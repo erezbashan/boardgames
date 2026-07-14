@@ -40,7 +40,7 @@ export function GameOverScreen({ gameState, onLobbyReturn, onClose }: Props) {
     // Let's sort turnA - turnB (ascending) so the earliest death is higher in the table.
     const turnA = pA.gameStats?.turnDied || 0;
     const turnB = pB.gameStats?.turnDied || 0;
-    return turnA - turnB;
+    return turnB - turnA;
   });
   
   if (gameState.history) {

@@ -112,6 +112,7 @@ async function startTurn(gameId: string, playerId: string) {
   
   if (p.inTokyo) {
     p.victoryPoints = Math.min(20, p.victoryPoints + 2);
+    if (p.gameStats) p.gameStats.startedTurnInTokyoCount += 1;
     game.logs.push(`👑 ${p.name} started their turn in Tokyo City! (+2 VP)`);
     broadcastState(gameId);
   }
@@ -396,6 +397,7 @@ async function resolveDiceAutomatically(gameId: string, socketId: string) {
       if (isTokyoEmpty) {
         p.inTokyo = true;
         p.victoryPoints = Math.min(20, p.victoryPoints + 1);
+        if (p.gameStats) p.gameStats.enteredTokyoCount += 1;
         game.logs.push(`👑 ${p.name} entered Tokyo City! (+1 VP)`);
         game.highlightedStats.push({ playerId: p.id, stat: 'vp' });
       }
@@ -688,7 +690,7 @@ io.on('connection', (socket) => {
           }
           // Don't splice yet, we'll replace or splice at the end
           
-          game.logs.push(`${player.name} bought ${card.name} for ${card.cost} ⚡!`);
+          game.logs.push(`BUY_CARD:${player.name}:${JSON.stringify(card)}`);
           game.isAnimating = true;
           game.highlightedStats = [];
           

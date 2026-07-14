@@ -14,17 +14,14 @@ function App() {
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const [showHelp, setShowHelp] = useState(false);
   const [showStats, setShowStats] = useState(false);
-  const [showWinnerBanner, setShowWinnerBanner] = useState(false);
+  
 
   useEffect(() => {
     if (gameState?.status === "GameOver") {
-      setShowWinnerBanner(true);
       setTimeout(() => {
-        setShowWinnerBanner(false);
         setShowStats(true);
       }, 3000);
     } else {
-      setShowWinnerBanner(false);
       setShowStats(false);
     }
   }, [gameState?.status]);
@@ -147,7 +144,7 @@ function App() {
                         </div>
                         <button 
                           className={`btn primary ${canBuy && isBuyPhase ? 'flash' : ''}`}
-                          disabled={!canBuy}
+                          disabled={!canBuy || gameState.status === 'GameOver'}
                           onClick={(e) => { e.stopPropagation(); buyCard(gameState.id, card.id); }}
                           style={{ width: '100%', padding: '6px' }}
                         >
@@ -158,7 +155,7 @@ function App() {
                   })}
                   
                   
-                  {gameState.currentTurnPlayerId === playerId && gameState.rollsLeft === 0 && !gameState.isAnimating && (
+                  {gameState.currentTurnPlayerId === playerId && gameState.rollsLeft === 0 && !gameState.isAnimating && gameState.status !== 'GameOver' && (
                     <div style={{ padding: '8px', display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
                       <button 
                         onClick={() => sweepCards(gameState.id)} 
@@ -404,11 +401,11 @@ function App() {
             })().map(p => {
               const isMePlayer = p.id === playerId || p.name === username;
               return (
-              <div key={p.id} className={`player-card glass-panel ${p.id === gameState.currentTurnPlayerId ? 'active-turn' : ''} ${isMePlayer ? 'is-me' : ''} ${p.inTokyo ? 'in-tokyo' : ''}`} style={{ marginBottom: '8px', opacity: p.health <= 0 ? 0.5 : 1, filter: p.health <= 0 ? 'grayscale(100%)' : 'none' }}>
+              <div key={p.id} className={`player-card glass-panel ${p.id === gameState.currentTurnPlayerId && gameState.status !== 'GameOver' ? 'active-turn' : ''} ${isMePlayer ? 'is-me' : ''} ${p.inTokyo ? 'in-tokyo' : ''} ${p.id === gameState.winner ? 'winner-card' : ''}`} style={{ marginBottom: '8px', opacity: p.health <= 0 ? 0.5 : 1, filter: p.health <= 0 ? 'grayscale(100%)' : 'none' }}>
                 <div className="player-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div>
                     <strong style={{ color: p.color || 'white' }}>{p.name}</strong> {p.isBot && '🤖'} 
-                    {p.poisonTokens > 0 && <span style={{ marginLeft: '6px', color: '#ff4444', fontWeight: 'bold' }}>☠️x{p.poisonTokens}</span>}
+                    {p.poisonTokens > 0 && <span style={{ marginLeft: '6px', color: '#ff4444', fontWeight: 'bold', display: 'inline-block', animation: 'poison-pop 0.3s ease-out' }} key={p.poisonTokens}>{Array(p.poisonTokens).fill('☠️').join('')}</span>}
                   </div>
                   {p.id === gameState.currentTurnPlayerId && p.health > 0 && (
                     <div style={{ animation: 'flash-btn 1.5s infinite', fontSize: '18px', display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--primary)', fontWeight: 'bold' }}>
@@ -416,8 +413,8 @@ function App() {
                     </div>
                   )}
                 </div>
-                <div className="player-stats">
-                  <span className={`stat health ${gameState.highlightedStats?.some(s => s.playerId === p.id && s.stat === 'health') ? 'flash' : ''}`}>❤️ {Math.max(0, p.health)} / {p.maxHealth || 10}</span>
+                <div className="player-stats" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                  <span className={`stat health ${gameState.highlightedStats?.some(s => s.playerId === p.id && s.stat === 'health') ? 'flash' : ''}`} style={{ display: 'inline-block', minWidth: '75px' }}>❤️ {Math.max(0, p.health)} / {p.maxHealth || 10}</span>
                   <span className={`stat vp ${gameState.highlightedStats?.some(s => s.playerId === p.id && s.stat === 'vp') ? 'flash' : ''}`}>⭐ {p.victoryPoints}</span>
                   <span className={`stat energy ${gameState.highlightedStats?.some(s => s.playerId === p.id && s.stat === 'energy') ? 'flash' : ''}`}>⚡ {p.energy}</span>
                 </div>
@@ -430,11 +427,15 @@ function App() {
                     ))}
                   </div>
                 )}
-                {p.health <= 0 ? (
+                
+                {p.id === gameState.winner ? (
+                  <div className="tokyo-badge" style={{ background: '#fbbf24', color: '#78350f', borderColor: '#f59e0b', boxShadow: '0 0 20px rgba(251, 191, 36, 0.8)', animation: 'pulse-glow 1.5s infinite' }}>WINNER 🏆</div>
+                ) : p.health <= 0 ? (
                   <div className="tokyo-badge" style={{ background: 'var(--danger)', color: 'white', borderColor: '#7f1d1d', boxShadow: '0 0 10px rgba(239, 68, 68, 0.4)' }}>DEAD</div>
                 ) : p.inTokyo ? (
                   <div className="tokyo-badge">IN TOKYO</div>
                 ) : null}
+
               </div>
               );
             })}
@@ -497,29 +498,7 @@ function App() {
       )}
 
 
-      {showWinnerBanner && gameState?.winner && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0,0,0,0.85)', zIndex: 9999,
-          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-          animation: 'winner-fade-in 0.5s ease-out'
-        }}>
-          <style>{`
-            @keyframes winner-fade-in { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
-            @keyframes pulse-glow { 0% { text-shadow: 0 0 20px ${gameState.players[gameState.winner]?.color || '#ffd700'}; } 50% { text-shadow: 0 0 50px ${gameState.players[gameState.winner]?.color || '#ffd700'}, 0 0 100px ${gameState.players[gameState.winner]?.color || '#ffd700'}; } 100% { text-shadow: 0 0 20px ${gameState.players[gameState.winner]?.color || '#ffd700'}; } }
-          `}</style>
-          <h1 style={{ 
-            fontSize: '80px', margin: 0, 
-            color: gameState.players[gameState.winner]?.color || '#ffd700',
-            animation: 'pulse-glow 1.5s infinite'
-          }}>
-            {gameState.players[gameState.winner]?.name} WINS!
-          </h1>
-          <p style={{ fontSize: '24px', color: 'white', marginTop: '20px' }}>
-            {gameState.players[gameState.winner]?.victoryPoints >= 20 ? 'By reaching 20 Victory Points!' : 'By being the last monster standing!'}
-          </p>
-        </div>
-      )}
+      
 
       {showStats && gameState.status === "GameOver" && (
         <GameOverScreen 
