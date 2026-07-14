@@ -114,6 +114,7 @@ async function startTurn(gameId: string, playerId: string) {
   game.logs.push(`TURN_START:${p.name}`);
   
   let animatedStart = false;
+  game.highlightedStats = [];
   
   if (p.inTokyo) {
     p.victoryPoints = Math.min(20, p.victoryPoints + 2);
@@ -122,7 +123,6 @@ async function startTurn(gameId: string, playerId: string) {
     game.highlightedStats.push({ playerId: p.id, stat: 'vp' });
     animatedStart = true;
   }
-  game.highlightedStats = [];
   if (p.cards.some(c => c.effect?.rapidHealing)) {
     const healAmt = Math.min(p.maxHealth || game.settings?.maxHealth || 10, p.health + 1) - p.health;
     if (healAmt > 0) {
