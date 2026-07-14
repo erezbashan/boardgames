@@ -1,13 +1,13 @@
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import App from './App.tsx';
-import { SocketProvider } from './SocketContext.tsx';
-import './index.css';
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import App from './App.tsx'
+import { FirebaseProvider } from './FirebaseContext.tsx';
+import './index.css'
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <SocketProvider>
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <FirebaseProvider>
       <App />
-    </SocketProvider>
-  </StrictMode>,
+    </FirebaseProvider>
+  </React.StrictMode>,
 );

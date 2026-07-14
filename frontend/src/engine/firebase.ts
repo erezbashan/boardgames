@@ -2,12 +2,12 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
-  apiKey: "MOCK_API_KEY",
-  authDomain: "mock.firebaseapp.com",
-  projectId: "mock",
-  storageBucket: "mock.appspot.com",
-  messagingSenderId: "123",
-  appId: "123"
+  projectId: "acquire-game-1782999027",
+  appId: "1:13397046224:web:cde4c3a9637972f464ffd5",
+  storageBucket: "acquire-game-1782999027.firebasestorage.app",
+  apiKey: "AIzaSyASeI7sudOZKb_jQnYGadix57m02STFUEo",
+  authDomain: "acquire-game-1782999027.firebaseapp.com",
+  messagingSenderId: "13397046224"
 };
 
 const app = initializeApp(firebaseConfig);

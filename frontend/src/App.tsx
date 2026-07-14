@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useSocket } from './SocketContext';
+import { useSocket } from './FirebaseContext';
 import type { Card } from '@king-of-tokyo/shared';
 import './App.css';
 import { GameOverScreen } from './GameOverScreen';
