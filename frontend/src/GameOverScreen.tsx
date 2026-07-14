@@ -30,7 +30,7 @@ export function GameOverScreen({ gameState, onLobbyReturn, onClose }: Props) {
     }
   }
 
-  const colors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#387908', '#d0ed57'];
+  // colors replaced by p.color
 
   return (
     <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 1000, overflowY: 'auto', display: 'flex', justifyContent: 'center' }}>
@@ -55,21 +55,19 @@ export function GameOverScreen({ gameState, onLobbyReturn, onClose }: Props) {
             <thead>
               <tr style={{ borderBottom: '1px solid #555' }}>
                 <th style={{ padding: '8px' }}>Player</th>
-                <th style={{ padding: '8px' }}>Final VP</th>
-                <th style={{ padding: '8px' }}>Final Health</th>
+                
                 <th style={{ padding: '8px' }}>Total Damage Dealt</th>
                 <th style={{ padding: '8px' }}>Cards Bought</th>
                 <th style={{ padding: '8px' }}>Energy Spent</th>
               </tr>
             </thead>
             <tbody>
-              {playerIds.map((id, index) => {
+              {playerIds.map(id => {
                 const p = gameState.players[id];
                 return (
-                  <tr key={id} style={{ borderBottom: '1px solid #444', color: colors[index % colors.length] }}>
+                  <tr key={id} style={{ borderBottom: '1px solid #444', color: p.color || 'white' }}>
                     <td style={{ padding: '8px', fontWeight: 'bold' }}>{p.name}</td>
-                    <td style={{ padding: '8px' }}>{p.victoryPoints}</td>
-                    <td style={{ padding: '8px' }}>{p.health > 0 ? p.health : '💀 0'}</td>
+                    
                     <td style={{ padding: '8px' }}>{p.gameStats?.damageDealt || 0}</td>
                     <td style={{ padding: '8px' }}>{p.gameStats?.cardsBought || 0}</td>
                     <td style={{ padding: '8px' }}>{p.gameStats?.energySpent || 0}</td>
@@ -91,8 +89,8 @@ export function GameOverScreen({ gameState, onLobbyReturn, onClose }: Props) {
                 <XAxis dataKey="name" stroke="#ccc" tick={false} />
                 <YAxis stroke="#ccc" domain={[0, 20]} />
                 <Legend />
-                {playerIds.map((id, index) => (
-                  <Line key={id} type="monotone" dataKey={`${gameState.players[id].name} VP`} stroke={colors[index % colors.length]} strokeWidth={3} dot={false} />
+                {playerIds.map(id => (
+                  <Line key={id} type="monotone" dataKey={`${gameState.players[id].name} VP`} stroke={gameState.players[id]?.color || '#8884d8'} strokeWidth={3} dot={false} />
                 ))}
               </LineChart>
             </ResponsiveContainer>
@@ -103,8 +101,8 @@ export function GameOverScreen({ gameState, onLobbyReturn, onClose }: Props) {
                 <CartesianGrid strokeDasharray="3 3" stroke="#444" />
                 <XAxis dataKey="name" stroke="#ccc" tick={false} />
                 <YAxis stroke="#ccc" domain={[0, 12]} />
-                {playerIds.map((id, index) => (
-                  <Line key={id} type="monotone" dataKey={`${gameState.players[id].name} Health`} stroke={colors[index % colors.length]} strokeWidth={3} dot={false} />
+                {playerIds.map(id => (
+                  <Line key={id} type="monotone" dataKey={`${gameState.players[id].name} Health`} stroke={gameState.players[id]?.color || '#8884d8'} strokeWidth={3} dot={false} />
                 ))}
               </LineChart>
             </ResponsiveContainer>
@@ -115,8 +113,8 @@ export function GameOverScreen({ gameState, onLobbyReturn, onClose }: Props) {
                 <CartesianGrid strokeDasharray="3 3" stroke="#444" />
                 <XAxis dataKey="name" stroke="#ccc" tick={false} />
                 <YAxis stroke="#ccc" />
-                {playerIds.map((id, index) => (
-                  <Line key={id} type="monotone" dataKey={`${gameState.players[id].name} Energy`} stroke={colors[index % colors.length]} strokeWidth={3} dot={false} />
+                {playerIds.map(id => (
+                  <Line key={id} type="monotone" dataKey={`${gameState.players[id].name} Energy`} stroke={gameState.players[id]?.color || '#8884d8'} strokeWidth={3} dot={false} />
                 ))}
               </LineChart>
             </ResponsiveContainer>

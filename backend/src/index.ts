@@ -467,6 +467,12 @@ io.on('connection', (socket) => {
         const yieldIdx = game.pendingYields?.indexOf(previousPlayerId);
         if (yieldIdx !== undefined && yieldIdx !== -1) game.pendingYields[yieldIdx] = socket.id;
         
+        if (game.history) {
+          game.history.forEach(h => {
+            if (h.playerId === previousPlayerId) h.playerId = socket.id;
+          });
+        }
+        
         socket.join(gameId);
         socketToGame[socket.id] = gameId;
         broadcastState(gameId);
@@ -576,8 +582,9 @@ io.on('connection', (socket) => {
     const game = games[gameId];
     if (game && game.status === 'Lobby') {
       game.status = 'Playing';
-      
-      Object.values(game.players).forEach(p => {
+      const PLAYER_COLORS = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
+      Object.values(game.players).forEach((p, index) => {
+        p.color = PLAYER_COLORS[index % PLAYER_COLORS.length];
         p.gameStats = {
           damageDealt: 0,
           cardsBought: 0,

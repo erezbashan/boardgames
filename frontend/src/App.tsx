@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useSocket } from './SocketContext';
-import type { Card, GameState } from '@king-of-tokyo/shared';
+import type { Card } from '@king-of-tokyo/shared';
+import type React from 'react';
 import './App.css';
 import { GameOverScreen } from './GameOverScreen';
 
@@ -327,7 +328,28 @@ function App() {
                             borderRadius: '4px', 
                             fontWeight: isTurnEnd ? 'bold' : 'normal'
                           }}>
-                            {log}
+                            {(() => {
+                      const players = Object.values(gameState.players);
+                      // Sort by name length descending so we match longer names first
+                      const sortedPlayers = [...players].sort((a,b) => b.name.length - a.name.length);
+                      
+                      const renderLog = (logText: string): React.ReactNode => {
+                        for (const p of sortedPlayers) {
+                          if (p.name && logText.includes(p.name)) {
+                            const split = logText.split(p.name);
+                            return (
+                              <>
+                                {renderLog(split[0])}
+                                <span style={{ color: p.color || 'white', fontWeight: 'bold' }}>{p.name}</span>
+                                {renderLog(split.slice(1).join(p.name))}
+                              </>
+                            );
+                          }
+                        }
+                        return logText;
+                      };
+                      return renderLog(log);
+                    })()}
                           </div>
                         );
                       });
@@ -340,7 +362,11 @@ function App() {
                   <div className="chat-messages" style={{ flex: 1, overflowY: 'auto', fontSize: '13px', display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '8px' }}>
                     {(gameState as any).chatMessages?.map((msg: any, i: number) => (
                       <div key={i} style={{ background: 'rgba(0,0,0,0.3)', padding: '6px', borderRadius: '6px' }}>
-                        <strong style={{ color: 'var(--primary)' }}>{msg.sender}:</strong> {msg.text}
+                        {(() => {
+                          const senderPlayer = Object.values(gameState.players).find(p => p.name === msg.sender);
+                          const color = senderPlayer?.color || 'var(--primary)';
+                          return <><strong style={{ color }}>{msg.sender}:</strong> {msg.text}</>;
+                        })()}
                       </div>
                     ))}
                     <div ref={chatBottomRef} />
@@ -399,7 +425,11 @@ function App() {
                     ))}
                   </div>
                 )}
-                {p.inTokyo && p.health > 0 && <div className="tokyo-badge">IN TOKYO</div>}
+                {p.health <= 0 ? (
+                  <div className="tokyo-badge" style={{ background: 'var(--danger)', color: 'white', borderColor: '#7f1d1d', boxShadow: '0 0 10px rgba(239, 68, 68, 0.4)' }}>DEAD</div>
+                ) : p.inTokyo ? (
+                  <div className="tokyo-badge">IN TOKYO</div>
+                ) : null}
               </div>
               );
             })}

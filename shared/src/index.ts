@@ -3,6 +3,7 @@ export type PlayerId = string;
 export interface Player {
   id: PlayerId;
   name: string;
+  color?: string;
   isBot: boolean;
   health: number;    // max 10 (usually 12 with some cards)
   maxHealth?: number; // defaults to 10
