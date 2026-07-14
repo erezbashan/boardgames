@@ -195,7 +195,7 @@ async function endTurnAutomatically(gameId: string, socketId: string) {
       vp: p.victoryPoints,
       health: Math.max(0, p.health),
       energy: p.energy,
-      inTokyo: p.inTokyo
+      tokyoPlayerId: Object.values(game.players).find(x => x.inTokyo)?.id || null
     });
   });
   

@@ -50,7 +50,7 @@ export interface TurnHistory {
   vp: number;
   health: number;
   energy: number;
-  inTokyo?: boolean;
+  tokyoPlayerId?: string | null;
 }
 
 export interface GameState {

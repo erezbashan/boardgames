@@ -99,27 +99,7 @@ export function GameOverScreen({ gameState, onClose }: Props) {
         
         
 
-                <h4 style={{ textAlign: 'left', margin: '24px 0 8px 0' }}>Who was in Tokyo?</h4>
-        <div style={{ display: 'flex', width: '100%', height: '40px', borderRadius: '4px', overflow: 'hidden', backgroundColor: 'rgba(0,0,0,0.3)', border: '1px solid #555' }}>
-          {chartData.map((d) => {
-            const historyForTurn = gameState.history?.filter(h => h.turnNumber === d.turnNumber) || [];
-            const tokyoPlayerHistory = historyForTurn.find(h => h.inTokyo);
-            const player = tokyoPlayerHistory ? gameState.players[tokyoPlayerHistory.playerId] : null;
-            const color = player ? (player.color || '#888') : 'transparent';
-            const name = player ? player.name : '';
-            return (
-              <div 
-                key={d.turnNumber} 
-                style={{ flex: 1, backgroundColor: color, borderRight: '1px solid rgba(255,255,255,0.1)', cursor: 'crosshair' }}
-                title={`Turn ${d.turnNumber}: ${name || 'Empty'}`}
-              />
-            );
-          })}
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginTop: '4px', color: '#888' }}>
-          <span>Turn 0</span>
-          <span>Turn {chartData.length > 0 ? chartData[chartData.length - 1].turnNumber : 0}</span>
-        </div>
+                
 
         {/* Stats Table */}
         <div style={{ marginTop: '40px', background: 'rgba(0,0,0,0.5)', padding: '16px', borderRadius: '8px' }}>
@@ -164,6 +144,23 @@ export function GameOverScreen({ gameState, onClose }: Props) {
         {chartData.length > 0 && (
           <div style={{ marginTop: '24px', background: 'rgba(0,0,0,0.5)', padding: '16px', borderRadius: '8px' }}>
             <h3 style={{ marginBottom: '16px' }}>Game Progress</h3>
+            <h4 style={{ textAlign: 'left', margin: '24px 0 8px 0' }}>Who was in Tokyo?</h4>
+            <div style={{ display: 'flex', width: '100%', height: '40px', borderRadius: '4px', overflow: 'hidden', backgroundColor: 'rgba(0,0,0,0.3)', border: '1px solid #555' }}>
+              {chartData.map((d) => {
+                const historyForTurn = gameState.history?.filter(h => h.turnNumber === d.turnNumber) || [];
+                const tokyoPlayerId = historyForTurn.length > 0 ? historyForTurn[0].tokyoPlayerId : null;
+                const player = tokyoPlayerId ? gameState.players[tokyoPlayerId] : null;
+                const color = player ? (player.color || '#888') : 'transparent';
+                const name = player ? player.name : '';
+                return (
+                  <div 
+                    key={d.turnNumber} 
+                    style={{ flex: 1, backgroundColor: color, borderRight: '1px solid rgba(255,255,255,0.1)', cursor: 'crosshair' }}
+                    title={`Turn ${d.turnNumber}: ${name || 'Empty'}`}
+                  />
+                );
+              })}
+            </div>
             
             <h4 style={{ textAlign: 'left', margin: '8px 0' }}>Victory Points</h4>
             <ResponsiveContainer width="100%" height={250}>
