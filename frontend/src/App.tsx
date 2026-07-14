@@ -144,7 +144,7 @@ function App() {
                         </div>
                         <button 
                           className={`btn primary ${canBuy && isBuyPhase ? 'flash' : ''}`}
-                          disabled={!canBuy || gameState.status === 'GameOver'}
+                          disabled={!canBuy}
                           onClick={(e) => { e.stopPropagation(); buyCard(gameState.id, card.id); }}
                           style={{ width: '100%', padding: '6px' }}
                         >
@@ -155,7 +155,7 @@ function App() {
                   })}
                   
                   
-                  {gameState.currentTurnPlayerId === playerId && gameState.rollsLeft === 0 && !gameState.isAnimating && gameState.status !== 'GameOver' && (
+                  {gameState.currentTurnPlayerId === playerId && gameState.rollsLeft === 0 && !gameState.isAnimating && (
                     <div style={{ padding: '8px', display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
                       <button 
                         onClick={() => sweepCards(gameState.id)} 
@@ -401,14 +401,14 @@ function App() {
             })().map(p => {
               const isMePlayer = p.id === playerId || p.name === username;
               return (
-              <div key={p.id} className={`player-card glass-panel ${p.id === gameState.currentTurnPlayerId && gameState.status !== 'GameOver' ? 'active-turn' : ''} ${isMePlayer ? 'is-me' : ''} ${p.inTokyo ? 'in-tokyo' : ''} ${p.id === gameState.winner ? 'winner-card' : ''}`} style={{ marginBottom: '8px', opacity: p.health <= 0 ? 0.5 : 1, filter: p.health <= 0 ? 'grayscale(100%)' : 'none' }}>
+              <div key={p.id} className={`player-card glass-panel ${p.id === gameState.currentTurnPlayerId ? 'active-turn' : ''} ${isMePlayer ? 'is-me' : ''} ${p.inTokyo ? 'in-tokyo' : ''} ${p.id === gameState.winner ? 'winner-card' : ''}`} style={{ marginBottom: '8px', opacity: p.health <= 0 ? 0.5 : 1, filter: p.health <= 0 ? 'grayscale(100%)' : 'none' }}>
                 <div className="player-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div>
                     <strong style={{ color: p.color || 'white' }}>{p.name}</strong> {p.isBot && '🤖'} 
                     {p.poisonTokens > 0 && <span style={{ marginLeft: '6px', color: '#ff4444', fontWeight: 'bold', display: 'inline-block', animation: 'poison-pop 0.3s ease-out' }} key={p.poisonTokens}>{Array(p.poisonTokens).fill('☠️').join('')}</span>}
                   </div>
                   {p.id === gameState.currentTurnPlayerId && p.health > 0 && (
-                    <div style={{ animation: 'flash-btn 1.5s infinite', fontSize: '18px', display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--primary)', fontWeight: 'bold' }}>
+                    <div style={{ animation: gameState.status === 'GameOver' ? 'none' : 'flash-btn 1.5s infinite', fontSize: '18px', display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--primary)', fontWeight: 'bold' }}>
                       <span style={{ fontSize: '12px' }}>PLAYING</span> ◀️
                     </div>
                   )}
