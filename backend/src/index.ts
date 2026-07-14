@@ -118,17 +118,30 @@ async function startTurn(gameId: string, playerId: string) {
     broadcastState(gameId);
   }
   
+  let animatedStart = false;
+  game.highlightedStats = [];
   if (p.cards.some(c => c.effect?.rapidHealing)) {
     const healAmt = Math.min(p.maxHealth || game.settings?.maxHealth || 10, p.health + 1) - p.health;
     if (healAmt > 0) {
       p.health += healAmt;
       game.logs.push(`💖 ${p.name} healed 1 ❤️ from Rapid Healing!`);
+      game.highlightedStats.push({ playerId: p.id, stat: 'health' });
+      animatedStart = true;
     }
   }
   if (p.gameStats) (p as any).dealtDamageThisTurn = false;
   if (p.cards.some(c => c.effect?.solarPowered) && p.energy === 0) {
     p.energy += 1;
     game.logs.push(`☀️ ${p.name} gained 1 ⚡ from Solar Powered!`);
+    game.highlightedStats.push({ playerId: p.id, stat: 'energy' });
+    animatedStart = true;
+  }
+  if (animatedStart) {
+    game.isAnimating = true;
+    broadcastState(gameId);
+    await new Promise(r => setTimeout(r, 1500));
+    game.isAnimating = false;
+    game.highlightedStats = [];
   }
   
   if (p.poisonTokens > 0) {
@@ -169,7 +182,7 @@ function checkGameOver(gameId: string): boolean {
   return game?.status === 'GameOver';
 }
 
-function endTurnAutomatically(gameId: string, socketId: string) {
+async function endTurnAutomatically(gameId: string, socketId: string) {
   const game = games[gameId];
   if (!game) return;
   
@@ -786,6 +799,7 @@ io.on('connection', (socket) => {
           if (player.cards.some(c => c.effect?.newsTeam)) {
             player.victoryPoints = Math.min(game.settings?.winningVP || 20, player.victoryPoints + 1);
             game.logs.push(`📰 ${player.name} gained 1 VP from Dedicated News Team!`);
+            game.highlightedStats.push({ playerId: player.id, stat: 'vp' });
           }
           if (card.effect?.evacuation) {
             Object.values(game.players).forEach(other => {
