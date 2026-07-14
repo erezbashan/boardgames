@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { useSocket } from './SocketContext';
-import type { Player, DiceRoll, Card, GameState } from '@king-of-tokyo/shared';
+import type { Card, GameState } from '@king-of-tokyo/shared';
 import './App.css';
 import { GameOverScreen } from './GameOverScreen';
 
 function App() {
-  const { connected, gameState, playerId, createGame, joinGame, quitGame, addBot, startGame, rollDice, keepDice, resolveDice, yieldTokyo, buyCard, sweepCards, endTurn, sendChat } = useSocket();
+  const { connected, gameState, playerId, createGame, joinGame, quitGame, returnToLobby, addBot, startGame, rollDice, keepDice, resolveDice, yieldTokyo, buyCard, sweepCards, endTurn, sendChat } = useSocket();
   const [username, setUsername] = useState(localStorage.getItem('kot_username') || '');
   const [gameIdInput, setGameIdInput] = useState(() => {
     return new URLSearchParams(window.location.search).get('game') || '';
@@ -24,8 +24,7 @@ function App() {
   const [showAllLogs, setShowAllLogs] = useState(false);
   const [chatText, setChatText] = useState('');
   const chatBottomRef = useRef<HTMLDivElement>(null);
-  const hasAutoJoined = useRef(false);
-  const initialPlayerIdRef = useRef<string | null>(localStorage.getItem('kot_playerId') || null);
+    const initialPlayerIdRef = useRef<string | null>(localStorage.getItem('kot_playerId') || null);
 
   useEffect(() => {
     if (gameState?.id) {
@@ -109,7 +108,7 @@ function App() {
         {gameState.status === "GameOver" && (
           <div style={{ display: "flex", gap: "8px" }}>
             <button onClick={() => setShowStats(true)} className="btn primary">View Stats</button>
-            <button onClick={() => socket?.emit("RETURN_TO_LOBBY", gameState.id)} className="btn danger">Return to Lobby</button>
+            <button onClick={() => returnToLobby(gameState.id)} className="btn danger">Return to Lobby</button>
           </div>
         )}
         <div style={{ display: "flex", gap: "8px", marginLeft: "16px" }}>
@@ -120,7 +119,7 @@ function App() {
 
       <div className="board-layout">
         <div className="left-column" style={{ gap: '8px' }}>
-          {gameState.status === 'Playing' && (
+          {(gameState.status === 'Playing' || gameState.status === 'GameOver') && (
             <>
               <div className="market-board glass-panel" style={{ padding: '8px' }}>
                 <div className="cards-list" style={{ display: 'flex', gap: '8px', overflowX: 'auto', alignItems: 'flex-start' }}>
@@ -215,7 +214,7 @@ function App() {
                     ) : (
                       /* Empty placeholders */
                       (() => {
-                        const activeP = gameState.players[gameState.currentTurnPlayerId];
+                        const activeP = gameState.players[gameState.currentTurnPlayerId || ''];
                         const extraDice = activeP?.cards?.reduce((sum: number, c: any) => sum + (c.effect?.extraDie || 0), 0) || 0;
                         const numDice = 6 + extraDice;
                         return Array.from({ length: numDice }).map((_, idx) => (
@@ -460,6 +459,14 @@ function App() {
             </div>
           </div>
         </div>
+      )}
+
+      {showStats && gameState.status === "GameOver" && (
+        <GameOverScreen 
+          gameState={gameState} 
+          onLobbyReturn={() => returnToLobby(gameState.id)} 
+          onClose={() => setShowStats(false)} 
+        />
       )}
 
       {showAllLogs && (

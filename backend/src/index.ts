@@ -120,6 +120,9 @@ async function startTurn(gameId: string, playerId: string) {
     const poisonDmg = Math.min(p.health, p.poisonTokens);
     p.health -= poisonDmg;
     game.logs.push(`☠️ ${p.name} took ${poisonDmg} poison damage!`);
+    if (p.health <= 0) {
+      game.logs.push(`💀 ${p.name} was killed!`);
+    }
     game.isAnimating = true;
     game.highlightedStats = [{ playerId: p.id, stat: 'health' }];
     broadcastState(gameId);
