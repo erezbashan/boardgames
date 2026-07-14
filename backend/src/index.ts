@@ -105,7 +105,7 @@ async function startTurn(gameId: string, playerId: string) {
   if (!p) return;
 
   game.currentTurnPlayerId = playerId;
-  game.rollsLeft = 3;
+  game.rollsLeft = p.cards.some(c => c.effect?.giantBrain) ? 4 : 3;
   console.log(`[DEBUG] ${gameId}: startTurn for ${playerId}. rollsLeft is now 3.`);
   game.currentDice = [];
   game.pendingYields = [];
@@ -118,6 +118,14 @@ async function startTurn(gameId: string, playerId: string) {
     broadcastState(gameId);
   }
   
+  if (p.cards.some(c => c.effect?.rapidHealing)) {
+    const healAmt = Math.min(p.maxHealth || game.settings?.maxHealth || 10, p.health + 1) - p.health;
+    if (healAmt > 0) {
+      p.health += healAmt;
+      game.logs.push(`💖 ${p.name} healed 1 ❤️ from Rapid Healing!`);
+    }
+  }
+  if (p.gameStats) (p as any).dealtDamageThisTurn = false;
   if (p.cards.some(c => c.effect?.solarPowered) && p.energy === 0) {
     p.energy += 1;
     game.logs.push(`☀️ ${p.name} gained 1 ⚡ from Solar Powered!`);
@@ -217,8 +225,13 @@ async function resolveDiceAutomatically(gameId: string, socketId: string) {
 
   // Phase 1: Points
   if (results.points > 0) {
-    p.victoryPoints = Math.min(20, p.victoryPoints + results.points);
-    game.logs.push(`${p.name} gained ${results.points} VP.`);
+    let pts = results.points;
+    if (p.cards.some(c => c.effect?.omnivore)) {
+      pts += 2;
+      game.logs.push(`🍖 ${p.name} gained 2 extra VP from Omnivore!`);
+    }
+    p.victoryPoints = Math.min(game.settings?.winningVP || 20, p.victoryPoints + pts);
+    game.logs.push(`${p.name} gained ${pts} VP.`);
     
     // Only highlight number dice if they actually scored points (count >= 3)
     game.highlightedDice = game.currentDice.filter(d => {
@@ -334,6 +347,20 @@ async function resolveDiceAutomatically(gameId: string, socketId: string) {
         }
         let actualDmg = Math.max(0, dmg - armor);
         if (actualDmg > 0) {
+          (p as any).dealtDamageThisTurn = true;
+          if (p.cards.some(c => c.effect?.poisonQuills)) {
+            other.energy = Math.max(0, other.energy - 1);
+            modifierLogs.push(`🪶 ${other.name} lost 1 ⚡ from Poison Quills!`);
+          }
+          if (other.cards.some(c => c.effect?.spikedArmor)) {
+            p.health = Math.max(0, p.health - 1);
+            modifierLogs.push(`🛡️ ${p.name} took 1 damage from ${other.name}'s Spiked Armor!`);
+            game.highlightedStats.push({ playerId: p.id, stat: 'health' });
+            if (p.health <= 0) {
+              game.logs.push(`💀 ${p.name} was killed by Spiked Armor!`);
+              if (p.gameStats) p.gameStats.turnDied = game.history && game.history.length > 0 ? game.history[game.history.length - 1].turnNumber : 0;
+            }
+          }
           other.health -= actualDmg;
           if (p.gameStats) {
             p.gameStats.damageDealt += actualDmg;
@@ -738,10 +765,11 @@ io.on('connection', (socket) => {
       const cardIndex = game.marketCards.findIndex(c => c.id === cardId);
       if (cardIndex !== -1) {
         const card = game.marketCards[cardIndex];
-        if (player.energy >= card.cost) {
-          player.energy -= card.cost;
+        const cost = player.cards.some(c => c.effect?.alienMetabolism) ? Math.max(0, card.cost - 1) : card.cost;
+        if (player.energy >= cost) {
+          player.energy -= cost;
           if (player.gameStats) {
-            player.gameStats.energySpent += card.cost;
+            player.gameStats.energySpent += cost;
             player.gameStats.cardsBought += 1;
           }
           if (card.type !== 'Discard') {
@@ -752,6 +780,42 @@ io.on('connection', (socket) => {
           game.logs.push(`BUY_CARD:${player.name}:${JSON.stringify(card)}`);
           game.isAnimating = true;
           game.highlightedStats = [];
+          if (player.cards.some(c => c.effect?.newsTeam)) {
+            player.victoryPoints = Math.min(game.settings?.winningVP || 20, player.victoryPoints + 1);
+            game.logs.push(`📰 ${player.name} gained 1 VP from Dedicated News Team!`);
+          }
+          if (card.effect?.evacuation) {
+            Object.values(game.players).forEach(other => {
+              if (other.id !== player.id) {
+                other.victoryPoints = Math.max(0, other.victoryPoints - 5);
+                game.highlightedStats.push({ playerId: other.id, stat: 'vp' });
+              }
+            });
+            game.logs.push(`🚨 All other players lost 5 VP from Evacuation Orders!`);
+          }
+          if (card.effect?.highAltitude) {
+            const dmg = 3;
+            Object.values(game.players).forEach(other => {
+              if (other.health > 0) {
+                const armor = other.cards.reduce((sum, c) => sum + (c.effect?.armor || 0), 0);
+                const evadeIdx = other.cards.findIndex(c => c.effect?.evade);
+                if (evadeIdx !== -1) {
+                  other.cards.splice(evadeIdx, 1);
+                  game.logs.push(`💨 ${other.name} Evaded High Altitude Bombing!`);
+                  return;
+                }
+                const actualDmg = Math.max(0, dmg - armor);
+                if (actualDmg > 0) {
+                  other.health -= actualDmg;
+                  game.highlightedStats.push({ playerId: other.id, stat: 'health' });
+                  if (other.health <= 0) {
+                    game.logs.push(`💀 ${other.name} was killed by High Altitude Bombing!`);
+                    if (other.gameStats) other.gameStats.turnDied = game.history && game.history.length > 0 ? game.history[game.history.length - 1].turnNumber : 0;
+                  }
+                }
+              }
+            });
+          }
           
           if (card.effect?.maxHealth) {
             player.maxHealth = (player.maxHealth || 10) + card.effect.maxHealth;

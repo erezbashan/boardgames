@@ -89,7 +89,7 @@ function App() {
   });
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const [showSettings, setShowSettings] = useState(false);
-  const [localSettings, setLocalSettings] = useState({ maxHealth: 10, startingHealth: 10, winningVP: 20 });
+  const [localSettings, setLocalSettings] = useState({ maxHealth: 10, startingHealth: 10, winningVP: 20, startingDice: 6 });
   const [showHelp, setShowHelp] = useState(false);
   const [showStats, setShowStats] = useState(false);
   
@@ -208,6 +208,10 @@ function App() {
             <div className="glass-panel" style={{ padding: '16px', color: 'white', width: 'fit-content' }}>
               <h3 style={{ marginTop: 0 }}>Game Settings</h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'auto 60px', gap: '12px 16px', alignItems: 'center' }}>
+                <label style={{ display: 'contents' }}>
+                  <span>Starting Dice:</span>
+                  <input type="number" min="1" max="10" value={localSettings.startingDice || 6} onChange={e => setLocalSettings(s => ({...s, startingDice: parseInt(e.target.value)||6}))} style={{ width: '60px', padding: '4px', background: 'rgba(0,0,0,0.3)', color: 'white', border: '1px solid #555' }} />
+                </label>
                 <label style={{ display: 'contents' }}>
                   <span>Starting Health:</span>
                   <input type="number" min="1" max="20" value={localSettings.startingHealth} onChange={e => setLocalSettings(s => ({...s, startingHealth: parseInt(e.target.value)||10}))} style={{ width: '60px', padding: '4px', background: 'rgba(0,0,0,0.3)', color: 'white', border: '1px solid #555' }} />
@@ -335,14 +339,14 @@ function App() {
                     {gameState.currentTurnPlayerId === playerId && gameState.status === 'Playing' ? (
                       <>
                         {gameState.rollsLeft === 3 && (
-                          <button onClick={() => rollDice(gameState.id)} className="btn primary flash" disabled={gameState.isAnimating}>
+                          <button onClick={() => rollDice(gameState.id)} className="btn primary flash" style={{ animationDelay: `-${Date.now() % 1500}ms` }} disabled={gameState.isAnimating}>
                             Roll Dice
                           </button>
                         )}
                         
                         {gameState.rollsLeft > 0 && gameState.rollsLeft < 3 && (
                           <>
-                            <button onClick={() => rollDice(gameState.id)} className="btn primary flash" disabled={gameState.isAnimating}>
+                            <button onClick={() => rollDice(gameState.id)} className="btn primary flash" style={{ animationDelay: `-${Date.now() % 1500}ms` }} disabled={gameState.isAnimating}>
                               Reroll ({gameState.rollsLeft} left)
                             </button>
                             <button onClick={() => resolveDice(gameState.id)} className="btn warning flash" disabled={gameState.isAnimating}>
@@ -435,7 +439,7 @@ function App() {
                     {p.poisonTokens > 0 && <span style={{ marginLeft: '6px', color: '#ff4444', fontWeight: 'bold', display: 'inline-block', animation: 'poison-pop 0.3s ease-out' }} key={p.poisonTokens}>{Array(p.poisonTokens).fill('☠️').join('')}</span>}
                   </div>
                   {p.id === gameState.currentTurnPlayerId && p.health > 0 && (
-                    <div style={{ animation: gameState.status === 'GameOver' ? 'none' : 'flash-btn 1.5s infinite', fontSize: '18px', display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--primary)', fontWeight: 'bold' }}>
+                    <div style={{ animation: gameState.status === 'GameOver' ? 'none' : 'flash-btn 1.5s infinite', animationDelay: `-${Date.now() % 1500}ms`, fontSize: '18px', display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--primary)', fontWeight: 'bold' }}>
                       <span style={{ fontSize: '12px' }}>PLAYING</span> ◀️
                     </div>
                   )}
@@ -490,7 +494,7 @@ function App() {
             <h2 style={{ color: 'var(--warning)', marginTop: 0 }}>You took damage in Tokyo!</h2>
             <p style={{ fontSize: '18px', marginBottom: '24px' }}>Do you want to yield Tokyo to your attacker?</p>
             <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
-              <button className="btn primary flash" onClick={() => yieldTokyo(gameState.id, true)}>Yield</button>
+              <button className="btn primary flash" style={{ animationDelay: `-${Date.now() % 1500}ms` }} onClick={() => yieldTokyo(gameState.id, true)}>Yield</button>
               <button className="btn secondary flash" onClick={() => yieldTokyo(gameState.id, false)}>Stay</button>
             </div>
           </div>
