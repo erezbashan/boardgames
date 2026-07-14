@@ -11,7 +11,7 @@ export const INITIAL_DECK: Card[] = [
   { id: 'c7', name: 'Points', cost: 4, type: 'Discard', description: 'Gain 2 VP', effect: { vp: 2 } },
   { id: 'c8', name: 'More Points', cost: 8, type: 'Discard', description: 'Gain 4 VP', effect: { vp: 4 } },
   { id: 'c9', name: 'Poison Spit', cost: 4, type: 'Keep', description: 'When you deal damage, give a Poison token. Poison deals 1 damage at the start of their turn. ❤️ cures Poison before healing.', effect: { poison: true } },
-  { id: 'c10', name: 'Armor', cost: 5, type: 'Keep', description: 'Ignore 1 damage', effect: { armor: 1 } },
+  { id: 'c10', name: 'Armor', cost: 5, type: 'Keep', description: 'Ignore 1 damage when attacked. (Reduces all incoming attack damage by 1).', effect: { armor: 1 } },
 ];
 
 export function createInitialGameState(id: string): GameState {

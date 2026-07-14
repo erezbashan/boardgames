@@ -1,4 +1,3 @@
-import React from 'react';
 import type { GameState } from '@king-of-tokyo/shared';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Legend, ResponsiveContainer } from 'recharts';
 

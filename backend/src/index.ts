@@ -277,6 +277,7 @@ async function resolveDiceAutomatically(gameId: string, socketId: string) {
     let hitSomeone = false;
     let hitTokyoPlayer = false;
     let playerInTokyo: any = null;
+    const modifierLogs: string[] = [];
 
     Object.values(game.players).forEach(other => {
       if (other.id === p.id) return;
@@ -306,18 +307,22 @@ async function resolveDiceAutomatically(gameId: string, socketId: string) {
           hitSomeone = true;
           
           if (extraFireDamage > 0) {
-            game.logs.push(`🔥 ${other.name} took +1 extra damage from Fire Breathing!`);
+            modifierLogs.push(`🔥 ${other.name} took +1 extra damage from Fire Breathing!`);
           }
           if (armor > 0 && dmg > 0) {
-             game.logs.push(`🛡️ ${other.name}'s Armor blocked ${Math.min(dmg, armor)} damage!`);
+             modifierLogs.push(`🛡️ ${other.name}'s Armor blocked ${Math.min(dmg, armor)} damage!`);
           }
           
           if (hasPoisonSpit) {
             other.poisonTokens = (other.poisonTokens || 0) + 1;
-            game.logs.push(`☠️ ${other.name} was poisoned!`);
+            modifierLogs.push(`☠️ ${other.name} was poisoned!`);
+          }
+          
+          if (other.health <= 0) {
+            modifierLogs.push(`💀 ${other.name} was killed!`);
           }
         } else if (armor > 0 && dmg > 0) {
-           game.logs.push(`🛡️ ${other.name}'s Armor completely blocked the attack!`);
+           modifierLogs.push(`🛡️ ${other.name}'s Armor completely blocked the attack!`);
         }
         
         if (other.inTokyo) {
@@ -327,12 +332,13 @@ async function resolveDiceAutomatically(gameId: string, socketId: string) {
       }
     });
 
-    if (hitSomeone) {
+    if (hitSomeone || modifierLogs.length > 0) {
       if (hasNovaBreath) {
         game.logs.push(`🌊 ${p.name} dealt 💥 damage to ALL other players! (Nova Breath)`);
       } else {
         game.logs.push(`${p.name} dealt 💥 damage!`);
       }
+      game.logs.push(...modifierLogs);
     }
 
     broadcastState(gameId);

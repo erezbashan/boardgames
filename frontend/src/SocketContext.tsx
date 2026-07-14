@@ -10,6 +10,7 @@ interface SocketContextType {
   createGame: (username: string) => void;
   joinGame: (gameId: string, username: string, previousPlayerId?: string) => void;
   quitGame: (gameId: string) => void;
+  returnToLobby: (gameId: string) => void;
   addBot: (gameId: string) => void;
   startGame: (gameId: string) => void;
   rollDice: (gameId: string) => void;
@@ -70,8 +71,10 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     quitGame: (gameId) => {
       emit(SOCKET_EVENTS.QUIT_GAME, gameId);
       setGameState(null);
-      window.history.replaceState(null, '', window.location.pathname);
+      setPlayerId(null);
+      localStorage.removeItem('kot_playerId');
     },
+    returnToLobby: (gameId) => emit('RETURN_TO_LOBBY', gameId),
     addBot: (gameId) => emit(SOCKET_EVENTS.ADD_BOT, gameId),
     startGame: (gameId) => emit(SOCKET_EVENTS.START_GAME, gameId),
     rollDice: (gameId) => emit(SOCKET_EVENTS.ROLL_DICE, gameId),
