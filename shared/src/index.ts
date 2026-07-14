@@ -19,10 +19,12 @@ export interface Player {
     playersKilled: number;
     cardsBought: number;
     energySpent: number;
-    enteredTokyoCount: number;
-    startedTurnInTokyoCount: number;
     energyGained: number;
     healingGained: number;
+    vpFromDice?: number;
+    vpFromEnteringTokyo?: number;
+    vpFromStartingTokyo?: number;
+    vpFromOther?: number;
     turnDied?: number;
   };
 }

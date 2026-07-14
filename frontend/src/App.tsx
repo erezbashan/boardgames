@@ -442,8 +442,8 @@ function App() {
                     {p.poisonTokens > 0 && <span title="Poison: Take 1 damage per poison token at the start of your turn." style={{ cursor: 'help', marginLeft: '6px', color: '#ff4444', fontWeight: 'bold', display: 'inline-block', animation: 'poison-pop 0.3s ease-out' }} key={'p'+p.poisonTokens}>{Array(p.poisonTokens).fill('☠️').join('')}</span>}
                     {(p.shrinkTokens || 0) > 0 && <span title="Shrink Ray: Roll 1 fewer die per shrink token." style={{ cursor: 'help', marginLeft: '6px', fontSize: '14px', display: 'inline-block' }} key={'s'+p.shrinkTokens}>{Array(p.shrinkTokens).fill('🎲🚫').join('')}</span>}
                   </div>
-                  {p.id === gameState.currentTurnPlayerId && p.health > 0 && (
-                    <div style={{ animation: gameState.status === 'GameOver' ? 'none' : 'flash-btn 1.5s infinite', animationDelay: `-${Date.now() % 1500}ms`, fontSize: '18px', display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--primary)', fontWeight: 'bold' }}>
+                  {p.id === gameState.currentTurnPlayerId && p.health > 0 && gameState.status !== 'GameOver' && (
+                    <div style={{ animation: 'flash-btn 1.5s infinite', animationDelay: `-${Date.now() % 1500}ms`, fontSize: '18px', display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--primary)', fontWeight: 'bold', margin: '4px 8px' }}>
                       <span style={{ fontSize: '12px' }}>PLAYING</span> ◀️
                     </div>
                   )}

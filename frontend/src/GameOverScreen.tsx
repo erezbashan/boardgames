@@ -132,8 +132,10 @@ export function GameOverScreen({ gameState, onClose }: Props) {
                     <td style={{ padding: '8px', textAlign: 'right' }}>{p.gameStats?.energySpent || 0}</td>
                     <td style={{ padding: '8px', textAlign: 'right' }}>{p.gameStats?.energyGained || 0}</td>
                     <td style={{ padding: '8px', textAlign: 'right' }}>{p.gameStats?.healingGained || 0}</td>
-                    <td style={{ padding: '8px', textAlign: 'right' }}>{p.gameStats?.enteredTokyoCount || 0}</td>
-                    <td style={{ padding: '8px', textAlign: 'right' }}>{p.gameStats?.startedTurnInTokyoCount || 0}</td>
+                    <td style={{ padding: '8px', textAlign: 'right' }}>{p.gameStats?.vpFromDice || 0}</td>
+                    <td style={{ padding: '8px', textAlign: 'right' }}>{p.gameStats?.vpFromEnteringTokyo || 0}</td>
+                    <td style={{ padding: '8px', textAlign: 'right' }}>{p.gameStats?.vpFromStartingTokyo || 0}</td>
+                    <td style={{ padding: '8px', textAlign: 'right' }}>{p.gameStats?.vpFromOther || 0}</td>
                   </tr>
                 );
               })}

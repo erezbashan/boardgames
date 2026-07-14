@@ -118,7 +118,7 @@ async function startTurn(gameId: string, playerId: string) {
   
   if (p.inTokyo) {
     p.victoryPoints = Math.min(20, p.victoryPoints + 2);
-    if (p.gameStats) p.gameStats.startedTurnInTokyoCount += 1;
+    if (p.gameStats) p.gameStats.vpFromStartingTokyo = (p.gameStats.vpFromStartingTokyo || 0) + 2;
     game.logs.push(`👑 ${p.name} started their turn in Tokyo City! (+2 VP)`);
     game.highlightedStats.push({ playerId: p.id, stat: 'vp' });
     animatedStart = true;
@@ -245,9 +245,11 @@ async function resolveDiceAutomatically(gameId: string, socketId: string) {
     let displayPts = results.points;
     if (p.cards.some(c => c.effect?.omnivore)) {
       displayPts += 2;
+      if (p.gameStats) p.gameStats.vpFromOther = (p.gameStats.vpFromOther || 0) + 2;
       game.logs.push(`🍖 ${p.name} gained 2 extra VP from Omnivore!`);
     }
     p.victoryPoints = Math.min(game.settings?.winningVP || 20, p.victoryPoints + displayPts);
+    if (p.gameStats) p.gameStats.vpFromDice = (p.gameStats.vpFromDice || 0) + results.points;
     game.logs.push(`${p.name} gained ${results.points} VP.`);
     
     // Only highlight number dice if they actually scored points (count >= 3)
@@ -397,13 +399,7 @@ async function resolveDiceAutomatically(gameId: string, socketId: string) {
               game.highlightedStats.push({ playerId: p.id, stat: 'health' });
             }
           }
-          if (p.cards.some(c => c.effect?.alphaMonster)) {
-            if (p.victoryPoints < (game.settings?.winningVP || 20)) {
-              p.victoryPoints += 1;
-              modifierLogs.push(`🐺 ${p.name} gained 1 ⭐ from Alpha Monster!`);
-              game.highlightedStats.push({ playerId: p.id, stat: 'vp' });
-            }
-          }
+
           
           if (extraFireDamage > 0) {
             modifierLogs.push(`🔥 ${other.name} took +1 extra damage from Fire Breathing!`);
@@ -441,6 +437,7 @@ async function resolveDiceAutomatically(gameId: string, socketId: string) {
       const targetsStr = targetNames.length > 0 ? targetNames.join(', ') : 'no one';
       if (p.cards.some(c => c.effect?.alphaMonster)) {
         p.victoryPoints = Math.min(game.settings?.winningVP || 20, p.victoryPoints + 1);
+        if (p.gameStats) p.gameStats.vpFromOther = (p.gameStats.vpFromOther || 0) + 1;
         modifierLogs.push(`🐺 ${p.name} gained 1 ⭐ from Alpha Monster!`);
         game.highlightedStats.push({ playerId: p.id, stat: 'vp' });
       }
@@ -502,7 +499,7 @@ async function resolveDiceAutomatically(gameId: string, socketId: string) {
       if (isTokyoEmpty) {
         p.inTokyo = true;
         p.victoryPoints = Math.min(20, p.victoryPoints + 1);
-        if (p.gameStats) p.gameStats.enteredTokyoCount += 1;
+        if (p.gameStats) p.gameStats.vpFromEnteringTokyo = (p.gameStats.vpFromEnteringTokyo || 0) + 1;
         game.logs.push(`👑 ${p.name} entered Tokyo City! (+1 VP)`);
         game.highlightedStats.push({ playerId: p.id, stat: 'vp' });
       }
@@ -725,10 +722,12 @@ io.on('connection', (socket) => {
           playersKilled: 0,
           cardsBought: 0,
           energySpent: 0,
-          enteredTokyoCount: 0,
-          startedTurnInTokyoCount: 0,
           energyGained: 0,
           healingGained: 0,
+          vpFromDice: 0,
+          vpFromEnteringTokyo: 0,
+          vpFromStartingTokyo: 0,
+          vpFromOther: 0,
         };
       });
 
@@ -817,6 +816,7 @@ io.on('connection', (socket) => {
           game.highlightedStats = [];
           if (player.cards.some(c => c.effect?.newsTeam)) {
             player.victoryPoints = Math.min(game.settings?.winningVP || 20, player.victoryPoints + 1);
+            if (player.gameStats) player.gameStats.vpFromOther = (player.gameStats.vpFromOther || 0) + 1;
             game.logs.push(`📰 ${player.name} gained 1 VP from Dedicated News Team!`);
             game.highlightedStats.push({ playerId: player.id, stat: 'vp' });
           }
