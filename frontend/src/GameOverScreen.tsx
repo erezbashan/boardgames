@@ -1,5 +1,5 @@
 import React from 'react';
-import { GameState } from '@king-of-tokyo/shared';
+import type { GameState } from '@king-of-tokyo/shared';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface Props {

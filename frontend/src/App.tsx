@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useSocket } from './SocketContext';
-import { Player, DiceRoll, Card, GameState } from '@king-of-tokyo/shared';
+import type { Player, DiceRoll, Card, GameState } from '@king-of-tokyo/shared';
 import './App.css';
 import { GameOverScreen } from './GameOverScreen';
 
