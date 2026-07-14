@@ -12,6 +12,11 @@ export interface Player {
   cards: Card[];
   hasYielded?: boolean; // temporary flag during resolution
   poisonTokens: number;
+  gameStats?: {
+    damageDealt: number;
+    cardsBought: number;
+    energySpent: number;
+  };
 }
 
 export type DiceFace = '1' | '2' | '3' | 'Heart' | 'Lightning' | 'Claw';

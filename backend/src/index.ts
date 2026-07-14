@@ -60,6 +60,18 @@ function broadcastState(gameId: string) {
         state.status = 'GameOver';
         state.winner = winner ? winner.id : null;
         state.logs.push(winner ? `🎉 ${winner.name} wins the game!` : `💀 Everyone was defeated. The game ends in a draw!`);
+        
+        if (!state.history) state.history = [];
+        const currentTurn = state.history.length > 0 ? state.history[state.history.length - 1].turnNumber + 1 : 0;
+        Object.values(state.players).forEach(p => {
+          state.history!.push({
+            turnNumber: currentTurn,
+            playerId: p.id,
+            vp: p.victoryPoints,
+            health: Math.max(0, p.health),
+            energy: p.energy
+          });
+        });
       }
     }
     
@@ -287,6 +299,9 @@ async function resolveDiceAutomatically(gameId: string, socketId: string) {
         let actualDmg = Math.max(0, dmg - armor);
         if (actualDmg > 0) {
           other.health -= actualDmg;
+          if (p.gameStats) {
+            p.gameStats.damageDealt += actualDmg;
+          }
           game.highlightedStats.push({ playerId: other.id, stat: 'health' });
           hitSomeone = true;
           
@@ -553,6 +568,14 @@ io.on('connection', (socket) => {
     if (game && game.status === 'Lobby') {
       game.status = 'Playing';
       
+      Object.values(game.players).forEach(p => {
+        p.gameStats = {
+          damageDealt: 0,
+          cardsBought: 0,
+          energySpent: 0
+        };
+      });
+
       // Randomize player order
       for (let i = game.playerOrder.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -620,6 +643,10 @@ io.on('connection', (socket) => {
         const card = game.marketCards[cardIndex];
         if (player.energy >= card.cost) {
           player.energy -= card.cost;
+          if (player.gameStats) {
+            player.gameStats.energySpent += card.cost;
+            player.gameStats.cardsBought += 1;
+          }
           if (card.type !== 'Discard') {
             player.cards.push(card);
           }

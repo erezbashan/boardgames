@@ -12,6 +12,15 @@ function App() {
   });
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const [showHelp, setShowHelp] = useState(false);
+  const [showStats, setShowStats] = useState(false);
+
+  useEffect(() => {
+    if (gameState?.status === "GameOver") {
+      setShowStats(true);
+    } else {
+      setShowStats(false);
+    }
+  }, [gameState?.status]);
   const [showAllLogs, setShowAllLogs] = useState(false);
   const [chatText, setChatText] = useState('');
   const chatBottomRef = useRef<HTMLDivElement>(null);
@@ -85,10 +94,6 @@ function App() {
     );
   }
 
-  if (gameState.status === 'GameOver') {
-    return <GameOverScreen gameState={gameState} onLobbyReturn={() => socket?.emit('RETURN_TO_LOBBY', gameState.id)} />;
-  }
-
   // GAME BOARD VIEW
   return (
     <div className="game-container">
@@ -101,7 +106,13 @@ function App() {
             <button onClick={() => startGame(gameState.id)} className="btn primary">Start Game</button>
           </div>
         )}
-        <div style={{ display: 'flex', gap: '8px', marginLeft: '16px' }}>
+        {gameState.status === "GameOver" && (
+          <div style={{ display: "flex", gap: "8px" }}>
+            <button onClick={() => setShowStats(true)} className="btn primary">View Stats</button>
+            <button onClick={() => socket?.emit("RETURN_TO_LOBBY", gameState.id)} className="btn danger">Return to Lobby</button>
+          </div>
+        )}
+        <div style={{ display: "flex", gap: "8px", marginLeft: "16px" }}>
           <button onClick={() => setShowHelp(true)} className="btn secondary">Help</button>
           <button onClick={() => quitGame(gameState.id)} className="btn danger">Quit</button>
         </div>
@@ -376,7 +387,7 @@ function App() {
                   )}
                 </div>
                 <div className="player-stats">
-                  <span className={`stat health ${gameState.highlightedStats?.some(s => s.playerId === p.id && s.stat === 'health') ? 'flash' : ''}`}>❤️ {p.health} / {p.maxHealth || 10}</span>
+                  <span className={`stat health ${gameState.highlightedStats?.some(s => s.playerId === p.id && s.stat === 'health') ? 'flash' : ''}`}>❤️ {Math.max(0, p.health)} / {p.maxHealth || 10}</span>
                   <span className={`stat vp ${gameState.highlightedStats?.some(s => s.playerId === p.id && s.stat === 'vp') ? 'flash' : ''}`}>⭐ {p.victoryPoints}</span>
                   <span className={`stat energy ${gameState.highlightedStats?.some(s => s.playerId === p.id && s.stat === 'energy') ? 'flash' : ''}`}>⚡ {p.energy}</span>
                 </div>
