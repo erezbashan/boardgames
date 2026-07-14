@@ -715,6 +715,7 @@ export async function startGame(payload: any) {
       }
 
       game.logs.push('Game started!');
+      await saveGame(gameId, game);
       startTurn(gameId, game.playerOrder[0]);
     }
 
