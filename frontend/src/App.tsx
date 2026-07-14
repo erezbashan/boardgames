@@ -401,9 +401,8 @@ function App() {
               <div key={p.id} className={`player-card glass-panel ${p.id === gameState.currentTurnPlayerId ? 'active-turn' : ''} ${isMePlayer ? 'is-me' : ''} ${p.inTokyo ? 'in-tokyo' : ''}`} style={{ marginBottom: '8px', opacity: p.health <= 0 ? 0.5 : 1, filter: p.health <= 0 ? 'grayscale(100%)' : 'none' }}>
                 <div className="player-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div>
-                    <strong>{p.name}</strong> {p.isBot && '🤖'} 
+                    <strong style={{ color: p.color || 'white' }}>{p.name}</strong> {p.isBot && '🤖'} 
                     {p.poisonTokens > 0 && <span style={{ marginLeft: '6px', color: '#ff4444', fontWeight: 'bold' }}>☠️x{p.poisonTokens}</span>}
-                    {p.health <= 0 && <span style={{ color: 'red', fontWeight: 'bold', marginLeft: '4px' }}>[DEAD]</span>}
                   </div>
                   {p.id === gameState.currentTurnPlayerId && p.health > 0 && (
                     <div style={{ animation: 'flash-btn 1.5s infinite', fontSize: '18px', display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--primary)', fontWeight: 'bold' }}>
