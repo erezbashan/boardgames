@@ -331,7 +331,7 @@ function App() {
                 </label>
                 <label style={{ display: 'contents' }}>
                   <span>Copies per Card:</span>
-                  <input type="number" min="1" max="10" value={localSettings.copiesPerCard} onChange={e => setLocalSettings(s => ({...s, copiesPerCard: parseInt(e.target.value)||1}))} style={{ width: '60px', padding: '4px', background: 'rgba(0,0,0,0.3)', color: 'white', border: '1px solid #555' }} />
+                  <input type="number" min="1" max="99" value={localSettings.copiesPerCard} onChange={e => setLocalSettings(s => ({...s, copiesPerCard: parseInt(e.target.value)||1}))} style={{ width: '60px', padding: '4px', background: 'rgba(0,0,0,0.3)', color: 'white', border: '1px solid #555' }} />
                 </label>
               </div>
               <div style={{ marginTop: '16px' }}>
@@ -342,7 +342,7 @@ function App() {
                     <button onClick={() => setLocalSettings(s => ({ ...s, excludedCards: marketCards.map(c => c.id) }))} className="btn secondary" style={{ padding: '2px 8px', fontSize: '11px' }}>None</button>
                   </div>
                 </div>
-                <div style={{ maxHeight: '150px', overflowY: 'auto', background: 'rgba(0,0,0,0.2)', padding: '8px', border: '1px solid #555', borderRadius: '4px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <div style={{ maxHeight: '300px', overflowY: 'auto', background: 'rgba(0,0,0,0.2)', padding: '8px', border: '1px solid #555', borderRadius: '4px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   {[...marketCards].sort((a, b) => a.name.localeCompare(b.name)).map(card => (
                     <label key={card.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px' }}>
                       <input 
@@ -358,7 +358,7 @@ function App() {
                           }));
                         }}
                       />
-                      <span>{card.name} <span style={{ opacity: 0.6, fontSize: '11px' }}>({card.cost}⚡)</span></span>
+                      <span>{card.name}</span>
                     </label>
                   ))}
                 </div>

@@ -99,9 +99,9 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
       if (!playerId) return;
       await gameEngine.addBot(gameId, playerId);
     },
-    startGame: async (gameId, _settings) => {
+    startGame: async (gameId, settings) => {
       if (!playerId) return;
-      await gameEngine.startGame({ gameId });
+      await gameEngine.startGame({ gameId, settings });
     },
     rollDice: async (gameId) => {
       if (!playerId) return;
