@@ -14,7 +14,9 @@ export const createEventContext = (gameState: GameState, playerId: string) => ({
     if (!gameState.logs.includes(msg)) gameState.logs.push(msg);
   },
   highlight: (id: string, stat: string, dir?: 'up' | 'down') => {
-    gameState.highlightedStats.push({ playerId: id, stat, dir });
+    const statObj: any = { playerId: id, stat };
+    if (dir) statObj.dir = dir;
+    gameState.highlightedStats.push(statObj);
   }
 });
 

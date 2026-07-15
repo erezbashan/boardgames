@@ -304,7 +304,7 @@ function App() {
           {(gameState.status === 'Playing' || gameState.status === 'GameOver') && (
             <>
               <div className="market-board glass-panel" style={{ padding: '8px' }}>
-                <div className="cards-list" style={{ display: 'flex', gap: '8px', overflowX: 'auto', alignItems: 'flex-start' }}>
+                <div className="cards-list" style={{ display: 'flex', gap: '8px', overflowX: 'auto', overflowY: 'hidden', alignItems: 'flex-start' }}>
                   {gameState.marketCards.map(card => {
                     const myEnergy = gameState.players[playerId!]?.energy || 0;
                     const isMyTurn = gameState.currentTurnPlayerId === playerId;
