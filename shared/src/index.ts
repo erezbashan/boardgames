@@ -16,6 +16,7 @@ export interface Player {
   poisonTokens: number;
   shrinkTokens: number;
   dealtDamageThisTurn?: boolean;
+  hasFrenzy?: boolean;
   gameStats?: {
     damageDealt: number;
     playersKilled: number;
@@ -27,6 +28,7 @@ export interface Player {
     vpFromEnteringTokyo?: number;
     vpFromStartingTokyo?: number;
     vpFromOther?: number;
+    vpFromCards?: number;
     turnDied?: number;
   };
 }

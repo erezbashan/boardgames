@@ -77,52 +77,58 @@ const renderLogLine = (log: string, i: number, gameState: any, setSelectedCard: 
         const sortedPlayers = [...players].sort((a: any, b: any) => b.name.length - a.name.length);
         const sortedCards = [...marketCards].sort((a: any, b: any) => b.name.length - a.name.length);
         
-        const renderText = (logText: string): any => {
-          if (logText.includes('⚡')) {
-            const split = logText.split('⚡');
-            return (
-              <span key={logText + 'energy'}>
-                {split.map((part, index) => (
-                  <span key={index}>
-                    {renderText(part)}
-                    {index < split.length - 1 && <span className="energy-icon">⚡</span>}
-                  </span>
-                ))}
-              </span>
-            );
-          }
+        const renderText = (logText: string): any[] => {
+          let elements: any[] = [logText];
 
+          // Handle Energy
+          elements = elements.flatMap((el) => {
+            if (typeof el !== 'string') return [el];
+            const parts = el.split('⚡');
+            return parts.flatMap((p, idx) => {
+              const res: any[] = [p];
+              if (idx < parts.length - 1) res.push(<span key={i + idx + 'energy'} className="energy-icon">⚡</span>);
+              return res;
+            });
+          });
+
+          // Handle Players
           for (const p of sortedPlayers as any[]) {
-            if (p.name && logText.includes(p.name)) {
-              const split = logText.split(p.name);
-              return (
-                <span key={logText + p.name}>
-                  {renderText(split[0])}
-                  <span style={{ color: p.color || 'white', fontWeight: 'bold' }}>{p.name}</span>
-                  {renderText(split.slice(1).join(p.name))}
-                </span>
-              );
+            if (p.name) {
+              const regex = new RegExp(`(${p.name})`, 'g');
+              elements = elements.flatMap((el) => {
+                if (typeof el !== 'string') return [el];
+                return el.split(regex).map((part, idx) => {
+                  if (part === p.name) return <span key={i + idx + p.name} style={{ color: p.color || 'white', fontWeight: 'bold' }}>{p.name}</span>;
+                  return part;
+                });
+              });
             }
           }
           
+          // Handle Cards
           for (const c of sortedCards as any[]) {
-            if (c.name && logText.includes(c.name)) {
-              const split = logText.split(c.name);
-              return (
-                <span key={logText + c.name}>
-                  {renderText(split[0])}
-                  <span 
-                    onClick={() => setSelectedCard(c)} 
-                    style={{ cursor: 'pointer', color: 'var(--primary)', textDecoration: 'underline', fontWeight: 'bold' }}
-                  >
-                    {c.name}
-                  </span>
-                  {renderText(split.slice(1).join(c.name))}
-                </span>
-              );
+            if (c.name) {
+              const regex = new RegExp(`(${c.name})`, 'g');
+              elements = elements.flatMap((el) => {
+                if (typeof el !== 'string') return [el];
+                return el.split(regex).map((part, idx) => {
+                  if (part === c.name) {
+                    return (
+                      <span 
+                        key={i + idx + c.name}
+                        onClick={() => setSelectedCard(c)} 
+                        style={{ cursor: 'pointer', color: 'var(--primary)', textDecoration: 'underline', fontWeight: 'bold' }}
+                      >
+                        {c.name}
+                      </span>
+                    );
+                  }
+                  return part;
+                });
+              });
             }
           }
-          return logText;
+          return elements;
         };
         return renderText(log);
       })()}
@@ -347,7 +353,7 @@ function App() {
                           onClick={(e) => { e.stopPropagation(); buyCard(gameState.id, card.id); }}
                           style={{ width: '100%', padding: '6px' }}
                         >
-                          Buy for {card.cost} ⚡
+                          Buy for {discountedCost} <span className="energy-icon">⚡</span>
                         </button>
                       </div>
                     );
@@ -408,7 +414,9 @@ function App() {
                                   'Lightning': '⚡',
                                   'Claw': '💥'
                                 };
-                                return faceIcons[die.face as string];
+                                return die.face === 'Lightning' 
+                                  ? <span className="energy-icon">⚡</span> 
+                                  : faceIcons[die.face as string];
                               })()}
                             </span>
                           </div>

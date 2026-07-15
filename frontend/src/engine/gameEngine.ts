@@ -11,7 +11,7 @@ export const createEventContext = (gameState: GameState, playerId: string) => ({
   gameState,
   playerId,
   log: (msg: string) => {
-    if (!gameState.logs.includes(msg)) gameState.logs.push(msg);
+    gameState.logs.push(msg);
   },
   highlight: (id: string, stat: string, dir?: 'up' | 'down') => {
     const statObj: any = { playerId: id, stat };
@@ -169,11 +169,16 @@ export async function endTurnAutomatically(gameId: string, playerId: string) {
   const idx = game.playerOrder.indexOf(playerId);
   
   let nextId = game.playerOrder[(idx + 1) % game.playerOrder.length];
-  let tries = 0;
-  while (game.players[nextId]?.health <= 0 && tries < game.playerOrder.length) {
-    const nextIdx = game.playerOrder.indexOf(nextId);
-    nextId = game.playerOrder[(nextIdx + 1) % game.playerOrder.length];
-    tries++;
+  if (game.players[playerId]?.hasFrenzy) {
+    nextId = playerId;
+    game.players[playerId].hasFrenzy = false;
+  } else {
+    let tries = 0;
+    while (game.players[nextId]?.health <= 0 && tries < game.playerOrder.length) {
+      const nextIdx = game.playerOrder.indexOf(nextId);
+      nextId = game.playerOrder[(nextIdx + 1) % game.playerOrder.length];
+      tries++;
+    }
   }
   
   startTurn(gameId, nextId);
@@ -799,6 +804,24 @@ export async function buyCard(gameId: string, cardId: string, playerId: string) 
           const cardBehavior = CardRegistry[card.id];
           if (cardBehavior?.onBuy) {
             cardBehavior.onBuy(ctx);
+          } else if (card.type === 'Discard' && card.effect) {
+            if (card.effect.vp) {
+              player.victoryPoints += card.effect.vp;
+              if (player.gameStats) player.gameStats.vpFromCards = (player.gameStats.vpFromCards || 0) + card.effect.vp;
+              ctx.highlight(player.id, 'vp');
+            }
+            if (card.effect.energy) {
+              player.energy += card.effect.energy;
+              ctx.highlight(player.id, 'energy');
+            }
+            if (card.effect.spikeDamage) {
+              for (const pId in game.players) {
+                if (pId !== playerId && game.players[pId].health > 0) {
+                  game.players[pId].health = Math.max(0, game.players[pId].health - card.effect.spikeDamage);
+                  ctx.highlight(pId, 'health');
+                }
+              }
+            }
           }
           
           if (game.deck.length > 0) {
