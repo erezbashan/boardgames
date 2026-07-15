@@ -6,7 +6,7 @@ export const PoisonSpit: CardBehavior = {
     const target = ctx.gameState.players[targetId];
     if (target && damage > 0) {
       target.poisonTokens = (target.poisonTokens || 0) + 1;
-      ctx.log(`☠️ ${target.name} was poisoned by Poison Spit!`);
+      ctx.log(`${target.name} was poisoned by Poison Spit!`);
       ctx.highlight(ctx.playerId, 'card:c9');
     }
   }

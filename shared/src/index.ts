@@ -142,7 +142,9 @@ export interface GameState {
     maxHealth: number;
     startingHealth: number;
     winningVP: number;
-  startingDice?: number;
+    startingDice?: number;
+    copiesPerCard?: number;
+    excludedCards?: string[];
   };
 }
 
@@ -212,7 +214,7 @@ export const marketCards: Card[] = [
   // ADD NEW CARDS HERE
   { id: 'c31', name: 'Wings', cost: 6, type: 'Keep', description: 'Spend 2 Energy to ignore damage for one turn.', effect: { wings: true } },
   { id: 'c32', name: 'Gourmet', cost: 4, type: 'Keep', description: 'When scoring points with dice, gain +1 extra VP if scoring 1s.', effect: { gourmet: true } },
-  { id: 'c33', name: 'Background Dweller', cost: 4, type: 'Keep', description: 'If you take no damage on a turn, gain 1 VP.', effect: { backgroundDweller: true } },
+  { id: 'c33', name: 'Background Dweller', cost: 4, type: 'Keep', description: 'You can always reroll any 3s you have.', effect: { backgroundDweller: true } },
   { id: 'c34', name: 'Friend of Children', cost: 3, type: 'Keep', description: 'When gaining Energy, gain 1 extra.', effect: { friendOfChildren: true } },
   { id: 'c35', name: 'Gas Refinery', cost: 6, type: 'Discard', description: 'Gain 2 VP and deal 3 damage to all other players.', effect: { vp: 2, spikeDamage: 3 } },
   { id: 'c36', name: 'Nuclear Power Plant', cost: 6, type: 'Discard', description: 'Heal 3 Health and gain 3 VP.', effect: { heal: 3, vp: 3 } },

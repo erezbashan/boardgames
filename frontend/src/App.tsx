@@ -154,7 +154,7 @@ function App() {
   });
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const [showSettings, setShowSettings] = useState(false);
-  const [localSettings, setLocalSettings] = useState({ maxHealth: 10, startingHealth: 10, winningVP: 20, startingDice: 6 });
+  const [localSettings, setLocalSettings] = useState<{ maxHealth: number, startingHealth: number, winningVP: number, startingDice: number, copiesPerCard: number, excludedCards: string[] }>({ maxHealth: 10, startingHealth: 10, winningVP: 20, startingDice: 6, copiesPerCard: 1, excludedCards: [] });
   const [showHelp, setShowHelp] = useState(false);
   const [showStats, setShowStats] = useState(false);
   
@@ -329,6 +329,39 @@ function App() {
                   <span>Winning VP:</span>
                   <input type="number" min="1" max="50" value={localSettings.winningVP} onChange={e => setLocalSettings(s => ({...s, winningVP: parseInt(e.target.value)||20}))} style={{ width: '60px', padding: '4px', background: 'rgba(0,0,0,0.3)', color: 'white', border: '1px solid #555' }} />
                 </label>
+                <label style={{ display: 'contents' }}>
+                  <span>Copies per Card:</span>
+                  <input type="number" min="1" max="10" value={localSettings.copiesPerCard} onChange={e => setLocalSettings(s => ({...s, copiesPerCard: parseInt(e.target.value)||1}))} style={{ width: '60px', padding: '4px', background: 'rgba(0,0,0,0.3)', color: 'white', border: '1px solid #555' }} />
+                </label>
+              </div>
+              <div style={{ marginTop: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <span style={{ fontWeight: 'bold' }}>Include Cards:</span>
+                  <div>
+                    <button onClick={() => setLocalSettings(s => ({ ...s, excludedCards: [] }))} className="btn secondary" style={{ padding: '2px 8px', fontSize: '11px', marginRight: '4px' }}>All</button>
+                    <button onClick={() => setLocalSettings(s => ({ ...s, excludedCards: marketCards.map(c => c.id) }))} className="btn secondary" style={{ padding: '2px 8px', fontSize: '11px' }}>None</button>
+                  </div>
+                </div>
+                <div style={{ maxHeight: '150px', overflowY: 'auto', background: 'rgba(0,0,0,0.2)', padding: '8px', border: '1px solid #555', borderRadius: '4px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  {[...marketCards].sort((a, b) => a.name.localeCompare(b.name)).map(card => (
+                    <label key={card.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={!localSettings.excludedCards.includes(card.id)}
+                        onChange={e => {
+                          const isChecked = e.target.checked;
+                          setLocalSettings(s => ({
+                            ...s,
+                            excludedCards: isChecked 
+                              ? s.excludedCards.filter(id => id !== card.id)
+                              : [...s.excludedCards, card.id]
+                          }));
+                        }}
+                      />
+                      <span>{card.name} <span style={{ opacity: 0.6, fontSize: '11px' }}>({card.cost}⚡)</span></span>
+                    </label>
+                  ))}
+                </div>
               </div>
             </div>
           )}
@@ -699,6 +732,18 @@ function App() {
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span>Winning VP:</span>
                 <strong>{gameState.settings?.winningVP || 20}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>Copies per Card:</span>
+                <strong>{gameState.settings?.copiesPerCard || 1}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>Excluded Cards:</span>
+                <strong>{gameState.settings?.excludedCards?.length || 0}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>Deck Size:</span>
+                <strong>{gameState.deckCount + gameState.marketCards.length}</strong>
               </div>
             </div>
             <button className="btn primary" onClick={() => setShowSettings(false)} style={{ marginTop: '24px', width: '100%' }}>Close</button>

@@ -7,7 +7,7 @@ export const PoisonQuills: CardBehavior = {
       const target = ctx.gameState.players[targetId];
       if (target.energy > 0) {
         target.energy -= 1;
-        ctx.log(`🪡 ${target.name} loses 1 ⚡ from Poison Quills!`);
+        ctx.log(`${target.name} loses 1 ⚡ from Poison Quills!`);
         ctx.highlight(ctx.playerId, 'card:c24');
         ctx.highlight(targetId, 'energy', 'down');
       }

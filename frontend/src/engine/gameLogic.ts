@@ -2,8 +2,8 @@ import type { GameState, Card, DiceRoll, DiceFace } from '@king-of-tokyo/shared'
 import { marketCards } from '@king-of-tokyo/shared';
 
 export function createInitialGameState(id: string, settings?: any): GameState {
-  const gameSettings = settings || { maxHealth: 10, startingHealth: 10, winningVP: 20, startingDice: 6 };
-  const deck = shuffleDeck();
+  const gameSettings = settings || { maxHealth: 10, startingHealth: 10, winningVP: 20, startingDice: 6, copiesPerCard: 1, excludedCards: [] };
+  const deck = shuffleDeck(gameSettings);
   const initialMarketCards = deck.splice(0, 3);
   return {
     id,
@@ -26,8 +26,22 @@ export function createInitialGameState(id: string, settings?: any): GameState {
   };
 }
 
-export function shuffleDeck(): Card[] {
-  return [...marketCards].sort(() => Math.random() - 0.5);
+export function shuffleDeck(settings?: any): Card[] {
+  const excluded = settings?.excludedCards || [];
+  const copies = settings?.copiesPerCard || 1;
+  
+  let baseCards = marketCards.filter(c => !excluded.includes(c.id));
+  let finalDeck: Card[] = [];
+  
+  for (let i = 0; i < copies; i++) {
+    const copyBatch = baseCards.map(c => ({
+      ...c,
+      id: i === 0 ? c.id : `${c.id}-copy${i}`
+    }));
+    finalDeck = finalDeck.concat(copyBatch);
+  }
+
+  return finalDeck.sort(() => Math.random() - 0.5);
 }
 
 export const FACES: DiceFace[] = ['1', '2', '3', 'Heart', 'Lightning', 'Claw'];
