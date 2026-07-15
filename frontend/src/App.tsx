@@ -9,12 +9,12 @@ import { GameOverScreen } from './GameOverScreen';
 
 const PlayerStat = ({ statName, value, max, icon, isHighlighted, className }: any) => {
   const prev = useRef(value);
-  const dir = useRef('');
-  useEffect(() => {
-    if (value > prev.current) dir.current = 'up';
-    else if (value < prev.current) dir.current = 'down';
+  const dir = useRef('up');
+  
+  if (value !== prev.current) {
+    dir.current = value > prev.current ? 'up' : 'down';
     prev.current = value;
-  }, [value]);
+  }
   
   const highlightClass = isHighlighted ? (dir.current === 'down' ? 'flash-down' : 'flash-up') : '';
   return <span className={`stat ${className} ${highlightClass}`} style={className === 'health' ? { display: 'inline-block', minWidth: '75px' } : undefined}>{icon} {value}{max ? ` / ${max}` : ''}</span>;
