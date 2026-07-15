@@ -2,7 +2,7 @@ import type { GameState, TurnHistory, Player } from '@king-of-tokyo/shared';
 import { CardRegistry } from '@king-of-tokyo/shared';
 import { db } from './firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { rollDice, evaluateDice, createInitialGameState } from './gameLogic';
+import { rollDice, evaluateDice, createInitialGameState, shuffleDeck } from './gameLogic';
 import { playBotTurn, playBotBuyPhase } from './botLogic';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -657,6 +657,10 @@ export async function startGame(payload: any) {
   if (!game) return;
     if (game && settings) {
       game.settings = { ...game.settings, ...settings };
+      const deck = shuffleDeck(game.settings);
+      game.marketCards = deck.splice(0, 3);
+      game.deckCount = deck.length;
+      game.deck = deck;
     }
     if (game && game.status === 'Lobby') {
       game.status = 'Playing';
