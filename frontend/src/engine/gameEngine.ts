@@ -205,19 +205,26 @@ export async function resolveDiceAutomatically(gameId: string, playerId: string)
   };
 
   // Phase 1: Points
-  if (results.points > 0) {
+  {
     let displayPts = results.points;
     const oldVp = displayPts;
     const ctx = createEventContext(game, p.id);
     for (const b of getBehaviors(p)) {
       if (b?.onBeforeScoreVP) displayPts = b.onBeforeScoreVP(ctx, displayPts);
     }
-    if (displayPts > oldVp && p.gameStats) {
-      p.gameStats.vpFromOther = (p.gameStats.vpFromOther || 0) + (displayPts - oldVp);
+    if (displayPts > 0) {
+      if (displayPts > oldVp && p.gameStats) {
+        p.gameStats.vpFromOther = (p.gameStats.vpFromOther || 0) + (displayPts - oldVp);
+      }
+      p.victoryPoints = Math.min(game.settings?.winningVP || 20, p.victoryPoints + displayPts);
+      if (p.gameStats) p.gameStats.vpFromDice = (p.gameStats.vpFromDice || 0) + results.points;
+      if (results.points > 0) {
+        game.logs.push(`${p.name} gained ${results.points} ⭐.`);
+      }
     }
-    p.victoryPoints = Math.min(game.settings?.winningVP || 20, p.victoryPoints + displayPts);
-    if (p.gameStats) p.gameStats.vpFromDice = (p.gameStats.vpFromDice || 0) + results.points;
-    game.logs.push(`${p.name} gained ${results.points} ⭐.`);
+  }
+
+  if (results.points > 0) {
     
     // Only highlight number dice if they actually scored points (count >= 3)
     game.highlightedDice = game.currentDice.filter(d => {
@@ -748,6 +755,17 @@ export async function yieldTokyo(gameId: string, choice: boolean, playerId: stri
 
 }
 
+export function getCardCost(game: GameState, playerId: string, cardCost: number): number {
+  const player = game.players[playerId];
+  if (!player) return cardCost;
+  let cost = cardCost;
+  const ctx = createEventContext(game, playerId);
+  for (const b of getBehaviors(player)) {
+    if (b?.onBeforeBuyCard) cost = b.onBeforeBuyCard(ctx, cost);
+  }
+  return Math.max(0, cost);
+}
+
 export async function buyCard(gameId: string, cardId: string, playerId: string) {
     const game = await getGame(gameId);
   if (!game) return;
@@ -757,18 +775,14 @@ export async function buyCard(gameId: string, cardId: string, playerId: string) 
       const cardIndex = game.marketCards.findIndex(c => c.id === cardId);
       if (cardIndex !== -1) {
         const card = game.marketCards[cardIndex];
-        let cost = card.cost;
-        const ctx = createEventContext(game, playerId);
-        for (const b of getBehaviors(player)) {
-          if (b?.onBeforeBuyCard) cost = b.onBeforeBuyCard(ctx, cost);
-        }
-        cost = Math.max(0, cost);
+        const cost = getCardCost(game, playerId, card.cost);
         if (player.energy >= cost) {
           player.energy -= cost;
           if (player.gameStats) {
             player.gameStats.energySpent += cost;
             player.gameStats.cardsBought += 1;
           }
+          const ctx = createEventContext(game, playerId);
           if (card.type !== 'Discard') {
             player.cards.push(card);
           }

@@ -73,9 +73,10 @@ export function GameOverScreen({ gameState, onClose }: Props) {
         }
         const h = gameState.history.find(x => x.turnNumber === turn && x.playerId === id);
         if (h) {
-          turnData[`${p.name} VP`] = h.vp;
-          turnData[`${p.name} Health`] = h.health;
-          turnData[`${p.name} Energy`] = h.energy;
+          const jitter = playerIds.indexOf(id) * 0.1;
+          turnData[`${p.name} VP`] = h.vp + jitter;
+          turnData[`${p.name} Health`] = h.health + jitter;
+          turnData[`${p.name} Energy`] = h.energy + jitter;
         }
       }
       chartData.push(turnData);

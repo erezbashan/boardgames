@@ -8,6 +8,7 @@ export const RootingForTheUnderdog: CardBehavior = {
     const isLowest = others.every(other => other.victoryPoints >= p.victoryPoints);
     if (isLowest && others.length > 0) {
       p.victoryPoints += 1;
+    if (p.gameStats) p.gameStats.vpFromCards = (p.gameStats.vpFromCards || 0) + 1;
       ctx.log(`📣 ${p.name} gains 1 ⭐ from Rooting for the Underdog!`);
       ctx.highlight(ctx.playerId, 'card:c44');
     }

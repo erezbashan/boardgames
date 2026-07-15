@@ -358,3 +358,17 @@
     opacity: 1;
   }
 }
+
+.energy-icon {
+  filter: hue-rotate(180deg) brightness(1.2);
+  display: inline-block;
+}
+
+@keyframes dead-flip {
+  0% { transform: rotate(0deg); filter: grayscale(0%); opacity: 1; }
+  100% { transform: rotate(180deg); filter: grayscale(100%); opacity: 0.7; }
+}
+.player-dead {
+  animation: dead-flip 1.5s forwards ease-in-out;
+  pointer-events: none;
+}

@@ -5,6 +5,7 @@ export const VastStorm: CardBehavior = {
   onBuy: (context) => {
     const player = context.gameState.players[context.playerId];
     player.victoryPoints += 2;
+    if (player.gameStats) player.gameStats.vpFromCards = (player.gameStats.vpFromCards || 0) + 2;
     context.log(`🌪️ ${player.name} gained 2 ⭐ and dealt 2 damage to all other players!`);
     context.highlight(context.playerId, 'vp');
     for (const pId in context.gameState.players) {

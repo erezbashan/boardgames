@@ -4,10 +4,11 @@ import { db } from './engine/firebase';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import type { Card } from '@king-of-tokyo/shared';
 import { CardRegistry, marketCards } from '@king-of-tokyo/shared';
+import { getCardCost } from './engine/gameEngine';
 import './App.css';
 import { GameOverScreen } from './GameOverScreen';
 
-const PlayerStat = ({ statName, value, max, icon, isHighlighted, className }: any) => {
+const PlayerStat = ({ value, max, icon, isHighlighted, className }: any) => {
   const prev = useRef(value);
   const dir = useRef('up');
   
@@ -77,6 +78,20 @@ const renderLogLine = (log: string, i: number, gameState: any, setSelectedCard: 
         const sortedCards = [...marketCards].sort((a: any, b: any) => b.name.length - a.name.length);
         
         const renderText = (logText: string): any => {
+          if (logText.includes('⚡')) {
+            const split = logText.split('⚡');
+            return (
+              <span key={logText + 'energy'}>
+                {split.map((part, index) => (
+                  <span key={index}>
+                    {renderText(part)}
+                    {index < split.length - 1 && <span className="energy-icon">⚡</span>}
+                  </span>
+                ))}
+              </span>
+            );
+          }
+
           for (const p of sortedPlayers as any[]) {
             if (p.name && logText.includes(p.name)) {
               const split = logText.split(p.name);
@@ -308,11 +323,19 @@ function App() {
                   {gameState.marketCards.map(card => {
                     const myEnergy = gameState.players[playerId!]?.energy || 0;
                     const isMyTurn = gameState.currentTurnPlayerId === playerId;
-                    const canBuy = isMyTurn && myEnergy >= card.cost && !gameState.isAnimating;
+                    const discountedCost = playerId ? getCardCost(gameState as any, playerId, card.cost) : card.cost;
+                    const canBuy = isMyTurn && myEnergy >= discountedCost && !gameState.isAnimating;
                     return (
                       <div key={card.id} className="card-item glass-panel" style={{ width: '160px', height: '180px', flexShrink: 0, display: 'flex', flexDirection: 'column', padding: '8px', cursor: 'pointer' }} onClick={() => setSelectedCard(card)}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                          <strong>{card.name}</strong>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                          <strong style={{ fontSize: '13px', lineHeight: '1.2' }}>{card.name}</strong>
+                          <span className="stat energy" style={{ fontSize: '13px', padding: '2px 6px' }}>
+                            {discountedCost < card.cost ? (
+                              <><span style={{ textDecoration: 'line-through', opacity: 0.6, marginRight: '4px' }}>{card.cost}</span>{discountedCost} <span className="energy-icon">⚡</span></>
+                            ) : (
+                              <>{card.cost} <span className="energy-icon">⚡</span></>
+                            )}
+                          </span>
                         </div>
                         <div style={{ fontSize: '11px', flex: 1, marginBottom: '8px', color: 'rgba(255,255,255,0.7)' }}>
                           <em>{card.type}</em><br/>
@@ -529,7 +552,7 @@ function App() {
             })().map(p => {
               const isMePlayer = p.id === playerId || p.name === username;
               return (
-              <div key={p.id} className={`player-card glass-panel ${p.id === gameState.currentTurnPlayerId ? 'active-turn' : ''} ${isMePlayer ? 'is-me' : ''} ${p.inTokyo ? 'in-tokyo' : ''} ${p.id === gameState.winner ? 'winner-card' : ''}`} style={{ marginBottom: '8px', opacity: p.health <= 0 ? 0.5 : 1, filter: p.health <= 0 ? 'grayscale(100%)' : 'none' }}>
+              <div key={p.id} className={`player-card glass-panel ${p.id === gameState.currentTurnPlayerId ? 'active-turn' : ''} ${isMePlayer ? 'is-me' : ''} ${p.inTokyo ? 'in-tokyo' : ''} ${p.id === gameState.winner ? 'winner-card' : ''} ${p.health <= 0 ? 'player-dead' : ''}`} style={{ marginBottom: '8px', minHeight: '180px' }}>
                 <div className="player-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div>
                     {p.isBot && <span style={{ marginRight: '4px' }}>🤖</span>}
@@ -602,7 +625,14 @@ function App() {
             <div style={{ color: 'rgba(255,255,255,0.7)', marginBottom: '16px', fontSize: '14px' }}><em>{selectedCard.type}</em></div>
             <p style={{ fontSize: '16px', lineHeight: '1.4' }}>{selectedCard.description}</p>
             <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span className="stat energy" style={{ fontSize: '18px' }}>Cost: {selectedCard.cost} ⚡</span>
+              <span className="stat energy" style={{ fontSize: '18px' }}>
+                Cost:{' '}
+                {playerId && getCardCost(gameState as any, playerId, selectedCard.cost) < selectedCard.cost ? (
+                  <><span style={{ textDecoration: 'line-through', opacity: 0.6, marginRight: '4px' }}>{selectedCard.cost}</span>{getCardCost(gameState as any, playerId, selectedCard.cost)} <span className="energy-icon">⚡</span></>
+                ) : (
+                  <>{selectedCard.cost} <span className="energy-icon">⚡</span></>
+                )}
+              </span>
               <button className="btn secondary" onClick={() => setSelectedCard(null)}>Close</button>
             </div>
           </div>
