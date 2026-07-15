@@ -6,7 +6,7 @@ export const Urbavore: CardBehavior = {
     const p = ctx.gameState.players[ctx.playerId];
     if (p.inTokyo || p.inTokyoBay) {
       p.victoryPoints = Math.min(ctx.gameState.settings?.winningVP || 20, p.victoryPoints + 1);
-      ctx.log(`🏙️ ${p.name} gained 1 extra VP from Urbavore!`);
+      ctx.log(`🏙️ ${p.name} gained 1 extra ⭐ from Urbavore!`);
       ctx.highlight(ctx.playerId, 'card:c46');
     }
   },

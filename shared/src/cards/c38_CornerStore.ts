@@ -5,7 +5,7 @@ export const CornerStore: CardBehavior = {
   onBuy: (context) => {
     const player = context.gameState.players[context.playerId];
     player.victoryPoints += 1;
-    context.log(`🏪 ${player.name} gained 1 VP from Corner Store!`);
+    context.log(`🏪 ${player.name} gained 1 ⭐ from Corner Store!`);
     context.highlight(context.playerId, 'vp');
   },
 

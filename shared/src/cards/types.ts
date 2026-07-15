@@ -4,7 +4,7 @@ export interface GameEventContext {
   gameState: GameState;
   playerId: string; // The player who owns or is buying the card
   log: (msg: string) => void;
-  highlight: (playerId: string, stat: string) => void;
+  highlight: (playerId: string, stat: string, dir?: 'up' | 'down') => void;
 }
 
 export interface CardBehavior {

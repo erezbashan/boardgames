@@ -15,6 +15,7 @@ export interface Player {
   hasYielded?: boolean; // temporary flag during resolution
   poisonTokens: number;
   shrinkTokens: number;
+  dealtDamageThisTurn?: boolean;
   gameStats?: {
     damageDealt: number;
     playersKilled: number;
@@ -126,7 +127,7 @@ export interface GameState {
   // Animation state
   isAnimating: boolean;
   highlightedDice: string[];
-  highlightedStats: { playerId: PlayerId, stat: string }[];
+  highlightedStats: { playerId: PlayerId, stat: string, dir?: 'up' | 'down' }[];
   
   // Resolution state
   pendingYields: PlayerId[]; // players asked if they want to yield Tokyo

@@ -5,7 +5,7 @@ export const Points: CardBehavior = {
   onBuy: (context) => {
     const player = context.gameState.players[context.playerId];
     player.victoryPoints += 2;
-    context.log(`⭐ ${player.name} gained 2 VP!`);
+    context.log(`⭐ ${player.name} gained 2 ⭐!`);
     context.highlight(context.playerId, 'vp');
   },
 

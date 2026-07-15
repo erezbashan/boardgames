@@ -297,8 +297,26 @@
   z-index: 10;
 }
 
-.stat.flash {
-  animation: flash-stat 1.4s ease-in-out 1;
+.stat.flash-up {
+  animation: flash-stat-up 1.4s ease-in-out 1;
+}
+
+.stat.flash-down {
+  animation: flash-stat-down 1.4s ease-in-out 1;
+}
+
+@keyframes flash-stat-up {
+  0% { transform: scale(1); background: rgba(0,0,0,0.4); }
+  15% { transform: scale(1.3); background: rgba(0,255,100,0.6); box-shadow: 0 0 15px rgba(0,255,100,0.8); }
+  50% { transform: scale(1.1); background: rgba(0,255,100,0.3); box-shadow: 0 0 5px rgba(0,255,100,0.4); }
+  100% { transform: scale(1); background: rgba(0,0,0,0.4); }
+}
+
+@keyframes flash-stat-down {
+  0% { transform: scale(1); background: rgba(0,0,0,0.4); }
+  15% { transform: scale(0.8); background: rgba(255,0,0,0.6); box-shadow: 0 0 15px rgba(255,0,0,0.8); }
+  50% { transform: scale(0.9); background: rgba(255,0,0,0.3); box-shadow: 0 0 5px rgba(255,0,0,0.4); }
+  100% { transform: scale(1); background: rgba(0,0,0,0.4); }
 }
 
 @keyframes pulse-die {

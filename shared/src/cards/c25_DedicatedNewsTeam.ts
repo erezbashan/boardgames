@@ -5,7 +5,7 @@ export const DedicatedNewsTeam: CardBehavior = {
   onBuyCard: (ctx, cost) => {
     const p = ctx.gameState.players[ctx.playerId];
     p.victoryPoints += 1;
-    ctx.log(`📰 ${p.name} gains 1 VP from Dedicated News Team!`);
+    ctx.log(`📰 ${p.name} gains 1 ⭐ from Dedicated News Team!`);
     ctx.highlight(ctx.playerId, 'card:c25');
   }
 };

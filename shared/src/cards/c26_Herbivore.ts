@@ -4,7 +4,7 @@ export const Herbivore: CardBehavior = {
   id: 'c26',
   onTurnEnd: (context) => {
     const player = context.gameState.players[context.playerId];
-    if (!(player as any).dealtDamageThisTurn) {
+    if (!player.dealtDamageThisTurn) {
       player.victoryPoints = Math.min(20, player.victoryPoints + 1);
       context.log(`🌱 ${player.name} gains 1 ⭐ from Herbivore (dealt no damage)!`);
       context.highlight(context.playerId, 'vp');

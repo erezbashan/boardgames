@@ -13,8 +13,8 @@ export const createEventContext = (gameState: GameState, playerId: string) => ({
   log: (msg: string) => {
     if (!gameState.logs.includes(msg)) gameState.logs.push(msg);
   },
-  highlight: (id: string, stat: string) => {
-    gameState.highlightedStats.push({ playerId: id, stat });
+  highlight: (id: string, stat: string, dir?: 'up' | 'down') => {
+    gameState.highlightedStats.push({ playerId: id, stat, dir });
   }
 });
 
@@ -97,7 +97,7 @@ export async function startTurn(gameId: string, playerId: string) {
   if (p.inTokyo) {
     p.victoryPoints = Math.min(20, p.victoryPoints + 2);
     if (p.gameStats) p.gameStats.vpFromStartingTokyo = (p.gameStats.vpFromStartingTokyo || 0) + 2;
-    game.logs.push(`👑 ${p.name} started their turn in Tokyo City! (+2 VP)`);
+    game.logs.push(`👑 ${p.name} started their turn in Tokyo City! (+2 ⭐)`);
     game.highlightedStats.push({ playerId: p.id, stat: 'vp' });
     animatedStart = true;
   }
@@ -107,7 +107,7 @@ export async function startTurn(gameId: string, playerId: string) {
   }
   if (game.logs.length > oldLogLen) animatedStart = true;
   
-  (p as any).dealtDamageThisTurn = false;
+  p.dealtDamageThisTurn = false;
   if (animatedStart) {
     game.isAnimating = true;
     await saveGame(gameId, game);
@@ -215,7 +215,7 @@ export async function resolveDiceAutomatically(gameId: string, playerId: string)
     }
     p.victoryPoints = Math.min(game.settings?.winningVP || 20, p.victoryPoints + displayPts);
     if (p.gameStats) p.gameStats.vpFromDice = (p.gameStats.vpFromDice || 0) + results.points;
-    game.logs.push(`${p.name} gained ${results.points} VP.`);
+    game.logs.push(`${p.name} gained ${results.points} ⭐.`);
     
     // Only highlight number dice if they actually scored points (count >= 3)
     game.highlightedDice = game.currentDice.filter(d => {
@@ -326,7 +326,7 @@ export async function resolveDiceAutomatically(gameId: string, playerId: string)
 
         let actualDmg = Math.max(0, dmg);
         if (actualDmg > 0) {
-          (p as any).dealtDamageThisTurn = true;
+          p.dealtDamageThisTurn = true;
           
           other.health -= actualDmg;
           if (p.gameStats) {
@@ -426,7 +426,7 @@ export async function resolveDiceAutomatically(gameId: string, playerId: string)
         let enterVp = 1;
         p.victoryPoints = Math.min(20, p.victoryPoints + enterVp);
         if (p.gameStats) p.gameStats.vpFromEnteringTokyo = (p.gameStats.vpFromEnteringTokyo || 0) + enterVp;
-        game.logs.push(`👑 ${p.name} entered Tokyo City! (+${enterVp} VP)`);
+        game.logs.push(`👑 ${p.name} entered Tokyo City! (+${enterVp} ⭐)`);
         game.highlightedStats.push({ playerId: p.id, stat: 'vp' });
         
         for (const b of getBehaviors(p)) {

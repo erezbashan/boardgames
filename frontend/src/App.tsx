@@ -7,6 +7,18 @@ import { CardRegistry, marketCards } from '@king-of-tokyo/shared';
 import './App.css';
 import { GameOverScreen } from './GameOverScreen';
 
+const PlayerStat = ({ statName, value, max, icon, isHighlighted, className }: any) => {
+  const prev = useRef(value);
+  const dir = useRef('');
+  useEffect(() => {
+    if (value > prev.current) dir.current = 'up';
+    else if (value < prev.current) dir.current = 'down';
+    prev.current = value;
+  }, [value]);
+  
+  const highlightClass = isHighlighted ? (dir.current === 'down' ? 'flash-down' : 'flash-up') : '';
+  return <span className={`stat ${className} ${highlightClass}`} style={className === 'health' ? { display: 'inline-block', minWidth: '75px' } : undefined}>{icon} {value}{max ? ` / ${max}` : ''}</span>;
+};
 
 const renderLogLine = (log: string, i: number, gameState: any, setSelectedCard: any) => {
   if (log.startsWith('TURN_START:')) {
@@ -545,9 +557,9 @@ function App() {
                   </div>
                 </div>
                 <div className="player-stats" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                  <span className={`stat health ${gameState.highlightedStats?.some(s => s.playerId === p.id && s.stat === 'health') ? 'flash' : ''}`} style={{ display: 'inline-block', minWidth: '75px' }}>❤️ {Math.max(0, p.health)} / {p.maxHealth || 10}</span>
-                  <span className={`stat vp ${gameState.highlightedStats?.some(s => s.playerId === p.id && s.stat === 'vp') ? 'flash' : ''}`}>⭐ {p.victoryPoints}</span>
-                  <span className={`stat energy ${gameState.highlightedStats?.some(s => s.playerId === p.id && s.stat === 'energy') ? 'flash' : ''}`}>⚡ {p.energy}</span>
+                  <PlayerStat className="health" icon="❤️" value={Math.max(0, p.health)} max={p.maxHealth || 10} isHighlighted={gameState.highlightedStats?.some(s => s.playerId === p.id && s.stat === 'health')} />
+                  <PlayerStat className="vp" icon="⭐" value={p.victoryPoints} isHighlighted={gameState.highlightedStats?.some(s => s.playerId === p.id && s.stat === 'vp')} />
+                  <PlayerStat className="energy" icon="⚡" value={p.energy} isHighlighted={gameState.highlightedStats?.some(s => s.playerId === p.id && s.stat === 'energy')} />
                 </div>
                 {p.cards && p.cards.length > 0 && (
                   <div className="player-cards" style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '8px' }}>
@@ -667,23 +679,14 @@ function App() {
         </div>
       )}
       
-      {showAllLogs && (
-        <div className="modal-overlay" onClick={() => setShowAllLogs(false)}>
-          <div className="modal-content log-modal" onClick={e => e.stopPropagation()}>
-            <h2>Full Game Log</h2>
-            <div className="log-messages full-log" style={{ overflowY: 'auto', flex: 1, marginTop: '10px' }}>
-              {gameState.logs.map((log, i) => renderLogLine(log, i, gameState, setSelectedCard))}
-            </div>
-            <button className="btn primary" onClick={() => setShowAllLogs(false)} style={{ marginTop: '15px' }}>Close</button>
-          </div>
-        </div>
-      )}
-
       {showFullChat && (
-        <div className="modal-overlay" onClick={() => setShowFullChat(false)}>
-          <div className="modal-content log-modal" onClick={e => e.stopPropagation()}>
-            <h2>Full Chat</h2>
-            <div className="log-messages full-log" style={{ overflowY: 'auto', flex: 1, marginTop: '10px' }}>
+        <div className="modal-overlay" onClick={() => setShowFullChat(false)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="glass-panel" onClick={e => e.stopPropagation()} style={{ width: '500px', height: '600px', cursor: 'default', padding: '24px', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h2 style={{ margin: 0 }}>Full Chat</h2>
+              <button className="btn secondary" onClick={() => setShowFullChat(false)} style={{ padding: '4px 8px', fontSize: '12px' }}>Close</button>
+            </div>
+            <div className="log-messages full-log" style={{ overflowY: 'auto', flex: 1, paddingRight: '10px' }}>
               {((gameState as any).chatMessages || []).map((msg: any, i: number) => {
                   const senderPlayer = Object.values(gameState.players).find(p => p.name === msg.sender);
                   const color = senderPlayer?.color || 'var(--primary)';
@@ -695,7 +698,6 @@ function App() {
               })}
               <div ref={chatBottomRef} />
             </div>
-            <button className="btn primary" onClick={() => setShowFullChat(false)} style={{ marginTop: '15px' }}>Close</button>
           </div>
         </div>
       )}
