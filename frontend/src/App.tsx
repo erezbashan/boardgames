@@ -77,26 +77,24 @@ const renderLogLine = (log: string, i: number, gameState: any, setSelectedCard: 
         const sortedPlayers = [...players].sort((a: any, b: any) => b.name.length - a.name.length);
         const sortedCards = [...marketCards].sort((a: any, b: any) => b.name.length - a.name.length);
         
-        const renderText = (logText: string): any[] => {
+        const renderText = (logText: string, logIndex: number): any[] => {
+          if (!logText) return [];
           let elements: any[] = [logText];
 
-          // Handle Energy and Dice numbers
-          const symbols: Record<string, any> = {
-            '⚡': <span key="energy" className="energy-icon">⚡</span>,
-            '1️⃣': <span key="d1" className="dice-number" style={{ color: '#00ff88' }}>1</span>,
-            '2️⃣': <span key="d2" className="dice-number" style={{ color: '#00ff88' }}>2</span>,
-            '3️⃣': <span key="d3" className="dice-number" style={{ color: '#00ff88' }}>3</span>,
-          };
-
-          for (const [sym, elNode] of Object.entries(symbols)) {
-            elements = elements.flatMap((el) => {
+          const symbols = ['⚡', '1️⃣', '2️⃣', '3️⃣'];
+          for (const sym of symbols) {
+            elements = elements.flatMap((el, idx1) => {
               if (typeof el !== 'string') return [el];
               const parts = el.split(sym);
-              return parts.flatMap((p, idx) => {
+              return parts.flatMap((p, idx2) => {
                 const res: any[] = [p];
-                if (idx < parts.length - 1) {
-                  // Clone element with unique key
-                  res.push({...elNode, key: `${i}-${idx}-${sym}`});
+                if (idx2 < parts.length - 1) {
+                  const key = `${logIndex}-${sym}-${idx1}-${idx2}`;
+                  if (sym === '⚡') {
+                    res.push(<span key={key} className="energy-icon">⚡</span>);
+                  } else {
+                    res.push(<span key={key} className="dice-number" style={{ color: '#00ff88' }}>{sym[0]}</span>);
+                  }
                 }
                 return res;
               });
@@ -107,10 +105,10 @@ const renderLogLine = (log: string, i: number, gameState: any, setSelectedCard: 
           for (const p of sortedPlayers as any[]) {
             if (p.name) {
               const regex = new RegExp(`(${p.name})`, 'g');
-              elements = elements.flatMap((el) => {
+              elements = elements.flatMap((el, idx1) => {
                 if (typeof el !== 'string') return [el];
-                return el.split(regex).map((part, idx) => {
-                  if (part === p.name) return <span key={i + idx + p.name} style={{ color: p.color || 'white', fontWeight: 'bold' }}>{p.name}</span>;
+                return el.split(regex).map((part, idx2) => {
+                  if (part === p.name) return <span key={`${logIndex}-p-${p.id}-${idx1}-${idx2}`} style={{ color: p.color || 'white', fontWeight: 'bold' }}>{p.name}</span>;
                   return part;
                 });
               });
@@ -121,13 +119,13 @@ const renderLogLine = (log: string, i: number, gameState: any, setSelectedCard: 
           for (const c of sortedCards as any[]) {
             if (c.name) {
               const regex = new RegExp(`(${c.name})`, 'g');
-              elements = elements.flatMap((el) => {
+              elements = elements.flatMap((el, idx1) => {
                 if (typeof el !== 'string') return [el];
-                return el.split(regex).map((part, idx) => {
+                return el.split(regex).map((part, idx2) => {
                   if (part === c.name) {
                     return (
                       <span 
-                        key={i + idx + c.name}
+                        key={`${logIndex}-c-${c.id}-${idx1}-${idx2}`}
                         onClick={() => setSelectedCard(c)} 
                         style={{ cursor: 'pointer', color: 'var(--primary)', textDecoration: 'underline', fontWeight: 'bold' }}
                       >
@@ -142,7 +140,7 @@ const renderLogLine = (log: string, i: number, gameState: any, setSelectedCard: 
           }
           return elements;
         };
-        return renderText(log);
+        return renderText(log, i);
       })()}
     </div>
   );
