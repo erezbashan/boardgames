@@ -91,6 +91,7 @@ export async function startTurn(gameId: string, playerId: string) {
   console.log(`[DEBUG] ${gameId}: startTurn for ${playerId}. rollsLeft is now 3.`);
   game.currentDice = [];
   game.pendingYields = [];
+  p.flags = {};
   game.logs.push(`TURN_START:${p.name}`);
   
   let animatedStart = false;
@@ -184,18 +185,77 @@ export async function endTurnAutomatically(gameId: string, playerId: string) {
   startTurn(gameId, nextId);
 }
 
+export async function answerPromptAction(gameId: string, playerId: string, promptId: string, answerValue: string) {
+  const game = await getGame(gameId);
+  if (!game) return;
+  const p = game.players[playerId];
+  if (!p) return;
+
+  if (!game.pendingPrompts) return;
+  const promptIdx = game.pendingPrompts.findIndex(p => p.promptId === promptId && p.playerId === playerId);
+  if (promptIdx === -1) return;
+
+  const prompt = game.pendingPrompts[promptIdx];
+  const chosenOption = prompt.options.find(o => o.value === answerValue);
+  game.logs.push(`🗣️ ${p.name} chose: ${chosenOption?.label || answerValue}`);
+
+  game.pendingPrompts.splice(promptIdx, 1);
+  if (game.pendingPrompts.length === 0) {
+    delete game.pendingPrompts;
+  }
+
+  const ctx = createEventContext(game, playerId);
+  const behaviors = getBehaviors(p);
+  const b = behaviors.find(b => b.id === prompt.cardId);
+
+  if (b && b.onPromptAnswer) {
+    const nextPrompt = b.onPromptAnswer(ctx, promptId, answerValue);
+    if (nextPrompt) {
+      game.logs.push(`❓ ${p.name} is deciding: "${nextPrompt.question}"`);
+      if (!game.pendingPrompts) game.pendingPrompts = [];
+      game.pendingPrompts.push({ ...nextPrompt, playerId, cardId: b.id, promptId: nextPrompt.id });
+      await saveGame(gameId, game);
+      return;
+    }
+  }
+
+  await saveGame(gameId, game);
+  if (!game.pendingPrompts || game.pendingPrompts.length === 0) {
+    resolveDiceAutomatically(gameId, playerId);
+  }
+}
+
 export async function resolveDiceAutomatically(gameId: string, playerId: string) {
   const game = await getGame(gameId);
   if (!game) return;
   
   
+  const p = game.players[playerId];
+
+  // Evaluate pre-resolution prompts
+  const resolveCtx = createEventContext(game, playerId);
+  for (const b of getBehaviors(p)) {
+    let currentPrompt = b?.onBeforeResolve ? b.onBeforeResolve(resolveCtx) : undefined;
+    while (currentPrompt) {
+      if (p.isBot) {
+         const randomOption = currentPrompt.options[Math.floor(Math.random() * currentPrompt.options.length)];
+         game.logs.push(`🤖 ${p.name} was asked: "${currentPrompt.question}" and chose: ${randomOption.label}`);
+         currentPrompt = b.onPromptAnswer ? b.onPromptAnswer(resolveCtx, currentPrompt.id, randomOption.value) : undefined;
+      } else {
+         game.logs.push(`❓ ${p.name} is deciding: "${currentPrompt.question}"`);
+         game.pendingPrompts = [{ ...currentPrompt, playerId, cardId: b.id, promptId: currentPrompt.id }];
+         await saveGame(gameId, game);
+         return; // Halt resolution until prompt is answered
+      }
+    }
+  }
+
   game.rollsLeft = 0;
   game.isAnimating = true;
   game.currentDice.forEach(d => d.kept = false);
   await saveGame(gameId, game);
   await delay(400); // Give UI time to clear locks before animating
 
-  const p = game.players[playerId];
   const faceMap: Record<string, string> = { '1': '1️⃣', '2': '2️⃣', '3': '3️⃣', 'Heart': '❤️', 'Lightning': '⚡', 'Claw': '💥' };
   const diceFaces = game.currentDice.map(d => faceMap[d.face]).join(' ');
   game.logs.push(`${p.name} resolved: ${diceFaces}`);

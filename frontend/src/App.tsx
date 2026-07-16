@@ -147,7 +147,7 @@ const renderLogLine = (log: string, i: number, gameState: any, setSelectedCard: 
 };
 
 function App() {
-  const { connected, gameState, playerId, createGame, joinGame, quitGame, returnToLobby, addBot, startGame, rollDice, keepDice, resolveDice, yieldTokyo, buyCard, sweepCards, endTurn, sendChat } = useSocket();
+  const { connected, gameState, playerId, createGame, joinGame, quitGame, returnToLobby, addBot, startGame, rollDice, keepDice, resolveDice, answerPrompt, yieldTokyo, buyCard, sweepCards, endTurn, sendChat } = useSocket();
   const [username, setUsername] = useState(localStorage.getItem('kot_username') || '');
   const [gameIdInput, setGameIdInput] = useState(() => {
     return new URLSearchParams(window.location.search).get('game') || '';
@@ -704,6 +704,28 @@ function App() {
             <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
               <button className="btn primary" style={{ animationDelay: `-${Date.now() % 1500}ms` }} onClick={() => yieldTokyo(gameState.id, true)}>Yield</button>
               <button className="btn secondary" onClick={() => yieldTokyo(gameState.id, false)}>Stay</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {playerId && gameState.pendingPrompts?.some(p => p.playerId === playerId) && (
+        <div style={{ position: 'fixed', top: '100px', left: '50%', transform: 'translateX(-50%)', zIndex: 1000, pointerEvents: 'none' }}>
+          <div className="glass-panel" style={{ textAlign: 'center', padding: '24px', pointerEvents: 'auto', border: '2px solid var(--primary)', boxShadow: '0 0 30px rgba(139, 92, 246, 0.4)' }}>
+            <h2 style={{ color: 'var(--primary)', marginTop: 0 }}>Decision Required!</h2>
+            <p style={{ fontSize: '18px', marginBottom: '24px' }}>
+              {gameState.pendingPrompts.find(p => p.playerId === playerId)?.question}
+            </p>
+            <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
+              {gameState.pendingPrompts.find(p => p.playerId === playerId)?.options.map(opt => (
+                <button 
+                  key={opt.value} 
+                  className={`btn ${opt.buttonClass || 'primary'}`} 
+                  onClick={() => answerPrompt(gameState.id, gameState.pendingPrompts!.find(p => p.playerId === playerId)!.promptId, opt.value)}
+                >
+                  {opt.label}
+                </button>
+              ))}
             </div>
           </div>
         </div>

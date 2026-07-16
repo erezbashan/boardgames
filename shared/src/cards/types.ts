@@ -7,6 +7,12 @@ export interface GameEventContext {
   highlight: (playerId: string, stat: string, dir?: 'up' | 'down') => void;
 }
 
+export interface PromptRequest {
+  id: string; // A unique ID so the card knows what the prompt is about
+  question: string;
+  options: { label: string, value: string, buttonClass?: string }[]; // e.g. "Yes", "No", primary/warning
+}
+
 export interface CardBehavior {
   id: string;
   onDetermineRolls?: (context: GameEventContext, rollsLeft: number) => number;
@@ -28,4 +34,8 @@ export interface CardBehavior {
   onBeforeGainEnergy?: (context: GameEventContext, energy: number) => number;
   onBeforeScoreVP?: (context: GameEventContext, vp: number) => number;
   onAttackResolved?: (context: GameEventContext, hitSomeone: boolean) => void;
+  
+  // Prompt Hooks
+  onBeforeResolve?: (context: GameEventContext) => PromptRequest | void;
+  onPromptAnswer?: (context: GameEventContext, promptId: string, answerValue: string) => PromptRequest | void;
 }

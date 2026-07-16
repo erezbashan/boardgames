@@ -18,6 +18,7 @@ interface FirebaseContextType {
   rollDice: (gameId: string) => void;
   keepDice: (gameId: string, diceIds: string[]) => void;
   resolveDice: (gameId: string) => void;
+  answerPrompt: (gameId: string, promptId: string, answerValue: string) => void;
   yieldTokyo: (gameId: string, yieldChoice: boolean) => void;
   buyCard: (gameId: string, cardId: string) => void;
   sweepCards: (gameId: string) => void;
@@ -118,6 +119,10 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
     yieldTokyo: async (gameId, yieldChoice) => {
       if (!playerId) return;
       await gameEngine.yieldTokyo(gameId, yieldChoice, playerId);
+    },
+    answerPrompt: async (gameId, promptId, answerValue) => {
+      if (!playerId) return;
+      await gameEngine.answerPromptAction(gameId, playerId, promptId, answerValue);
     },
 
     buyCard: async (gameId, cardId) => {

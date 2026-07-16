@@ -137,6 +137,7 @@ export interface GameState {
   pendingPrompts?: { playerId: string, cardId: string, promptId: string, question: string, options: { label: string, value: string, buttonClass?: string }[] }[];
   pendingWings?: PlayerId[]; // players asked if they want to spend 2 energy to ignore damage
   playerDecisions?: Record<PlayerId, { type: 'Yield' | 'Wings', choice: boolean }>;
+  flags?: Record<string, any>;
   logs: string[];
   chatMessages?: { sender: string, text: string }[];
   history?: TurnHistory[];
