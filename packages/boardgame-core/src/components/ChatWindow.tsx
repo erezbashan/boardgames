@@ -1,10 +1,6 @@
 import React, { useState } from 'react';
 import { Modal } from './Modal';
-
-export interface ChatMessage {
-  sender: string;
-  text: string;
-}
+import type { ChatMessage } from '../engine/types';
 
 export interface ChatWindowProps {
   messages: ChatMessage[];

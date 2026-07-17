@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import type { FlipsState, FlipsAction } from '../engine/reducer';
 import type { BasePlayer } from '@erez/boardgame-core';
-import { GameLayout, ChatWindow, GameLog } from '@erez/boardgame-core';
+import { GameLayout, GameLog, BOT_NAMES } from '@erez/boardgame-core';
 
 interface FlipsBoardProps {
   gameState: FlipsState;
@@ -10,22 +10,12 @@ interface FlipsBoardProps {
   onLeaveGame: () => void;
 }
 
-const BOT_NAMES = ["Alice", "Bob", "Charlie", "David", "Eve"];
-const OTHER_COLORS = ['#3b82f6', '#ef4444', '#eab308', '#a855f7', '#ec4899', '#f97316'];
-
 export const FlipsBoard: React.FC<FlipsBoardProps> = ({ gameState, myPlayerId, dispatch, onLeaveGame }) => {
-  const { status, targetScore, players, playerOrder, currentPlayerIndex, winnerId, lastFlipResult } = gameState;
+  const { status, targetScore, players, playerOrder, currentPlayerIndex, winnerId, lastFlipResult, chatMessages } = gameState;
   const [logs, setLogs] = useState<React.ReactNode[]>([]);
-  const [chatMessages, setChatMessages] = useState<{sender: string, text: string, color?: string}[]>([]);
 
   // Base players for framework
-  const basePlayers: BasePlayer[] = playerOrder.map((id, index) => ({
-    id,
-    name: players[id].name,
-    color: id === myPlayerId ? '#4ade80' : OTHER_COLORS[index % OTHER_COLORS.length], // Avoid collision with green
-    isBot: players[id].isBot,
-    isWinner: winnerId === id
-  }));
+  const basePlayers: BasePlayer[] = playerOrder.map((id) => players[id]);
 
   const currentPlayerId = playerOrder[currentPlayerIndex];
   const isMyTurn = currentPlayerId === myPlayerId;
@@ -35,11 +25,10 @@ export const FlipsBoard: React.FC<FlipsBoardProps> = ({ gameState, myPlayerId, d
   useEffect(() => {
     if (lastFlipResult) {
       const p = players[lastFlipResult.playerId];
-      const pColor = basePlayers.find(bp => bp.id === lastFlipResult.playerId)?.color;
       const resultText = lastFlipResult.isHeads ? 'Heads (+1)' : 'Tails';
       setLogs(prev => [
         ...prev, 
-        <span key={prev.length}><strong style={{color: pColor}}>{p.name}</strong> flipped {resultText}</span>, 
+        <span key={prev.length}><strong style={{color: p.color}}>{p.name}</strong> flipped {resultText}</span>, 
         '---'
       ]);
     }
@@ -65,8 +54,7 @@ export const FlipsBoard: React.FC<FlipsBoardProps> = ({ gameState, myPlayerId, d
           const chatTimer = setTimeout(() => {
             const msgs = ["I'm feeling lucky!", "Tails never fails...", "Beep boop, calculating flip...", "You humans stand no chance!"];
             const msg = msgs[Math.floor(Math.random() * msgs.length)];
-            const pColor = basePlayers.find(bp => bp.id === currentPlayerId)?.color;
-            setChatMessages(prev => [...prev, { sender: currentPlayer.name, text: msg, color: pColor }]);
+            dispatch({ type: 'SEND_CHAT_MESSAGE', payload: { sender: currentPlayer.name, text: msg, color: currentPlayer.color } });
           }, 800);
           return () => { clearTimeout(timer); clearTimeout(chatTimer); }
         }
@@ -74,9 +62,9 @@ export const FlipsBoard: React.FC<FlipsBoardProps> = ({ gameState, myPlayerId, d
         return () => clearTimeout(timer);
       }
     }
-  }, [status, currentPlayerId, players, dispatch, chatMessages, isHost]);
+  }, [status, currentPlayerId, players, dispatch, chatMessages, isHost, myPlayerId]);
 
-  const handleStart = () => dispatch({ type: 'START_GAME', payload: { targetScore } });
+  const handleStart = () => dispatch({ type: 'START_GAME' });
   const handleAddBot = () => {
     const botId = 'bot-' + Math.random().toString(36).substring(2, 6);
     const botName = BOT_NAMES[Math.floor(Math.random() * BOT_NAMES.length)];
@@ -115,7 +103,7 @@ export const FlipsBoard: React.FC<FlipsBoardProps> = ({ gameState, myPlayerId, d
 
       {lastFlipResult && (
         <div style={{ marginBottom: '40px', fontSize: '24px', textAlign: 'center', background: 'rgba(0,0,0,0.2)', padding: '20px', borderRadius: '12px' }}>
-          <strong style={{ color: basePlayers.find(p => p.id === lastFlipResult.playerId)?.color }}>
+          <strong style={{ color: players[lastFlipResult.playerId]?.color }}>
             {players[lastFlipResult.playerId].name}
           </strong> flipped a coin and got: 
           <div style={{ 
@@ -185,10 +173,9 @@ export const FlipsBoard: React.FC<FlipsBoardProps> = ({ gameState, myPlayerId, d
             <tbody>
               {sortedPlayers.map((id, index) => {
                 const p = players[id];
-                const pColor = basePlayers.find(bp => bp.id === id)?.color;
                 return (
                   <tr key={id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                    <td style={{ padding: '10px', color: pColor, fontWeight: 'bold' }}>
+                    <td style={{ padding: '10px', color: p.color, fontWeight: 'bold' }}>
                       {index === 0 && '🏆 '} {p.name}
                     </td>
                     <td style={{ padding: '10px', fontSize: '1.2em', fontWeight: 'bold' }}>{p.score}</td>
@@ -212,7 +199,7 @@ export const FlipsBoard: React.FC<FlipsBoardProps> = ({ gameState, myPlayerId, d
               
               {playerOrder.map(id => {
                 const p = players[id];
-                const color = basePlayers.find(bp => bp.id === id)?.color || 'white';
+                const color = p.color || 'white';
                 
                 // Construct polyline points using absolute pixels
                 const points = p.pointsHistory.map((pts, idx) => {
@@ -240,8 +227,7 @@ export const FlipsBoard: React.FC<FlipsBoardProps> = ({ gameState, myPlayerId, d
   };
 
   const handleSendMessage = (msg: string) => {
-    const pColor = basePlayers.find(bp => bp.id === myPlayerId)?.color;
-    setChatMessages(prev => [...prev, { sender: players[myPlayerId]?.name || 'You', text: msg, color: pColor }]);
+    dispatch({ type: 'SEND_CHAT_MESSAGE', payload: { sender: players[myPlayerId]?.name || 'You', text: msg, color: players[myPlayerId]?.color } });
   };
 
   return (
@@ -250,6 +236,8 @@ export const FlipsBoard: React.FC<FlipsBoardProps> = ({ gameState, myPlayerId, d
       status={status}
       players={basePlayers}
       currentPlayerId={currentPlayerId}
+      chatMessages={chatMessages}
+      onSendMessage={handleSendMessage}
       onStartGame={status === 'Lobby' ? handleStart : undefined}
       onAddBot={status === 'Lobby' ? handleAddBot : undefined}
       onNewGame={() => onLeaveGame()} // Navigate back to lobby to reset
@@ -258,7 +246,6 @@ export const FlipsBoard: React.FC<FlipsBoardProps> = ({ gameState, myPlayerId, d
       renderSettings={renderSettings}
       renderGraphics={renderGraphics}
       renderPlayerDetails={renderPlayerDetails}
-      renderChat={() => <ChatWindow messages={chatMessages} onSendMessage={handleSendMessage} />}
       renderLog={() => <GameLog logs={logs} />}
       renderStats={renderStats}
     />

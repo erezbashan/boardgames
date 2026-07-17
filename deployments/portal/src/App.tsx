@@ -1,6 +1,7 @@
 import { Routes, Route, useNavigate, useParams, useLocation } from 'react-router-dom';
 import { Lobby } from '@erez/boardgame-core';
 import { FlipsBoard } from '@erez/flips';
+import type { FlipsState, FlipsAction } from '@erez/flips';
 import { useMultiplayerGame } from './hooks/useMultiplayerGame';
 
 function GameSelector() {
@@ -60,7 +61,7 @@ function GameLobbyWrapper() {
 }
 
 function ActiveFlipsGame({ gameId, username }: { gameId: string, username: string }) {
-  const { gameState, myPlayerId, dispatchToBackend, error } = useMultiplayerGame(gameId, 'flips', username);
+  const { gameState, myPlayerId, dispatchToBackend, error } = useMultiplayerGame<FlipsState, FlipsAction>(gameId, 'flips', username);
   const navigate = useNavigate();
 
   if (error) {

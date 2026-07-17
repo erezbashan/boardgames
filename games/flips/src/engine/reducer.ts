@@ -1,83 +1,108 @@
+import type { BaseGameState, BaseAction } from '@erez/boardgame-core';
+import { baseReducer } from '@erez/boardgame-core';
+
 export interface FlipsPlayer {
   id: string;
   name: string;
   isBot: boolean;
+  color?: string;
   score: number;
   headsCount: number;
   tailsCount: number;
   pointsHistory: number[];
 }
 
-export interface FlipsState {
-  status: 'Lobby' | 'Playing' | 'Finished';
+export interface FlipsState extends BaseGameState {
   targetScore: number;
-  players: Record<string, FlipsPlayer>;
-  playerOrder: string[];
   currentPlayerIndex: number;
-  winnerId: string | null;
+  players: Record<string, FlipsPlayer>;
   lastFlipResult: { playerId: string, isHeads: boolean } | null;
 }
 
 export type FlipsAction = 
-  | { type: 'JOIN_GAME', payload: { playerId: string, name: string, isBot: boolean } }
-  | { type: 'START_GAME', payload: { targetScore: number } }
-  | { type: 'SET_TARGET_SCORE', payload: { targetScore: number } }
+  | BaseAction
   | { type: 'FLIP_COIN', payload: { playerId: string, isHeads: boolean } }
-  | { type: 'NEW_GAME' }
+  | { type: 'SET_TARGET_SCORE', payload: { targetScore: number } };
+
+export const initialFlipsState: FlipsState = {
+  status: 'Lobby',
+  players: {},
+  playerOrder: [],
+  winnerId: null,
+  chatMessages: [],
+  targetScore: 3,
+  currentPlayerIndex: 0,
+  lastFlipResult: null
+};
 
 export function flipsReducer(state: FlipsState, action: FlipsAction): FlipsState {
-  switch (action.type) {
-    case 'JOIN_GAME': {
-      if (state.status !== 'Lobby') return state;
-      if (state.players[action.payload.playerId]) return state; // Already joined
-      return {
-        ...state,
-        players: {
-          ...state.players,
-          [action.payload.playerId]: {
-            id: action.payload.playerId,
-            name: action.payload.name,
-            isBot: action.payload.isBot,
-            score: 0,
-            headsCount: 0,
-            tailsCount: 0,
-            pointsHistory: [0]
+  // Pass to base reducer first to handle JOIN_GAME, START_GAME, NEW_GAME, SEND_CHAT_MESSAGE
+  let newState = baseReducer(state, action) as FlipsState;
+  
+  if (newState !== state) {
+    // If a new player joined, we need to initialize their Flips-specific fields
+    if (action.type === 'JOIN_GAME') {
+      const playerId = action.payload.playerId;
+      const basePlayer = newState.players[playerId];
+      if (basePlayer && !('score' in basePlayer)) {
+        newState = {
+          ...newState,
+          players: {
+            ...newState.players,
+            [playerId]: {
+              ...(basePlayer as any),
+              score: 0,
+              headsCount: 0,
+              tailsCount: 0,
+              pointsHistory: [0]
+            }
           }
-        },
-        playerOrder: [...state.playerOrder, action.payload.playerId]
-      };
+        };
+      }
     }
     
-    case 'START_GAME': {
-      if (state.status !== 'Lobby' || state.playerOrder.length === 0) return state;
-      return {
-        ...state,
-        status: 'Playing',
-        targetScore: action.payload.targetScore,
-        currentPlayerIndex: 0
-      };
+    // If game started, init currentPlayerIndex
+    if (action.type === 'START_GAME') {
+      newState = { ...newState, currentPlayerIndex: 0, lastFlipResult: null };
+    }
+    
+    // If new game, reset player points
+    if (action.type === 'NEW_GAME') {
+      const resetPlayers: Record<string, FlipsPlayer> = {};
+      Object.keys(newState.players).forEach(pId => {
+        resetPlayers[pId] = { 
+          ...newState.players[pId], 
+          score: 0, 
+          headsCount: 0, 
+          tailsCount: 0, 
+          pointsHistory: [0] 
+        } as FlipsPlayer;
+      });
+      newState = { ...newState, currentPlayerIndex: 0, lastFlipResult: null, players: resetPlayers };
     }
 
+    return newState;
+  }
+
+  // Handle Flips-specific actions
+  switch (action.type) {
     case 'SET_TARGET_SCORE': {
       if (state.status !== 'Lobby') return state;
-      return {
-        ...state,
-        targetScore: action.payload.targetScore
-      };
+      return { ...state, targetScore: action.payload.targetScore };
     }
-    
     case 'FLIP_COIN': {
       if (state.status !== 'Playing') return state;
       if (state.playerOrder[state.currentPlayerIndex] !== action.payload.playerId) return state;
 
       const player = state.players[action.payload.playerId];
-      const newScore = player.score + (action.payload.isHeads ? 1 : 0);
+      const isHeads = action.payload.isHeads;
+      const newScore = player.score + (isHeads ? 1 : 0);
       
       const newPlayerState = {
         ...player,
         score: newScore,
-        headsCount: player.headsCount + (action.payload.isHeads ? 1 : 0),
-        tailsCount: player.tailsCount + (action.payload.isHeads ? 0 : 1),
+        headsCount: player.headsCount + (isHeads ? 1 : 0),
+        tailsCount: player.tailsCount + (isHeads ? 0 : 1),
         pointsHistory: [...player.pointsHistory, newScore]
       };
 
@@ -93,52 +118,24 @@ export function flipsReducer(state: FlipsState, action: FlipsAction): FlipsState
       }
 
       const hasWon = newScore >= state.targetScore;
+      let newStatus = state.status;
+      let newWinnerId = state.winnerId;
+
+      if (hasWon) {
+        newStatus = 'Finished' as any;
+        newWinnerId = action.payload.playerId;
+      }
 
       return {
         ...state,
         players: updatedPlayers,
+        status: newStatus,
+        winnerId: newWinnerId,
         currentPlayerIndex: (state.currentPlayerIndex + 1) % state.playerOrder.length,
-        status: hasWon ? 'Finished' : 'Playing',
-        winnerId: hasWon ? action.payload.playerId : null,
-        lastFlipResult: {
-          playerId: action.payload.playerId,
-          isHeads: action.payload.isHeads
-        }
+        lastFlipResult: { playerId: action.payload.playerId, isHeads }
       };
     }
-
-    case 'NEW_GAME': {
-      const resetPlayers: Record<string, FlipsPlayer> = {};
-      for (const pId of state.playerOrder) {
-        resetPlayers[pId] = {
-          ...state.players[pId],
-          score: 0,
-          headsCount: 0,
-          tailsCount: 0,
-          pointsHistory: [0]
-        };
-      }
-      return {
-        ...state,
-        status: 'Lobby',
-        players: resetPlayers,
-        currentPlayerIndex: 0,
-        winnerId: null,
-        lastFlipResult: null
-      };
-    }
-    
     default:
       return state;
   }
 }
-
-export const initialFlipsState: FlipsState = {
-  status: 'Lobby',
-  targetScore: 5,
-  players: {},
-  playerOrder: [],
-  currentPlayerIndex: 0,
-  winnerId: null,
-  lastFlipResult: null
-};

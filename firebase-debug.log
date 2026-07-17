@@ -1,0 +1,497 @@
+[debug] [2026-07-17T13:42:25.779Z] ----------------------------------------------------------------------
+[debug] [2026-07-17T13:42:25.780Z] Command:       /Users/erezbashan/.nvm/versions/node/v24.13.0/bin/node /Users/erezbashan/.nvm/versions/node/v24.13.0/bin/firebase emulators:start --project demo-project
+[debug] [2026-07-17T13:42:25.780Z] CLI Version:   15.3.1
+[debug] [2026-07-17T13:42:25.780Z] Platform:      darwin
+[debug] [2026-07-17T13:42:25.780Z] Node Version:  v24.13.0
+[debug] [2026-07-17T13:42:25.780Z] Time:          Fri Jul 17 2026 16:42:25 GMT+0300 (Israel Daylight Time)
+[debug] [2026-07-17T13:42:25.781Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-07-17T13:42:26.430Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-17T13:42:26.430Z] > authorizing via signed-in user (erez.bashan@gmail.com)
+[debug] [2026-07-17T13:42:26.822Z] openjdk version "21.0.11" 2026-04-21
+
+[debug] [2026-07-17T13:42:26.822Z] OpenJDK Runtime Environment Homebrew (build 21.0.11)
+OpenJDK 64-Bit Server VM Homebrew (build 21.0.11, mixed mode, sharing)
+
+[debug] [2026-07-17T13:42:26.824Z] Parsed Java major version: 21
+[info] i  emulators: Starting emulators: auth, functions, firestore, hosting, extensions {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: auth, functions, firestore, hosting, extensions"}}
+[info] i  emulators: Detected demo project ID "demo-project", emulated services will use a demo configuration and attempts to access non-emulated services for this project will fail. {"metadata":{"emulator":{"name":"hub"},"message":"Detected demo project ID \"demo-project\", emulated services will use a demo configuration and attempts to access non-emulated services for this project will fail."}}
+[debug] [2026-07-17T13:42:27.470Z] [logging] Logging Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-07-17T13:42:27.470Z] [auth] Authentication Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-07-17T13:42:27.470Z] [firestore] Firestore Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-07-17T13:42:27.470Z] [firestore.websocket] websocket server for firestore only supports listening on one address (127.0.0.1). Not listening on ::1
+[warn] ⚠  hosting: Hosting Emulator unable to start on port 5000, starting on 5002 instead. {"metadata":{"emulator":{"name":"hosting"},"message":"Hosting Emulator unable to start on port 5000, starting on 5002 instead."}}
+[debug] [2026-07-17T13:42:27.470Z] [hosting] Hosting Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-07-17T13:42:27.470Z] assigned listening specs for emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000},{"address":"::1","family":"IPv6","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}],"firestore":[{"address":"127.0.0.1","family":"IPv4","port":8080}],"firestore.websocket":[{"address":"127.0.0.1","family":"IPv4","port":9150}],"hosting":[{"address":"127.0.0.1","family":"IPv4","port":5002}]},"metadata":{"message":"assigned listening specs for emulators"}}
+[debug] [2026-07-17T13:42:27.472Z] Write emulator hub locator at /var/folders/yn/mvs6rcp16xnbljhpbjq8b36h0000gn/T/hub-demo-project.json
+[debug] [2026-07-17T13:42:27.474Z] [Extensions] Started Extensions emulator, this is a noop.
+[debug] [2026-07-17T13:42:27.687Z] [functions] Functions Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-07-17T13:42:27.687Z] [eventarc] Eventarc Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-07-17T13:42:27.687Z] [tasks] Cloud Tasks Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-07-17T13:42:27.687Z] late-assigned ports for functions and eventarc emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000},{"address":"::1","family":"IPv6","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}],"firestore":[{"address":"127.0.0.1","family":"IPv4","port":8080}],"firestore.websocket":[{"address":"127.0.0.1","family":"IPv4","port":9150}],"hosting":[{"address":"127.0.0.1","family":"IPv4","port":5002}],"functions":[{"address":"127.0.0.1","family":"IPv4","port":5001}],"eventarc":[{"address":"127.0.0.1","family":"IPv4","port":9299}],"tasks":[{"address":"127.0.0.1","family":"IPv4","port":9499}]},"metadata":{"message":"late-assigned ports for functions and eventarc emulators"}}
+[warn] ⚠  functions: Application Default Credentials detected. Non-emulated services will access production using these credentials. Be careful! {"metadata":{"emulator":{"name":"functions"},"message":"Application Default Credentials detected. Non-emulated services will access production using these credentials. Be careful!"}}
+[info] i  firestore: downloading cloud-firestore-emulator-v1.20.2.jar... {"metadata":{"emulator":{"name":"firestore"},"message":"downloading cloud-firestore-emulator-v1.20.2.jar..."}}
+[debug] [2026-07-17T13:42:29.979Z] >>> [apiv2][query] GET https://storage.googleapis.com/firebase-preview-drop/emulator/cloud-firestore-emulator-v1.20.2.jar 
+[debug] [2026-07-17T13:42:30.322Z] <<< [apiv2][status] GET https://storage.googleapis.com/firebase-preview-drop/emulator/cloud-firestore-emulator-v1.20.2.jar 200
+[debug] [2026-07-17T13:42:30.322Z] <<< [apiv2][body] GET https://storage.googleapis.com/firebase-preview-drop/emulator/cloud-firestore-emulator-v1.20.2.jar [stream]
+[info] i  firestore: Removing outdated emulator files: cloud-firestore-emulator-v1.21.0.jar {"metadata":{"emulator":{"name":"firestore"},"message":"Removing outdated emulator files: cloud-firestore-emulator-v1.21.0.jar"}}
+[debug] [2026-07-17T13:42:35.996Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2026-07-17T13:42:35.996Z] Ignoring unsupported arg: single_project_mode_error {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: single_project_mode_error"}}
+[debug] [2026-07-17T13:42:35.996Z] Starting Firestore Emulator with command {"binary":"java","args":["-Dgoogle.cloud_firestore.debug_log_level=FINE","-Duser.language=en","-jar","/Users/erezbashan/.cache/firebase/emulators/cloud-firestore-emulator-v1.20.2.jar","--host","127.0.0.1","--port",8080,"--websocket_port",9150,"--project_id","demo-project","--rules","/Users/erezbashan/workspace/king-of-tokyo/firestore.rules","--single_project_mode",true,"--functions_emulator","127.0.0.1:5001"],"optionalArgs":["port","webchannel_port","host","rules","websocket_port","functions_emulator","seed_from_export","project_id","single_project_mode"],"joinArgs":false,"shell":false,"port":8080} {"metadata":{"emulator":{"name":"firestore"},"message":"Starting Firestore Emulator with command {\"binary\":\"java\",\"args\":[\"-Dgoogle.cloud_firestore.debug_log_level=FINE\",\"-Duser.language=en\",\"-jar\",\"/Users/erezbashan/.cache/firebase/emulators/cloud-firestore-emulator-v1.20.2.jar\",\"--host\",\"127.0.0.1\",\"--port\",8080,\"--websocket_port\",9150,\"--project_id\",\"demo-project\",\"--rules\",\"/Users/erezbashan/workspace/king-of-tokyo/firestore.rules\",\"--single_project_mode\",true,\"--functions_emulator\",\"127.0.0.1:5001\"],\"optionalArgs\":[\"port\",\"webchannel_port\",\"host\",\"rules\",\"websocket_port\",\"functions_emulator\",\"seed_from_export\",\"project_id\",\"single_project_mode\"],\"joinArgs\":false,\"shell\":false,\"port\":8080}"}}
+[info] i  firestore: Firestore Emulator logging to firestore-debug.log {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator logging to firestore-debug.log"}}
+[debug] [2026-07-17T13:42:36.725Z] Jul 17, 2026 4:42:36 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketServer start
+INFO: Started WebSocket server on ws://127.0.0.1:9150
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Jul 17, 2026 4:42:36 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketServer start\nINFO: Started WebSocket server on ws://127.0.0.1:9150\n"}}
+[debug] [2026-07-17T13:42:36.736Z] API endpoint: http:// {"metadata":{"emulator":{"name":"firestore"},"message":"API endpoint: http://"}}
+[debug] [2026-07-17T13:42:36.736Z] 127.0.0.1:8080
+If you are using a library that supports the FIRESTORE_EMULATOR_HOST environment variable, run:
+
+   export FIRESTORE_EMULATOR_HOST=127.0.0.1:8080
+
+If you are running a Firestore in Datastore Mode project, run:
+
+   export DATASTORE_EMULATOR_HOST=127.0.0.1:8080
+
+Note: Support for Datastore Mode is in preview. If you encounter any bugs please file at https://github.com/firebase/firebase-tools/issues.
+Dev App Server is now running.
+
+ {"metadata":{"emulator":{"name":"firestore"},"message":"127.0.0.1:8080\nIf you are using a library that supports the FIRESTORE_EMULATOR_HOST environment variable, run:\n\n   export FIRESTORE_EMULATOR_HOST=127.0.0.1:8080\n\nIf you are running a Firestore in Datastore Mode project, run:\n\n   export DATASTORE_EMULATOR_HOST=127.0.0.1:8080\n\nNote: Support for Datastore Mode is in preview. If you encounter any bugs please file at https://github.com/firebase/firebase-tools/issues.\nDev App Server is now running.\n\n"}}
+[info] ✔  firestore: Firestore Emulator UI websocket is running on 9150. {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator UI websocket is running on 9150."}}
+[debug] [2026-07-17T13:42:40.192Z] Checked if tokens are valid: false, expires at: 1784283852072
+[debug] [2026-07-17T13:42:40.192Z] Checked if tokens are valid: false, expires at: 1784283852072
+[debug] [2026-07-17T13:42:40.192Z] > refreshing access token with scopes: []
+[debug] [2026-07-17T13:42:40.193Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-17T13:42:40.193Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-17T13:42:40.383Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-17T13:42:40.383Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-17T13:42:40.420Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/demo-project [none]
+[debug] [2026-07-17T13:42:40.880Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/demo-project 403
+[debug] [2026-07-17T13:42:40.881Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/demo-project {"error":{"code":403,"message":"The caller does not have permission","status":"PERMISSION_DENIED"}}
+[debug] [2026-07-17T13:42:40.881Z] Request to https://firebase.googleapis.com/v1beta1/projects/demo-project had HTTP Error: 403, The caller does not have permission
+[info] i  hosting[demo-project]: Serving hosting files from: deployments/portal/dist {"metadata":{"emulator":{"name":"hosting"},"message":"Serving hosting files from: deployments/portal/dist"}}
+[info] ✔  hosting[demo-project]: Local server: http://127.0.0.1:5002 {"metadata":{"emulator":{"name":"hosting"},"message":"Local server: http://127.0.0.1:5002"}}
+[debug] [2026-07-17T13:42:40.937Z] [Extensions] Connecting Extensions emulator, this is a noop.
+[info] i  functions: Watching "/Users/erezbashan/workspace/king-of-tokyo/deployments/backend" for Cloud Functions... {"metadata":{"emulator":{"name":"functions"},"message":"Watching \"/Users/erezbashan/workspace/king-of-tokyo/deployments/backend\" for Cloud Functions..."}}
+[debug] [2026-07-17T13:42:40.938Z] Validating nodejs source
+[warn] ⚠  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[warn] ⚠  functions: Please note that there will be breaking changes when you upgrade. 
+[debug] [2026-07-17T13:42:41.600Z] > [functions] package.json contents: {
+  "name": "backend",
+  "private": true,
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "shell": "npm run build && firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "20"
+  },
+  "dependencies": {
+    "@erez/flips": "*",
+    "firebase-admin": "^13.0.0",
+    "firebase-functions": "^6.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
+[debug] [2026-07-17T13:42:41.600Z] Building nodejs source
+[debug] [2026-07-17T13:42:41.600Z] Failed to find version of module node: reached end of search path /Users/erezbashan/workspace/king-of-tokyo/deployments/backend/node_modules
+[warn] ⚠  functions: Your requested "node" version "20" doesn't match your global version "24". Using node@24 from host. 
+[debug] [2026-07-17T13:42:41.601Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-07-17T13:42:41.604Z] Found firebase-functions binary at '/Users/erezbashan/workspace/king-of-tokyo/node_modules/.bin/firebase-functions'
+[info] Serving at port 8159
+
+[error] Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/Users/erezbashan/workspace/king-of-tokyo/games/flips/src/engine/reducer' imported from /Users/erezbashan/workspace/king-of-tokyo/games/flips/src/index.ts
+    at finalizeResolution (node:internal/modules/esm/resolve:274:11)
+    at moduleResolve (node:internal/modules/esm/resolve:864:10)
+    at defaultResolve (node:internal/modules/esm/resolve:990:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:718:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:735:38)
+    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:764:52)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:617:27)
+    at ModuleJobSync.syncLink (node:internal/modules/esm/module_job:143:33)
+    at ModuleJobSync.link (node:internal/modules/esm/module_job:463:17)
+    at new ModuleJobSync (node:internal/modules/esm/module_job:453:26) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file:///Users/erezbashan/workspace/king-of-tokyo/games/flips/src/engine/reducer'
+}
+
+[debug] [2026-07-17T13:42:42.145Z] Got response code 400; body Failed to generate manifest from function source: Cannot find module '/Users/erezbashan/workspace/king-of-tokyo/games/flips/src/engine/reducer' imported from /Users/erezbashan/workspace/king-of-tokyo/games/flips/src/index.ts
+[error] ⬢  functions: Failed to load function definition from source: FirebaseError: Functions codebase could not be analyzed successfully. It may have a syntax or runtime error {"metadata":{"emulator":{"name":"functions"},"message":"Failed to load function definition from source: FirebaseError: Functions codebase could not be analyzed successfully. It may have a syntax or runtime error"}}
+[debug] [2026-07-17T13:42:46.155Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: . If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
+[info] 
+┌─────────────────────────────────────────────────────────────┐
+│ ✔  All emulators ready! It is now safe to connect your app. │
+│ i  View Emulator UI at http://127.0.0.1:4000/               │
+└─────────────────────────────────────────────────────────────┘
+
+┌────────────────┬────────────────┬──────────────────────────────────┐
+│ Emulator       │ Host:Port      │ View in Emulator UI              │
+├────────────────┼────────────────┼──────────────────────────────────┤
+│ Authentication │ 127.0.0.1:9099 │ http://127.0.0.1:4000/auth       │
+├────────────────┼────────────────┼──────────────────────────────────┤
+│ Functions      │ 127.0.0.1:5001 │ http://127.0.0.1:4000/functions  │
+├────────────────┼────────────────┼──────────────────────────────────┤
+│ Firestore      │ 127.0.0.1:8080 │ http://127.0.0.1:4000/firestore  │
+├────────────────┼────────────────┼──────────────────────────────────┤
+│ Hosting        │ 127.0.0.1:5002 │ n/a                              │
+├────────────────┼────────────────┼──────────────────────────────────┤
+│ Extensions     │ 127.0.0.1:5001 │ http://127.0.0.1:4000/extensions │
+└────────────────┴────────────────┴──────────────────────────────────┘
+  Emulator Hub host: 127.0.0.1 port: 4400
+  Other reserved ports: 4500, 9150
+┌─────────────────────────┬───────────────┬─────────────────────┐
+│ Extension Instance Name │ Extension Ref │ View in Emulator UI │
+└─────────────────────────┴───────────────┴─────────────────────┘
+Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
+ 
+[debug] [2026-07-17T13:43:57.372Z] Jul 17, 2026 4:43:57 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Jul 17, 2026 4:43:57 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}
+[debug] [2026-07-17T13:43:57.448Z] Multiple projectIds are not recommended in single project mode. Requested project ID acquire-game-1782999027, but the emulator is configured for demo-project. To opt-out of single project mode add/set the '"singleProjectMode": false' property in the firebase.json emulators config.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Multiple projectIds are not recommended in single project mode. Requested project ID acquire-game-1782999027, but the emulator is configured for demo-project. To opt-out of single project mode add/set the '\"singleProjectMode\": false' property in the firebase.json emulators config.\n"}}
+[debug] [2026-07-17T13:43:58.006Z] Jul 17, 2026 4:43:58 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Jul 17, 2026 4:43:58 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}
+[debug] [2026-07-17T13:44:58.036Z] Jul 17, 2026 4:44:58 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Jul 17, 2026 4:44:58 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}
+[debug] [2026-07-17T13:45:36.841Z] File /Users/erezbashan/workspace/king-of-tokyo/deployments/backend/lib/index.js.map changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File /Users/erezbashan/workspace/king-of-tokyo/deployments/backend/lib/index.js.map changed, reloading triggers"}}
+[debug] [2026-07-17T13:45:36.842Z] File /Users/erezbashan/workspace/king-of-tokyo/deployments/backend/lib/index.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File /Users/erezbashan/workspace/king-of-tokyo/deployments/backend/lib/index.js changed, reloading triggers"}}
+[debug] [2026-07-17T13:45:37.844Z] Validating nodejs source
+[warn] ⚠  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[warn] ⚠  functions: Please note that there will be breaking changes when you upgrade. 
+[debug] [2026-07-17T13:45:38.332Z] > [functions] package.json contents: {
+  "name": "backend",
+  "private": true,
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "shell": "npm run build && firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "20"
+  },
+  "dependencies": {
+    "@erez/flips": "*",
+    "firebase-admin": "^13.0.0",
+    "firebase-functions": "^6.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
+[debug] [2026-07-17T13:45:38.332Z] Building nodejs source
+[debug] [2026-07-17T13:45:38.332Z] Failed to find version of module node: reached end of search path /Users/erezbashan/workspace/king-of-tokyo/deployments/backend/node_modules
+[warn] ⚠  functions: Your requested "node" version "20" doesn't match your global version "24". Using node@24 from host. 
+[debug] [2026-07-17T13:45:38.333Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-07-17T13:45:38.334Z] Found firebase-functions binary at '/Users/erezbashan/workspace/king-of-tokyo/node_modules/.bin/firebase-functions'
+[info] Serving at port 8175
+
+[error] Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/Users/erezbashan/workspace/king-of-tokyo/games/flips/src/engine/reducer' imported from /Users/erezbashan/workspace/king-of-tokyo/games/flips/src/index.ts
+    at finalizeResolution (node:internal/modules/esm/resolve:274:11)
+    at moduleResolve (node:internal/modules/esm/resolve:864:10)
+    at defaultResolve (node:internal/modules/esm/resolve:990:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:718:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:735:38)
+    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:764:52)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:617:27)
+    at ModuleJobSync.syncLink (node:internal/modules/esm/module_job:143:33)
+    at ModuleJobSync.link (node:internal/modules/esm/module_job:463:17)
+    at new ModuleJobSync (node:internal/modules/esm/module_job:453:26) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file:///Users/erezbashan/workspace/king-of-tokyo/games/flips/src/engine/reducer'
+}
+
+[debug] [2026-07-17T13:45:38.630Z] Got response code 400; body Failed to generate manifest from function source: Cannot find module '/Users/erezbashan/workspace/king-of-tokyo/games/flips/src/engine/reducer' imported from /Users/erezbashan/workspace/king-of-tokyo/games/flips/src/index.ts
+[error] ⬢  functions: Failed to load function definition from source: FirebaseError: Functions codebase could not be analyzed successfully. It may have a syntax or runtime error {"metadata":{"emulator":{"name":"functions"},"message":"Failed to load function definition from source: FirebaseError: Functions codebase could not be analyzed successfully. It may have a syntax or runtime error"}}
+[debug] [2026-07-17T13:45:58.072Z] Jul 17, 2026 4:45:58 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Jul 17, 2026 4:45:58 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}
+[debug] [2026-07-17T13:46:40.418Z] File /Users/erezbashan/workspace/king-of-tokyo/deployments/backend/lib/index.js.map changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File /Users/erezbashan/workspace/king-of-tokyo/deployments/backend/lib/index.js.map changed, reloading triggers"}}
+[debug] [2026-07-17T13:46:40.419Z] File /Users/erezbashan/workspace/king-of-tokyo/deployments/backend/lib/index.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File /Users/erezbashan/workspace/king-of-tokyo/deployments/backend/lib/index.js changed, reloading triggers"}}
+[debug] [2026-07-17T13:46:41.420Z] Validating nodejs source
+[warn] ⚠  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[warn] ⚠  functions: Please note that there will be breaking changes when you upgrade. 
+[debug] [2026-07-17T13:46:41.826Z] > [functions] package.json contents: {
+  "name": "backend",
+  "private": true,
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "shell": "npm run build && firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "20"
+  },
+  "dependencies": {
+    "@erez/flips": "*",
+    "firebase-admin": "^13.0.0",
+    "firebase-functions": "^6.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
+[debug] [2026-07-17T13:46:41.826Z] Building nodejs source
+[debug] [2026-07-17T13:46:41.826Z] Failed to find version of module node: reached end of search path /Users/erezbashan/workspace/king-of-tokyo/deployments/backend/node_modules
+[warn] ⚠  functions: Your requested "node" version "20" doesn't match your global version "24". Using node@24 from host. 
+[debug] [2026-07-17T13:46:41.827Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-07-17T13:46:41.828Z] Found firebase-functions binary at '/Users/erezbashan/workspace/king-of-tokyo/node_modules/.bin/firebase-functions'
+[info] Serving at port 8241
+
+[error] Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/Users/erezbashan/workspace/king-of-tokyo/games/flips/src/engine/reducer' imported from /Users/erezbashan/workspace/king-of-tokyo/games/flips/src/index.ts
+    at finalizeResolution (node:internal/modules/esm/resolve:274:11)
+    at moduleResolve (node:internal/modules/esm/resolve:864:10)
+    at defaultResolve (node:internal/modules/esm/resolve:990:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:718:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:735:38)
+    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:764:52)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:617:27)
+    at ModuleJobSync.syncLink (node:internal/modules/esm/module_job:143:33)
+    at ModuleJobSync.link (node:internal/modules/esm/module_job:463:17)
+    at new ModuleJobSync (node:internal/modules/esm/module_job:453:26) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file:///Users/erezbashan/workspace/king-of-tokyo/games/flips/src/engine/reducer'
+}
+
+[debug] [2026-07-17T13:46:42.070Z] Got response code 400; body Failed to generate manifest from function source: Cannot find module '/Users/erezbashan/workspace/king-of-tokyo/games/flips/src/engine/reducer' imported from /Users/erezbashan/workspace/king-of-tokyo/games/flips/src/index.ts
+[error] ⬢  functions: Failed to load function definition from source: FirebaseError: Functions codebase could not be analyzed successfully. It may have a syntax or runtime error {"metadata":{"emulator":{"name":"functions"},"message":"Failed to load function definition from source: FirebaseError: Functions codebase could not be analyzed successfully. It may have a syntax or runtime error"}}
+[debug] [2026-07-17T13:46:59.462Z] File /Users/erezbashan/workspace/king-of-tokyo/deployments/backend/lib/index.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File /Users/erezbashan/workspace/king-of-tokyo/deployments/backend/lib/index.js changed, reloading triggers"}}
+[debug] [2026-07-17T13:46:59.462Z] File /Users/erezbashan/workspace/king-of-tokyo/deployments/backend/lib/index.js.map changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File /Users/erezbashan/workspace/king-of-tokyo/deployments/backend/lib/index.js.map changed, reloading triggers"}}
+[debug] [2026-07-17T13:47:00.464Z] Validating nodejs source
+[warn] ⚠  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[warn] ⚠  functions: Please note that there will be breaking changes when you upgrade. 
+[debug] [2026-07-17T13:47:00.922Z] > [functions] package.json contents: {
+  "name": "backend",
+  "private": true,
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "shell": "npm run build && firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "20"
+  },
+  "dependencies": {
+    "@erez/flips": "*",
+    "firebase-admin": "^13.0.0",
+    "firebase-functions": "^6.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
+[debug] [2026-07-17T13:47:00.922Z] Building nodejs source
+[debug] [2026-07-17T13:47:00.922Z] Failed to find version of module node: reached end of search path /Users/erezbashan/workspace/king-of-tokyo/deployments/backend/node_modules
+[warn] ⚠  functions: Your requested "node" version "20" doesn't match your global version "24". Using node@24 from host. 
+[debug] [2026-07-17T13:47:00.922Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-07-17T13:47:00.923Z] Found firebase-functions binary at '/Users/erezbashan/workspace/king-of-tokyo/node_modules/.bin/firebase-functions'
+[info] Serving at port 8536
+
+[error] Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/Users/erezbashan/workspace/king-of-tokyo/games/flips/src/engine/reducer' imported from /Users/erezbashan/workspace/king-of-tokyo/games/flips/src/index.ts
+    at finalizeResolution (node:internal/modules/esm/resolve:274:11)
+    at moduleResolve (node:internal/modules/esm/resolve:864:10)
+    at defaultResolve (node:internal/modules/esm/resolve:990:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:718:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:735:38)
+    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:764:52)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:617:27)
+    at ModuleJobSync.syncLink (node:internal/modules/esm/module_job:143:33)
+    at ModuleJobSync.link (node:internal/modules/esm/module_job:463:17)
+    at new ModuleJobSync (node:internal/modules/esm/module_job:453:26) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file:///Users/erezbashan/workspace/king-of-tokyo/games/flips/src/engine/reducer'
+}
+
+[debug] [2026-07-17T13:47:01.196Z] Got response code 400; body Failed to generate manifest from function source: Cannot find module '/Users/erezbashan/workspace/king-of-tokyo/games/flips/src/engine/reducer' imported from /Users/erezbashan/workspace/king-of-tokyo/games/flips/src/index.ts
+[error] ⬢  functions: Failed to load function definition from source: FirebaseError: Functions codebase could not be analyzed successfully. It may have a syntax or runtime error {"metadata":{"emulator":{"name":"functions"},"message":"Failed to load function definition from source: FirebaseError: Functions codebase could not be analyzed successfully. It may have a syntax or runtime error"}}
+[debug] [2026-07-17T13:47:13.366Z] Jul 17, 2026 4:47:13 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Jul 17, 2026 4:47:13 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}
+[debug] [2026-07-17T13:47:23.721Z] File /Users/erezbashan/workspace/king-of-tokyo/deployments/backend/lib/index.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File /Users/erezbashan/workspace/king-of-tokyo/deployments/backend/lib/index.js changed, reloading triggers"}}
+[debug] [2026-07-17T13:47:23.721Z] File /Users/erezbashan/workspace/king-of-tokyo/deployments/backend/lib/index.js.map changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File /Users/erezbashan/workspace/king-of-tokyo/deployments/backend/lib/index.js.map changed, reloading triggers"}}
+[debug] [2026-07-17T13:47:24.723Z] Validating nodejs source
+[warn] ⚠  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[warn] ⚠  functions: Please note that there will be breaking changes when you upgrade. 
+[debug] [2026-07-17T13:47:25.334Z] > [functions] package.json contents: {
+  "name": "backend",
+  "private": true,
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "shell": "npm run build && firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "20"
+  },
+  "dependencies": {
+    "@erez/flips": "*",
+    "firebase-admin": "^13.0.0",
+    "firebase-functions": "^6.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
+[debug] [2026-07-17T13:47:25.334Z] Building nodejs source
+[debug] [2026-07-17T13:47:25.335Z] Failed to find version of module node: reached end of search path /Users/erezbashan/workspace/king-of-tokyo/deployments/backend/node_modules
+[warn] ⚠  functions: Your requested "node" version "20" doesn't match your global version "24". Using node@24 from host. 
+[debug] [2026-07-17T13:47:25.335Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-07-17T13:47:25.336Z] Found firebase-functions binary at '/Users/erezbashan/workspace/king-of-tokyo/node_modules/.bin/firebase-functions'
+[info] Serving at port 8054
+
+[error] Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/Users/erezbashan/workspace/king-of-tokyo/games/flips/src/engine/reducer' imported from /Users/erezbashan/workspace/king-of-tokyo/games/flips/src/index.ts
+    at finalizeResolution (node:internal/modules/esm/resolve:274:11)
+    at moduleResolve (node:internal/modules/esm/resolve:864:10)
+    at defaultResolve (node:internal/modules/esm/resolve:990:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:718:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:735:38)
+    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:764:52)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:617:27)
+    at ModuleJobSync.syncLink (node:internal/modules/esm/module_job:143:33)
+    at ModuleJobSync.link (node:internal/modules/esm/module_job:463:17)
+    at new ModuleJobSync (node:internal/modules/esm/module_job:453:26) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file:///Users/erezbashan/workspace/king-of-tokyo/games/flips/src/engine/reducer'
+}
+
+[debug] [2026-07-17T13:47:25.618Z] Got response code 400; body Failed to generate manifest from function source: Cannot find module '/Users/erezbashan/workspace/king-of-tokyo/games/flips/src/engine/reducer' imported from /Users/erezbashan/workspace/king-of-tokyo/games/flips/src/index.ts
+[error] ⬢  functions: Failed to load function definition from source: FirebaseError: Functions codebase could not be analyzed successfully. It may have a syntax or runtime error {"metadata":{"emulator":{"name":"functions"},"message":"Failed to load function definition from source: FirebaseError: Functions codebase could not be analyzed successfully. It may have a syntax or runtime error"}}
+[debug] [2026-07-17T13:47:51.340Z] File /Users/erezbashan/workspace/king-of-tokyo/deployments/backend/lib/index.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File /Users/erezbashan/workspace/king-of-tokyo/deployments/backend/lib/index.js changed, reloading triggers"}}
+[debug] [2026-07-17T13:47:51.341Z] File /Users/erezbashan/workspace/king-of-tokyo/deployments/backend/lib/index.js.map changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File /Users/erezbashan/workspace/king-of-tokyo/deployments/backend/lib/index.js.map changed, reloading triggers"}}
+[debug] [2026-07-17T13:47:52.344Z] Validating nodejs source
+[warn] ⚠  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[warn] ⚠  functions: Please note that there will be breaking changes when you upgrade. 
+[debug] [2026-07-17T13:47:52.781Z] > [functions] package.json contents: {
+  "name": "backend",
+  "private": true,
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "shell": "npm run build && firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "20"
+  },
+  "dependencies": {
+    "@erez/flips": "*",
+    "firebase-admin": "^13.0.0",
+    "firebase-functions": "^6.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
+[debug] [2026-07-17T13:47:52.781Z] Building nodejs source
+[debug] [2026-07-17T13:47:52.781Z] Failed to find version of module node: reached end of search path /Users/erezbashan/workspace/king-of-tokyo/deployments/backend/node_modules
+[warn] ⚠  functions: Your requested "node" version "20" doesn't match your global version "24". Using node@24 from host. 
+[debug] [2026-07-17T13:47:52.782Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-07-17T13:47:52.783Z] Found firebase-functions binary at '/Users/erezbashan/workspace/king-of-tokyo/node_modules/.bin/firebase-functions'
+[info] Serving at port 8396
+
+[error] Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/Users/erezbashan/workspace/king-of-tokyo/games/flips/src/engine/reducer' imported from /Users/erezbashan/workspace/king-of-tokyo/games/flips/src/index.ts
+    at finalizeResolution (node:internal/modules/esm/resolve:274:11)
+    at moduleResolve (node:internal/modules/esm/resolve:864:10)
+    at defaultResolve (node:internal/modules/esm/resolve:990:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:718:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:735:38)
+    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:764:52)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:617:27)
+    at ModuleJobSync.syncLink (node:internal/modules/esm/module_job:143:33)
+    at ModuleJobSync.link (node:internal/modules/esm/module_job:463:17)
+    at new ModuleJobSync (node:internal/modules/esm/module_job:453:26) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file:///Users/erezbashan/workspace/king-of-tokyo/games/flips/src/engine/reducer'
+}
+
+[debug] [2026-07-17T13:47:53.029Z] Got response code 400; body Failed to generate manifest from function source: Cannot find module '/Users/erezbashan/workspace/king-of-tokyo/games/flips/src/engine/reducer' imported from /Users/erezbashan/workspace/king-of-tokyo/games/flips/src/index.ts
+[error] ⬢  functions: Failed to load function definition from source: FirebaseError: Functions codebase could not be analyzed successfully. It may have a syntax or runtime error {"metadata":{"emulator":{"name":"functions"},"message":"Failed to load function definition from source: FirebaseError: Functions codebase could not be analyzed successfully. It may have a syntax or runtime error"}}
+[debug] [2026-07-17T13:48:13.397Z] Jul 17, 2026 4:48:13 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Jul 17, 2026 4:48:13 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}
+[debug] [2026-07-17T13:48:32.222Z] File /Users/erezbashan/workspace/king-of-tokyo/deployments/backend/lib/index.js.map changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File /Users/erezbashan/workspace/king-of-tokyo/deployments/backend/lib/index.js.map changed, reloading triggers"}}
+[debug] [2026-07-17T13:48:32.222Z] File /Users/erezbashan/workspace/king-of-tokyo/deployments/backend/lib/index.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File /Users/erezbashan/workspace/king-of-tokyo/deployments/backend/lib/index.js changed, reloading triggers"}}
+[debug] [2026-07-17T13:48:33.223Z] Validating nodejs source
+[warn] ⚠  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[warn] ⚠  functions: Please note that there will be breaking changes when you upgrade. 
+[debug] [2026-07-17T13:48:33.574Z] > [functions] package.json contents: {
+  "name": "backend",
+  "private": true,
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "shell": "npm run build && firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "20"
+  },
+  "dependencies": {
+    "@erez/flips": "*",
+    "firebase-admin": "^13.0.0",
+    "firebase-functions": "^6.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
+[debug] [2026-07-17T13:48:33.574Z] Building nodejs source
+[debug] [2026-07-17T13:48:33.574Z] Failed to find version of module node: reached end of search path /Users/erezbashan/workspace/king-of-tokyo/deployments/backend/node_modules
+[warn] ⚠  functions: Your requested "node" version "20" doesn't match your global version "24". Using node@24 from host. 
+[debug] [2026-07-17T13:48:33.576Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-07-17T13:48:33.578Z] Found firebase-functions binary at '/Users/erezbashan/workspace/king-of-tokyo/node_modules/.bin/firebase-functions'
+[info] Serving at port 8701
+
+[error] Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/Users/erezbashan/workspace/king-of-tokyo/games/flips/src/engine/reducer' imported from /Users/erezbashan/workspace/king-of-tokyo/games/flips/src/index.ts
+    at finalizeResolution (node:internal/modules/esm/resolve:274:11)
+    at moduleResolve (node:internal/modules/esm/resolve:864:10)
+    at defaultResolve (node:internal/modules/esm/resolve:990:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:718:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:735:38)
+    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:764:52)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:617:27)
+    at ModuleJobSync.syncLink (node:internal/modules/esm/module_job:143:33)
+    at ModuleJobSync.link (node:internal/modules/esm/module_job:463:17)
+    at new ModuleJobSync (node:internal/modules/esm/module_job:453:26) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file:///Users/erezbashan/workspace/king-of-tokyo/games/flips/src/engine/reducer'
+}
+
+[debug] [2026-07-17T13:48:33.814Z] Got response code 400; body Failed to generate manifest from function source: Cannot find module '/Users/erezbashan/workspace/king-of-tokyo/games/flips/src/engine/reducer' imported from /Users/erezbashan/workspace/king-of-tokyo/games/flips/src/index.ts
+[error] ⬢  functions: Failed to load function definition from source: FirebaseError: Functions codebase could not be analyzed successfully. It may have a syntax or runtime error {"metadata":{"emulator":{"name":"functions"},"message":"Failed to load function definition from source: FirebaseError: Functions codebase could not be analyzed successfully. It may have a syntax or runtime error"}}

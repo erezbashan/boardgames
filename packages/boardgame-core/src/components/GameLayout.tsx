@@ -1,26 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import './GameLayout.css';
 import { Modal } from './Modal';
-
-export interface BasePlayer {
-  id: string;
-  name: string;
-  color?: string; // Optional color for the player
-  isBot?: boolean; // True if the player is a bot
-  isWinner?: boolean; // True if player won
-}
+import { ChatWindow } from './ChatWindow';
+import type { BasePlayer, ChatMessage, GameStatus } from '../engine/types';
 
 export interface GameLayoutProps {
   gameName: string;
-  status: 'Lobby' | 'Playing' | 'Finished';
+  status: GameStatus;
   players: BasePlayer[];
   currentPlayerId?: string;
+  chatMessages?: ChatMessage[];
   
   // Actions
   onStartGame?: () => void;
   onAddBot?: () => void;
   onLeaveGame?: () => void;
   onNewGame?: () => void;
+  onSendMessage?: (msg: string) => void;
   
   // Content Slots
   helpText?: string;
@@ -41,11 +37,12 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
   onAddBot,
   onLeaveGame,
   onNewGame,
+  onSendMessage,
   helpText,
   renderSettings,
   renderGraphics,
   renderPlayerDetails,
-  renderChat,
+  chatMessages,
   renderLog,
   renderStats
 }) => {
@@ -109,7 +106,9 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
               {renderLog && renderLog()}
             </div>
             <div className="game-chat-wrapper">
-              {renderChat && renderChat()}
+              {chatMessages && onSendMessage && (
+                <ChatWindow messages={chatMessages} onSendMessage={onSendMessage} />
+              )}
             </div>
           </div>
         </div>
