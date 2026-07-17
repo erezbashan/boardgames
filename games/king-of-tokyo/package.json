@@ -1,0 +1,15 @@
+{
+  "name": "@erez/king-of-tokyo",
+  "version": "1.0.0",
+  "private": true,
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@erez/boardgame-core": "*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

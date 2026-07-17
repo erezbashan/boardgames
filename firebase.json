@@ -1,9 +1,10 @@
 {
-  "firestore": {
-    "rules": "firestore.rules"
+  "functions": {
+    "source": "deployments/backend",
+    "runtime": "nodejs20"
   },
   "hosting": {
-    "public": "frontend/dist",
+    "public": "deployments/portal/dist",
     "ignore": [
       "firebase.json",
       "**/.*",

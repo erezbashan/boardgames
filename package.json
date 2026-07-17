@@ -1,15 +1,9 @@
 {
-  "name": "king-of-tokyo",
+  "name": "erez-boardgames",
   "private": true,
   "workspaces": [
-    "frontend",
-    "backend",
-    "shared"
-  ],
-  "scripts": {
-    "dev:frontend": "npm run dev --workspace=frontend",
-    "build:shared": "npm run build --workspace=shared",
-    "dev:backend": "npm run dev --workspace=backend",
-    "dev": "npm run build:shared && (npm run dev:backend & npm run dev:frontend)"
-  }
+    "packages/*",
+    "games/*",
+    "deployments/*"
+  ]
 }
