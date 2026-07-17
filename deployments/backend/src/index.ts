@@ -1,6 +1,9 @@
+// Mock CSS imports so Node.js doesn't crash on shared UI code
+require.extensions['.css'] = () => {};
+
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import * as admin from "firebase-admin";
-import { flipsReducer, initialFlipsState, FlipsAction } from "@erez/flips";
+import { flipsReducer, initialFlipsState, FlipsAction } from "@erez/flips/dist/engine/reducer";
 
 admin.initializeApp();
 const db = admin.firestore();

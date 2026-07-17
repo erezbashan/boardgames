@@ -34,9 +34,11 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.dispatchAction = exports.createGame = void 0;
+// Mock CSS imports so Node.js doesn't crash on shared UI code
+require.extensions['.css'] = () => { };
 const https_1 = require("firebase-functions/v2/https");
 const admin = __importStar(require("firebase-admin"));
-const flips_1 = require("@erez/flips");
+const reducer_1 = require("@erez/flips/dist/engine/reducer");
 admin.initializeApp();
 const db = admin.firestore();
 exports.createGame = (0, https_1.onCall)(async (request) => {
@@ -50,7 +52,7 @@ exports.createGame = (0, https_1.onCall)(async (request) => {
         return { gameId };
     let state;
     if (gameType === 'flips') {
-        state = flips_1.initialFlipsState;
+        state = reducer_1.initialFlipsState;
     }
     else {
         throw new https_1.HttpsError('invalid-argument', 'Unsupported game type');
@@ -76,7 +78,7 @@ exports.dispatchAction = (0, https_1.onCall)(async (request) => {
         const gameDoc = doc.data();
         let newState;
         if (gameType === 'flips') {
-            newState = (0, flips_1.flipsReducer)(gameDoc.state, action);
+            newState = (0, reducer_1.flipsReducer)(gameDoc.state, action);
         }
         else {
             throw new https_1.HttpsError('invalid-argument', 'Unsupported game type');

@@ -2,9 +2,10 @@
   "name": "@erez/boardgame-core",
   "version": "1.0.0",
   "private": true,
-  "main": "src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc && rsync -a --include '*/' --include '*.css' --exclude '*' src/ dist/"
   },
   "dependencies": {
     "react": "^19.2.7",
