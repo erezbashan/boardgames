@@ -1,122 +1,88 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
+import { Lobby } from '@erez/boardgame-core';
 
-function App() {
-  const [count, setCount] = useState(0)
-
+function GameSelector() {
+  const navigate = useNavigate();
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
+    <div style={{ padding: '40px', color: 'white', backgroundColor: '#1a1a2e', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <h1 style={{ fontSize: '3rem', marginBottom: '40px' }}>Erez Boardgames</h1>
+      <div style={{ display: 'flex', gap: '20px' }}>
+        <div 
+          onClick={() => navigate('/flips')}
+          style={{ background: 'rgba(255,255,255,0.1)', padding: '30px', borderRadius: '16px', cursor: 'pointer', textAlign: 'center', minWidth: '200px' }}
         >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+          <h2>Flips</h2>
+          <p>A simple test game</p>
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
+        <div 
+          onClick={() => navigate('/kot')}
+          style={{ background: 'rgba(255,255,255,0.1)', padding: '30px', borderRadius: '16px', cursor: 'pointer', textAlign: 'center', minWidth: '200px' }}
+        >
+          <h2>King of Tokyo</h2>
+          <p>The main event</p>
         </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      </div>
+    </div>
+  );
 }
 
-export default App
+function GameLobbyWrapper() {
+  const { gameType } = useParams();
+  const navigate = useNavigate();
+
+  const handleCreateGame = (username: string) => {
+    console.log(`Create ${gameType} game with username:`, username);
+    // TODO: Create in Firebase, then navigate to the new ID
+    const mockId = Math.random().toString(36).substring(2, 8).toUpperCase();
+    navigate(`/${gameType}/${mockId}`);
+  };
+
+  const handleJoinGame = (gameId: string, username: string) => {
+    console.log(`Join ${gameType} game:`, gameId, "as", username);
+    navigate(`/${gameType}/${gameId}`);
+  };
+
+  const formattedTitle = gameType === 'kot' ? 'King of Tokyo Lobby' : 'Flips Lobby';
+
+  return (
+    <Lobby 
+      title={formattedTitle}
+      onCreateGame={handleCreateGame}
+      onJoinGame={handleJoinGame}
+      pendingGames={gameType === 'flips' ? [
+        { id: "FLIP-111", gameType: "Flips", playersCount: 1, status: "Lobby" }
+      ] : [
+        { id: "KOT-123", gameType: "King of Tokyo", playersCount: 2, status: "Lobby" }
+      ]}
+    />
+  );
+}
+
+function ActiveGameWrapper() {
+  const { gameType, gameId } = useParams();
+  const navigate = useNavigate();
+  return (
+    <div style={{ padding: '40px', color: 'white', backgroundColor: '#1a1a2e', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <h1>Playing {gameType?.toUpperCase()}</h1>
+      <p>Game ID: {gameId}</p>
+      <button 
+        onClick={() => navigate(`/${gameType}`)} 
+        style={{ padding: '10px 20px', cursor: 'pointer', marginTop: '20px', borderRadius: '8px', border: 'none', background: '#3b82f6', color: 'white' }}
+      >
+        Leave Game
+      </button>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<GameSelector />} />
+      <Route path="/:gameType" element={<GameLobbyWrapper />} />
+      <Route path="/:gameType/:gameId" element={<ActiveGameWrapper />} />
+    </Routes>
+  );
+}
+
+export default App;
