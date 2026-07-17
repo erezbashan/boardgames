@@ -3,10 +3,11 @@ require.extensions['.css'] = () => {};
 
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import * as admin from "firebase-admin";
+import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { flipsReducer, initialFlipsState, FlipsAction } from "@erez/flips/dist/engine/reducer";
 
 admin.initializeApp();
-const db = admin.firestore();
+const db = getFirestore();
 
 export const createGame = onCall(async (request) => {
   const { gameType, requestedId } = request.data;
@@ -28,7 +29,7 @@ export const createGame = onCall(async (request) => {
   await gameRef.set({
     gameType,
     state,
-    createdAt: admin.firestore.FieldValue.serverTimestamp()
+    createdAt: FieldValue.serverTimestamp()
   });
 
   return { gameId };
