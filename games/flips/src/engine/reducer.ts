@@ -1,11 +1,9 @@
 import type { BaseGameState, BaseAction } from '@erez/boardgame-core';
-import { baseReducer } from '@erez/boardgame-core';
+import { baseReducer, baseInitialState } from '@erez/boardgame-core';
 
-export interface FlipsPlayer {
-  id: string;
-  name: string;
-  isBot: boolean;
-  color?: string;
+import type { BasePlayer } from '@erez/boardgame-core';
+
+export interface FlipsPlayer extends BasePlayer {
   score: number;
   headsCount: number;
   tailsCount: number;
@@ -25,14 +23,11 @@ export type FlipsAction =
   | { type: 'SET_TARGET_SCORE', payload: { targetScore: number } };
 
 export const initialFlipsState: FlipsState = {
-  status: 'Lobby',
-  players: {},
-  playerOrder: [],
-  winnerId: null,
-  chatMessages: [],
+  ...baseInitialState,
   targetScore: 3,
   currentPlayerIndex: 0,
-  lastFlipResult: null
+  lastFlipResult: null,
+  players: {}
 };
 
 export function flipsReducer(state: FlipsState, action: FlipsAction): FlipsState {
@@ -126,13 +121,20 @@ export function flipsReducer(state: FlipsState, action: FlipsAction): FlipsState
         newWinnerId = action.payload.playerId;
       }
 
+      const systemMessage = {
+        sender: 'System',
+        text: `${player.name} flipped ${isHeads ? 'Heads' : 'Tails'}!`,
+        isSystem: true
+      };
+
       return {
         ...state,
         players: updatedPlayers,
         status: newStatus,
         winnerId: newWinnerId,
         currentPlayerIndex: (state.currentPlayerIndex + 1) % state.playerOrder.length,
-        lastFlipResult: { playerId: action.payload.playerId, isHeads }
+        lastFlipResult: { playerId: action.payload.playerId, isHeads },
+        chatMessages: [...state.chatMessages, systemMessage]
       };
     }
     default:

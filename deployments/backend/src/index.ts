@@ -2,6 +2,7 @@
 require.extensions['.css'] = () => {};
 
 import { onCall, HttpsError } from "firebase-functions/v2/https";
+import { onDocumentUpdated } from "firebase-functions/v2/firestore";
 import * as admin from "firebase-admin";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { flipsReducer, initialFlipsState, FlipsAction } from "@erez/flips/dist/engine/reducer";
@@ -62,4 +63,48 @@ export const dispatchAction = onCall(async (request) => {
   });
 
   return { success: true };
+});
+
+export const onGameUpdated = onDocumentUpdated("games/{gameId}", async (event) => {
+  const data = event.data?.after.data();
+  if (!data) return;
+  const state = data.state;
+  if (!state || state.status !== 'Playing') return;
+
+  const currentPlayerId = state.playerOrder[state.currentPlayerIndex];
+  const player = state.players[currentPlayerId];
+  if (!player || !player.isBot) return;
+
+  // Wait 1.5 seconds to simulate thinking
+  await new Promise(r => setTimeout(r, 1500));
+
+  const gameRef = event.data!.after.ref;
+  await db.runTransaction(async (transaction) => {
+    const doc = await transaction.get(gameRef);
+    if (!doc.exists) return;
+    const gameDoc = doc.data()!;
+    const curState = gameDoc.state;
+    
+    // Check if it's still this bot's turn (in case someone manually skipped or it already ran)
+    if (curState.status !== 'Playing' || curState.playerOrder[curState.currentPlayerIndex] !== currentPlayerId) return;
+
+    let newState;
+    if (data.gameType === 'flips') {
+      const action = { type: 'FLIP_COIN', payload: { playerId: currentPlayerId, isHeads: Math.random() > 0.5 } } as any;
+      newState = flipsReducer(curState, action);
+      
+      // Random chatter logic
+      const humanSpoke = curState.chatMessages.some((m: any) => !curState.players[m.sender]?.isBot);
+      if (!humanSpoke && Math.random() > 0.7) {
+        const msgs = ["I'm feeling lucky!", "Tails never fails...", "Beep boop, calculating flip...", "You humans stand no chance!"];
+        const msg = msgs[Math.floor(Math.random() * msgs.length)];
+        const chatAction = { type: 'SEND_CHAT_MESSAGE', payload: { sender: player.name, text: msg, color: player.color } };
+        newState = flipsReducer(newState, chatAction as any);
+      }
+    } else {
+      return; // Unsupported game type
+    }
+
+    transaction.update(gameRef, { state: newState });
+  });
 });

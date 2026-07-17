@@ -12,6 +12,7 @@ export interface ChatMessage {
   sender: string;
   text: string;
   color?: string;
+  isSystem?: boolean;
 }
 
 export interface BaseGameState {

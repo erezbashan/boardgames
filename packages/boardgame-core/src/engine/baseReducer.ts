@@ -11,6 +11,8 @@ export function createBaseGameState(): BaseGameState {
   };
 }
 
+export const baseInitialState: BaseGameState = createBaseGameState();
+
 export function baseReducer<T extends BaseGameState>(state: T, action: BaseAction | any): T {
   switch (action.type) {
     case 'JOIN_GAME': {

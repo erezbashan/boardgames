@@ -22,10 +22,10 @@ export interface GameLayoutProps {
   helpText?: string;
   renderSettings?: () => React.ReactNode;
   renderGraphics?: () => React.ReactNode;
-  renderPlayerDetails?: (playerId: string) => React.ReactNode;
+  renderGameSpecificPlayerDetails?: (playerId: string) => React.ReactNode;
   renderChat?: () => React.ReactNode;
   renderLog?: () => React.ReactNode;
-  renderStats?: () => React.ReactNode;
+  renderGameSpecificStats?: () => React.ReactNode;
 }
 
 export const GameLayout: React.FC<GameLayoutProps> = ({
@@ -41,10 +41,10 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
   helpText,
   renderSettings,
   renderGraphics,
-  renderPlayerDetails,
+  renderGameSpecificPlayerDetails,
   chatMessages,
   renderLog,
-  renderStats
+  renderGameSpecificStats
 }) => {
   const [showSettings, setShowSettings] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
@@ -73,13 +73,13 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
           {status === 'Lobby' && onAddBot && (
             <button className="btn secondary" onClick={onAddBot}>Add Bot</button>
           )}
-          {status === 'Playing' && renderSettings && (
+          {(status === 'Lobby' || status === 'Playing') && renderSettings && (
             <button className="btn secondary" onClick={() => setShowSettings(true)}>Settings</button>
           )}
           {status === 'Finished' && onNewGame && (
             <button className="btn primary" onClick={onNewGame}>New Game</button>
           )}
-          {status === 'Finished' && renderStats && (
+          {status === 'Finished' && renderGameSpecificStats && (
             <button className="btn secondary" onClick={() => setShowStats(true)}>Stats</button>
           )}
           <button className="btn secondary" onClick={() => setShowShare(true)}>Share</button>
@@ -130,7 +130,7 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
                   {isPlaying && <span className="playing-banner">Playing</span>}
                 </div>
                 <div className="player-card-content">
-                  {renderPlayerDetails && renderPlayerDetails(p.id)}
+                  {renderGameSpecificPlayerDetails && renderGameSpecificPlayerDetails(p.id)}
                 </div>
               </div>
             );
@@ -160,7 +160,7 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
       </Modal>
 
       <Modal isOpen={showStats} title="Game Stats" onClose={() => setShowStats(false)} width="800px">
-        {renderStats && renderStats()}
+        {renderGameSpecificStats && renderGameSpecificStats()}
       </Modal>
 
     </div>

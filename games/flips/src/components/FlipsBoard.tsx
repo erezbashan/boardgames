@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import type { FlipsState, FlipsAction } from '../engine/reducer';
 import type { BasePlayer } from '@erez/boardgame-core';
-import { GameLayout, GameLog, BOT_NAMES } from '@erez/boardgame-core';
+import { GameLayout, GameLog, useGameController } from '@erez/boardgame-core';
 
 interface FlipsBoardProps {
   gameState: FlipsState;
@@ -12,7 +12,13 @@ interface FlipsBoardProps {
 
 export const FlipsBoard: React.FC<FlipsBoardProps> = ({ gameState, myPlayerId, dispatch, onLeaveGame }) => {
   const { status, targetScore, players, playerOrder, currentPlayerIndex, winnerId, lastFlipResult, chatMessages } = gameState;
-  const [logs, setLogs] = useState<React.ReactNode[]>([]);
+  // Derive logs from chatMessages
+  const logs = chatMessages
+    .filter((m) => m.isSystem)
+    .flatMap((m, index) => [
+      <span key={`msg-${index}`}>{m.text}</span>,
+      '---'
+    ]);
 
   // Base players for framework
   const basePlayers: BasePlayer[] = playerOrder.map((id) => players[id]);
@@ -21,55 +27,10 @@ export const FlipsBoard: React.FC<FlipsBoardProps> = ({ gameState, myPlayerId, d
   const isMyTurn = currentPlayerId === myPlayerId;
   const iAmWinner = winnerId === myPlayerId;
 
-  // Track logs
-  useEffect(() => {
-    if (lastFlipResult) {
-      const p = players[lastFlipResult.playerId];
-      const resultText = lastFlipResult.isHeads ? 'Heads (+1)' : 'Tails';
-      setLogs(prev => [
-        ...prev, 
-        <span key={prev.length}><strong style={{color: p.color}}>{p.name}</strong> flipped {resultText}</span>, 
-        '---'
-      ]);
-    }
-  }, [lastFlipResult, players]);
 
-  const isHost = playerOrder.length > 0 && playerOrder[0] === myPlayerId;
 
-  // Bot Auto-Play Logic & Chatter (Only Host runs this to prevent duplicate actions)
-  useEffect(() => {
-    if (!isHost) return;
-    
-    if (status === 'Playing' && currentPlayerId) {
-      const currentPlayer = players[currentPlayerId];
-      if (currentPlayer.isBot) {
-        const timer = setTimeout(() => {
-          const isHeads = Math.random() > 0.5;
-          dispatch({ type: 'FLIP_COIN', payload: { playerId: currentPlayerId, isHeads } });
-        }, 1500);
+  const { handleStart, handleAddBot, handleSendMessage } = useGameController(dispatch as any);
 
-        // Random chatter
-        const humanSpoke = chatMessages.some(m => m.sender === players[myPlayerId]?.name);
-        if (!humanSpoke && Math.random() > 0.7) {
-          const chatTimer = setTimeout(() => {
-            const msgs = ["I'm feeling lucky!", "Tails never fails...", "Beep boop, calculating flip...", "You humans stand no chance!"];
-            const msg = msgs[Math.floor(Math.random() * msgs.length)];
-            dispatch({ type: 'SEND_CHAT_MESSAGE', payload: { sender: currentPlayer.name, text: msg, color: currentPlayer.color } });
-          }, 800);
-          return () => { clearTimeout(timer); clearTimeout(chatTimer); }
-        }
-
-        return () => clearTimeout(timer);
-      }
-    }
-  }, [status, currentPlayerId, players, dispatch, chatMessages, isHost, myPlayerId]);
-
-  const handleStart = () => dispatch({ type: 'START_GAME' });
-  const handleAddBot = () => {
-    const botId = 'bot-' + Math.random().toString(36).substring(2, 6);
-    const botName = BOT_NAMES[Math.floor(Math.random() * BOT_NAMES.length)];
-    dispatch({ type: 'JOIN_GAME', payload: { playerId: botId, name: botName, isBot: true } });
-  };
   const handleFlip = () => {
     if (!isMyTurn || status !== 'Playing') return;
     const isHeads = Math.random() > 0.5;
@@ -152,8 +113,8 @@ export const FlipsBoard: React.FC<FlipsBoardProps> = ({ gameState, myPlayerId, d
     const maxTurns = Math.max(1, ...Object.values(players).map(p => p.pointsHistory.length - 1));
     const sortedPlayers = [...playerOrder].sort((a, b) => players[b].score - players[a].score);
     
-    // Compute exact SVG dimensions
-    const svgWidth = Math.max(600, maxTurns * 60);
+    // Fixed width to fit inside the 800px modal without scrolling
+    const svgWidth = 720;
     const svgHeight = 200;
 
     return (
@@ -191,8 +152,8 @@ export const FlipsBoard: React.FC<FlipsBoardProps> = ({ gameState, myPlayerId, d
         {/* Bottom: Line Graph */}
         <div>
           <h3 style={{ margin: '0 0 15px 0' }}>Points Progression</h3>
-          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '20px', borderRadius: '12px', overflowX: 'auto' }}>
-            <svg width={svgWidth} height={svgHeight} style={{ overflow: 'visible', margin: '10px' }}>
+          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '20px', borderRadius: '12px' }}>
+            <svg width={svgWidth} height={svgHeight} style={{ overflow: 'visible', margin: '0 auto', display: 'block' }}>
               {/* Axes */}
               <line x1="0" y1={svgHeight} x2={svgWidth} y2={svgHeight} stroke="rgba(255,255,255,0.2)" strokeWidth="2" />
               <line x1="0" y1="0" x2="0" y2={svgHeight} stroke="rgba(255,255,255,0.2)" strokeWidth="2" />
@@ -226,9 +187,7 @@ export const FlipsBoard: React.FC<FlipsBoardProps> = ({ gameState, myPlayerId, d
     );
   };
 
-  const handleSendMessage = (msg: string) => {
-    dispatch({ type: 'SEND_CHAT_MESSAGE', payload: { sender: players[myPlayerId]?.name || 'You', text: msg, color: players[myPlayerId]?.color } });
-  };
+
 
   return (
     <GameLayout
@@ -237,7 +196,7 @@ export const FlipsBoard: React.FC<FlipsBoardProps> = ({ gameState, myPlayerId, d
       players={basePlayers}
       currentPlayerId={currentPlayerId}
       chatMessages={chatMessages}
-      onSendMessage={handleSendMessage}
+      onSendMessage={(msg) => handleSendMessage(msg, players[myPlayerId]?.name || 'You', players[myPlayerId]?.color)}
       onStartGame={status === 'Lobby' ? handleStart : undefined}
       onAddBot={status === 'Lobby' ? handleAddBot : undefined}
       onNewGame={() => onLeaveGame()} // Navigate back to lobby to reset
@@ -245,9 +204,9 @@ export const FlipsBoard: React.FC<FlipsBoardProps> = ({ gameState, myPlayerId, d
       helpText="Flips: First to target points wins! Click FLIP COIN to test your luck."
       renderSettings={renderSettings}
       renderGraphics={renderGraphics}
-      renderPlayerDetails={renderPlayerDetails}
+      renderGameSpecificPlayerDetails={renderPlayerDetails}
       renderLog={() => <GameLog logs={logs} />}
-      renderStats={renderStats}
+      renderGameSpecificStats={renderStats}
     />
   );
 };
