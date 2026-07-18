@@ -25,7 +25,13 @@ const styles = `
   .pulse-red { animation: pulse-red 0.8s ease-out; }
 `;
 
-const AnimatedCounter = ({ value, icon, color }: { value: number, icon: string, color: string }) => {
+const LightningIcon = () => (
+  <svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" style={{ verticalAlign: 'middle' }}>
+    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+  </svg>
+);
+
+const AnimatedCounter = ({ value, icon, color }: { value: number, icon: React.ReactNode, color: string }) => {
   const prevValue = React.useRef(value);
   const [animClass, setAnimClass] = React.useState('');
 
@@ -52,45 +58,32 @@ const AnimatedCounter = ({ value, icon, color }: { value: number, icon: string, 
 };
 
 const SettingsPanel = ({ settings, dispatch, status }: any) => {
-  const [maxHealth, setMaxHealth] = React.useState(settings?.maxHealth || 10);
-  const [maxVp, setMaxVp] = React.useState(settings?.maxVp || 20);
-
-  const handleSave = () => {
-    dispatch({ type: 'UPDATE_SETTINGS', payload: { maxHealth: Number(maxHealth), maxVp: Number(maxVp) } });
-  };
-
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-      <div>
-        <label style={{ display: 'block', marginBottom: '5px' }}>Max Health / Initial Health</label>
+    <div style={{ padding: '20px', textAlign: 'center' }}>
+      <div style={{ margin: '10px 20px' }}>
+        <label style={{ fontSize: '18px', marginRight: '10px' }}>Max/Initial Health:</label>
         <input 
           type="number" 
-          value={maxHealth} 
-          onChange={e => setMaxHealth(e.target.value)}
+          value={settings?.maxHealth || 10} 
+          onChange={e => dispatch({ type: 'UPDATE_SETTINGS', payload: { maxHealth: parseInt(e.target.value) || 10, maxVp: settings?.maxVp || 20 } })}
           disabled={status !== 'Lobby'}
           className="modern-input"
-          style={{ width: '100%' }}
+          style={{ width: '100px', display: 'inline-block' }}
         />
       </div>
-      <div>
-        <label style={{ display: 'block', marginBottom: '5px' }}>VPs to Win</label>
+      <div style={{ margin: '10px 20px' }}>
+        <label style={{ fontSize: '18px', marginRight: '10px' }}>VPs to Win:</label>
         <input 
           type="number" 
-          value={maxVp} 
-          onChange={e => setMaxVp(e.target.value)}
+          value={settings?.maxVp || 20} 
+          onChange={e => dispatch({ type: 'UPDATE_SETTINGS', payload: { maxHealth: settings?.maxHealth || 10, maxVp: parseInt(e.target.value) || 20 } })}
           disabled={status !== 'Lobby'}
           className="modern-input"
-          style={{ width: '100%' }}
+          style={{ width: '100px', display: 'inline-block' }}
         />
       </div>
-      {status === 'Lobby' && (
-        <button className="btn primary" onClick={handleSave} style={{ marginTop: '10px' }}>
-          Save Settings
-        </button>
-      )}
-      {status !== 'Lobby' && (
-        <p style={{ color: 'gray', fontSize: '12px' }}>Settings can only be changed in the Lobby.</p>
-      )}
+      {status === 'Lobby' && <p style={{ color: 'gray' }}>Waiting for the host to start the game...</p>}
+      {status !== 'Lobby' && <p style={{ color: 'gray', fontSize: '12px' }}>Settings can only be changed in the Lobby.</p>}
     </div>
   );
 };
@@ -127,7 +120,7 @@ export const KotBoard: React.FC = () => {
   const getDiceFace = (val: string) => {
     switch (val) {
       case 'Heart': return <span style={{color: '#ef4444', textShadow: '0 0 5px rgba(0,0,0,0.5)'}}>❤️</span>;
-      case 'Energy': return <span style={{color: '#06b6d4', textShadow: '0 0 5px rgba(0,0,0,0.5)'}}>⚡</span>;
+      case 'Energy': return <span style={{color: '#06b6d4', filter: 'drop-shadow(0 0 5px rgba(0,0,0,0.5))'}}><LightningIcon /></span>;
       case 'Smash': return <span style={{color: '#f97316', textShadow: '0 0 5px rgba(0,0,0,0.5)'}}>💥</span>;
       case '1': return <span style={{color: 'white', textShadow: '0 0 5px rgba(0,0,0,0.5)'}}>1</span>;
       case '2': return <span style={{color: 'white', textShadow: '0 0 5px rgba(0,0,0,0.5)'}}>2</span>;
@@ -164,10 +157,15 @@ export const KotBoard: React.FC = () => {
                {rollCount === 0 ? "🎲 ROLL DICE" : `🎲 REROLL DICE`}
             </button>
           )}
-          {rollCount > 0 && (
+          {rollCount > 0 && rollCount < 3 && (
             <button className="btn" onClick={handleResolve} style={{ padding: '15px 30px', fontSize: '20px', width: '250px', background: '#10b981', color: 'white', border: 'none' }}>
               ✅ DONE
             </button>
+          )}
+          {rollCount >= 3 && (
+            <div style={{ padding: '15px 30px', fontSize: '20px', width: '250px', background: 'rgba(255,255,255,0.1)', color: 'white', borderRadius: '8px', textAlign: 'center' }}>
+              Resolving...
+            </div>
           )}
         </div>
       );
@@ -253,7 +251,7 @@ export const KotBoard: React.FC = () => {
       <div style={{ marginTop: '10px', textAlign: 'center', display: 'flex', justifyContent: 'center', gap: '15px' }}>
         <AnimatedCounter value={p.health} icon="❤️" color="#ef4444" />
         <AnimatedCounter value={p.vp} icon="⭐" color="#eab308" />
-        <AnimatedCounter value={p.energy} icon="⚡" color="#06b6d4" />
+        <AnimatedCounter value={p.energy} icon={<LightningIcon />} color="#06b6d4" />
         {p.location === 'TokyoCity' && (
           <div style={{ color: '#a855f7', fontWeight: 'bold', border: '1px solid #a855f7', padding: '2px 6px', borderRadius: '4px', fontSize: '12px' }}>
             TOKYO

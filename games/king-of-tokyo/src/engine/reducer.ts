@@ -162,11 +162,18 @@ export function kingOfTokyoReducer(state: KotState, action: KotAction): KotState
         return { ...d, value: randomFace, kept: false };
       });
 
-      const finalState = {
+      let finalState = {
         ...state,
         dice: newDice,
         rollCount: state.rollCount + 1
       };
+
+      if (finalState.rollCount >= 3) {
+        finalState.actionQueue = [
+          ...(finalState.actionQueue || []),
+          { delayMs: 1500, action: { type: 'RESOLVE_DICE', payload: { playerId: action.payload.playerId } as any } }
+        ];
+      }
 
       return queueBotActionsIfNeeded(finalState);
     }
@@ -280,12 +287,13 @@ export function kingOfTokyoReducer(state: KotState, action: KotAction): KotState
         rollCount: 0,
         players: newPlayers,
         dice: state.dice.map(d => ({ ...d, kept: false })),
-        logs: newLogs,
-        prompt: newPrompt
+        logs: newLogs
       };
 
-      // If no prompt, advance turn
-      if (!newPrompt) {
+      if (newPrompt) {
+        finalState.prompt = newPrompt;
+      } else {
+        delete finalState.prompt;
         finalState.currentPlayerIndex = (state.currentPlayerIndex + 1) % state.playerOrder.length;
       }
 
@@ -306,9 +314,9 @@ export function kingOfTokyoReducer(state: KotState, action: KotAction): KotState
         ...state,
         players: newPlayers,
         logs: [...state.logs, `${player.name} yielded Tokyo! ${attacker.name} enters and gains 1 VP!`],
-        prompt: undefined,
         currentPlayerIndex: (state.currentPlayerIndex + 1) % state.playerOrder.length
       };
+      delete finalState.prompt;
       
       return queueBotActionsIfNeeded(finalState);
     }
@@ -320,9 +328,9 @@ export function kingOfTokyoReducer(state: KotState, action: KotAction): KotState
       const finalState: KotState = {
         ...state,
         logs: [...state.logs, `${player.name} stays in Tokyo!`],
-        prompt: undefined,
         currentPlayerIndex: (state.currentPlayerIndex + 1) % state.playerOrder.length
       };
+      delete finalState.prompt;
       
       return queueBotActionsIfNeeded(finalState);
     }
