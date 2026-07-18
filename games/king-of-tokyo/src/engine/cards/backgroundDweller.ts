@@ -16,7 +16,7 @@ export const BackgroundDweller: KotCard = {
             ...state,
             prompt: {
               playerId: payload.playerId,
-              text: 'Reroll a 3️⃣? (Background Dweller)',
+              text: 'Reroll a 3?',
               options: [
                 { label: 'Yes', action: { type: 'CARD_ACTION', payload: { cardId: 'background_dweller', action: 'reroll', playerId: payload.playerId } } },
                 { label: 'No', action: { type: 'CARD_ACTION', payload: { cardId: 'background_dweller', action: 'decline', playerId: payload.playerId } } }
@@ -41,7 +41,7 @@ export const BackgroundDweller: KotCard = {
         if (threeIndex >= 0) {
           const DICE_FACES = ['1', '2', '3', 'Energy', 'Heart', 'Smash'];
           const randomFace = DICE_FACES[Math.floor(Math.random() * DICE_FACES.length)];
-          newDice[threeIndex] = { ...newDice[threeIndex], value: randomFace as any };
+          newDice[threeIndex] = { ...newDice[threeIndex], id: Math.random().toString(36).substring(7), value: randomFace as any };
         }
         let newState = {
           ...state,
@@ -55,7 +55,7 @@ export const BackgroundDweller: KotCard = {
         if (stillHasThree) {
           newState.prompt = {
             playerId: payload.playerId,
-            text: 'Reroll another 3️⃣? (Background Dweller)',
+            text: 'Reroll a 3?',
             options: [
               { label: 'Yes', action: { type: 'CARD_ACTION', payload: { cardId: 'background_dweller', action: 'reroll', playerId: payload.playerId } } },
               { label: 'No', action: { type: 'CARD_ACTION', payload: { cardId: 'background_dweller', action: 'decline', playerId: payload.playerId } } }

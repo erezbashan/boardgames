@@ -10,6 +10,7 @@ import { kingOfTokyoReducer, initialKotState } from "@erez/king-of-tokyo/dist/en
 
 admin.initializeApp();
 const db = getFirestore();
+db.settings({ ignoreUndefinedProperties: true });
 
 export const createGame = onCall(async (request) => {
   const { gameType, requestedId } = request.data;

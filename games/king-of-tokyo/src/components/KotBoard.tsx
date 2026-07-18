@@ -285,13 +285,12 @@ export const KotBoard: React.FC = () => {
     if (status !== 'Playing' && status !== 'Finished') return null;
 
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '20px', boxSizing: 'border-box' }}>
+      <div style={{ display: 'flex', flexDirection: 'row', gap: '20px', height: '100%', padding: '20px', boxSizing: 'border-box' }}>
         <style dangerouslySetInnerHTML={{ __html: styles }} />
         
-        {/* Top Row: Cards and Prompts */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '40px', minHeight: '360px' }}>
-          {/* Top Left: Cards Market */}
-          <div style={{ width: '730px', flex: '0 0 auto', border: '2px dashed rgba(255,255,255,0.2)', borderRadius: '12px', padding: '15px', display: 'flex', gap: '15px', alignItems: 'flex-start', justifyContent: 'flex-start', background: 'rgba(0,0,0,0.2)', flexWrap: 'wrap' }}>
+        {/* Left Half: Cards Market */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', border: '2px dashed rgba(255,255,255,0.2)', borderRadius: '12px', padding: '20px', background: 'rgba(0,0,0,0.2)', overflowY: 'auto' }}>
+          <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', justifyContent: 'center' }}>
             {gameState.market?.map((cardId, i) => {
               const card = CARD_REGISTRY[cardId];
               if (!card) return null;
@@ -358,55 +357,58 @@ export const KotBoard: React.FC = () => {
                 </div>
               );
             })}
-            {(!gameState.market || gameState.market.length === 0) && (
-              <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '18px', fontWeight: 'bold', alignSelf: 'center', margin: 'auto' }}>Market Empty</span>
-            )}
           </div>
-
-          {/* Top Right: Prompts & Turn Controls */}
-          <div style={{ flex: 1, marginLeft: '20px', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'center', gap: '10px' }}>
-            {renderPromptsAndControls()}
-          </div>
+          {(!gameState.market || gameState.market.length === 0) && (
+            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '18px', fontWeight: 'bold', margin: 'auto' }}>Market Empty</div>
+          )}
         </div>
 
-        {/* Middle: Dice */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          {status === 'Finished' && (
-            <div style={{ padding: '15px 40px', background: gameState.winnerId === myPlayerId ? '#22c55e' : 'rgba(255,255,255,0.1)', color: 'white', borderRadius: '12px', marginBottom: '30px', textAlign: 'center', fontSize: '32px', fontWeight: 'bold' }}>
-              {gameState.winnerId === myPlayerId ? "🏆 You Won!" : `Winner: ${players[gameState.winnerId!].name}`}
-            </div>
-          )}
+        {/* Right Half: Prompts Top, Dice Bottom */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '20px' }}>
+          {/* Top Right: Prompts & Turn Controls */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
+            {renderPromptsAndControls()}
+          </div>
 
-          <div style={{ display: 'flex', gap: '15px', marginTop: '20px' }}>
-            {dice.map((d) => {
-              const isDiceKept = d.kept || (isMyTurn && rollCount > 0 && keptDiceIds.includes(d.id));
-              return (
-                <div 
-                  key={isDiceKept ? d.id : `dice-${d.id}-${rollCount}`}
-                  onClick={() => toggleKeep(d.id)}
-                  className={!isDiceKept && rollCount > 0 ? 'dice-rolling' : ''}
-                  style={{
-                    width: '80px',
-                    height: '80px',
-                    background: isDiceKept ? '#22c55e' : 'rgba(255,255,255,0.1)',
-                    border: isDiceKept ? '3px solid #4ade80' : '2px solid rgba(255,255,255,0.3)',
-                    borderRadius: '12px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '36px',
-                    fontWeight: 'bold',
-                    cursor: (isMyTurn && rollCount > 0 && rollCount < 3 && !prompt) ? 'pointer' : 'default',
-                    boxShadow: isDiceKept ? '0 0 15px rgba(74, 222, 128, 0.5)' : 'none',
-                    opacity: rollCount === 0 ? 0.3 : 1,
-                    position: 'relative'
-                  }}
-                >
-                  {rollCount > 0 ? getDiceFace(d.value) : '?'}
-                  {isDiceKept && <div style={{position: 'absolute', top: '-10px', right: '-10px', fontSize: '20px'}}>🔒</div>}
-                </div>
-              );
-            })}
+          {/* Bottom Right: Dice */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', background: 'rgba(0,0,0,0.2)', padding: '20px', borderRadius: '12px' }}>
+            {status === 'Finished' && (
+              <div style={{ padding: '15px 40px', background: gameState.winnerId === myPlayerId ? '#22c55e' : 'rgba(255,255,255,0.1)', color: 'white', borderRadius: '12px', marginBottom: '30px', textAlign: 'center', fontSize: '32px', fontWeight: 'bold' }}>
+                {gameState.winnerId === myPlayerId ? "🏆 You Won!" : `Winner: ${players[gameState.winnerId!].name}`}
+              </div>
+            )}
+
+            <div style={{ display: 'flex', gap: '15px', marginTop: '20px' }}>
+              {dice.map((d) => {
+                const isDiceKept = d.kept || (isMyTurn && rollCount > 0 && keptDiceIds.includes(d.id));
+                return (
+                  <div 
+                    key={isDiceKept ? d.id : `dice-${d.id}-${rollCount}`}
+                    onClick={() => toggleKeep(d.id)}
+                    className={!isDiceKept && rollCount > 0 ? 'dice-rolling' : ''}
+                    style={{
+                      width: '80px',
+                      height: '80px',
+                      background: isDiceKept ? '#22c55e' : 'rgba(255,255,255,0.1)',
+                      border: isDiceKept ? '3px solid #4ade80' : '2px solid rgba(255,255,255,0.3)',
+                      borderRadius: '12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '36px',
+                      fontWeight: 'bold',
+                      cursor: (isMyTurn && rollCount > 0 && rollCount < 3 && !prompt) ? 'pointer' : 'default',
+                      boxShadow: isDiceKept ? '0 0 15px rgba(74, 222, 128, 0.5)' : 'none',
+                      opacity: rollCount === 0 ? 0.3 : 1,
+                      position: 'relative'
+                    }}
+                  >
+                    {rollCount > 0 ? getDiceFace(d.value) : '?'}
+                    {isDiceKept && <div style={{position: 'absolute', top: '-10px', right: '-10px', fontSize: '20px'}}>🔒</div>}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
 

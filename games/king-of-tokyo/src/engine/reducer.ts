@@ -651,6 +651,11 @@ export function kingOfTokyoReducer(state: KotState, action: KotAction): KotState
         const payloadBuy = { playerId: player.id, cardOwnerId: player.id, cardId, cost: card.cost };
         finalState = dispatchEvent(finalState, 'BUY_CARD', payloadBuy);
         
+        if (card.onEvent) {
+          const modState = card.onEvent('BUY_CARD', payloadBuy, finalState);
+          if (modState) finalState = modState;
+        }
+        
         const finalCost = payloadBuy.cost || 0;
         let newPlayer = { ...finalState.players[player.id], energy: finalState.players[player.id].energy - finalCost };
         
