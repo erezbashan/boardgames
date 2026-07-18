@@ -52,9 +52,9 @@ export function flipsReducer(state: FlipsState, action: FlipsAction): FlipsState
       }
     }
     
-    // If game started, init currentPlayerIndex
+    // If game started, clear the last flip result graphic
     if (action.type === 'START_GAME') {
-      newState = { ...newState, currentPlayerIndex: 0, lastFlipResult: null };
+      newState = { ...newState, lastFlipResult: null };
     }
     
     // If new game, reset player points
@@ -69,7 +69,7 @@ export function flipsReducer(state: FlipsState, action: FlipsAction): FlipsState
           pointsHistory: [0] 
         } as FlipsPlayer;
       });
-      newState = { ...newState, currentPlayerIndex: 0, lastFlipResult: null, players: resetPlayers };
+      newState = { ...newState, lastFlipResult: null, players: resetPlayers };
     }
 
     return newState;
