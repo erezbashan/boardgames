@@ -289,9 +289,9 @@ export const KotBoard: React.FC = () => {
         <style dangerouslySetInnerHTML={{ __html: styles }} />
         
         {/* Top Row: Cards and Prompts */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '40px', minHeight: '200px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '40px', minHeight: '360px' }}>
           {/* Top Left: Cards Market */}
-          <div style={{ flex: 1, border: '2px dashed rgba(255,255,255,0.2)', borderRadius: '12px', padding: '15px', display: 'flex', gap: '15px', alignItems: 'flex-start', justifyContent: 'flex-start', background: 'rgba(0,0,0,0.2)', flexWrap: 'wrap' }}>
+          <div style={{ width: '730px', flex: '0 0 auto', border: '2px dashed rgba(255,255,255,0.2)', borderRadius: '12px', padding: '15px', display: 'flex', gap: '15px', alignItems: 'flex-start', justifyContent: 'flex-start', background: 'rgba(0,0,0,0.2)', flexWrap: 'wrap' }}>
             {gameState.market?.map((cardId, i) => {
               const card = CARD_REGISTRY[cardId];
               if (!card) return null;
@@ -341,8 +341,7 @@ export const KotBoard: React.FC = () => {
                           Buy 
                           {displayCost < card.cost ? (
                             <span style={{ marginLeft: '8px' }}>
-                              <s style={{ color: 'rgba(255,255,255,0.5)', marginRight: '4px' }}>{card.cost}</s>
-                              {displayCost} ⚡
+                              <s style={{ color: 'rgba(255,255,255,0.5)' }}>{card.cost}</s> ➡️ {displayCost} ⚡
                             </span>
                           ) : (
                             <span style={{ marginLeft: '8px' }}>{card.cost} ⚡</span>

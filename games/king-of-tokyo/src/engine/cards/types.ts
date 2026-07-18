@@ -4,7 +4,10 @@ export type CardEvent =
   | 'BEFORE_RESOLVE_ATTACKS' // Modify smash count
   | 'AFTER_ATTACK'        // Fired when player deals damage (Alpha Monster)
   | 'BUY_CARD_EVAL'       // Fired when evaluating cost (Alien Metabolism)
-  | 'BUY_CARD';           // Fired when actually buying a card
+  | 'BUY_CARD'            // Fired when actually buying a card
+  | 'BEFORE_TAKE_DAMAGE'  // Fired before taking damage
+  | 'BEFORE_RESOLVE_DICE' // Fired before resolving dice
+  | 'CARD_ACTION';        // Fired when user answers a card prompt
 
 export interface CardEventPayload {
   playerId: string;

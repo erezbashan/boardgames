@@ -44,6 +44,7 @@ export interface KotState extends BaseGameState<KotPlayer> {
   history: KotHistorySnapshot[];
   deck: string[];
   market: string[];
+  turnContext?: Record<string, any>;
 }
 
 export type KotAction = 
@@ -56,7 +57,8 @@ export type KotAction =
   | { type: 'UPDATE_SETTINGS', payload: { maxHealth: number, maxVp: number, cardsPerType: number, activeCards: string[] } }
   | { type: 'BUY_CARD', payload: { playerId: string, cardId: string } }
   | { type: 'SWEEP_MARKET', payload: { playerId: string } }
-  | { type: 'END_TURN', payload: { playerId: string } };
+  | { type: 'END_TURN', payload: { playerId: string } }
+  | { type: 'CARD_ACTION', payload: { playerId: string; cardId: string; action: string; [key: string]: any } };
 
 export const initialKotState: KotState = {
   ...(baseInitialState as unknown as KotState),
@@ -187,6 +189,8 @@ export function kingOfTokyoReducer(state: KotState, action: KotAction): KotState
       newState = { 
         ...newState, 
         rollCount: 0,
+        turnContext: {},
+        prompt: undefined,
         dice: newState.dice.map(d => ({ ...d, kept: false })),
         history: [],
         deck,
@@ -303,8 +307,10 @@ export function kingOfTokyoReducer(state: KotState, action: KotAction): KotState
       ...st,
       currentPlayerIndex: nextIndex,
       rollCount: 0,
+      turnContext: {},
+      prompt: undefined,
       dice: st.dice.map(d => ({ ...d, kept: false })),
-      logs: [...st.logs, '---']
+      logs: [...st.logs, `---`, `${st.players[st.playerOrder[nextIndex]].name}'s turn!`]
     };
   }
 
@@ -339,323 +345,349 @@ export function kingOfTokyoReducer(state: KotState, action: KotAction): KotState
     }
   }
 
-  switch (action.type) {
-    case 'UPDATE_SETTINGS': {
-      if (state.status !== 'Lobby') return state;
-      const newPlayers = { ...state.players };
-      Object.keys(newPlayers).forEach(pId => {
-        // Clamp current health to the new maxHealth so we don't accidentally max out an injured player's health if this is triggered mid-game
-        // In lobby they should ideally be fully healed, so we just set it to maxHealth.
-        newPlayers[pId] = { ...newPlayers[pId], health: action.payload.maxHealth };
-      });
-      return {
-        ...state,
-        players: newPlayers,
-        settings: {
-          ...state.settings,
-          maxHealth: action.payload.maxHealth,
-          maxVp: action.payload.maxVp,
-          cardsPerType: action.payload.cardsPerType,
-          activeCards: action.payload.activeCards
-        }
-      };
-    }
-    case 'ROLL_DICE': {
-      if (state.status !== 'Playing') return state;
-      if (state.playerOrder[state.currentPlayerIndex] !== action.payload.playerId) return state;
-      if (state.rollCount >= 3) return state;
-
-      let finalState = { ...state };
-
-      if (state.rollCount === 0) {
-        const p = finalState.players[action.payload.playerId];
-        if (p.location === 'TokyoCity' && p.health > 0) {
-          finalState.players = {
-            ...finalState.players,
-            [p.id]: { ...p, vp: p.vp + 2 }
-          };
-          finalState.logs = [...finalState.logs, `${p.name} starts turn in Tokyo! Gained 2 ⭐`];
-          finalState = checkGameEnd(finalState);
-          if (finalState.status === 'Finished') return finalState;
-        }
+  function innerReducer(): KotState {
+    switch (action.type) {
+      case 'UPDATE_SETTINGS': {
+        if (state.status !== 'Lobby') return state;
+        const newPlayers = { ...state.players };
+        Object.keys(newPlayers).forEach(pId => {
+          // Clamp current health to the new maxHealth so we don't accidentally max out an injured player's health if this is triggered mid-game
+          // In lobby they should ideally be fully healed, so we just set it to maxHealth.
+          newPlayers[pId] = { ...newPlayers[pId], health: action.payload.maxHealth };
+        });
+        return {
+          ...state,
+          players: newPlayers,
+          settings: {
+            ...state.settings,
+            maxHealth: action.payload.maxHealth,
+            maxVp: action.payload.maxVp,
+            cardsPerType: action.payload.cardsPerType,
+            activeCards: action.payload.activeCards
+          }
+        };
       }
+      case 'ROLL_DICE': {
+        if (state.status !== 'Playing') return state;
+        if (state.playerOrder[state.currentPlayerIndex] !== action.payload.playerId) return state;
+        if (state.rollCount >= 3) return state;
 
-      const keptDiceIds = action.payload.keptDiceIds || [];
-      const newDice = finalState.dice.map(d => {
-        if (finalState.rollCount > 0 && keptDiceIds.includes(d.id)) {
-          return { ...d, kept: true };
+        let finalState = { ...state };
+
+        if (state.rollCount === 0) {
+          const p = finalState.players[action.payload.playerId];
+          if (p.location === 'TokyoCity' && p.health > 0) {
+            finalState.players = {
+              ...finalState.players,
+              [p.id]: { ...p, vp: p.vp + 2 }
+            };
+            finalState.logs = [...finalState.logs, `${p.name} starts turn in Tokyo! Gained 2 ⭐`];
+          }
         }
-        const randomFace = DICE_FACES[Math.floor(Math.random() * DICE_FACES.length)];
-        return { ...d, value: randomFace, kept: false };
-      });
 
-      finalState = {
-        ...finalState,
-        dice: newDice,
-        rollCount: finalState.rollCount + 1
-      };
+        const keptDiceIds = action.payload.keptDiceIds || [];
+        const newDice = finalState.dice.map(d => {
+          if (finalState.rollCount > 0 && keptDiceIds.includes(d.id)) {
+            return { ...d, kept: true };
+          }
+          const randomFace = DICE_FACES[Math.floor(Math.random() * DICE_FACES.length)];
+          return { ...d, value: randomFace, kept: false };
+        });
 
-      if (finalState.rollCount >= 3) {
-        finalState.actionQueue = [
-          ...(finalState.actionQueue || []),
-          { delayMs: 1500, action: { type: 'RESOLVE_DICE', payload: { playerId: action.payload.playerId } as any } }
-        ];
-      }
+        finalState = {
+          ...finalState,
+          dice: newDice,
+          rollCount: finalState.rollCount + 1
+        };
 
-      return queueBotActionsIfNeeded(finalState);
-    }
-    case 'BOT_PLAY': {
-      const botPlayer = state.players[action.payload.playerId];
-      if (!botPlayer || !botPlayer.isBot) return state;
-      
-      const { runBotStrategy } = require('../bots/botLogic');
-      const botAction = runBotStrategy(state, action.payload.playerId, botPlayer.botStrategy || 'random');
-      
-      if (botAction) {
-        return kingOfTokyoReducer(state, botAction);
-      }
-      return state;
-    }
-    case 'RESOLVE_DICE': {
-      if (state.status !== 'Playing') return state;
-      if (state.playerOrder[state.currentPlayerIndex] !== action.payload.playerId) return state;
-
-      const player = state.players[action.payload.playerId];
-      const outcomeMap: Record<string, number> = {};
-      state.dice.forEach(d => { outcomeMap[d.value] = (outcomeMap[d.value] || 0) + 1; });
-      
-      const outcomeEmojiMap: Record<string, string> = { Heart: '❤️', Energy: '⚡', Smash: '💥', '1': '1️⃣', '2': '2️⃣', '3': '3️⃣' };
-      const outcomeStr = state.dice.map(d => outcomeEmojiMap[d.value] || d.value).join(' ');
-      const logMessage = `${player.name} resolved: ${outcomeStr}`;
-
-      let newHealth = player.health;
-      let newVp = player.vp;
-      let newEnergy = player.energy;
-      let newLogs = [...state.logs, logMessage];
-      
-      const newStats = { ...player.stats };
-
-      // Energy
-      if (outcomeMap['Energy']) {
-        newEnergy += outcomeMap['Energy'];
-        newStats.energyGained += outcomeMap['Energy'];
-        newLogs.push(`${player.name} gained ${outcomeMap['Energy']} ⚡`);
-      }
-
-      // Healing (only if Outside Tokyo)
-      if (outcomeMap['Heart'] && player.location === 'Outside') {
-        const maxHealth = state.settings?.maxHealth || 10;
-        const actualHeal = Math.min(maxHealth - player.health, outcomeMap['Heart']);
-        if (actualHeal > 0) {
-          newHealth += actualHeal;
-          newStats.healthHealed += actualHeal;
-          newLogs.push(`${player.name} healed ${actualHeal} ❤️`);
+        if (finalState.rollCount >= 3) {
+          finalState.actionQueue = [
+            ...(finalState.actionQueue || []),
+            { delayMs: 1500, action: { type: 'RESOLVE_DICE', payload: { playerId: action.payload.playerId } as any } }
+          ];
         }
+
+        return queueBotActionsIfNeeded(finalState);
       }
-
-      // VPs for numbers
-      ['1', '2', '3'].forEach(num => {
-        const count = outcomeMap[num] || 0;
-        if (count >= 3) {
-          const gained = parseInt(num) + (count - 3);
-          newVp += gained;
-          newLogs.push(`${player.name} gained ${gained} ⭐`);
+      case 'BOT_PLAY': {
+        const botPlayer = state.players[action.payload.playerId];
+        if (!botPlayer || !botPlayer.isBot) return state;
+        
+        const { runBotStrategy } = require('../bots/botLogic');
+        const botAction = runBotStrategy(state, action.payload.playerId, botPlayer.botStrategy || 'random');
+        
+        if (botAction) {
+          return kingOfTokyoReducer(state, botAction);
         }
-      });
+        return state;
+      }
+      case 'RESOLVE_DICE': {
+        if (state.status !== 'Playing') return state;
+        if (state.playerOrder[state.currentPlayerIndex] !== action.payload.playerId) return state;
 
-      const updatedPlayer = { ...player, health: newHealth, vp: newVp, energy: newEnergy, stats: newStats };
-      let newPlayers = { ...state.players, [player.id]: updatedPlayer };
-      let newPrompt = state.prompt;
+        let finalState = dispatchEvent(state, 'BEFORE_RESOLVE_DICE', { playerId: action.payload.playerId });
+        if (finalState.prompt) {
+          return queueBotActionsIfNeeded(finalState);
+        }
 
-      // Attacking
-      let smashCountObj = { smashCount: outcomeMap['Smash'] || 0 };
-      
-      // Fire BEFORE_RESOLVE_ATTACKS to allow cards like Acid Attack to modify smashCountObj.smashCount
-      let finalState: KotState = {
-        ...state,
-        players: newPlayers,
-        logs: newLogs
-      };
-      
-      finalState = dispatchEvent(finalState, 'BEFORE_RESOLVE_ATTACKS', { playerId: player.id, smashCount: smashCountObj });
-      const finalSmashCount = smashCountObj.smashCount;
+        const player = finalState.players[action.payload.playerId];
+        const outcomeMap: Record<string, number> = {};
+        finalState.dice.forEach(d => { outcomeMap[d.value] = (outcomeMap[d.value] || 0) + 1; });
+        
+        const outcomeEmojiMap: Record<string, string> = { Heart: '❤️', Energy: '⚡', Smash: '💥', '1': '1️⃣', '2': '2️⃣', '3': '3️⃣' };
+        const outcomeStr = finalState.dice.map(d => outcomeEmojiMap[d.value] || d.value).join(' ');
+        const logMessage = `${player.name} resolved: ${outcomeStr}`;
 
-      let damagedSomeone = false;
-      if (finalSmashCount > 0) {
-        if (player.location === 'Outside') {
-          // Attack Tokyo players
-          const tokyoPlayers = Object.values(finalState.players).filter(p => p.location === 'TokyoCity' && p.health > 0);
-          if (tokyoPlayers.length === 0) {
-            finalState.players[player.id].location = 'TokyoCity';
-            finalState.players[player.id].vp += 1;
-            finalState.logs.push(`${player.name} entered Tokyo and gained 1 ⭐!`);
-          } else {
-            tokyoPlayers.forEach(tp => {
-              finalState.players[tp.id].health = Math.max(0, finalState.players[tp.id].health - finalSmashCount);
-              damagedSomeone = true;
-              finalState.players[player.id].stats.damageDealt += Math.min(tp.health, finalSmashCount);
-              if (finalState.players[tp.id].health === 0) {
-                finalState.players[player.id].stats.playersKilled += 1;
-                finalState.logs.push(`💀 ${tp.name} was eliminated!`);
-              }
-            });
-            finalState.logs.push(`${player.name} dealt ${finalSmashCount} 💥 to Tokyo!`);
-            
-            // Prompt first damaged living Tokyo player to yield
-            if (damagedSomeone) {
-              const livingTokyoPlayer = tokyoPlayers.find(tp => finalState.players[tp.id].health > 0);
-              if (livingTokyoPlayer) {
-                newPrompt = {
+        let newHealth = player.health;
+        let newVp = player.vp;
+        let newEnergy = player.energy;
+        let newLogs = [...finalState.logs, logMessage];
+        
+        const newStats = { ...player.stats };
+
+        // Energy
+        if (outcomeMap['Energy']) {
+          newEnergy += outcomeMap['Energy'];
+          newStats.energyGained += outcomeMap['Energy'];
+          newLogs.push(`${player.name} gained ${outcomeMap['Energy']} ⚡`);
+        }
+
+        // Healing (only if Outside Tokyo)
+        if (outcomeMap['Heart'] && player.location === 'Outside') {
+          const maxHealth = finalState.settings?.maxHealth || 10;
+          const actualHeal = Math.min(maxHealth - player.health, outcomeMap['Heart']);
+          if (actualHeal > 0) {
+            newHealth += actualHeal;
+            newStats.healthHealed += actualHeal;
+            newLogs.push(`${player.name} healed ${actualHeal} ❤️`);
+          }
+        }
+
+        // VPs for numbers
+        ['1', '2', '3'].forEach(num => {
+          const count = outcomeMap[num] || 0;
+          if (count >= 3) {
+            const gained = parseInt(num) + (count - 3);
+            newVp += gained;
+            newLogs.push(`${player.name} gained ${gained} ⭐`);
+          }
+        });
+
+        const updatedPlayer = { ...player, health: newHealth, vp: newVp, energy: newEnergy, stats: newStats };
+        let newPlayers = { ...finalState.players, [player.id]: updatedPlayer };
+        let newPrompt = finalState.prompt;
+
+        // Attacking
+        let smashCountObj = { smashCount: outcomeMap['Smash'] || 0 };
+        
+        finalState = {
+          ...finalState,
+          players: newPlayers,
+          logs: newLogs
+        };
+        
+        finalState = dispatchEvent(finalState, 'BEFORE_RESOLVE_ATTACKS', { playerId: player.id, smashCount: smashCountObj });
+        const finalSmashCount = smashCountObj.smashCount;
+
+        let damagedSomeone = false;
+        if (finalSmashCount > 0) {
+          if (player.location === 'Outside') {
+            // Attack Tokyo players
+            const tokyoPlayers = Object.values(finalState.players).filter(p => p.location === 'TokyoCity' && p.health > 0);
+            if (tokyoPlayers.length === 0) {
+              finalState.players[player.id].location = 'TokyoCity';
+              finalState.players[player.id].vp += 1;
+              finalState.logs.push(`${player.name} entered Tokyo and gained 1 ⭐!`);
+            } else {
+              tokyoPlayers.forEach(tp => {
+                let dmgObj = { damage: finalSmashCount };
+                finalState = dispatchEvent(finalState, 'BEFORE_TAKE_DAMAGE', { playerId: tp.id, attackerId: player.id, damage: dmgObj });
+                const actualDmg = dmgObj.damage;
+
+                if (actualDmg > 0) {
+                  finalState.players[tp.id].health = Math.max(0, finalState.players[tp.id].health - actualDmg);
+                  damagedSomeone = true;
+                  finalState.players[player.id].stats.damageDealt += Math.min(tp.health, actualDmg);
+                  if (finalState.players[tp.id].health === 0) {
+                    finalState.players[player.id].stats.playersKilled += 1;
+                    finalState.logs.push(`💀 ${tp.name} was eliminated!`);
+                  }
+                }
+              });
+              finalState.logs.push(`${player.name} dealt ${finalSmashCount} 💥 to Tokyo!`);
+              
+              // Prompt first damaged living Tokyo player to yield
+              if (damagedSomeone) {
+                const livingTokyoPlayer = tokyoPlayers.find(tp => finalState.players[tp.id].health > 0 && finalState.players[tp.id].health < tp.health); // Only prompt if they actually took damage
+                if (livingTokyoPlayer) {
+                  newPrompt = {
                   playerId: livingTokyoPlayer.id,
                   text: `Will you yield Tokyo?`,
                   options: [
                     { label: 'Yield', action: { type: 'YIELD_TOKYO', payload: { playerId: livingTokyoPlayer.id, attackerId: player.id } } },
                     { label: 'Stay', action: { type: 'STAY_IN_TOKYO', payload: { playerId: livingTokyoPlayer.id } } }
-                  ]
-                };
-              } else {
-                // All Tokyo players died, automatically enter Tokyo
-                finalState.players[player.id].location = 'TokyoCity';
-                finalState.players[player.id].vp += 1;
-                finalState.logs.push(`${player.name} entered empty Tokyo and gained 1 ⭐!`);
+                  ] as any
+                } as any;
+                } else if (!tokyoPlayers.find(tp => finalState.players[tp.id].health > 0)) {
+                  // All Tokyo players died, automatically enter Tokyo
+                  finalState.players[player.id].location = 'TokyoCity';
+                  finalState.players[player.id].vp += 1;
+                  finalState.logs.push(`${player.name} entered empty Tokyo and gained 1 ⭐!`);
+                }
               }
             }
-          }
-        } else {
-          // Attack Outside players
-          Object.values(finalState.players).forEach(p => {
-            if (p.location === 'Outside' && p.id !== player.id && p.health > 0) {
-              finalState.players[p.id].health = Math.max(0, finalState.players[p.id].health - finalSmashCount);
-              damagedSomeone = true;
-              finalState.players[player.id].stats.damageDealt += Math.min(p.health, finalSmashCount);
-              if (finalState.players[p.id].health === 0) {
-                finalState.players[player.id].stats.playersKilled += 1;
-                finalState.logs.push(`💀 ${p.name} was eliminated!`);
+          } else {
+            // Attack Outside players
+            Object.values(finalState.players).forEach(p => {
+              if (p.location === 'Outside' && p.id !== player.id && p.health > 0) {
+                let dmgObj = { damage: finalSmashCount };
+                finalState = dispatchEvent(finalState, 'BEFORE_TAKE_DAMAGE', { playerId: p.id, attackerId: player.id, damage: dmgObj });
+                const actualDmg = dmgObj.damage;
+
+                if (actualDmg > 0) {
+                  finalState.players[p.id].health = Math.max(0, finalState.players[p.id].health - actualDmg);
+                  damagedSomeone = true;
+                  finalState.players[player.id].stats.damageDealt += Math.min(p.health, actualDmg);
+                  if (finalState.players[p.id].health === 0) {
+                    finalState.players[player.id].stats.playersKilled += 1;
+                    finalState.logs.push(`💀 ${p.name} was eliminated!`);
+                  }
+                }
               }
+            });
+            if (damagedSomeone) {
+              finalState.logs.push(`${player.name} dealt ${finalSmashCount} 💥 to everyone outside!`);
             }
-          });
-          if (damagedSomeone) {
-            finalState.logs.push(`${player.name} dealt ${finalSmashCount} 💥 to everyone outside!`);
           }
         }
+
+        finalState = dispatchEvent(finalState, 'AFTER_ATTACK', { playerId: player.id, damagedSomeone });
+
+        if (newPrompt) {
+          finalState.prompt = newPrompt;
+        } else {
+          delete finalState.prompt;
+          finalState = enterBuyPhaseOrAdvance(finalState, player.id);
+        }
+
+        return queueBotActionsIfNeeded(finalState);
       }
+      case 'YIELD_TOKYO': {
+        const { playerId, attackerId } = action.payload;
+        const player = state.players[playerId];
+        const attacker = state.players[attackerId];
+        if (!player || !attacker || !state.prompt || state.prompt.playerId !== playerId) return state;
 
-      finalState = dispatchEvent(finalState, 'AFTER_ATTACK', { playerId: player.id, damagedSomeone });
+        const newPlayers = { ...state.players };
+        newPlayers[playerId].location = 'Outside';
+        newPlayers[attackerId].location = 'TokyoCity';
+        newPlayers[attackerId].vp += 1;
 
-      if (newPrompt) {
-        finalState.prompt = newPrompt;
-      } else {
+        let finalState: KotState = {
+          ...state,
+          players: newPlayers,
+          logs: [...state.logs, `${player.name} yielded Tokyo!`, `${attacker.name} enters and gains 1 ⭐!`]
+        };
         delete finalState.prompt;
+        finalState = enterBuyPhaseOrAdvance(finalState, attackerId);
+        
+        return queueBotActionsIfNeeded(finalState);
+      }
+      case 'STAY_IN_TOKYO': {
+        const { playerId } = action.payload;
+        const player = state.players[playerId];
+        if (!player || !state.prompt || state.prompt.playerId !== playerId) return state;
+
+        let finalState: KotState = {
+          ...state,
+          logs: [...state.logs, `${player.name} stays in Tokyo!`]
+        };
+        delete finalState.prompt;
+        
+        // The attacker is the one who caused the prompt. We can get attackerId from the previous active player (the current player)
+        const attackerId = state.playerOrder[state.currentPlayerIndex];
+        finalState = enterBuyPhaseOrAdvance(finalState, attackerId);
+        
+        return queueBotActionsIfNeeded(finalState);
+      }
+      case 'END_TURN': {
+        if (state.status !== 'Playing' || !state.prompt || state.prompt.playerId !== action.payload.playerId) return state;
+        let finalState = { ...state };
+        delete finalState.prompt;
+        finalState = advanceTurn(finalState);
+        return queueBotActionsIfNeeded(finalState);
+      }
+      case 'SWEEP_MARKET': {
+        if (state.status !== 'Playing' || !state.prompt || state.prompt.playerId !== action.payload.playerId) return state;
+        const player = state.players[action.payload.playerId];
+        if (player.energy < 2) return state;
+
+        let finalState = { ...state };
+        finalState.players = { ...finalState.players, [player.id]: { ...player, energy: player.energy - 2 } };
+        finalState.logs = [...finalState.logs, `${player.name} paid 2 ⚡ to sweep the market!`];
+        
+        const newDeck = [...finalState.deck];
+        const newMarket = newDeck.splice(0, 3);
+        finalState.deck = newDeck;
+        finalState.market = newMarket;
+
         finalState = enterBuyPhaseOrAdvance(finalState, player.id);
+        return queueBotActionsIfNeeded(finalState);
       }
+      case 'BUY_CARD': {
+        if (state.status !== 'Playing' || !state.prompt || state.prompt.playerId !== action.payload.playerId) return state;
+        const { playerId, cardId } = action.payload;
+        const player = state.players[playerId];
+        const card = CARD_REGISTRY[cardId];
+        if (!card || !state.market.includes(cardId) || (player.cards && player.cards.includes(cardId))) return state;
 
-      return queueBotActionsIfNeeded(finalState);
-    }
-    case 'YIELD_TOKYO': {
-      const { playerId, attackerId } = action.payload;
-      const player = state.players[playerId];
-      const attacker = state.players[attackerId];
-      if (!player || !attacker || !state.prompt || state.prompt.playerId !== playerId) return state;
+        const payloadEval = { playerId: player.id, cardOwnerId: player.id, cost: card.cost };
+        dispatchEvent(state, 'BUY_CARD_EVAL', payloadEval);
+        
+        if (player.energy < (payloadEval.cost || 0)) return state;
 
-      const newPlayers = { ...state.players };
-      newPlayers[playerId].location = 'Outside';
-      newPlayers[attackerId].location = 'TokyoCity';
-      newPlayers[attackerId].vp += 1;
+        let finalState = { ...state };
+        
+        const payloadBuy = { playerId: player.id, cardOwnerId: player.id, cardId, cost: card.cost };
+        finalState = dispatchEvent(finalState, 'BUY_CARD', payloadBuy);
+        
+        const finalCost = payloadBuy.cost || 0;
+        let newPlayer = { ...finalState.players[player.id], energy: finalState.players[player.id].energy - finalCost };
+        
+        finalState.logs = [...finalState.logs, `${newPlayer.name} bought ${card.name} for ${finalCost} ⚡!`];
 
-      let finalState: KotState = {
-        ...state,
-        players: newPlayers,
-        logs: [...state.logs, `${player.name} yielded Tokyo!`, `${attacker.name} enters and gains 1 ⭐!`]
-      };
-      delete finalState.prompt;
-      finalState = enterBuyPhaseOrAdvance(finalState, attackerId);
-      
-      return queueBotActionsIfNeeded(finalState);
-    }
-    case 'STAY_IN_TOKYO': {
-      const { playerId } = action.payload;
-      const player = state.players[playerId];
-      if (!player || !state.prompt || state.prompt.playerId !== playerId) return state;
+        if (card.type === 'Keep') {
+          newPlayer.cards = [...(newPlayer.cards || []), card.id];
+        }
 
-      let finalState: KotState = {
-        ...state,
-        logs: [...state.logs, `${player.name} stays in Tokyo!`]
-      };
-      delete finalState.prompt;
-      
-      // The attacker is the one who caused the prompt. We can get attackerId from the previous active player (the current player)
-      const attackerId = state.playerOrder[state.currentPlayerIndex];
-      finalState = enterBuyPhaseOrAdvance(finalState, attackerId);
-      
-      return queueBotActionsIfNeeded(finalState);
-    }
-    case 'END_TURN': {
-      if (state.status !== 'Playing' || !state.prompt || state.prompt.playerId !== action.payload.playerId) return state;
-      let finalState = { ...state };
-      delete finalState.prompt;
-      finalState = advanceTurn(finalState);
-      return queueBotActionsIfNeeded(finalState);
-    }
-    case 'SWEEP_MARKET': {
-      if (state.status !== 'Playing' || !state.prompt || state.prompt.playerId !== action.payload.playerId) return state;
-      const player = state.players[action.payload.playerId];
-      if (player.energy < 2) return state;
+        finalState.players = { ...finalState.players, [playerId]: newPlayer };
+        
+        const newMarket = [...finalState.market];
+        const marketIndex = newMarket.indexOf(cardId);
+        const newDeck = [...finalState.deck];
+        if (newDeck.length > 0) {
+          newMarket[marketIndex] = newDeck.shift()!;
+        } else {
+          newMarket.splice(marketIndex, 1);
+        }
+        finalState.market = newMarket;
+        finalState.deck = newDeck;
 
-      let finalState = { ...state };
-      finalState.players = { ...finalState.players, [player.id]: { ...player, energy: player.energy - 2 } };
-      finalState.logs = [...finalState.logs, `${player.name} paid 2 ⚡ to sweep the market!`];
-      
-      const newDeck = [...finalState.deck];
-      const newMarket = newDeck.splice(0, 3);
-      finalState.deck = newDeck;
-      finalState.market = newMarket;
-
-      finalState = enterBuyPhaseOrAdvance(finalState, player.id);
-      return queueBotActionsIfNeeded(finalState);
-    }
-    case 'BUY_CARD': {
-      if (state.status !== 'Playing' || !state.prompt || state.prompt.playerId !== action.payload.playerId) return state;
-      const { playerId, cardId } = action.payload;
-      const player = state.players[playerId];
-      const card = CARD_REGISTRY[cardId];
-      if (!card || !state.market.includes(cardId) || (player.cards && player.cards.includes(cardId))) return state;
-
-      const payloadEval = { playerId: player.id, cardOwnerId: player.id, cost: card.cost };
-      dispatchEvent(state, 'BUY_CARD_EVAL', payloadEval);
-      
-      if (player.energy < (payloadEval.cost || 0)) return state;
-
-      let finalState = { ...state };
-      
-      const payloadBuy = { playerId: player.id, cardOwnerId: player.id, cardId, cost: card.cost };
-      finalState = dispatchEvent(finalState, 'BUY_CARD', payloadBuy);
-      
-      const finalCost = payloadBuy.cost || 0;
-      let newPlayer = { ...finalState.players[player.id], energy: finalState.players[player.id].energy - finalCost };
-      
-      finalState.logs = [...finalState.logs, `${newPlayer.name} bought ${card.name} for ${finalCost} ⚡!`];
-
-      if (card.type === 'Keep') {
-        newPlayer.cards = [...(newPlayer.cards || []), card.id];
+        finalState = enterBuyPhaseOrAdvance(finalState, player.id);
+        return queueBotActionsIfNeeded(finalState);
       }
-
-      finalState.players = { ...finalState.players, [playerId]: newPlayer };
-      
-      const newMarket = [...finalState.market];
-      const marketIndex = newMarket.indexOf(cardId);
-      const newDeck = [...finalState.deck];
-      if (newDeck.length > 0) {
-        newMarket[marketIndex] = newDeck.shift()!;
-      } else {
-        newMarket.splice(marketIndex, 1);
+      case 'CARD_ACTION': {
+        let finalState = dispatchEvent(state, 'CARD_ACTION', action.payload);
+        return queueBotActionsIfNeeded(finalState);
       }
-      finalState.market = newMarket;
-      finalState.deck = newDeck;
-
-      finalState = enterBuyPhaseOrAdvance(finalState, player.id);
-      return queueBotActionsIfNeeded(finalState);
+      default:
+        return baseReducer(state, action);
     }
-    default:
-      return baseReducer(state, action);
   }
+
+  let finalRes = innerReducer();
+  if (finalRes.status === 'Playing') {
+    finalRes = checkGameEnd(finalRes);
+  }
+  return finalRes;
 }
