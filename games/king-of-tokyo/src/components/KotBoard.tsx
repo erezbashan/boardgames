@@ -289,8 +289,8 @@ export const KotBoard: React.FC = () => {
         <style dangerouslySetInnerHTML={{ __html: styles }} />
         
         {/* Left Half: Cards Market */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', border: '2px dashed rgba(255,255,255,0.2)', borderRadius: '12px', padding: '20px', background: 'rgba(0,0,0,0.2)', overflowY: 'auto' }}>
-          <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', justifyContent: 'center' }}>
+        <div style={{ flex: '0 0 730px', display: 'flex', flexDirection: 'column', border: '2px dashed rgba(255,255,255,0.2)', borderRadius: '12px', padding: '20px', background: 'rgba(0,0,0,0.2)', overflowY: 'hidden', overflowX: 'hidden' }}>
+          <div style={{ display: 'flex', gap: '15px', flexWrap: 'nowrap', justifyContent: 'center' }}>
             {gameState.market?.map((cardId, i) => {
               const card = CARD_REGISTRY[cardId];
               if (!card) return null;
