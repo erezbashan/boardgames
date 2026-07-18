@@ -5,7 +5,6 @@ import type { FlipsState, FlipsAction } from '@erez/flips';
 import { KotBoard } from '@erez/king-of-tokyo';
 import type { KotState, KotAction } from '@erez/king-of-tokyo';
 import { useMultiplayerGame } from './hooks/useMultiplayerGame';
-import { GameProvider } from '@erez/boardgame-core';
 
 function GameSelector() {
   const navigate = useNavigate();
