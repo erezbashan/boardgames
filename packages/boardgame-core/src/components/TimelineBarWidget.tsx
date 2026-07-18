@@ -20,7 +20,8 @@ export const TimelineBarWidget: React.FC<TimelineBarWidgetProps> = ({ data, titl
       {title && <h3 style={{ textAlign: 'center', marginBottom: '10px' }}>{title}</h3>}
       <div style={{ 
         display: 'flex', 
-        width: '100%', 
+        width: 'calc(100% - 50px)', 
+        margin: '0 10px 0 40px',
         height: height + 'px', 
         borderRadius: '8px', 
         overflow: 'hidden',
@@ -38,10 +39,6 @@ export const TimelineBarWidget: React.FC<TimelineBarWidgetProps> = ({ data, titl
             }}
           />
         ))}
-      </div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '5px', color: 'rgba(255,255,255,0.5)', fontSize: '12px' }}>
-        <span>Turn {data[0].name}</span>
-        <span>Turn {data[data.length - 1].name}</span>
       </div>
     </div>
   );

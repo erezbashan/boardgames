@@ -8,3 +8,5 @@ export * from './engine/botHelpers';
 export * from './components/Modal';
 export * from './hooks/useGameController';
 export * from './hooks/GameContext';
+export * from './components/LineChartWidget';
+export * from './components/TimelineBarWidget';

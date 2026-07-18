@@ -29,7 +29,7 @@ export const GameLog: React.FC<GameLogProps> = ({ logs }) => {
           if (l === '---') {
             return <hr key={i} style={{ borderColor: 'rgba(255,255,255,0.1)', margin: '10px 0' }} />;
           }
-          return <p key={i} style={{ margin: '5px 0', fontSize: '14px' }}>- {l}</p>;
+          return <p key={i} style={{ margin: '5px 0', fontSize: '14px' }}>{l}</p>;
         })}
       </div>
 
@@ -39,7 +39,7 @@ export const GameLog: React.FC<GameLogProps> = ({ logs }) => {
             if (l === '---') {
               return <hr key={i} style={{ borderColor: 'rgba(255,255,255,0.1)', margin: '15px 0' }} />;
             }
-            return <p key={i} style={{ margin: '8px 0', fontSize: '16px' }}>- {l}</p>;
+            return <p key={i} style={{ margin: '8px 0', fontSize: '16px' }}>{l}</p>;
           })}
         </div>
       </Modal>

@@ -100,8 +100,10 @@ export const FlipsBoard: React.FC = () => {
     
     for (let t = 0; t <= maxTurns; t++) {
       const turnEntry: any = { name: `T${t}` };
-      gameState.playerOrder.forEach(id => {
-        turnEntry[players[id].name] = players[id].pointsHistory[t] ?? players[id].score;
+      gameState.playerOrder.forEach((id, pIdx) => {
+        const jitter = pIdx * 0.15;
+        const val = players[id].pointsHistory[t] ?? players[id].score;
+        turnEntry[players[id].name] = val + jitter;
       });
       chartData.push(turnEntry);
     }
@@ -109,7 +111,8 @@ export const FlipsBoard: React.FC = () => {
     const lines = gameState.playerOrder.map((id) => ({
       key: players[id].name,
       color: players[id].color || 'white',
-      name: players[id].name
+      name: players[id].name,
+      dot: false
     }));
 
     return (
@@ -146,7 +149,7 @@ export const FlipsBoard: React.FC = () => {
 
         {/* Bottom: Line Graph */}
         <div style={{ background: 'rgba(0,0,0,0.3)', padding: '20px', borderRadius: '12px' }}>
-          <LineChartWidget title="Points Progression" data={chartData} lines={lines} height={250} />
+          <LineChartWidget title="Points Progression" data={chartData} lines={lines} height={250} hideLegend hideXAxis hideTooltip yAxisWidth={40} />
         </div>
       </div>
     );

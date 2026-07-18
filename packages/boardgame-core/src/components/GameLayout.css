@@ -140,3 +140,19 @@
   50% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.8) !important; }
   100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.3) !important; }
 }
+
+.winner-banner {
+  font-size: 0.75rem;
+  background: #eab308;
+  color: #000;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+  animation: pulse-banner 2s infinite;
+  margin-left: auto;
+}
+
+/* Hide Firebase Emulator Warning */
+.firebase-emulator-warning { display: none !important; }
+

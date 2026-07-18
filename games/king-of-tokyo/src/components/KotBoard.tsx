@@ -96,7 +96,6 @@ export const KotBoard: React.FC = () => {
   const { status, players, dice, rollCount, prompt, playerOrder, currentPlayerIndex, settings } = gameState;
 
   const [keptDiceIds, setKeptDiceIds] = React.useState<string[]>([]);
-  const [showStats, setShowStats] = React.useState(false);
   const isMyTurn = playerOrder[currentPlayerIndex] === myPlayerId;
 
   // Clear local kept dice when turn ends/begins
@@ -208,15 +207,18 @@ export const KotBoard: React.FC = () => {
 
           {/* Top Right: Prompts & Turn Controls */}
           <div style={{ flex: 1, marginLeft: '20px', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'center', gap: '10px' }}>
-            <button className="btn secondary" onClick={() => setShowStats(true)} style={{ alignSelf: 'flex-end', fontSize: '14px', padding: '5px 15px' }}>
-              📊 View Stats
-            </button>
             {renderPromptsAndControls()}
           </div>
         </div>
 
         {/* Middle: Dice */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          {status === 'Finished' && (
+            <div style={{ padding: '15px 40px', background: gameState.winnerId === myPlayerId ? '#22c55e' : 'rgba(255,255,255,0.1)', color: 'white', borderRadius: '12px', marginBottom: '30px', textAlign: 'center', fontSize: '32px', fontWeight: 'bold' }}>
+              {gameState.winnerId === myPlayerId ? "🏆 You Won!" : `Winner: ${players[gameState.winnerId!].name}`}
+            </div>
+          )}
+
           <h2 style={{ marginBottom: '20px' }}>Dice (Rolls left: {3 - rollCount})</h2>
           <div style={{ display: 'flex', gap: '15px' }}>
             {dice.map((d) => {
@@ -290,10 +292,10 @@ export const KotBoard: React.FC = () => {
       helpText={`Roll dice up to 3 times. Reach ${settings?.maxVp || 20} VP or be the last monster standing!`}
       helpUrl="https://en.wikipedia.org/wiki/King_of_Tokyo"
       renderGameSpecificPlayerDetails={renderPlayerDetails}
+      renderGameSpecificStats={() => <KotStats gameState={gameState} />}
       settings={renderSettings(settings, dispatch, status)}
     >
       {renderGraphics()}
-      {showStats && <KotStats gameState={gameState} onClose={() => setShowStats(false)} />}
     </GameLayout>
   );
 };

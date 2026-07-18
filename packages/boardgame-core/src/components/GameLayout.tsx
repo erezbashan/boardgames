@@ -52,6 +52,31 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
     }
   }, [status]);
 
+  const colorizeLog = (logText: string) => {
+    let parts: React.ReactNode[] = [logText];
+    const sortedPlayers = [...players].sort((a, b) => (b.name?.length || 0) - (a.name?.length || 0));
+    
+    sortedPlayers.forEach(p => {
+      if (!p.name) return;
+      const newParts: React.ReactNode[] = [];
+      parts.forEach(part => {
+        if (typeof part === 'string') {
+          const split = part.split(p.name);
+          split.forEach((s, idx) => {
+            newParts.push(s);
+            if (idx < split.length - 1) {
+              newParts.push(<span key={p.id + idx} style={{ color: p.color || 'white', fontWeight: 'bold' }}>{p.name}</span>);
+            }
+          });
+        } else {
+          newParts.push(part);
+        }
+      });
+      parts = newParts;
+    });
+    return parts;
+  };
+
   return (
     <div className="game-layout-container">
       {/* TOP BAR */}
@@ -92,7 +117,7 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
           </div>
           <div className="game-bottom-area">
             <div className="game-log-wrapper">
-              <GameLog logs={logs.map((l: string, index: number) => <span key={`msg-${index}`}>{l}</span>)} />
+              <GameLog logs={logs.map((l: string, index: number) => <span key={`msg-${index}`}>{colorizeLog(l)}</span>)} />
             </div>
             <div className="game-chat-wrapper">
               <ChatWindow 
@@ -112,12 +137,14 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
           {players.map((p: any) => {
             const isPlaying = p.id === currentPlayerId && status === 'Playing';
             const isMe = p.id === myPlayerId;
+            const isWinner = p.id === gameState.winnerId;
             return (
-              <div key={p.id} className={`player-card ${isPlaying ? 'is-playing' : ''} ${p.isWinner ? 'is-winner' : ''}`} style={{ borderLeftColor: p.color || 'rgba(255,255,255,0.1)', borderLeftWidth: p.color ? '4px' : '1px', position: 'relative' }}>
+              <div key={p.id} className={`player-card ${isPlaying ? 'is-playing' : ''} ${isWinner ? 'is-winner' : ''}`} style={{ borderLeftColor: p.color || 'rgba(255,255,255,0.1)', borderLeftWidth: p.color ? '4px' : '1px', position: 'relative' }}>
                 <div className="player-card-header">
                   <span className="player-name">
-                    {p.name} {p.isBot && <span title="Bot">🤖</span>} {isMe && <span style={{ color: 'gray', fontSize: '0.8em' }}>(You)</span>} {p.isWinner && <span title="Winner" style={{ marginLeft: '5px' }}>🏆</span>}
+                    {p.name} {p.isBot && <span title="Bot">🤖</span>} {isMe && <span style={{ color: 'gray', fontSize: '0.8em' }}>(You)</span>}
                   </span>
+                  {isWinner && <span className="winner-banner">🏆 Winner</span>}
                   {isPlaying && <span className="playing-banner">Playing</span>}
                   {status === 'Lobby' && !isMe && (
                     <button 

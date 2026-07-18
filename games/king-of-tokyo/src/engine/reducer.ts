@@ -165,6 +165,29 @@ export function kingOfTokyoReducer(state: KotState, action: KotAction): KotState
     return newState;
   }
 
+  function pushHistorySnapshot(st: KotState, currentPlayerId: string): KotState {
+    const vps: Record<string, number> = {};
+    const healths: Record<string, number> = {};
+    let tokyoOccupant: string | null = null;
+    st.playerOrder.forEach(id => {
+      vps[id] = st.players[id].vp;
+      healths[id] = st.players[id].health;
+      if (st.players[id].location === 'TokyoCity' && st.players[id].health > 0) {
+        tokyoOccupant = id;
+      }
+    });
+    return {
+      ...st,
+      history: [...st.history, {
+        turnNum: st.history.length + 1,
+        playerId: currentPlayerId,
+        vps,
+        healths,
+        tokyoOccupant
+      }]
+    };
+  }
+
   function checkGameEnd(st: KotState): KotState {
     if (st.status === 'Finished') return st;
 
@@ -179,22 +202,24 @@ export function kingOfTokyoReducer(state: KotState, action: KotAction): KotState
     }
 
     if (aliveCount <= 1) {
-      return {
+      let finalSt = {
         ...st,
         status: 'Finished',
         winnerId: aliveWinnerId || null,
         logs: [...st.logs, `Only one monster left standing!`, '---']
-      };
+      } as KotState;
+      return pushHistorySnapshot(finalSt, st.playerOrder[st.currentPlayerIndex]);
     }
 
     const vpWinner = st.playerOrder.find(id => st.players[id].vp >= (st.settings?.maxVp || 20));
     if (vpWinner) {
-      return {
+      let finalSt = {
         ...st,
         status: 'Finished',
         winnerId: vpWinner,
         logs: [...st.logs, `🏆 ${st.players[vpWinner].name} reached Max VPs!`, '---']
-      };
+      } as KotState;
+      return pushHistorySnapshot(finalSt, st.playerOrder[st.currentPlayerIndex]);
     }
 
     return st;
@@ -204,26 +229,7 @@ export function kingOfTokyoReducer(state: KotState, action: KotAction): KotState
     st = checkGameEnd(st);
     if (st.status === 'Finished') return st;
 
-    const currentPlayerId = st.playerOrder[st.currentPlayerIndex];
-    const vps: Record<string, number> = {};
-    const healths: Record<string, number> = {};
-    let tokyoOccupant: string | null = null;
-    
-    st.playerOrder.forEach(id => {
-      vps[id] = st.players[id].vp;
-      healths[id] = st.players[id].health;
-      if (st.players[id].location === 'TokyoCity' && st.players[id].health > 0) {
-        tokyoOccupant = id;
-      }
-    });
-
-    const newHistory = [...st.history, {
-      turnNum: st.history.length + 1,
-      playerId: currentPlayerId,
-      vps,
-      healths,
-      tokyoOccupant
-    }];
+    st = pushHistorySnapshot(st, st.playerOrder[st.currentPlayerIndex]);
 
     let nextIndex = st.currentPlayerIndex;
     do {
@@ -235,8 +241,7 @@ export function kingOfTokyoReducer(state: KotState, action: KotAction): KotState
       currentPlayerIndex: nextIndex,
       rollCount: 0,
       dice: st.dice.map(d => ({ ...d, kept: false })),
-      logs: [...st.logs, '---'],
-      history: newHistory
+      logs: [...st.logs, '---']
     };
   }
 
@@ -245,6 +250,8 @@ export function kingOfTokyoReducer(state: KotState, action: KotAction): KotState
       if (state.status !== 'Lobby') return state;
       const newPlayers = { ...state.players };
       Object.keys(newPlayers).forEach(pId => {
+        // Clamp current health to the new maxHealth so we don't accidentally max out an injured player's health if this is triggered mid-game
+        // In lobby they should ideally be fully healed, so we just set it to maxHealth.
         newPlayers[pId] = { ...newPlayers[pId], health: action.payload.maxHealth };
       });
       return {
