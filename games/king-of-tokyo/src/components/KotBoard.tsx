@@ -109,8 +109,20 @@ const renderSettings = (settings: any, dispatch: any, status: string) => {
           />
         </div>
         <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '10px' }}>
-          <button className="btn" disabled={status !== 'Lobby'} onClick={() => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...currentSettings, activeCards: ALL_CARD_IDS } })}>Select All</button>
-          <button className="btn" disabled={status !== 'Lobby'} onClick={() => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...currentSettings, activeCards: [] } })}>Select None</button>
+          <button 
+            disabled={status !== 'Lobby'} 
+            onClick={() => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...currentSettings, activeCards: ALL_CARD_IDS } })}
+            style={{ padding: '4px 8px', fontSize: '12px', background: 'transparent', color: '#60a5fa', border: '1px solid #60a5fa', borderRadius: '4px', cursor: status === 'Lobby' ? 'pointer' : 'default', opacity: status === 'Lobby' ? 1 : 0.5 }}
+          >
+            Select All
+          </button>
+          <button 
+            disabled={status !== 'Lobby'} 
+            onClick={() => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...currentSettings, activeCards: [] } })}
+            style={{ padding: '4px 8px', fontSize: '12px', background: 'transparent', color: '#60a5fa', border: '1px solid #60a5fa', borderRadius: '4px', cursor: status === 'Lobby' ? 'pointer' : 'default', opacity: status === 'Lobby' ? 1 : 0.5 }}
+          >
+            Select None
+          </button>
         </div>
         <div style={{ maxHeight: '200px', overflowY: 'auto', textAlign: 'left', background: 'rgba(0,0,0,0.2)', padding: '10px', borderRadius: '8px', display: 'inline-block', width: '100%' }}>
           {ALL_CARD_IDS.map(id => {

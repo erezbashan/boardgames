@@ -623,9 +623,13 @@ export function kingOfTokyoReducer(state: KotState, action: KotAction): KotState
       if (player.energy < payload.cost) return state;
 
       let finalState = { ...state };
-      let newPlayer = { ...player, energy: player.energy - payload.cost };
+      let newPlayer = { ...player, energy: player.energy - (payload.cost || 0) };
       
-      finalState.logs = [...finalState.logs, `${player.name} bought ${card.name} for ${payload.cost} ⚡!`];
+      let logMsg = `${player.name} bought ${card.name} for ${payload.cost} ⚡!`;
+      if (payload.costModifiers && payload.costModifiers.length > 0) {
+        logMsg += ` (Reduced by ${payload.costModifiers.join(', ')})`;
+      }
+      finalState.logs = [...finalState.logs, logMsg];
 
       if (card.type === 'Keep') {
         newPlayer.cards = [...(newPlayer.cards || []), card.id];

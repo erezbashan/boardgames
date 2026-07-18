@@ -7,13 +7,10 @@ export const AlienMetabolism: KotCard = {
   type: 'Keep',
   description: "Buying cards costs you 1 less ⚡.",
   onEvent: (event, payload, state) => {
-    if (event === 'BUY_CARD_EVAL') {
-      const ownerId = payload.cardOwnerId;
-      if (payload.playerId !== ownerId) return;
-
-      if (typeof payload.cost === 'number') {
-        payload.cost = Math.max(0, payload.cost - 1);
-      }
+    if (event === 'BUY_CARD_EVAL' && payload.playerId === payload.cardOwnerId && payload.cost !== undefined && payload.cost > 0) {
+      payload.cost = Math.max(0, payload.cost - 1);
+      if (!payload.costModifiers) payload.costModifiers = [];
+      payload.costModifiers.push('Alien Metabolism');
     }
   }
 };

@@ -6,8 +6,12 @@ export type CardEvent =
   | 'BUY_CARD_EVAL';      // Fired when evaluating cost (Alien Metabolism)
 
 export interface CardEventPayload {
-  playerId: string;       // The active player triggering the event
-  cardOwnerId: string;    // The player who owns the card being evaluated
+  playerId: string;
+  cardOwnerId?: string;
+  smashCount?: { smashCount: number };
+  damagedSomeone?: boolean;
+  cost?: number;
+  costModifiers?: string[];
   [key: string]: any;     // Other event-specific data (e.g., cost, damagedSomeone)
 }
 
