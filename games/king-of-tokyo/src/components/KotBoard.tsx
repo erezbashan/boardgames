@@ -60,15 +60,24 @@ const AnimatedCounter = ({ value, icon, color, suffix, width }: { value: number,
   );
 };
 
+import { CARD_REGISTRY, ALL_CARD_IDS } from '../engine/cards/registry';
+
 const renderSettings = (settings: any, dispatch: any, status: string) => {
+  const currentSettings = {
+    maxHealth: settings?.maxHealth || 10,
+    maxVp: settings?.maxVp || 20,
+    cardsPerType: settings?.cardsPerType || 1,
+    activeCards: settings?.activeCards || ['acid_attack', 'alien_metabolism', 'alpha_monster']
+  };
+
   return (
     <div style={{ padding: '20px', textAlign: 'center' }}>
       <div style={{ margin: '10px 20px' }}>
         <label style={{ fontSize: '18px', marginRight: '10px' }}>Max/Initial Health:</label>
         <input 
           type="number" 
-          value={settings?.maxHealth || 10} 
-          onChange={e => dispatch({ type: 'UPDATE_SETTINGS', payload: { maxHealth: parseInt(e.target.value) || 10, maxVp: settings?.maxVp || 20 } })}
+          value={currentSettings.maxHealth} 
+          onChange={e => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...currentSettings, maxHealth: parseInt(e.target.value) || 10 } })}
           disabled={status !== 'Lobby'}
           className="modern-input"
           style={{ width: '100px', display: 'inline-block' }}
@@ -78,13 +87,57 @@ const renderSettings = (settings: any, dispatch: any, status: string) => {
         <label style={{ fontSize: '18px', marginRight: '10px' }}>VPs to Win:</label>
         <input 
           type="number" 
-          value={settings?.maxVp || 20} 
-          onChange={e => dispatch({ type: 'UPDATE_SETTINGS', payload: { maxHealth: settings?.maxHealth || 10, maxVp: parseInt(e.target.value) || 20 } })}
+          value={currentSettings.maxVp} 
+          onChange={e => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...currentSettings, maxVp: parseInt(e.target.value) || 20 } })}
           disabled={status !== 'Lobby'}
           className="modern-input"
           style={{ width: '100px', display: 'inline-block' }}
         />
       </div>
+
+      <div style={{ margin: '20px auto', borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: '20px', maxWidth: '400px' }}>
+        <h3 style={{ margin: '0 0 10px 0' }}>Deck Configuration</h3>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '10px' }}>
+          <label style={{ fontSize: '16px', marginRight: '10px' }}>Copies per Card:</label>
+          <input 
+            type="number" 
+            value={currentSettings.cardsPerType} 
+            onChange={e => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...currentSettings, cardsPerType: parseInt(e.target.value) || 1 } })}
+            disabled={status !== 'Lobby'}
+            className="modern-input"
+            style={{ width: '60px', display: 'inline-block' }}
+          />
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '10px' }}>
+          <button className="btn" disabled={status !== 'Lobby'} onClick={() => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...currentSettings, activeCards: ALL_CARD_IDS } })}>Select All</button>
+          <button className="btn" disabled={status !== 'Lobby'} onClick={() => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...currentSettings, activeCards: [] } })}>Select None</button>
+        </div>
+        <div style={{ maxHeight: '200px', overflowY: 'auto', textAlign: 'left', background: 'rgba(0,0,0,0.2)', padding: '10px', borderRadius: '8px', display: 'inline-block', width: '100%' }}>
+          {ALL_CARD_IDS.map(id => {
+            const isActive = currentSettings.activeCards.includes(id);
+            return (
+              <div key={id} style={{ padding: '4px 0' }}>
+                <label style={{ cursor: status === 'Lobby' ? 'pointer' : 'default', opacity: status === 'Lobby' ? 1 : 0.5 }}>
+                  <input 
+                    type="checkbox" 
+                    checked={!!isActive} 
+                    disabled={status !== 'Lobby'}
+                    onChange={(e) => {
+                      const newActive = e.target.checked 
+                        ? [...currentSettings.activeCards, id]
+                        : currentSettings.activeCards.filter((c: string) => c !== id);
+                      dispatch({ type: 'UPDATE_SETTINGS', payload: { ...currentSettings, activeCards: newActive } });
+                    }}
+                    style={{ marginRight: '8px' }}
+                  />
+                  {CARD_REGISTRY[id].name} <span style={{ color: 'gray', fontSize: '12px' }}>({CARD_REGISTRY[id].cost}⚡)</span>
+                </label>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
       {status === 'Lobby' && <p style={{ color: 'gray' }}>Waiting for the host to start the game...</p>}
       {status !== 'Lobby' && <p style={{ color: 'gray', fontSize: '12px' }}>Settings can only be changed in the Lobby.</p>}
     </div>
@@ -191,6 +244,8 @@ export const KotBoard: React.FC = () => {
     );
   };
 
+  const [selectedCard, setSelectedCard] = React.useState<string | null>(null);
+
   const renderGraphics = () => {
     if (status !== 'Playing' && status !== 'Finished') return null;
 
@@ -200,9 +255,28 @@ export const KotBoard: React.FC = () => {
         
         {/* Top Row: Cards and Prompts */}
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '40px', minHeight: '150px' }}>
-          {/* Top Left: Cards */}
-          <div style={{ flex: 1, border: '2px dashed rgba(255,255,255,0.2)', borderRadius: '12px', padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.2)' }}>
-            <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '24px', fontWeight: 'bold' }}>Cards Area (Coming Soon)</span>
+          {/* Top Left: Cards Market */}
+          <div style={{ flex: 1, border: '2px dashed rgba(255,255,255,0.2)', borderRadius: '12px', padding: '10px', display: 'flex', gap: '10px', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.2)', overflowX: 'auto' }}>
+            {gameState.market?.map((cardId, i) => {
+              const card = CARD_REGISTRY[cardId];
+              if (!card) return null;
+              return (
+                <div 
+                  key={`${cardId}-${i}`}
+                  style={{ background: '#1e293b', border: '1px solid #475569', borderRadius: '8px', padding: '10px', width: '120px', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', transition: 'transform 0.2s' }}
+                  onClick={() => setSelectedCard(cardId)}
+                  onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+                  onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                >
+                  <div style={{ color: '#06b6d4', fontWeight: 'bold', marginBottom: '5px' }}>{card.cost} ⚡</div>
+                  <div style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '5px' }}>{card.name}</div>
+                  <div style={{ fontSize: '10px', color: 'gray' }}>{card.type}</div>
+                </div>
+              );
+            })}
+            {(!gameState.market || gameState.market.length === 0) && (
+              <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '18px', fontWeight: 'bold' }}>Market Empty</span>
+            )}
           </div>
 
           {/* Top Right: Prompts & Turn Controls */}
@@ -252,6 +326,32 @@ export const KotBoard: React.FC = () => {
             })}
           </div>
         </div>
+
+        {/* Card Details Modal */}
+        {selectedCard && CARD_REGISTRY[selectedCard] && (
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setSelectedCard(null)}>
+            <div style={{ background: '#1e293b', padding: '30px', borderRadius: '12px', border: '2px solid #3b82f6', maxWidth: '400px', width: '100%' }} onClick={e => e.stopPropagation()}>
+              <h2 style={{ margin: '0 0 10px 0' }}>{CARD_REGISTRY[selectedCard].name}</h2>
+              <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
+                <span style={{ color: '#06b6d4', fontWeight: 'bold' }}>Cost: {CARD_REGISTRY[selectedCard].cost} ⚡</span>
+                <span style={{ color: 'gray' }}>Type: {CARD_REGISTRY[selectedCard].type}</span>
+              </div>
+              <p style={{ fontSize: '16px', lineHeight: '1.5', marginBottom: '30px' }}>{CARD_REGISTRY[selectedCard].description}</p>
+              
+              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                {prompt?.text === 'Buy Phase' && isMyTurn && gameState.market.includes(selectedCard) && (
+                  <button 
+                    className="btn primary" 
+                    onClick={() => { dispatch({ type: 'BUY_CARD', payload: { playerId: myPlayerId, cardId: selectedCard } }); setSelectedCard(null); }}
+                  >
+                    Buy Card
+                  </button>
+                )}
+                <button className="btn" onClick={() => setSelectedCard(null)}>Close</button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   };
@@ -261,29 +361,78 @@ export const KotBoard: React.FC = () => {
     const isDead = p.health <= 0;
     
     return (
-      <div style={{ 
-        marginTop: '10px', 
-        display: 'flex', 
-        justifyContent: 'flex-start', 
-        gap: '20px',
-        filter: isDead ? 'grayscale(100%)' : 'none',
-        opacity: isDead ? 0.5 : 1
-      }}>
-        <AnimatedCounter value={p.health} icon="❤️" color="#ef4444" suffix={`/${settings?.maxHealth || 10}`} width="70px" />
-        <AnimatedCounter value={p.vp} icon="⭐" color="#eab308" width="40px" />
-        <AnimatedCounter value={p.energy} icon={<LightningIcon />} color="#06b6d4" width="40px" />
-        {p.location === 'TokyoCity' && !isDead && (
-          <div style={{ color: '#a855f7', fontWeight: 'bold', border: '1px solid #a855f7', padding: '2px 6px', borderRadius: '4px', fontSize: '12px', marginLeft: 'auto' }}>
-            TOKYO
-          </div>
-        )}
-        {isDead && (
-          <div style={{ color: 'gray', fontWeight: 'bold', border: '1px solid gray', padding: '2px 6px', borderRadius: '4px', fontSize: '12px', marginLeft: 'auto' }}>
-            DEAD
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <div style={{ 
+          marginTop: '10px', 
+          display: 'flex', 
+          justifyContent: 'flex-start', 
+          gap: '20px',
+          filter: isDead ? 'grayscale(100%)' : 'none',
+          opacity: isDead ? 0.5 : 1
+        }}>
+          <AnimatedCounter value={p.health} icon="❤️" color="#ef4444" suffix={`/${settings?.maxHealth || 10}`} width="70px" />
+          <AnimatedCounter value={p.vp} icon="⭐" color="#eab308" width="40px" />
+          <AnimatedCounter value={p.energy} icon={<LightningIcon />} color="#06b6d4" width="40px" />
+          {p.location === 'TokyoCity' && !isDead && (
+            <div style={{ color: '#a855f7', fontWeight: 'bold', border: '1px solid #a855f7', padding: '2px 6px', borderRadius: '4px', fontSize: '12px', marginLeft: 'auto' }}>
+              TOKYO
+            </div>
+          )}
+          {isDead && (
+            <div style={{ color: 'gray', fontWeight: 'bold', border: '1px solid gray', padding: '2px 6px', borderRadius: '4px', fontSize: '12px', marginLeft: 'auto' }}>
+              DEAD
+            </div>
+          )}
+        </div>
+        {p.cards && p.cards.length > 0 && (
+          <div style={{ display: 'flex', gap: '5px', marginTop: '5px', flexWrap: 'wrap' }}>
+            {p.cards.map((cId, i) => (
+               <div 
+                 key={i} 
+                 onClick={() => setSelectedCard(cId)}
+                 style={{ fontSize: '11px', background: '#334155', padding: '2px 6px', borderRadius: '4px', cursor: 'pointer' }}
+               >
+                 {CARD_REGISTRY[cId]?.name || cId}
+               </div>
+            ))}
           </div>
         )}
       </div>
     );
+  };
+
+  const renderLogMessage = (msg: string, defaultRenderer: (m: string) => React.ReactNode) => {
+    let parts: React.ReactNode[] = [msg];
+    
+    ALL_CARD_IDS.forEach(cId => {
+      const card = CARD_REGISTRY[cId];
+      if (!card) return;
+      const newParts: React.ReactNode[] = [];
+      parts.forEach(part => {
+        if (typeof part === 'string') {
+          const split = part.split(card.name);
+          split.forEach((s, idx) => {
+            newParts.push(s);
+            if (idx < split.length - 1) {
+              newParts.push(
+                <span 
+                  key={`${cId}-${idx}`} 
+                  onClick={() => setSelectedCard(cId)}
+                  style={{ color: '#60a5fa', textDecoration: 'underline', cursor: 'pointer', fontWeight: 'bold' }}
+                >
+                  {card.name}
+                </span>
+              );
+            }
+          });
+        } else {
+          newParts.push(part);
+        }
+      });
+      parts = newParts;
+    });
+
+    return parts.map((p, i) => typeof p === 'string' ? <React.Fragment key={i}>{defaultRenderer(p)}</React.Fragment> : p);
   };
 
   return (
@@ -293,6 +442,7 @@ export const KotBoard: React.FC = () => {
       helpUrl="https://en.wikipedia.org/wiki/King_of_Tokyo"
       renderGameSpecificPlayerDetails={renderPlayerDetails}
       renderGameSpecificStats={() => <KotStats gameState={gameState} />}
+      renderLogMessage={renderLogMessage}
       settings={renderSettings(settings, dispatch, status)}
     >
       {renderGraphics()}

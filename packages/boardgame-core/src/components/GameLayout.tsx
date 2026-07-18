@@ -7,6 +7,32 @@ import { useGameContext } from '../hooks/GameContext';
 import { GameLog } from './GameLog';
 import type { BaseGameState, BasePlayer, ChatMessage, GameStatus } from '../engine/types';
 
+export const colorizeLog = (logText: string, players: any[] = []) => {
+  if (!players) players = [];
+  let parts: React.ReactNode[] = [logText];
+  const sortedPlayers = [...players].sort((a, b) => (b?.name?.length || 0) - (a?.name?.length || 0));
+  
+  sortedPlayers.forEach(p => {
+    if (!p || !p.name) return;
+    const newParts: React.ReactNode[] = [];
+    parts.forEach(part => {
+      if (typeof part === 'string') {
+        const split = part.split(p.name);
+        split.forEach((s, idx) => {
+          newParts.push(s);
+          if (idx < split.length - 1) {
+            newParts.push(<span key={p.id + idx} style={{ color: p.color || 'white', fontWeight: 'bold' }}>{p.name}</span>);
+          }
+        });
+      } else {
+        newParts.push(part);
+      }
+    });
+    parts = newParts;
+  });
+  return parts;
+};
+
 export interface GameLayoutProps {
   gameName: string;
   
@@ -17,6 +43,7 @@ export interface GameLayoutProps {
   settings?: React.ReactNode; 
   renderGameSpecificPlayerDetails?: (playerId: string) => React.ReactNode;
   renderGameSpecificStats?: () => React.ReactNode;
+  renderLogMessage?: (msg: string, defaultRenderer: (m: string) => React.ReactNode) => React.ReactNode;
 }
 
 export const GameLayout: React.FC<GameLayoutProps> = ({
@@ -26,7 +53,8 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
   settings,
   children,
   renderGameSpecificPlayerDetails,
-  renderGameSpecificStats
+  renderGameSpecificStats,
+  renderLogMessage
 }) => {
   const [showSettings, setShowSettings] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
@@ -51,31 +79,6 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
       setShowStats(false);
     }
   }, [status]);
-
-  const colorizeLog = (logText: string) => {
-    let parts: React.ReactNode[] = [logText];
-    const sortedPlayers = [...players].sort((a, b) => (b.name?.length || 0) - (a.name?.length || 0));
-    
-    sortedPlayers.forEach(p => {
-      if (!p.name) return;
-      const newParts: React.ReactNode[] = [];
-      parts.forEach(part => {
-        if (typeof part === 'string') {
-          const split = part.split(p.name);
-          split.forEach((s, idx) => {
-            newParts.push(s);
-            if (idx < split.length - 1) {
-              newParts.push(<span key={p.id + idx} style={{ color: p.color || 'white', fontWeight: 'bold' }}>{p.name}</span>);
-            }
-          });
-        } else {
-          newParts.push(part);
-        }
-      });
-      parts = newParts;
-    });
-    return parts;
-  };
 
   return (
     <div className="game-layout-container">
@@ -117,7 +120,7 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
           </div>
           <div className="game-bottom-area">
             <div className="game-log-wrapper">
-              <GameLog logs={logs.map((l: string, index: number) => <span key={`msg-${index}`}>{colorizeLog(l)}</span>)} />
+              <GameLog logs={logs.map((l: string, index: number) => <span key={`msg-${index}`}>{renderLogMessage ? renderLogMessage(l, (m) => colorizeLog(m, players)) : colorizeLog(l, players)}</span>)} />
             </div>
             <div className="game-chat-wrapper">
               <ChatWindow 

@@ -6,7 +6,29 @@ function runRandomStrategy(state: KotState, playerId: string): KotAction | null 
 
   // If there is a prompt for this player
   if (state.prompt && state.prompt.playerId === playerId) {
-    // Randomly pick an option
+    if (state.prompt.text === 'Buy Phase') {
+      const { CARD_REGISTRY } = require('../engine/cards/registry');
+      const { dispatchEvent } = require('../engine/reducer');
+      
+      const choices: KotAction[] = [...state.prompt.options.map(o => o.action as KotAction)];
+      
+      state.market.forEach(cardId => {
+        const card = CARD_REGISTRY[cardId];
+        if (card) {
+          const payload = { playerId, cardOwnerId: playerId, cost: card.cost };
+          dispatchEvent(state, 'BUY_CARD_EVAL', payload);
+          if (player.energy >= payload.cost) {
+            choices.push({ type: 'BUY_CARD', payload: { playerId, cardId } });
+          }
+        }
+      });
+      
+      if (choices.length > 0) {
+        return choices[Math.floor(Math.random() * choices.length)];
+      }
+    }
+
+    // Default Randomly pick an option
     const options = state.prompt.options;
     if (options.length > 0) {
       const choice = options[Math.floor(Math.random() * options.length)];
