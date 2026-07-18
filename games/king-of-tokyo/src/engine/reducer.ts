@@ -119,7 +119,8 @@ export function dispatchEvent(state: KotState, event: CardEvent, payload: CardEv
       for (const cardId of player.cards) {
         const card = CARD_REGISTRY[cardId];
         if (card && card.onEvent) {
-          const modState = card.onEvent(event, { ...payload, cardOwnerId: pId }, newState);
+          payload.cardOwnerId = pId;
+          const modState = card.onEvent(event, payload, newState);
           if (modState) {
             newState = modState;
           }

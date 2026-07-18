@@ -228,9 +228,9 @@ export const KotBoard: React.FC = () => {
       return (
         <div style={{ background: 'rgba(239, 68, 68, 0.2)', padding: '20px', borderRadius: '12px', border: '1px solid #ef4444', display: 'flex', flexDirection: 'column' }}>
           <h3 style={{ margin: '0 0 15px 0' }}>{prompt.text}</h3>
-          <div style={{ display: 'flex', gap: '10px', justifyContent: 'space-around', marginTop: '10px' }}>
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '10px' }}>
             {prompt.options.map((opt, i) => (
-              <button key={i} className="btn primary" style={{ flex: 1 }} onClick={() => dispatch(opt.action as KotAction)}>
+              <button key={i} className="btn primary" style={{ width: '160px', height: '60px', fontSize: '20px' }} onClick={() => dispatch(opt.action as KotAction)}>
                 {opt.label}
               </button>
             ))}
@@ -245,17 +245,17 @@ export const KotBoard: React.FC = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'flex-end', minHeight: '60px' }}>
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
             {rollCount > 0 && rollCount < 3 && (
-              <button className="btn" onClick={handleResolve} style={{ padding: '15px 30px', fontSize: '20px', width: '150px', background: '#10b981', color: 'white', border: 'none' }}>
-                ✅ DONE
+              <button className="btn" onClick={handleResolve} style={{ width: '160px', height: '60px', fontSize: '20px', background: '#10b981', color: 'white', border: 'none' }}>
+                Done
               </button>
             )}
             {rollCount < 3 && (
-              <button className="btn primary" onClick={handleRoll} style={{ padding: '15px 30px', fontSize: '20px', width: '200px' }}>
-                 {rollCount === 0 ? "🎲 ROLL DICE" : `🎲 REROLL DICE`}
+              <button className="btn primary" onClick={handleRoll} style={{ width: '160px', height: '60px', fontSize: '20px' }}>
+                 Roll ({3 - rollCount})
               </button>
             )}
             {rollCount >= 3 && (
-              <div style={{ padding: '15px 30px', fontSize: '20px', width: '360px', background: 'rgba(255,255,255,0.1)', color: 'white', borderRadius: '8px', textAlign: 'center' }}>
+              <div style={{ width: '330px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', background: 'rgba(255,255,255,0.1)', color: 'white', borderRadius: '8px' }}>
                 Resolving...
               </div>
             )}
@@ -291,7 +291,7 @@ export const KotBoard: React.FC = () => {
         {/* Top Row: Cards and Prompts */}
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '40px', minHeight: '200px' }}>
           {/* Top Left: Cards Market */}
-          <div style={{ flex: 1, border: '2px dashed rgba(255,255,255,0.2)', borderRadius: '12px', padding: '15px', display: 'flex', gap: '15px', alignItems: 'stretch', justifyContent: 'flex-start', background: 'rgba(0,0,0,0.2)', overflowX: 'auto' }}>
+          <div style={{ flex: 1, border: '2px dashed rgba(255,255,255,0.2)', borderRadius: '12px', padding: '15px', display: 'flex', gap: '15px', alignItems: 'flex-start', justifyContent: 'flex-start', background: 'rgba(0,0,0,0.2)', flexWrap: 'wrap' }}>
             {gameState.market?.map((cardId, i) => {
               const card = CARD_REGISTRY[cardId];
               if (!card) return null;
@@ -309,7 +309,7 @@ export const KotBoard: React.FC = () => {
               return (
                 <div 
                   key={`${cardId}-${i}`}
-                  style={{ background: '#1e293b', border: '1px solid #475569', borderRadius: '8px', padding: '15px', minWidth: '180px', flex: '0 0 auto', display: 'flex', flexDirection: 'column', transition: 'transform 0.2s', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
+                  style={{ background: '#1e293b', border: '1px solid #475569', borderRadius: '8px', padding: '15px', width: '220px', height: '320px', flex: '0 0 auto', display: 'flex', flexDirection: 'column', transition: 'transform 0.2s', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', boxSizing: 'border-box' }}
                   onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
                   onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
                 >
@@ -318,33 +318,43 @@ export const KotBoard: React.FC = () => {
                     <div style={{ fontSize: '12px', color: 'gray', padding: '2px 6px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px' }}>{card.type}</div>
                   </div>
                   
-                  <div style={{ color: '#06b6d4', fontWeight: 'bold', marginBottom: '10px', fontSize: '18px' }}>
-                    {displayCost < card.cost ? (
-                      <span>
-                        <s style={{color:'gray', marginRight: '5px'}}>{card.cost}</s> 
-                        <span>{displayCost} ⚡</span>
-                      </span>
-                    ) : (
-                      <span>{card.cost} ⚡</span>
-                    )}
-                  </div>
-                  
-                  <div style={{ fontSize: '14px', flex: 1, marginBottom: '15px', color: '#cbd5e1' }}>{card.description}</div>
+                  <div style={{ fontSize: '14px', flex: 1, marginBottom: '15px', color: '#cbd5e1', overflowY: 'auto' }}>{card.description}</div>
                   
                   {isMyTurn && prompt?.text === 'Buy Phase' && (
                     <button 
                       disabled={!canBuy}
                       onClick={() => dispatch({ type: 'BUY_CARD', payload: { playerId: myPlayerId, cardId } })}
                       style={{ 
-                        padding: '8px 10px', width: '100%', fontSize: '14px', fontWeight: 'bold', borderRadius: '6px',
-                        background: canBuy ? '#3b82f6' : 'transparent', 
+                        padding: '12px 10px', width: '100%', fontSize: '16px', fontWeight: 'bold', borderRadius: '6px',
+                        background: canBuy ? '#3b82f6' : 'rgba(255,255,255,0.1)', 
                         color: canBuy ? 'white' : 'gray', 
                         border: canBuy ? 'none' : '1px solid gray',
-                        cursor: canBuy ? 'pointer' : 'default'
+                        cursor: canBuy ? 'pointer' : 'default',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        gap: '8px'
                       }}
                     >
-                      {alreadyOwned ? 'Already Owned' : (canAfford ? `Buy for ${displayCost} ⚡` : 'Not enough ⚡')}
+                      {alreadyOwned ? 'Already Owned' : (
+                        <span>
+                          Buy 
+                          {displayCost < card.cost ? (
+                            <span style={{ marginLeft: '8px' }}>
+                              <s style={{ color: 'rgba(255,255,255,0.5)', marginRight: '4px' }}>{card.cost}</s>
+                              {displayCost} ⚡
+                            </span>
+                          ) : (
+                            <span style={{ marginLeft: '8px' }}>{card.cost} ⚡</span>
+                          )}
+                        </span>
+                      )}
                     </button>
+                  )}
+                  {(!isMyTurn || prompt?.text !== 'Buy Phase') && (
+                    <div style={{ textAlign: 'center', padding: '12px 10px', background: 'rgba(255,255,255,0.05)', borderRadius: '6px', color: 'gray', fontWeight: 'bold' }}>
+                      Cost: {card.cost} ⚡
+                    </div>
                   )}
                 </div>
               );
@@ -368,8 +378,7 @@ export const KotBoard: React.FC = () => {
             </div>
           )}
 
-          <h2 style={{ marginBottom: '20px' }}>Dice (Rolls left: {3 - rollCount})</h2>
-          <div style={{ display: 'flex', gap: '15px' }}>
+          <div style={{ display: 'flex', gap: '15px', marginTop: '20px' }}>
             {dice.map((d) => {
               const isDiceKept = d.kept || (isMyTurn && rollCount > 0 && keptDiceIds.includes(d.id));
               return (
