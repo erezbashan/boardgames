@@ -24,6 +24,8 @@ export const createGame = onCall(async (request) => {
   let state;
   if (gameType === 'flips') {
     state = initialFlipsState;
+  } else if (gameType === 'king-of-tokyo') {
+    state = initialKotState;
   } else {
     throw new HttpsError('invalid-argument', 'Unsupported game type');
   }
