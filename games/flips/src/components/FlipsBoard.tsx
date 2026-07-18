@@ -199,7 +199,7 @@ export const FlipsBoard: React.FC<FlipsBoardProps> = ({ gameState, myPlayerId, d
       onSendMessage={(msg) => handleSendMessage(msg, players[myPlayerId]?.name || 'You', players[myPlayerId]?.color)}
       onStartGame={status === 'Lobby' ? handleStart : undefined}
       onAddBot={status === 'Lobby' ? handleAddBot : undefined}
-      onNewGame={() => onLeaveGame()} // Navigate back to lobby to reset
+      onNewGame={() => dispatch({ type: 'NEW_GAME' })}
       onLeaveGame={onLeaveGame}
       helpText="Flips: First to target points wins! Click FLIP COIN to test your luck."
       renderSettings={renderSettings}

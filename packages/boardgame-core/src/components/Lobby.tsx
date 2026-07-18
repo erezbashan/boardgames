@@ -23,7 +23,14 @@ export const Lobby: React.FC<LobbyProps> = ({
   onCreateGame,
   onJoinGame
 }) => {
-  const [username, setUsername] = useState(initialUsername);
+  const [username, setUsername] = useState(() => {
+    return localStorage.getItem('boardgames_username') || initialUsername;
+  });
+
+  const handleUsernameChange = (val: string) => {
+    setUsername(val);
+    localStorage.setItem('boardgames_username', val);
+  };
 
   const handleCreate = () => {
     if (username.trim()) onCreateGame(username.trim());
@@ -44,7 +51,7 @@ export const Lobby: React.FC<LobbyProps> = ({
           type="text" 
           placeholder="Your Name" 
           value={username} 
-          onChange={e => setUsername(e.target.value)}
+          onChange={e => handleUsernameChange(e.target.value)}
           className="modern-input"
           autoComplete="off"
         />
