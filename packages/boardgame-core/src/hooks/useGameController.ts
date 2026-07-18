@@ -9,14 +9,19 @@ export interface GameController {
   handleNewGame: () => void;
 }
 
-export function useGameController(dispatch: (action: BaseAction) => void): GameController {
+export function useGameController(dispatch: (action: BaseAction) => void, gameState?: any): GameController {
   const handleStart = () => {
     dispatch({ type: 'START_GAME' });
   };
 
   const handleAddBot = () => {
+    const existingNames = gameState ? Object.values(gameState.players).map((p: any) => p.name) : [];
+    const availableNames = BOT_NAMES.filter(n => !existingNames.includes(n));
+    const botName = availableNames.length > 0 
+      ? availableNames[Math.floor(Math.random() * availableNames.length)] 
+      : `Bot ${Math.floor(Math.random() * 1000)}`;
+      
     const botId = 'bot-' + Math.random().toString(36).substring(2, 6);
-    const botName = BOT_NAMES[Math.floor(Math.random() * BOT_NAMES.length)];
     dispatch({ type: 'JOIN_GAME', payload: { playerId: botId, name: botName, isBot: true, botStrategy: 'random' } });
   };
 

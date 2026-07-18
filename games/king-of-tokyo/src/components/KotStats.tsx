@@ -27,7 +27,9 @@ export const KotStats: React.FC<KotStatsProps> = ({ gameState }) => {
       if (!p) return;
 
       if (isDeadObj[id]) {
-        // Line stops if already dead
+        // Line stops if already dead (null breaks the line)
+        vpEntry[players[id].name] = null;
+        hpEntry[players[id].name] = null;
         return;
       }
 

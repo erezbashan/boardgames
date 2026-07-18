@@ -14,12 +14,12 @@ const styles = `
   }
   @keyframes pulse-green {
     0% { transform: scale(1); color: #4ade80; }
-    50% { transform: scale(1.3); color: #4ade80; }
+    50% { transform: scale(2.5); color: #4ade80; }
     100% { transform: scale(1); color: inherit; }
   }
   @keyframes pulse-red {
     0% { transform: scale(1); color: #ef4444; }
-    50% { transform: scale(1.3); color: #ef4444; }
+    50% { transform: scale(2.5); color: #ef4444; }
     100% { transform: scale(1); color: inherit; }
   }
   .pulse-green { animation: pulse-green 1.5s ease-out; }

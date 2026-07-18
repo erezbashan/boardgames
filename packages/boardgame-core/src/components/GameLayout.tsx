@@ -34,7 +34,7 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
   const [showStats, setShowStats] = useState(false);
 
   const { gameState, myPlayerId, dispatch, onLeaveGame } = useGameContext();
-  const { handleStart, handleAddBot, handleSendMessage, handleNewGame, handleRemovePlayer } = useGameController(dispatch);
+  const { handleStart, handleAddBot, handleSendMessage, handleNewGame, handleRemovePlayer } = useGameController(dispatch, gameState);
   
   const { status, players: playersMap, playerOrder, currentPlayerIndex, chatMessages, logs } = gameState;
   const myIndex = playerOrder.indexOf(myPlayerId);
@@ -141,7 +141,7 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
             return (
               <div key={p.id} className={`player-card ${isPlaying ? 'is-playing' : ''} ${isWinner ? 'is-winner' : ''}`} style={{ borderLeftColor: p.color || 'rgba(255,255,255,0.1)', borderLeftWidth: p.color ? '4px' : '1px', position: 'relative' }}>
                 <div className="player-card-header">
-                  <span className="player-name">
+                  <span className="player-name" style={{ color: p.color || 'white' }}>
                     {p.name} {p.isBot && <span title="Bot">🤖</span>} {isMe && <span style={{ color: 'gray', fontSize: '0.8em' }}>(You)</span>}
                   </span>
                   {isWinner && <span className="winner-banner">🏆 Winner</span>}
