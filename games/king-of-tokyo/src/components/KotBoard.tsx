@@ -289,7 +289,7 @@ export const KotBoard: React.FC = () => {
         <style dangerouslySetInnerHTML={{ __html: styles }} />
         
         {/* Left Half: Cards Market */}
-        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', border: '2px dashed rgba(255,255,255,0.2)', borderRadius: '12px', padding: '20px', background: 'rgba(0,0,0,0.2)', overflowY: 'hidden', overflowX: 'hidden' }}>
+        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', border: '2px dashed rgba(255,255,255,0.2)', borderRadius: '12px', padding: '20px', background: 'rgba(0,0,0,0.2)', overflowY: 'hidden', overflowX: 'hidden' }}>
           <div style={{ display: 'flex', gap: '15px', flexWrap: 'nowrap', justifyContent: 'center' }}>
             {gameState.market?.map((cardId, i) => {
               const card = CARD_REGISTRY[cardId];
@@ -308,7 +308,7 @@ export const KotBoard: React.FC = () => {
               return (
                 <div 
                   key={`${cardId}-${i}`}
-                  style={{ background: '#1e293b', border: '1px solid #475569', borderRadius: '8px', padding: '15px', flex: 1, minWidth: '150px', maxWidth: '220px', height: '320px', display: 'flex', flexDirection: 'column', transition: 'transform 0.2s', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', boxSizing: 'border-box' }}
+                  style={{ background: '#1e293b', border: '1px solid #475569', borderRadius: '8px', padding: '15px', flex: 1, minWidth: '150px', maxWidth: '220px', height: '380px', display: 'flex', flexDirection: 'column', transition: 'transform 0.2s', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', boxSizing: 'border-box' }}
                   onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
                   onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
                 >
