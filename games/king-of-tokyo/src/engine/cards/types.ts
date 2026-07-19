@@ -7,7 +7,8 @@ export type CardEvent =
   | 'BUY_CARD'            // Fired when actually buying a card
   | 'BEFORE_TAKE_DAMAGE'  // Fired before taking damage
   | 'BEFORE_RESOLVE_DICE' // Fired before resolving dice
-  | 'CARD_ACTION';        // Fired when user answers a card prompt
+  | 'CARD_ACTION'         // Fired when user answers a card prompt
+  | 'YIELD_TOKYO';        // Fired when a player yields Tokyo
 
 export interface CardEventPayload {
   playerId: string;

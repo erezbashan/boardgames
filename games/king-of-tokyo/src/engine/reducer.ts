@@ -58,6 +58,7 @@ export type KotAction =
   | { type: 'BUY_CARD', payload: { playerId: string, cardId: string } }
   | { type: 'SWEEP_MARKET', payload: { playerId: string } }
   | { type: 'END_TURN', payload: { playerId: string } }
+  | { type: 'ADD_LOG', payload: { log: string } }
   | { type: 'CARD_ACTION', payload: { playerId: string; cardId: string; action: string; [key: string]: any } };
 
 export const initialKotState: KotState = {
@@ -619,6 +620,8 @@ export function kingOfTokyoReducer(state: KotState, action: KotAction): KotState
           logs: [...state.logs, `${player.name} yielded Tokyo!`, `${attacker.name} enters and gains 1 ⭐!`]
         };
         delete finalState.prompt;
+
+        finalState = dispatchEvent(finalState, 'YIELD_TOKYO', { playerId, attackerId });
         finalState = enterBuyPhaseOrAdvance(finalState, attackerId);
         
         return queueBotActionsIfNeeded(finalState);
@@ -639,6 +642,13 @@ export function kingOfTokyoReducer(state: KotState, action: KotAction): KotState
         finalState = enterBuyPhaseOrAdvance(finalState, attackerId);
         
         return queueBotActionsIfNeeded(finalState);
+      }
+      case 'ADD_LOG': {
+        const { log } = action.payload;
+        return {
+          ...state,
+          logs: [...state.logs, log]
+        };
       }
       case 'END_TURN': {
         if (state.status !== 'Playing' || !state.prompt || state.prompt.playerId !== action.payload.playerId) return state;
