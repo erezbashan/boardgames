@@ -8,17 +8,23 @@ import { BackgroundDweller } from './backgroundDweller';
 import { Burrowing } from './burrowing';
 import { Camouflage } from './camouflage';
 import { CommuterTrain } from './commuterTrain';
+import { CompleteDestruction } from './completeDestruction';
+import { CornerStore } from './cornerStore';
+import { DedicatedNewsTeam } from './dedicatedNewsTeam';
 
 export const CARD_REGISTRY: Record<string, KotCard> = {
-  acid_attack: AcidAttack,
-  alien_metabolism: AlienMetabolism,
-  alpha_monster: AlphaMonster,
-  apartment_building: ApartmentBuilding,
-  armor_plating: ArmorPlating,
-  background_dweller: BackgroundDweller,
-  burrowing: Burrowing,
-  camouflage: Camouflage,
-  commuter_train: CommuterTrain,
+  [AcidAttack.id]: AcidAttack,
+  [AlienMetabolism.id]: AlienMetabolism,
+  [AlphaMonster.id]: AlphaMonster,
+  [ApartmentBuilding.id]: ApartmentBuilding,
+  [ArmorPlating.id]: ArmorPlating,
+  [BackgroundDweller.id]: BackgroundDweller,
+  [Burrowing.id]: Burrowing,
+  [Camouflage.id]: Camouflage,
+  [CommuterTrain.id]: CommuterTrain,
+  [CompleteDestruction.id]: CompleteDestruction,
+  [CornerStore.id]: CornerStore,
+  [DedicatedNewsTeam.id]: DedicatedNewsTeam,
 };
 
 export const ALL_CARD_IDS = Object.keys(CARD_REGISTRY).sort((a, b) => 

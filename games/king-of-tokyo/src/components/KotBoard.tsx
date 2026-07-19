@@ -125,7 +125,7 @@ const renderSettings = (settings: any, dispatch: any, status: string) => {
             Select None
           </button>
         </div>
-        <div style={{ maxHeight: '200px', overflowY: 'auto', textAlign: 'left', background: 'rgba(0,0,0,0.2)', padding: '10px', borderRadius: '8px', display: 'inline-block', width: '100%' }}>
+        <div style={{ textAlign: 'left', background: 'rgba(0,0,0,0.2)', padding: '10px', borderRadius: '8px', display: 'inline-block', width: '100%' }}>
           {ALL_CARD_IDS.map(id => {
             const isActive = currentSettings.activeCards.includes(id);
             return (
