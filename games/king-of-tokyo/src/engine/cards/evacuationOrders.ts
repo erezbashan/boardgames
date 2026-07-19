@@ -6,7 +6,6 @@ export const EvacuationOrders: KotCard = {
   cost: 7,
   type: 'Discard',
   description: 'All other monsters lose 5 ⭐.',
-  copies: 2,
   onEvent: (event, payload, state) => {
     if (event === 'BUY_CARD' && payload.cardId === 'evacuation_orders') {
       const buyer = state.players[payload.playerId];

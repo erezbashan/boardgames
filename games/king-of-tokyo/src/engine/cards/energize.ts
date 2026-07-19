@@ -9,16 +9,18 @@ export const Energize: KotCard = {
   onEvent: (event, payload, state) => {
     if (event === 'BUY_CARD' && payload.cardId === 'energize') {
       const player = state.players[payload.playerId];
+      const hasFriend = player.cards.includes('friend_of_children');
+      const energyGain = 9 + (hasFriend ? 1 : 0);
       return {
         ...state,
         players: {
           ...state.players,
           [player.id]: {
             ...player,
-            energy: player.energy + 9
+            energy: player.energy + energyGain
           }
         },
-        logs: [...state.logs, `${player.name} instantly gained 9 ⚡ from Energize!`]
+        logs: [...state.logs, `${player.name} instantly gained ${energyGain} ⚡ from Energize!` + (hasFriend ? ' (including 1 from Friend of Children)' : '')]
       };
     }
   }

@@ -13,6 +13,15 @@ const styles = `
   .dice-rolling {
     animation: dice-roll 0.5s ease-in-out;
   }
+  @keyframes pulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.7); }
+    50% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(234, 179, 8, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(234, 179, 8, 0); }
+  }
+  @keyframes slideDown {
+    from { transform: translateY(-30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
   @keyframes pulse-green {
     0% { transform: scale(1); color: #4ade80; }
     50% { transform: scale(2.5); color: #4ade80; }
@@ -69,6 +78,7 @@ const renderSettings = (settings: any, dispatch: any, status: string, setSelecte
     maxHealth: settings?.maxHealth || 10,
     maxVp: settings?.maxVp || 20,
     cardsPerType: settings?.cardsPerType || 1,
+    startingEnergy: settings?.startingEnergy || 0,
     activeCards: settings?.activeCards || ['acid_attack', 'alien_metabolism', 'alpha_monster']
   };
 
@@ -91,6 +101,17 @@ const renderSettings = (settings: any, dispatch: any, status: string, setSelecte
           type="number" 
           value={currentSettings.maxVp} 
           onChange={e => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...currentSettings, maxVp: parseInt(e.target.value) || 20 } })}
+          disabled={status !== 'Lobby'}
+          className="modern-input"
+          style={{ width: '100px', display: 'inline-block' }}
+        />
+      </div>
+      <div style={{ margin: '10px 20px' }}>
+        <label style={{ fontSize: '18px', marginRight: '10px' }}>Starting Energy:</label>
+        <input 
+          type="number" 
+          value={currentSettings.startingEnergy} 
+          onChange={e => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...currentSettings, startingEnergy: parseInt(e.target.value) || 0 } })}
           disabled={status !== 'Lobby'}
           className="modern-input"
           style={{ width: '100px', display: 'inline-block' }}
@@ -127,23 +148,27 @@ const renderSettings = (settings: any, dispatch: any, status: string, setSelecte
           </button>
         </div>
         <div style={{ textAlign: 'left', background: 'rgba(0,0,0,0.2)', padding: '10px', borderRadius: '8px', display: 'inline-block', width: '100%' }}>
-          {ALL_CARD_IDS.map(id => {
+          {[...(status === 'Lobby' ? ALL_CARD_IDS : currentSettings.activeCards)]
+            .sort((a, b) => CARD_REGISTRY[a].name.localeCompare(CARD_REGISTRY[b].name))
+            .map((id: string) => {
             const isActive = currentSettings.activeCards.includes(id);
             return (
               <div key={id} style={{ padding: '4px 0' }}>
-                <label style={{ cursor: status === 'Lobby' ? 'pointer' : 'default', opacity: status === 'Lobby' ? 1 : 0.5 }}>
-                  <input 
-                    type="checkbox" 
-                    checked={!!isActive} 
-                    disabled={status !== 'Lobby'}
-                    onChange={(e) => {
-                      const newActive = e.target.checked 
-                        ? [...currentSettings.activeCards, id]
-                        : currentSettings.activeCards.filter((c: string) => c !== id);
-                      dispatch({ type: 'UPDATE_SETTINGS', payload: { ...currentSettings, activeCards: newActive } });
-                    }}
-                    style={{ marginRight: '8px' }}
-                  />
+                <label style={{ cursor: status === 'Lobby' ? 'pointer' : 'default', opacity: status === 'Lobby' ? 1 : 0.8 }}>
+                  {status === 'Lobby' && (
+                    <input 
+                      type="checkbox" 
+                      checked={!!isActive} 
+                      disabled={status !== 'Lobby'}
+                      onChange={(e) => {
+                        const newActive = e.target.checked 
+                          ? [...currentSettings.activeCards, id]
+                          : currentSettings.activeCards.filter((c: string) => c !== id);
+                        dispatch({ type: 'UPDATE_SETTINGS', payload: { ...currentSettings, activeCards: newActive } });
+                      }}
+                      style={{ marginRight: '8px' }}
+                    />
+                  )}
                   <span 
                     style={{ cursor: 'pointer', textDecoration: 'underline' }}
                     onClick={(e) => { e.preventDefault(); setSelectedCard(id); }}
@@ -206,11 +231,11 @@ export const KotBoard: React.FC = () => {
   React.useEffect(() => {
     setKeptDiceIds(gameState.dice.filter(d => d.kept).map(d => d.id));
   }, [gameState.dice]);
+  const maxRolls = players[myPlayerId]?.cards?.includes('giant_brain') ? 4 : 3;
 
   const handleRoll = () => {
-    if (!isMyTurn || status !== 'Playing' || prompt) return;
-    const payload = { playerId: myPlayerId, keptDiceIds };
-    dispatch({ type: 'ROLL_DICE', payload });
+    if (!isMyTurn || status !== 'Playing' || rollCount >= maxRolls || prompt) return;
+    dispatch({ type: 'ROLL_DICE', payload: { playerId: myPlayerId, keptDiceIds } });
   };
 
   const handleResolve = () => {
@@ -219,7 +244,7 @@ export const KotBoard: React.FC = () => {
   };
 
   const toggleKeep = (diceId: string) => {
-    if (!isMyTurn || status !== 'Playing' || rollCount === 0 || rollCount >= 3 || prompt) return;
+    if (!isMyTurn || status !== 'Playing' || rollCount === 0 || rollCount >= maxRolls || prompt) return;
     setKeptDiceIds(prev => prev.includes(diceId) ? prev.filter(id => id !== diceId) : [...prev, diceId]);
   };
 
@@ -259,17 +284,17 @@ export const KotBoard: React.FC = () => {
       return (
         <div style={{ height: '130px', display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'flex-end' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center', justifyContent: 'flex-start' }}>
-            {rollCount < 3 && (
+            {rollCount < maxRolls && (
               <button className="btn primary" onClick={handleRoll} style={{ width: '160px', height: '60px', fontSize: '20px' }}>
-                 Roll ({3 - rollCount})
+                 Roll ({maxRolls - rollCount})
               </button>
             )}
-            {rollCount > 0 && rollCount < 3 && (
+            {rollCount > 0 && rollCount < maxRolls && (
               <button className="btn" onClick={handleResolve} style={{ width: '160px', height: '60px', fontSize: '20px', background: '#10b981', color: 'white', border: 'none' }}>
                 Done
               </button>
             )}
-            {rollCount >= 3 && (
+            {rollCount >= maxRolls && (
               <div style={{ width: '330px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', background: 'rgba(255,255,255,0.1)', color: 'white', borderRadius: '8px' }}>
                 Resolving...
               </div>
@@ -312,7 +337,7 @@ export const KotBoard: React.FC = () => {
               return (
                 <div 
                   key={`${cardId}-${i}`}
-                  style={{ background: '#1e293b', border: '1px solid #475569', borderRadius: '8px', padding: '15px', flex: 1, minWidth: '150px', maxWidth: '220px', height: '380px', display: 'flex', flexDirection: 'column', transition: 'transform 0.2s', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', boxSizing: 'border-box' }}
+                  style={{ background: '#1e293b', border: '1px solid #475569', borderRadius: '8px', padding: '15px', flex: 1, minWidth: '150px', maxWidth: '220px', height: '380px', display: 'flex', flexDirection: 'column', transition: 'transform 0.2s', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', boxSizing: 'border-box', animation: 'slideDown 0.4s ease-out' }}
                   onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
                   onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
                 >
@@ -326,7 +351,7 @@ export const KotBoard: React.FC = () => {
                   {isMyTurn && prompt?.text === 'Buy Phase' && (
                     <button 
                       disabled={!canBuy}
-                      onClick={() => dispatch({ type: 'BUY_CARD', payload: { playerId: myPlayerId, cardId } })}
+                      onClick={() => dispatch({ type: 'BUY_CARD', payload: { playerId: myPlayerId, cardId, marketIndex: i } })}
                       style={{ 
                         padding: '12px 10px', width: '100%', fontSize: '16px', fontWeight: 'bold', borderRadius: '6px',
                         background: canBuy ? '#3b82f6' : 'rgba(255,255,255,0.1)', 
@@ -384,15 +409,15 @@ export const KotBoard: React.FC = () => {
 
             <div style={{ display: 'flex', gap: '15px', marginTop: '20px', flexWrap: 'wrap', justifyContent: 'center' }}>
               {dice.map((d) => {
-                const isDiceKept = rollCount > 0 && rollCount < 3 && keptDiceIds.includes(d.id);
+                const isDiceKept = rollCount > 0 && rollCount < maxRolls && keptDiceIds.includes(d.id);
                 return (
                   <div 
                     key={d.id}
                     onClick={() => toggleKeep(d.id)}
                     className={rollCount > 0 ? 'dice-rolling' : ''}
                     style={{
-                      width: '80px',
-                      height: '80px',
+                      width: dice.length > 6 ? '65px' : '80px',
+                      height: dice.length > 6 ? '65px' : '80px',
                       background: isDiceKept ? '#22c55e' : 'rgba(255,255,255,0.1)',
                       border: isDiceKept ? '3px solid #4ade80' : '2px solid rgba(255,255,255,0.3)',
                       borderRadius: '12px',
@@ -415,24 +440,6 @@ export const KotBoard: React.FC = () => {
             </div>
           </div>
         </div>
-
-        {/* Card Details Modal */}
-        {selectedCard && CARD_REGISTRY[selectedCard] && (
-          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setSelectedCard(null)}>
-            <div style={{ background: '#1e293b', padding: '30px', borderRadius: '12px', border: '2px solid #3b82f6', maxWidth: '400px', width: '100%' }} onClick={e => e.stopPropagation()}>
-              <h2 style={{ margin: '0 0 10px 0' }}>{CARD_REGISTRY[selectedCard].name}</h2>
-              <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
-                <span style={{ color: '#06b6d4', fontWeight: 'bold' }}>Cost: {CARD_REGISTRY[selectedCard].cost} ⚡</span>
-                <span style={{ color: 'gray' }}>Type: {CARD_REGISTRY[selectedCard].type}</span>
-              </div>
-              <p style={{ fontSize: '16px', lineHeight: '1.5', marginBottom: '30px' }}>{CARD_REGISTRY[selectedCard].description}</p>
-              
-              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-                <button onClick={() => setSelectedCard(null)} style={{ background: 'transparent', color: 'white', border: '1px solid gray', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer' }}>Close</button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     );
   };
@@ -529,16 +536,36 @@ export const KotBoard: React.FC = () => {
   };
 
   return (
-    <GameLayout
-      gameName="King of Tokyo"
-      helpText={`Roll dice up to 3 times. Reach ${settings?.maxVp || 20} VP or be the last monster standing!`}
-      helpUrl="https://en.wikipedia.org/wiki/King_of_Tokyo"
-      renderGameSpecificPlayerDetails={renderPlayerDetails}
-      renderGameSpecificStats={() => <KotStats gameState={gameState} />}
-      renderLogMessage={renderLogMessage}
-      settings={renderSettings(settings, dispatch, status, setSelectedCard)}
-    >
-      {renderGraphics()}
-    </GameLayout>
+    <>
+      <GameLayout
+        gameName="King of Tokyo"
+        helpText={`Roll dice up to 3 times. Reach ${settings?.maxVp || 20} VP or be the last monster standing!`}
+        helpUrl="https://en.wikipedia.org/wiki/King_of_Tokyo"
+        renderGameSpecificPlayerDetails={renderPlayerDetails}
+        renderGameSpecificStats={() => <KotStats gameState={gameState} />}
+        renderLogMessage={renderLogMessage}
+        settings={renderSettings(settings, dispatch, status, setSelectedCard)}
+      >
+        {renderGraphics()}
+      </GameLayout>
+
+      {/* Card Details Modal moved outside GameLayout to fix lobby rendering */}
+      {selectedCard && CARD_REGISTRY[selectedCard] && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setSelectedCard(null)}>
+          <div style={{ background: '#1e293b', padding: '30px', borderRadius: '12px', border: '2px solid #3b82f6', maxWidth: '400px', width: '100%' }} onClick={e => e.stopPropagation()}>
+            <h2 style={{ margin: '0 0 10px 0' }}>{CARD_REGISTRY[selectedCard].name}</h2>
+            <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
+              <span style={{ color: '#06b6d4', fontWeight: 'bold' }}>Cost: {CARD_REGISTRY[selectedCard].cost} ⚡</span>
+              <span style={{ color: 'gray' }}>Type: {CARD_REGISTRY[selectedCard].type}</span>
+            </div>
+            <p style={{ fontSize: '16px', lineHeight: '1.5', marginBottom: '30px' }}>{CARD_REGISTRY[selectedCard].description}</p>
+            
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+              <button onClick={() => setSelectedCard(null)} style={{ background: 'transparent', color: 'white', border: '1px solid gray', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer' }}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };

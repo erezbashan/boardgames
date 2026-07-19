@@ -8,3 +8,4 @@
 - **Vite Caching Issue:** If you make changes to UI components in the workspace packages (`boardgame-core`, `king-of-tokyo`, etc) and the user does not see them after a browser refresh, Vite has cached the old `dist` files. You MUST:
   1. Rebuild the packages: `npm run build --workspaces`
   2. Clear Vite cache and restart: `rm -rf deployments/portal/node_modules/.vite && rm -rf node_modules/.vite && npm run dev --workspace=deployments/portal -- --force` (or tell the user to restart their own dev server with `--force`).
+- **Laser Focus**: When fixing a bug or adding a specific feature, do NOT change unrelated code or UI labels (e.g. changing button texts) unless specifically requested. Always keep the changes strictly scoped to the exact problem being solved.

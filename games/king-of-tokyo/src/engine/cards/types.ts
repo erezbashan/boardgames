@@ -28,6 +28,5 @@ export interface KotCard {
   cost: number;
   type: 'Keep' | 'Discard';
   description: string;
-  copies?: number;
   onEvent?: (event: CardEvent, payload: CardEventPayload, state: KotState) => KotState | void;
 }
