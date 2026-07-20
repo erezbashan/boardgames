@@ -27,11 +27,11 @@ function handleNextAction(state: KotState): KotState {
   let topAction = st.pendingActions[0];
 
   if (topAction.type.startsWith('ASK')) {
-     const currentPlayerId = st.playerOrder[st.currentPlayerIndex];
-     const isBot = st.players[currentPlayerId]?.isBot;
+     const promptPlayerId = topAction.payload?.prompt?.playerId || topAction.playerId || st.playerOrder[st.currentPlayerIndex];
+     const isBot = st.players[promptPlayerId]?.isBot;
 
      if (isBot) {
-        st.actionQueue = [...(st.actionQueue || []), { delayMs: 500, action: { type: 'PLAY_BOT' } }];
+        st.actionQueue = [...(st.actionQueue || []), { delayMs: 20, action: { type: 'PLAY_BOT' } }];
      }
      return st; // wait for response
   }
@@ -42,7 +42,7 @@ function handleNextAction(state: KotState): KotState {
     st = triggerCards(st, topAction, 'onPostEvent');
     
     // We schedule a TICK to let client animate/see the state
-    st.actionQueue = [...(st.actionQueue || []), { delayMs: 500, action: { type: 'NOP' } }];
+    st.actionQueue = [...(st.actionQueue || []), { delayMs: 20, action: { type: 'NOP' } }];
     return st;
   } else {
     st.pendingActions[0] = { ...topAction, skipPreEvent: true };
@@ -73,7 +73,6 @@ export function kingOfTokyoReducer(state: KotState = initialKotState, action: Ko
   if (action.type !== 'NOP') {
     state = JSON.parse(JSON.stringify(state)); // Deep clone state to prevent optimistic UI mutation leaks
     console.log(`${gamePrefix}INCOMING:`, action.type);
-    console.log(`${gamePrefix}BEFORE PENDING:`, state.pendingActions?.map(a => a.type).join(', '));
   }
   
   if (action.type === 'NOP') {
@@ -88,15 +87,17 @@ export function kingOfTokyoReducer(state: KotState = initialKotState, action: Ko
   }
 
   if (action.type === 'PLAY_BOT') {
-    const pId = st.playerOrder[st.currentPlayerIndex];
     if (st.pendingActions.length > 0) {
-       const botResponse = getBotAction(st, pId);
+       const topAction = st.pendingActions[0];
+       const targetPlayerId = topAction.payload?.prompt?.playerId || topAction.playerId || st.playerOrder[st.currentPlayerIndex];
+       
+       const botResponse = getBotAction(st, targetPlayerId);
        if (botResponse) {
           // Remove the ASK action that prompted the bot!
           if (st.pendingActions[0].type.startsWith('ASK')) {
             st.pendingActions.shift();
           }
-          st.pendingActions.unshift({ ...botResponse, playerId: pId });
+          st.pendingActions.unshift({ ...botResponse, playerId: targetPlayerId });
        }
     }
   }
@@ -113,9 +114,6 @@ export function kingOfTokyoReducer(state: KotState = initialKotState, action: Ko
 
 
   const finalState = handleNextAction(st);
-  if (action.type !== 'NOP') {
-    console.log(`${gamePrefix}AFTER PENDING:`, finalState.pendingActions?.map(a => a.type).join(', '));
-  }
   return finalState;
 }
 

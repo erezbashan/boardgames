@@ -16,10 +16,6 @@ export function handleResponseRoll(st: KotState, action: PendingAction, pId: str
            ]
          }
       } });
-    } else {
-      st.pendingActions.unshift({ type: 'RESOLVE_ROLLS', playerId: pId });
     }
-  } else {
-    st.pendingActions.unshift({ type: 'RESOLVE_ROLLS', playerId: pId });
   }
 }
