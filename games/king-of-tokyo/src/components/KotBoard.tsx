@@ -44,26 +44,21 @@ const LightningIcon = () => (
 
 const AnimatedCounter = ({ value, icon, color, suffix, width }: { value: number, icon: React.ReactNode, color: string, suffix?: string, width?: string }) => {
   const prevValue = React.useRef(value);
-  const [animClass, setAnimClass] = React.useState('');
+  const [animState, setAnimState] = React.useState({ class: '', key: 0 });
 
   React.useEffect(() => {
     if (value > prevValue.current) {
-      setAnimClass('pulse-green');
-      const timer = setTimeout(() => setAnimClass(''), 1500);
-      prevValue.current = value;
-      return () => clearTimeout(timer);
+      setAnimState(s => ({ class: 'pulse-green', key: s.key + 1 }));
     } else if (value < prevValue.current) {
-      setAnimClass('pulse-red');
-      const timer = setTimeout(() => setAnimClass(''), 1500);
-      prevValue.current = value;
-      return () => clearTimeout(timer);
+      setAnimState(s => ({ class: 'pulse-red', key: s.key + 1 }));
     }
+    prevValue.current = value;
   }, [value]);
 
   return (
     <div style={{ color, fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px', width, minWidth: width }}>
       <span>{icon}</span>
-      <span key={animClass ? value : 'static'} className={animClass} style={{ display: 'inline-block', transition: 'all 0.3s', fontFamily: width ? 'monospace' : 'inherit' }}>
+      <span key={`${value}-${animState.key}`} className={animState.class} style={{ display: 'inline-block', transition: 'all 0.3s', fontFamily: width ? 'monospace' : 'inherit' }}>
         {value}{suffix}
       </span>
     </div>
