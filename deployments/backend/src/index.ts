@@ -60,8 +60,8 @@ export const dispatchAction = onCall(async (request) => {
     const uid = request.auth?.uid;
     const actionWithPlayer = uid ? { ...action, playerId: uid } : action;
 
-    console.log("INCOMING ACTION:", JSON.stringify(actionWithPlayer, null, 2));
-    console.log("PENDING ACTIONS BEFORE:", JSON.stringify(gameDoc.state?.pendingActions, null, 2));
+    console.log(`[${gameId}] INCOMING ACTION:`, actionWithPlayer.type);
+    console.log(`[${gameId}] PENDING ACTIONS BEFORE:`, gameDoc.state?.pendingActions?.map((a: any) => a.type).join(', '));
 
     if (gameType === 'flips') {
       if (!gameDoc.state) gameDoc.state = initialFlipsState;
@@ -73,7 +73,7 @@ export const dispatchAction = onCall(async (request) => {
       throw new HttpsError('invalid-argument', 'Unsupported game type');
     }
 
-    console.log("PENDING ACTIONS AFTER:", JSON.stringify(newState?.pendingActions, null, 2));
+    console.log(`[${gameId}] PENDING ACTIONS AFTER:`, newState?.pendingActions?.map((a: any) => a.type).join(', '));
 
     transaction.update(gameRef, { state: newState });
   });
@@ -95,11 +95,16 @@ export const onGameUpdated = onDocumentUpdated("games/{gameId}", async (event) =
   }
 
   const gameRef = event.data!.after.ref;
-  await db.runTransaction(async (transaction) => {
-    const doc = await transaction.get(gameRef);
-    if (!doc.exists) return;
-    const gameDoc = doc.data()!;
-    let curState = gameDoc.state;
+  const gameId = event.params.gameId;
+  return db.runTransaction(async (transaction) => {
+    const gameDoc = await transaction.get(gameRef);
+    if (!gameDoc.exists) return;
+
+    const data = gameDoc.data();
+    if (!data) return;
+
+    const curState = data.state;
+    if (!curState) return;
     
     // Safety check: Ensure the queue hasn't changed/emptied while sleeping
     if (!curState.actionQueue || curState.actionQueue.length === 0) return;
@@ -108,8 +113,8 @@ export const onGameUpdated = onDocumentUpdated("games/{gameId}", async (event) =
     const actionToRun = curState.actionQueue[0].action;
     curState.actionQueue = curState.actionQueue.slice(1);
 
-    console.log("SCHEDULED ACTION:", actionToRun.type);
-    console.log("PENDING ACTIONS BEFORE:", curState.pendingActions.map(a => a.type).join(', '));
+    console.log(`[${gameId}] SCHEDULED ACTION:`, actionToRun.type);
+    console.log(`[${gameId}] PENDING ACTIONS BEFORE:`, curState.pendingActions.map((a: any) => a.type).join(', '));
 
     let newState;
     if (data.gameType === 'flips') {
@@ -120,7 +125,7 @@ export const onGameUpdated = onDocumentUpdated("games/{gameId}", async (event) =
       return; // Add other game reducers here later
     }
 
-    console.log("PENDING ACTIONS AFTER:", newState?.pendingActions.map(a => a.type).join(', '));
+    console.log(`[${gameId}] PENDING ACTIONS AFTER:`, newState?.pendingActions.map((a: any) => a.type).join(', '));
     transaction.update(gameRef, { state: newState });
   });
 });

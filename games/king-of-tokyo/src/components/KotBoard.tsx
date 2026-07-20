@@ -298,17 +298,17 @@ export const KotBoard: React.FC = () => {
       return (
         <div style={{ height: '130px', display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'flex-end' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center', justifyContent: 'flex-start' }}>
-            {rollCount < maxRolls && (
+            {rollCount > 0 && (
               <button className="btn primary" onClick={handleRoll} style={{ width: '160px', height: '60px', fontSize: '20px' }}>
-                 Roll ({maxRolls - rollCount})
+                 Roll ({rollCount})
               </button>
             )}
-            {rollCount > 0 && rollCount < maxRolls && (
+            {rollCount < maxRolls && rollCount > 0 && (
               <button className="btn" onClick={handleResolve} style={{ width: '160px', height: '60px', fontSize: '20px', background: '#10b981', color: 'white', border: 'none' }}>
                 Done
               </button>
             )}
-            {rollCount >= maxRolls && (
+            {rollCount === 0 && (
               <div style={{ width: '330px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', background: 'rgba(255,255,255,0.1)', color: 'white', borderRadius: '8px' }}>
                 Resolving...
               </div>

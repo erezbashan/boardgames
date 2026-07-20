@@ -69,6 +69,11 @@ function triggerCards(state: KotState, action: PendingAction, hook: 'onPreEvent'
 }
 
 export function kingOfTokyoReducer(state: KotState = initialKotState, action: KotAction): KotState {
+  if (action.type !== 'NOP') {
+    console.log(`[KotReducer] INCOMING:`, action.type);
+    console.log(`[KotReducer] BEFORE PENDING:`, state.pendingActions?.map(a => a.type).join(', '));
+  }
+  
   if (action.type === 'NOP') {
     return handleNextAction(JSON.parse(JSON.stringify(state)));
   }
