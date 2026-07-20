@@ -31,7 +31,7 @@ function handleNextAction(state: KotState): KotState {
      const isBot = st.players[promptPlayerId]?.isBot;
 
      if (isBot) {
-        st.actionQueue = [...(st.actionQueue || []), { delayMs: 20, action: { type: 'PLAY_BOT' } }];
+        st.actionQueue = [...(st.actionQueue || []), { delayMs: 200, action: { type: 'PLAY_BOT' } }];
      }
      return st; // wait for response
   }
@@ -42,7 +42,7 @@ function handleNextAction(state: KotState): KotState {
     st = triggerCards(st, topAction, 'onPostEvent');
     
     // We schedule a TICK to let client animate/see the state
-    st.actionQueue = [...(st.actionQueue || []), { delayMs: 20, action: { type: 'NOP' } }];
+    st.actionQueue = [...(st.actionQueue || []), { delayMs: 400, action: { type: 'NOP' } }];
     return st;
   } else {
     st.pendingActions[0] = { ...topAction, skipPreEvent: true };

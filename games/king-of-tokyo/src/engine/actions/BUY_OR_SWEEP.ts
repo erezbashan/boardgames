@@ -1,7 +1,7 @@
 import { KotState, PendingAction } from '../types';
 
 export function handleBuyOrSweep(st: KotState, action: PendingAction, pId: string) {
-  const canSweep = st.players[pId].energy >= 2;
+  const canSweep = st.players[pId].energy >= 2 && st.deck.length > 0;
   const canPurchase = false; // simplifying for now
   if (canSweep || canPurchase) {
      st.pendingActions.unshift({ type: 'ASK_MARKET', playerId: pId, payload: {

@@ -294,7 +294,7 @@ export const KotBoard: React.FC = () => {
     }
 
     // 2. If it's MY turn and NO prompt (or if it's ASK_ROLL)
-    if (isMyTurn && (!prompt || topAction?.type === 'ASK_ROLL')) {
+    if (isMyTurn && topAction?.type === 'ASK_ROLL') {
       return (
         <div style={{ height: '130px', display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'flex-end' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center', justifyContent: 'flex-start' }}>
@@ -545,7 +545,22 @@ export const KotBoard: React.FC = () => {
       parts = newParts;
     });
 
-    return parts.map((p, i) => typeof p === 'string' ? <React.Fragment key={i}>{defaultRenderer(p)}</React.Fragment> : p);
+    const finalParts: React.ReactNode[] = [];
+    parts.forEach((part, i) => {
+      if (typeof part === 'string') {
+        const split = part.split('⚡');
+        split.forEach((s, idx) => {
+          finalParts.push(s);
+          if (idx < split.length - 1) {
+            finalParts.push(<span key={`energy-${i}-${idx}`} style={{ color: '#06b6d4', filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.5))' }}><LightningIcon /></span>);
+          }
+        });
+      } else {
+        finalParts.push(part);
+      }
+    });
+
+    return finalParts.map((p, i) => typeof p === 'string' ? <React.Fragment key={i}>{defaultRenderer(p)}</React.Fragment> : p);
   };
 
   return (
