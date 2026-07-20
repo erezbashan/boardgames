@@ -3,6 +3,10 @@ import { addLog } from '../utils';
 
 export function handleStartTurn(st: KotState, action: PendingAction, pId: string) {
   const p = st.players[pId];
+  
+  // Log the start of the turn
+  addLog(st, action, `--- 👾 ${p.name}'s Turn ---`);
+  
   st.pendingActions = [
     { type: 'SETUP_DICE', playerId: pId },
     { type: 'ASK_ROLL', playerId: pId, payload: {
@@ -10,8 +14,7 @@ export function handleStartTurn(st: KotState, action: PendingAction, pId: string
          playerId: pId,
          text: 'Roll Dice?',
          options: [
-           { label: 'Roll', action: { type: 'RESPONSE_ROLL', payload: { roll: true } } },
-           { label: 'Resolve', action: { type: 'RESPONSE_ROLL', payload: { roll: false } } }
+           { label: 'Roll', action: { type: 'RESPONSE_ROLL', payload: { roll: true } } }
          ]
        }
     } },

@@ -425,9 +425,9 @@ export const KotBoard: React.FC = () => {
                 const isDiceKept = rollCount > 0 && rollCount < maxRolls && keptDiceIds.includes(d.id);
                 return (
                   <div 
-                    key={d.id}
+                    key={`${d.id}-${rollCount}`}
                     onClick={() => toggleKeep(d.id)}
-                    className={rollCount > 0 ? 'dice-rolling' : ''}
+                    className={rollCount > 0 && rollCount < maxRolls && !isDiceKept ? 'dice-rolling' : ''}
                     style={{
                       width: dice.length > 6 ? '65px' : '80px',
                       height: dice.length > 6 ? '65px' : '80px',
@@ -439,13 +439,13 @@ export const KotBoard: React.FC = () => {
                       justifyContent: 'center',
                       fontSize: '36px',
                       fontWeight: 'bold',
-                      cursor: (isMyTurn && rollCount > 0 && rollCount < 3 && !prompt) ? 'pointer' : 'default',
+                      cursor: (isMyTurn && rollCount > 0 && rollCount < maxRolls && !prompt) ? 'pointer' : 'default',
                       boxShadow: isDiceKept ? '0 0 15px rgba(74, 222, 128, 0.5)' : 'none',
-                      opacity: rollCount === 0 ? 0.3 : 1,
+                      opacity: rollCount === maxRolls ? 0.3 : 1,
                       position: 'relative'
                     }}
                   >
-                    {rollCount > 0 ? getDiceFace(d.value) : '?'}
+                    {rollCount < maxRolls ? getDiceFace(d.value) : '?'}
                     {isDiceKept && <div style={{position: 'absolute', top: '-10px', right: '-10px', fontSize: '20px'}}>🔒</div>}
                   </div>
                 );

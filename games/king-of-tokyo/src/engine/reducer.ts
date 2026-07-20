@@ -70,12 +70,13 @@ function triggerCards(state: KotState, action: PendingAction, hook: 'onPreEvent'
 
 export function kingOfTokyoReducer(state: KotState = initialKotState, action: KotAction): KotState {
   if (action.type !== 'NOP') {
+    state = JSON.parse(JSON.stringify(state)); // Deep clone state to prevent optimistic UI mutation leaks
     console.log(`[KotReducer] INCOMING:`, action.type);
     console.log(`[KotReducer] BEFORE PENDING:`, state.pendingActions?.map(a => a.type).join(', '));
   }
   
   if (action.type === 'NOP') {
-    return handleNextAction(JSON.parse(JSON.stringify(state)));
+    return handleNextAction(state);
   }
   let st = baseReducer(state, action) as KotState;
 
@@ -90,6 +91,10 @@ export function kingOfTokyoReducer(state: KotState = initialKotState, action: Ko
     if (st.pendingActions.length > 0) {
        const botResponse = getBotAction(st, pId);
        if (botResponse) {
+          // Remove the ASK action that prompted the bot!
+          if (st.pendingActions[0].type.startsWith('ASK')) {
+            st.pendingActions.shift();
+          }
           st.pendingActions.unshift({ ...botResponse, playerId: pId });
        }
     }
