@@ -422,12 +422,12 @@ export const KotBoard: React.FC = () => {
 
             <div style={{ display: 'flex', gap: '15px', marginTop: '20px', flexWrap: 'wrap', justifyContent: 'center' }}>
               {dice.map((d) => {
-                const isDiceKept = rollCount > 0 && rollCount < maxRolls && keptDiceIds.includes(d.id);
+                const isDiceKept = rollCount < maxRolls && keptDiceIds.includes(d.id);
                 return (
                   <div 
                     key={`${d.id}-${rollCount}`}
                     onClick={() => toggleKeep(d.id)}
-                    className={rollCount > 0 && rollCount < maxRolls && !isDiceKept ? 'dice-rolling' : ''}
+                    className={rollCount < maxRolls && !isDiceKept ? 'dice-rolling' : ''}
                     style={{
                       width: dice.length > 6 ? '65px' : '80px',
                       height: dice.length > 6 ? '65px' : '80px',
