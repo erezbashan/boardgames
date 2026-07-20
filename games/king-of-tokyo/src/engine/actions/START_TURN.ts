@@ -7,6 +7,7 @@ export function handleStartTurn(st: KotState, action: PendingAction, pId: string
     { type: 'SETUP_DICE' },
     { type: 'ASK_ROLL', payload: {
        prompt: {
+         playerId: pId,
          text: 'Roll Dice?',
          options: [
            { label: 'Roll', action: { type: 'RESPONSE_ROLL', payload: { roll: true } } },

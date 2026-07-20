@@ -6,6 +6,7 @@ export function handleBuyOrSweep(st: KotState, action: PendingAction, pId: strin
   if (canSweep || canPurchase) {
      st.pendingActions.unshift({ type: 'ASK_MARKET', payload: {
         prompt: {
+          playerId: pId,
           text: 'Buy Cards?',
           options: [
             { label: 'Done', action: { type: 'RESPONSE_MARKET', payload: { action: 'DONE' } } },

@@ -8,6 +8,7 @@ export function handleResponseRoll(st: KotState, action: PendingAction, pId: str
     if (st.rollCount > 0) {
       st.pendingActions.unshift({ type: 'ASK_ROLL', payload: {
          prompt: {
+           playerId: pId,
            text: 'Roll Dice?',
            options: [
              { label: 'Roll', action: { type: 'RESPONSE_ROLL', payload: { roll: true } } },

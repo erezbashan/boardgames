@@ -17,7 +17,7 @@ export function handleAttack(st: KotState, action: PendingAction, pId: string) {
            actionsToPush.push({ type: 'TAKE_DAMAGE', payload: { amount: damage }, playerId: tId });
            actionsToPush.push({ type: 'ASK', payload: {
               prompt: {
-                playerId: tokyoPlayers[0],
+                playerId: tId,
                 text: `Will you yield Tokyo?`,
               options: [
                 { label: 'Yield', action: { type: 'RESPONSE_YIELD', payload: { yield: true, attackerId: pId } } },
