@@ -416,7 +416,7 @@ export const KotBoard: React.FC = () => {
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', background: 'rgba(0,0,0,0.2)', padding: '20px', borderRadius: '12px' }}>
             {status === 'Finished' && (
               <div style={{ padding: '15px 40px', background: gameState.winnerId === myPlayerId ? '#22c55e' : 'rgba(255,255,255,0.1)', color: 'white', borderRadius: '12px', marginBottom: '30px', textAlign: 'center', fontSize: '32px', fontWeight: 'bold' }}>
-                {gameState.winnerId === myPlayerId ? "🏆 You Won!" : `Winner: ${players[gameState.winnerId!].name}`}
+                {gameState.winnerId === myPlayerId ? "🏆 You Won!" : `Winner: ${gameState.winnerId && players[gameState.winnerId] ? players[gameState.winnerId].name : 'Unknown'}`}
               </div>
             )}
 
