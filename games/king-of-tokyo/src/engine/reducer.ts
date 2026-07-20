@@ -67,12 +67,14 @@ function handleNextAction(state: KotState): KotState {
 function triggerCards(state: KotState, action: PendingAction, hook: 'onPreEvent' | 'onPostEvent'): KotState {
   let st = state;
   st.playerOrder.forEach(pId => {
-    st.players[pId].cards.forEach(cardId => {
-      const card = CARD_REGISTRY[cardId];
-      if (card && card[hook]) {
-        st = card[hook]!(st, action, pId);
-      }
-    });
+    if (st.players[pId] && st.players[pId].cards) {
+      st.players[pId].cards.forEach(cardId => {
+        const card = CARD_REGISTRY[cardId];
+        if (card && card[hook]) {
+          st = card[hook]!(st, action, pId);
+        }
+      });
+    }
   });
   return st;
 }
