@@ -4,8 +4,8 @@ import { addLog } from '../utils';
 export function handleStartTurn(st: KotState, action: PendingAction, pId: string) {
   const p = st.players[pId];
   st.pendingActions = [
-    { type: 'SETUP_DICE' },
-    { type: 'ASK_ROLL', payload: {
+    { type: 'SETUP_DICE', playerId: pId },
+    { type: 'ASK_ROLL', playerId: pId, payload: {
        prompt: {
          playerId: pId,
          text: 'Roll Dice?',
@@ -15,9 +15,9 @@ export function handleStartTurn(st: KotState, action: PendingAction, pId: string
          ]
        }
     } },
-    { type: 'RESOLVE_ROLLS' },
-    { type: 'GO_TO_MARKET' },
-    { type: 'END_TURN' },
+    { type: 'RESOLVE_ROLLS', playerId: pId },
+    { type: 'GO_TO_MARKET', playerId: pId },
+    { type: 'END_TURN', playerId: pId },
     ...st.pendingActions
   ];
   

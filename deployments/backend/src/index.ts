@@ -60,6 +60,9 @@ export const dispatchAction = onCall(async (request) => {
     const uid = request.auth?.uid;
     const actionWithPlayer = uid ? { ...action, playerId: uid } : action;
 
+    console.log("INCOMING ACTION:", JSON.stringify(actionWithPlayer, null, 2));
+    console.log("PENDING ACTIONS BEFORE:", JSON.stringify(gameDoc.state?.pendingActions, null, 2));
+
     if (gameType === 'flips') {
       if (!gameDoc.state) gameDoc.state = initialFlipsState;
       newState = flipsReducer(gameDoc.state, actionWithPlayer);
@@ -69,6 +72,8 @@ export const dispatchAction = onCall(async (request) => {
     } else {
       throw new HttpsError('invalid-argument', 'Unsupported game type');
     }
+
+    console.log("PENDING ACTIONS AFTER:", JSON.stringify(newState?.pendingActions, null, 2));
 
     transaction.update(gameRef, { state: newState });
   });
@@ -103,6 +108,9 @@ export const onGameUpdated = onDocumentUpdated("games/{gameId}", async (event) =
     const actionToRun = curState.actionQueue[0].action;
     curState.actionQueue = curState.actionQueue.slice(1);
 
+    console.log("SCHEDULED ACTION:", JSON.stringify(actionToRun, null, 2));
+    console.log("PENDING ACTIONS BEFORE:", JSON.stringify(curState.pendingActions, null, 2));
+
     let newState;
     if (data.gameType === 'flips') {
       newState = flipsReducer(curState, actionToRun);
@@ -112,6 +120,7 @@ export const onGameUpdated = onDocumentUpdated("games/{gameId}", async (event) =
       return; // Add other game reducers here later
     }
 
+    console.log("PENDING ACTIONS AFTER:", JSON.stringify(newState?.pendingActions, null, 2));
     transaction.update(gameRef, { state: newState });
   });
 });

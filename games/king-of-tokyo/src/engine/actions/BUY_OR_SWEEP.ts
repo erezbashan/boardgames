@@ -4,7 +4,7 @@ export function handleBuyOrSweep(st: KotState, action: PendingAction, pId: strin
   const canSweep = st.players[pId].energy >= 2;
   const canPurchase = false; // simplifying for now
   if (canSweep || canPurchase) {
-     st.pendingActions.unshift({ type: 'ASK_MARKET', payload: {
+     st.pendingActions.unshift({ type: 'ASK_MARKET', playerId: pId, payload: {
         prompt: {
           playerId: pId,
           text: 'Buy Cards?',
