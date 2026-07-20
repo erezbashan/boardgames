@@ -7,7 +7,7 @@ export const ItHasAChild: CardImplementation = {
   name: 'It Has a Child',
   cost: 7,
   type: 'Keep',
-  description: 'If you are eliminated discard all your cards and lose all your [Star], Heal to 10[Heart] and start again.',
+  description: 'If you are eliminated discard all your cards and lose all your ⭐, Heal to 10❤️ and start again.',
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'DEAD' && action.playerId === pId) {
       addLog(st, action, `🌟 ${st.players[pId].name} used It Has a Child! They are reborn!`);

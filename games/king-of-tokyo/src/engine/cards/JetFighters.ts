@@ -7,7 +7,7 @@ export const JetFighters: CardImplementation = {
   name: 'Jet Fighters',
   cost: 5,
   type: 'Discard',
-  description: '+ 5[Star] and take 4 damage',
+  description: '+ 5⭐ and take 4 damage',
   onBuy: (st: KotState, action: PendingAction, pId: string) => {
     addLog(st, action, `${st.players[pId].name} used Jet Fighters!`);
     

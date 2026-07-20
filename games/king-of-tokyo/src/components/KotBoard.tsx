@@ -360,7 +360,7 @@ export const KotBoard: React.FC = () => {
                   {isMyTurn && prompt?.text === 'Buy Phase' && (
                     <button 
                       disabled={!canBuy}
-                      onClick={() => dispatch({ type: 'BUY_CARD', payload: { playerId: myPlayerId, cardId, marketIndex: i } })}
+                      onClick={() => dispatch({ type: 'RESPONSE_MARKET', payload: { action: 'BUY', cardId, marketIndex: i } })}
                       style={{ 
                         padding: '12px 10px', width: '100%', fontSize: '16px', fontWeight: 'bold', borderRadius: '6px',
                         background: canBuy ? '#3b82f6' : 'rgba(255,255,255,0.1)', 
