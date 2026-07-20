@@ -71,7 +71,7 @@ const AnimatedCounter = ({ value, icon, color, suffix, width }: { value: number,
 };
 
 import { CARD_REGISTRY } from "../engine/cards/registry";
-import { dispatchEvent } from '../engine/reducer';
+
 
 const renderSettings = (settings: any, dispatch: any, status: string, setSelectedCard: any) => {
   const currentSettings = {
@@ -199,6 +199,16 @@ export const KotBoard: React.FC = () => {
   const prevLogsLength = React.useRef(gameState.logs?.length || 0);
 
   React.useEffect(() => {
+    if (gameState.turnContext?.animatedCard) {
+      const { cardId, playerId } = gameState.turnContext.animatedCard;
+      setHighlightedCards(prev => [...prev, { cardId, playerId }]);
+      setTimeout(() => {
+        setHighlightedCards(prev => prev.filter(hc => hc.cardId !== cardId || hc.playerId !== playerId));
+      }, 2000);
+    }
+  }, [gameState.turnContext?.animatedCard]);
+
+  React.useEffect(() => {
     if (gameState.logs && gameState.logs.length > prevLogsLength.current) {
       const newLogs = gameState.logs.slice(prevLogsLength.current);
       const highlighted: {cardId: string, playerId: string}[] = [];
@@ -220,12 +230,14 @@ export const KotBoard: React.FC = () => {
         });
       });
       if (highlighted.length > 0) {
-        setHighlightedCards(highlighted);
-        setTimeout(() => setHighlightedCards([]), 2000);
+        setHighlightedCards(prev => [...prev, ...highlighted]);
+        setTimeout(() => {
+           setHighlightedCards(prev => prev.filter(hc => !highlighted.find(h => h.cardId === hc.cardId && h.playerId === hc.playerId)));
+        }, 2000);
       }
       prevLogsLength.current = gameState.logs.length;
     }
-  }, [gameState.logs?.length]);
+  }, [gameState.logs]);
 
   // Sync kept dice from server whenever dice state updates
   React.useEffect(() => {
@@ -269,7 +281,7 @@ export const KotBoard: React.FC = () => {
         <div style={{ background: 'rgba(239, 68, 68, 0.2)', padding: '20px', borderRadius: '12px', border: '1px solid #ef4444', display: 'flex', flexDirection: 'column' }}>
           <h3 style={{ margin: '0 0 15px 0' }}>{prompt.text}</h3>
           <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '10px' }}>
-            {prompt.options.map((opt, i) => (
+            {prompt.options.map((opt: any, i: number) => (
               <button key={i} className="btn primary" style={{ width: '160px', height: '60px', fontSize: '20px' }} onClick={() => dispatch(opt.action as KotAction)}>
                 {opt.label}
               </button>
@@ -325,10 +337,9 @@ export const KotBoard: React.FC = () => {
               if (!card) return null;
 
               let displayCost = card.cost;
+              // BUY_CARD_EVAL is deprecated, just use default cost for now
               if (isMyTurn && prompt?.text === 'Buy Phase') {
-                const evalPayload = { playerId: myPlayerId, cardOwnerId: myPlayerId, cost: card.cost };
-                dispatchEvent(gameState, 'BUY_CARD_EVAL', evalPayload);
-                displayCost = evalPayload.cost || 0;
+                displayCost = card.cost;
               }
               const canAfford = (players[myPlayerId]?.energy || 0) >= displayCost;
               const alreadyOwned = players[myPlayerId]?.cards?.includes(cardId);

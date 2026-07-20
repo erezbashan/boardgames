@@ -18,7 +18,7 @@ export const KotStats: React.FC<KotStatsProps> = ({ gameState }) => {
   
   const isDeadObj: Record<string, boolean> = {};
 
-  history.forEach((snapshot, turnIndex) => {
+  history.forEach((snapshot: any, turnIndex: number) => {
     const vpEntry: LineChartData = { name: `T${snapshot.turnNum}` };
     const hpEntry: LineChartData = { name: `T${snapshot.turnNum}` };
     
@@ -68,7 +68,7 @@ export const KotStats: React.FC<KotStatsProps> = ({ gameState }) => {
   }));
 
   // 3. Prepare Timeline Bar Data
-  const tokyoData: TimelineSegment[] = history.map(snapshot => {
+  const tokyoData: TimelineSegment[] = history.map((snapshot: any) => {
     let color = 'rgba(255,255,255,0.1)';
     let label = 'Empty';
     if (snapshot.tokyoOccupant) {
