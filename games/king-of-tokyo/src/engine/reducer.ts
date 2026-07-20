@@ -31,7 +31,7 @@ function handleNextAction(state: KotState): KotState {
      const isBot = st.players[currentPlayerId]?.isBot;
 
      if (isBot) {
-        st.actionQueue = [...(st.actionQueue || []), { delayMs: 1500, action: { type: 'PLAY_BOT' } }];
+        st.actionQueue = [...(st.actionQueue || []), { delayMs: 500, action: { type: 'PLAY_BOT' } }];
      }
      return st; // wait for response
   }
