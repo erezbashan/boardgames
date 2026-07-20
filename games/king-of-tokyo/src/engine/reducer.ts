@@ -38,12 +38,17 @@ function handleNextAction(state: KotState): KotState {
 
   if (topAction.skipPreEvent) {
     st.pendingActions.shift();
+    const initialLogCount = st.logs.length;
     st = doAction(st, topAction);
     st = triggerCards(st, topAction, 'onPostEvent');
     
-    // We schedule a TICK to let client animate/see the state
-    st.actionQueue = [...(st.actionQueue || []), { delayMs: 400, action: { type: 'NOP' } }];
-    return st;
+    if (st.logs.length > initialLogCount) {
+      // We schedule a TICK to let client animate/see the state
+      st.actionQueue = [...(st.actionQueue || []), { delayMs: 400, action: { type: 'NOP' } }];
+      return st;
+    } else {
+      return handleNextAction(st);
+    }
   } else {
     st.pendingActions[0] = { ...topAction, skipPreEvent: true };
     st = triggerCards(st, st.pendingActions[0], 'onPreEvent');
@@ -69,24 +74,24 @@ function triggerCards(state: KotState, action: PendingAction, hook: 'onPreEvent'
 }
 
 export function kingOfTokyoReducer(state: KotState = initialKotState, action: KotAction & { gameId?: string }): KotState {
-  const gamePrefix = action.gameId ? `[${action.gameId}] ` : '';
+  const gamePrefix = action.gameId ? `[${action.gameId}]` : '';
   if (action.type !== 'NOP') {
     state = JSON.parse(JSON.stringify(state)); // Deep clone state to prevent optimistic UI mutation leaks
-    console.log(`${gamePrefix}INCOMING:`, action.type);
+    console.log(`kingOfTokyoReducer ${gamePrefix} INCOMING:`, action.type);
+    console.log(`kingOfTokyoReducer ${gamePrefix} PENDING:`, state.pendingActions?.map(a => a.type).join(', '));
   }
   
-  if (action.type === 'NOP') {
-    return handleNextAction(state);
-  }
+  // run framework commands if any:
   let st = baseReducer(state, action) as KotState;
 
-  if (action.type === 'START_GAME') {
-    st.pendingActions.push({ type: 'START_GAME' });
-    st = handleNextAction(st);
-    return st;
+  if (action.type === 'NOP') {
+    // no need to do anything - we'll just run what's already in pendingActions
   }
-
-  if (action.type === 'PLAY_BOT') {
+  else if (action.type === 'START_GAME') {
+    st.pendingActions.push({ type: 'START_GAME' });
+  }
+  else if (action.type === 'PLAY_BOT') {
+    // this is for when we went to sleep before a bot needed to decide on something
     if (st.pendingActions.length > 0) {
        const topAction = st.pendingActions[0];
        const targetPlayerId = topAction.payload?.prompt?.playerId || topAction.playerId || st.playerOrder[st.currentPlayerIndex];
@@ -101,8 +106,7 @@ export function kingOfTokyoReducer(state: KotState = initialKotState, action: Ko
        }
     }
   }
-
-  if (action.type.startsWith('RESPONSE_')) {
+  else if (action.type.startsWith('RESPONSE_')) {
     if (st.pendingActions.length > 0 && st.pendingActions[0].type.startsWith('ASK')) {
       const askAction = st.pendingActions[0];
       if (askAction.payload?.prompt?.playerId === action.playerId) {
@@ -112,9 +116,7 @@ export function kingOfTokyoReducer(state: KotState = initialKotState, action: Ko
     }
   }
 
-
-  const finalState = handleNextAction(st);
-  return finalState;
+  return handleNextAction(st);
 }
 
 export * from './types';
