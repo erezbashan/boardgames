@@ -190,7 +190,9 @@ const renderSettings = (settings: any, dispatch: any, status: string, setSelecte
 
 export const KotBoard: React.FC = () => {
   const { gameState, myPlayerId, dispatch } = useGameContext<KotState, KotAction>();
-  const { status, players, dice, rollCount, prompt, playerOrder, currentPlayerIndex, settings } = gameState;
+  const { status, players, dice, rollCount, playerOrder, currentPlayerIndex, settings, pendingActions } = gameState;
+  const topAction = pendingActions?.[0];
+  const prompt = topAction?.type?.startsWith('ASK') ? topAction.payload?.prompt : undefined;
 
   const [keptDiceIds, setKeptDiceIds] = React.useState<string[]>([]);
   const isMyTurn = playerOrder[currentPlayerIndex] === myPlayerId;

@@ -48,7 +48,6 @@ export interface KotState extends BaseGameState<KotPlayer> {
   pendingActions: PendingAction[];
   logs: string[];
   history: any[];
-  prompt?: any; // To keep UI happy temporarily
 }
 
 export type KotAction = BaseAction | any;
@@ -149,16 +148,12 @@ function handleNextAction(state: KotState): KotState {
   if (topAction.type.startsWith('ASK')) {
      const currentPlayerId = st.playerOrder[st.currentPlayerIndex];
      const isBot = st.players[currentPlayerId]?.isBot;
-     
-     st.prompt = topAction.payload?.prompt;
 
      if (isBot) {
         st.actionQueue = [...(st.actionQueue || []), { delayMs: 1500, action: { type: 'PLAY_BOT' } }];
      }
      return st; // wait for response
   }
-
-  st.prompt = undefined; // clear prompt if we're not asking
 
   if (topAction.skipPreEvent) {
     st.pendingActions.shift();
@@ -459,12 +454,12 @@ function doAction(state: KotState, action: PendingAction): KotState {
       break;
     }
     case 'END_TURN': {
-      st.currentPlayerIndex = (st.currentPlayerIndex + 1) % st.playerOrder.length;
-      if (st.players[st.playerOrder[st.currentPlayerIndex]].health <= 0) {
-         st.pendingActions.unshift({ type: 'END_TURN' }); // skip dead
-      } else {
-         st.pendingActions.unshift({ type: 'START_TURN', playerId: st.playerOrder[st.currentPlayerIndex] });
+      let nextIdx = (st.currentPlayerIndex + 1) % st.playerOrder.length;
+      while (st.players[st.playerOrder[nextIdx]].health <= 0) {
+          nextIdx = (nextIdx + 1) % st.playerOrder.length;
       }
+      st.currentPlayerIndex = nextIdx;
+      st.pendingActions.unshift({ type: 'START_TURN', playerId: st.playerOrder[nextIdx] });
       break;
     }
   }

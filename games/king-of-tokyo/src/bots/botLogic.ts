@@ -4,10 +4,12 @@ export function getBotAction(state: KotState, playerId: string): KotAction | nul
   const player = state.players[playerId];
   if (!player) return null;
 
-  if (state.prompt && state.prompt.playerId === playerId) {
-    if (state.prompt.options && state.prompt.options.length > 0) {
+  const topAction = state.pendingActions[0];
+  if (topAction?.type.startsWith('ASK') && topAction.payload?.prompt?.playerId === playerId) {
+    const prompt = topAction.payload.prompt;
+    if (prompt.options && prompt.options.length > 0) {
       // Just pick the first option or a 'Stay' if available
-      const opt = state.prompt.options.find((o: any) => o.label === 'Stay') || state.prompt.options[0];
+      const opt = prompt.options.find((o: any) => o.label === 'Stay') || prompt.options[0];
       return opt.action;
     }
   }
