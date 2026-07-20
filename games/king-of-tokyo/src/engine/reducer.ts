@@ -1,5 +1,6 @@
 import type { BaseGameState, BaseAction, BasePlayer } from '@erez/boardgame-core';
 import { baseReducer, baseInitialState } from '@erez/boardgame-core';
+import { getBotAction } from '../bots/botLogic';
 
 export type DiceFace = '1' | '2' | '3' | 'Energy' | 'Heart' | 'Smash';
 
@@ -107,44 +108,12 @@ export function kingOfTokyoReducer(state: KotState, action: KotAction): KotState
   newState = { ...state, pendingActions: [...(state.pendingActions || [])] };
   const top = newState.pendingActions[0];
 
-  if (top) {
-    if (top.type === 'ASK_ROLL') {
-      if (action.type === 'ROLL_DICE') {
+  if (action.type.startsWith('RESPONSE_')) {
+     if (top && top.type.startsWith('ASK')) {
         newState.pendingActions.shift();
-        newState.pendingActions.unshift({ type: 'RESPONSE_ROLL', payload: { roll: true, keptDiceIds: action.payload.keptDiceIds } });
-        return handleNextAction(newState);
-      }
-      if (action.type === 'RESOLVE_DICE') {
-        newState.pendingActions.shift();
-        newState.pendingActions.unshift({ type: 'RESPONSE_ROLL', payload: { roll: false } });
-        return handleNextAction(newState);
-      }
-    }
-    if (top.type === 'ASK_MARKET') {
-      if (action.type === 'END_TURN') {
-        newState.pendingActions.shift();
-        newState.pendingActions.unshift({ type: 'RESPONSE_MARKET', payload: { action: 'DONE' } });
-        return handleNextAction(newState);
-      }
-      if (action.type === 'BUY_CARD') {
-        newState.pendingActions.shift();
-        newState.pendingActions.unshift({ type: 'RESPONSE_MARKET', payload: { action: 'BUY', cardId: action.payload.cardId, marketIndex: action.payload.marketIndex } });
-        return handleNextAction(newState);
-      }
-      if (action.type === 'SWEEP_MARKET') {
-        newState.pendingActions.shift();
-        newState.pendingActions.unshift({ type: 'RESPONSE_MARKET', payload: { action: 'SWEEP' } });
-        return handleNextAction(newState);
-      }
-    }
-    if (top.type === 'ASK') {
-       if (action.type === 'CARD_ACTION' || action.type === 'YIELD_TOKYO' || action.type === 'STAY_IN_TOKYO') {
-          newState.pendingActions.shift();
-          // Assume the UI action directly provides the next action steps, or just prepend the raw action
-          newState.pendingActions.unshift({ type: 'RESPONSE_ASK', payload: action });
-          return handleNextAction(newState);
-       }
-    }
+     }
+     newState.pendingActions.unshift({ type: action.type, payload: action.payload, playerId: (action as any).playerId || newState.playerOrder[newState.currentPlayerIndex] });
+     return handleNextAction(newState);
   }
 
   // Generic fallback if not handled
@@ -169,15 +138,9 @@ function handleNextAction(state: KotState): KotState {
   if (topAction.type === 'PLAY_BOT') {
     st.pendingActions.shift();
     if (st.pendingActions.length > 0) {
-       // Minimal random bot
-       const nextAction = st.pendingActions[0];
-       if (nextAction.type === 'ASK_ROLL') {
-         st.actionQueue = [...(st.actionQueue || []), { delayMs: 1000, action: { type: 'RESOLVE_DICE' } }];
-       } else if (nextAction.type === 'ASK_MARKET') {
-         st.actionQueue = [...(st.actionQueue || []), { delayMs: 1000, action: { type: 'END_TURN' } }];
-       } else if (nextAction.type === 'ASK') {
-         // handle yield vs stay
-         st.actionQueue = [...(st.actionQueue || []), { delayMs: 1000, action: { type: 'STAY_IN_TOKYO' } }];
+       const botResponse = getBotAction(st, st.playerOrder[st.currentPlayerIndex]);
+       if (botResponse) {
+          st.pendingActions.unshift(botResponse);
        }
     }
     return st;
@@ -187,14 +150,7 @@ function handleNextAction(state: KotState): KotState {
      const currentPlayerId = st.playerOrder[st.currentPlayerIndex];
      const isBot = st.players[currentPlayerId]?.isBot;
      
-     // Setup UI prompts
-     if (topAction.type === 'ASK_ROLL') {
-        st.prompt = { playerId: currentPlayerId, text: 'Roll Dice?' };
-     } else if (topAction.type === 'ASK_MARKET') {
-        st.prompt = { playerId: currentPlayerId, text: 'Buy Cards?' };
-     } else if (topAction.type === 'ASK') {
-        st.prompt = topAction.payload.prompt;
-     }
+     st.prompt = topAction.payload?.prompt;
 
      if (isBot) {
         st.actionQueue = [...(st.actionQueue || []), { delayMs: 1500, action: { type: 'PLAY_BOT' } }];
@@ -240,6 +196,19 @@ function triggerCards(state: KotState, action: PendingAction, hook: 'onPreEvent'
   return st;
 }
 
+function addLog(state: KotState, action: PendingAction, logStr: string): void {
+  let finalStr = logStr;
+  if (action.affectedByCards && action.affectedByCards.length > 0) {
+    const cardNames = action.affectedByCards.map(c => {
+       const card = CARD_REGISTRY[c.cardId];
+       const ownerName = state.players[c.playerId]?.name || 'Unknown';
+       return `${card?.name || c.cardId} (${ownerName})`;
+    }).join(', ');
+    finalStr += ` [due to ${cardNames}]`;
+  }
+  state.logs.push(finalStr);
+}
+
 function doAction(state: KotState, action: PendingAction): KotState {
   let st = { ...state };
   const currentPlayerId = st.playerOrder[st.currentPlayerIndex];
@@ -251,14 +220,22 @@ function doAction(state: KotState, action: PendingAction): KotState {
       const p = st.players[pId];
       st.pendingActions = [
         { type: 'SETUP_DICE' },
-        { type: 'ASK_ROLL' },
+        { type: 'ASK_ROLL', payload: {
+           prompt: {
+             text: 'Roll Dice?',
+             options: [
+               { label: 'Roll', action: { type: 'RESPONSE_ROLL', payload: { roll: true } } },
+               { label: 'Resolve', action: { type: 'RESPONSE_ROLL', payload: { roll: false } } }
+             ]
+           }
+        } },
         { type: 'RESOLVE_ROLLS' },
-        { type: 'GO_TO_MARKER' },
+        { type: 'GO_TO_MARKET' },
         { type: 'END_TURN' },
         ...st.pendingActions
       ];
       if (p && p.location === 'TokyoCity') {
-        st.logs = [...st.logs, `${p.name} starts turn in Tokyo!`];
+        addLog(st, action, `${p.name} starts turn in Tokyo!`);
         st.pendingActions.unshift({ type: 'VP', payload: { amount: 2 }, playerId: pId });
       }
       break;
@@ -266,6 +243,7 @@ function doAction(state: KotState, action: PendingAction): KotState {
     case 'SETUP_DICE': {
       st.dice = st.dice.map(d => ({ ...d, kept: false, value: '1' }));
       st.rollCount = 3;
+      addLog(st, action, `Dice have been reset.`);
       break;
     }
     case 'RESPONSE_ROLL': {
@@ -273,7 +251,15 @@ function doAction(state: KotState, action: PendingAction): KotState {
         st.dice = st.dice.map(d => action.payload.keptDiceIds?.includes(d.id) ? d : { ...d, value: DICE_FACES[Math.floor(Math.random() * DICE_FACES.length)] });
         st.rollCount -= 1;
         if (st.rollCount > 0) {
-          st.pendingActions.unshift({ type: 'ASK_ROLL' });
+          st.pendingActions.unshift({ type: 'ASK_ROLL', payload: {
+             prompt: {
+               text: 'Roll Dice?',
+               options: [
+                 { label: 'Roll', action: { type: 'RESPONSE_ROLL', payload: { roll: true } } },
+                 { label: 'Resolve', action: { type: 'RESPONSE_ROLL', payload: { roll: false } } }
+               ]
+             }
+          } });
         } else {
           st.pendingActions.unshift({ type: 'RESOLVE_ROLLS' });
         }
@@ -287,7 +273,7 @@ function doAction(state: KotState, action: PendingAction): KotState {
       
       const emojiMap: Record<string, string> = { Heart: '❤️', Energy: '⚡', Smash: '💥', '1': '1️⃣', '2': '2️⃣', '3': '3️⃣' };
       const outcomeStr = st.dice.map(d => emojiMap[d.value] || d.value).join(' ');
-      st.logs = [...st.logs, `${st.players[pId].name} resolved: ${outcomeStr}`];
+      addLog(st, action, `${st.players[pId].name} resolved: ${outcomeStr}`);
 
       if (outcomeMap['Heart']) diceActions.push({ type: 'HEALTH', payload: { amount: outcomeMap['Heart'] }, playerId: pId });
       if (outcomeMap['Energy']) diceActions.push({ type: 'ENERGY', payload: { amount: outcomeMap['Energy'] }, playerId: pId });
@@ -305,9 +291,9 @@ function doAction(state: KotState, action: PendingAction): KotState {
     case 'VP': {
       if (st.players[pId]) {
         st.players[pId] = { ...st.players[pId], vp: st.players[pId].vp + action.payload.amount };
-        st.logs = [...st.logs, `${st.players[pId].name} gained ${action.payload.amount} ⭐`];
+        addLog(st, action, `${st.players[pId].name} gained ${action.payload.amount} ⭐`);
         if (st.players[pId].vp >= st.settings.maxVp) {
-          st.logs = [...st.logs, `${st.players[pId].name} wins on VP! 🏆`];
+          addLog(st, action, `${st.players[pId].name} wins on VP! 🏆`);
           st.status = 'Finished';
         }
       }
@@ -316,7 +302,7 @@ function doAction(state: KotState, action: PendingAction): KotState {
     case 'ENERGY': {
        if (st.players[pId]) {
          st.players[pId] = { ...st.players[pId], energy: st.players[pId].energy + action.payload.amount };
-         st.logs = [...st.logs, `${st.players[pId].name} gained ${action.payload.amount} ⚡`];
+         addLog(st, action, `${st.players[pId].name} gained ${action.payload.amount} ⚡`);
        }
        break;
     }
@@ -326,7 +312,7 @@ function doAction(state: KotState, action: PendingAction): KotState {
         const actual = Math.min(max - st.players[pId].health, action.payload.amount);
         if (actual > 0 && st.players[pId].location !== 'TokyoCity') {
           st.players[pId] = { ...st.players[pId], health: st.players[pId].health + actual };
-          st.logs = [...st.logs, `${st.players[pId].name} healed ${actual} ❤️`];
+          addLog(st, action, `${st.players[pId].name} healed ${actual} ❤️`);
         }
       }
       break;
@@ -337,7 +323,7 @@ function doAction(state: KotState, action: PendingAction): KotState {
       if (st.players[targetId] && st.players[targetId].health > 0) {
          const newHealth = Math.max(0, st.players[targetId].health - dmg);
          st.players[targetId] = { ...st.players[targetId], health: newHealth };
-         st.logs = [...st.logs, `${st.players[targetId].name} took ${dmg} 💥`];
+         addLog(st, action, `${st.players[targetId].name} took ${dmg} 💥`);
          if (newHealth === 0) {
             st.pendingActions.unshift({ type: 'DEAD', playerId: targetId });
          }
@@ -345,10 +331,10 @@ function doAction(state: KotState, action: PendingAction): KotState {
       break;
     }
     case 'DEAD': {
-       st.logs = [...st.logs, `💀 ${st.players[pId].name} was eliminated!`];
+       addLog(st, action, `💀 ${st.players[pId].name} was eliminated!`);
        const alive = st.playerOrder.filter(id => st.players[id].health > 0);
        if (alive.length <= 1) {
-          st.logs = [...st.logs, `${st.players[alive[0]].name} is the last monster standing! 🏆`];
+          addLog(st, action, `${st.players[alive[0]].name} is the last monster standing! 🏆`);
           st.status = 'Finished';
        }
        break;
@@ -356,7 +342,7 @@ function doAction(state: KotState, action: PendingAction): KotState {
     case 'ATTACK': {
       const attacker = st.players[pId];
       const damage = action.payload.damage;
-      let damagedSomeone = false;
+      addLog(st, action, `${attacker.name} attacks for ${damage}! (not fully implemented)`);
 
       const actionsToPush: PendingAction[] = [];
 
@@ -372,10 +358,10 @@ function doAction(state: KotState, action: PendingAction): KotState {
                prompt: {
                  playerId: tokyoPlayers[0],
                  text: `Will you yield Tokyo?`,
-                 options: [
-                   { label: 'Yield', action: { type: 'YIELD_TOKYO', payload: { playerId: tokyoPlayers[0], attackerId: pId } } },
-                   { label: 'Stay', action: { type: 'STAY_IN_TOKYO', payload: { playerId: tokyoPlayers[0] } } }
-                 ]
+               options: [
+                 { label: 'Yield', action: { type: 'RESPONSE_YIELD', payload: { yield: true, attackerId: pId } } },
+                 { label: 'Stay', action: { type: 'RESPONSE_YIELD', payload: { yield: false } } }
+               ]
                }
             }});
          }
@@ -393,26 +379,26 @@ function doAction(state: KotState, action: PendingAction): KotState {
       st.pendingActions = [...actionsToPush, ...st.pendingActions];
       break;
     }
-    case 'RESPONSE_ASK': {
+    case 'RESPONSE_YIELD': {
       // Handles yield
       const subAction = action.payload;
-      if (subAction.type === 'YIELD_TOKYO') {
-         const { playerId, attackerId } = subAction.payload;
-         st.players[playerId] = { ...st.players[playerId], location: 'Outside' };
-         st.logs = [...st.logs, `${st.players[playerId].name} yielded Tokyo!`];
+      if (subAction.yield) {
+         const { attackerId } = subAction;
+         st.players[pId] = { ...st.players[pId], location: 'Outside' };
+         addLog(st, action, `${st.players[pId].name} yielded Tokyo!`);
          st.pendingActions.unshift({ type: 'ENTER_TOKYO', playerId: attackerId });
-      } else if (subAction.type === 'STAY_IN_TOKYO') {
-         st.logs = [...st.logs, `${st.players[subAction.payload.playerId].name} stays in Tokyo!`];
+      } else {
+         addLog(st, action, `${st.players[pId].name} stays in Tokyo!`);
       }
       break;
     }
     case 'ENTER_TOKYO': {
       st.players[pId] = { ...st.players[pId], location: 'TokyoCity' };
-      st.logs = [...st.logs, `${st.players[pId].name} enters Tokyo!`];
+      addLog(st, action, `${st.players[pId].name} enters Tokyo!`);
       st.pendingActions.unshift({ type: 'VP', payload: { amount: 1 }, playerId: pId });
       break;
     }
-    case 'GO_TO_MARKER': {
+    case 'GO_TO_MARKET': {
       st.pendingActions = [
         { type: 'SETUP_CARD_PRICES' },
         { type: 'BUY_OR_SWEEP' },
@@ -426,9 +412,17 @@ function doAction(state: KotState, action: PendingAction): KotState {
     }
     case 'BUY_OR_SWEEP': {
       const canSweep = st.players[pId].energy >= 2;
-      const canPurchase = true; // simplifying for now
+      const canPurchase = false; // simplifying for now
       if (canSweep || canPurchase) {
-         st.pendingActions.unshift({ type: 'ASK_MARKET' });
+         st.pendingActions.unshift({ type: 'ASK_MARKET', payload: {
+            prompt: {
+              text: 'Buy Cards?',
+              options: [
+                { label: 'Done', action: { type: 'RESPONSE_MARKET', payload: { action: 'DONE' } } },
+                { label: 'Sweep (2⚡)', action: { type: 'RESPONSE_MARKET', payload: { action: 'SWEEP' } } }
+              ]
+            }
+         } });
       }
       break;
     }
@@ -452,7 +446,7 @@ function doAction(state: KotState, action: PendingAction): KotState {
     }
     case 'SWEEP': {
       st.players[pId].energy -= 2;
-      st.logs = [...st.logs, `${st.players[pId].name} paid 2 ⚡ to sweep the market!`];
+      addLog(st, action, `${st.players[pId].name} paid 2 ⚡ to sweep the market!`);
       const newDeck = [...st.deck];
       st.market = newDeck.splice(0, 3);
       st.deck = newDeck;
@@ -461,7 +455,7 @@ function doAction(state: KotState, action: PendingAction): KotState {
     case 'BUY': {
       // Not fully implemented without cards, just deduct cost and put in array
       const cardId = action.payload.cardId;
-      st.logs = [...st.logs, `${st.players[pId].name} bought a card! (Not fully implemented)`];
+      addLog(st, action, `${st.players[pId].name} bought a card! (Not fully implemented)`);
       break;
     }
     case 'END_TURN': {
