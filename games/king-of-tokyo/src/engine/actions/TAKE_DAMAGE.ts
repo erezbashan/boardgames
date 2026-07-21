@@ -16,8 +16,8 @@ export function handleTakeDamage(st: KotState, action: PendingAction, pId: strin
               playerId: targetId,
               text: `Will you yield Tokyo?`,
               options: [
-                 { label: 'Yield', action: { type: 'RESPONSE_YIELD', payload: { yield: true, attackerId: action.payload.attackerId } } },
-                 { label: 'Stay', action: { type: 'RESPONSE_YIELD', payload: { yield: false } } }
+                 { label: 'Yield', action: { type: 'RESPONSE_YIELD', payload: { yield: true, attackerId: action.payload.attackerId }, playerId: targetId } },
+                 { label: 'Stay', action: { type: 'RESPONSE_YIELD', payload: { yield: false }, playerId: targetId } }
               ]
            }
         }});
