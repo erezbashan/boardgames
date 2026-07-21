@@ -19,13 +19,22 @@ export const Metamorph: CardImplementation = {
     }
     
     if (action.type === 'METAMORPH_PROMPT' && action.playerId === pId) {
-       const keepCards = st.players[pId].cards.filter(cId => cId !== 'metamorph');
+       const keepCards = st.players[pId].cards;
        if (keepCards.length > 0) {
           const options: any[] = keepCards.map(cId => {
              const c = CARD_REGISTRY[cId];
              return {
                 label: `Discard ${c.name} (+${c.cost}⚡)`,
-                action: { type: 'METAMORPH_DISCARD', payload: { cardId: cId } }
+                action: { 
+                   type: 'MULTIPLE_ACTIONS', 
+                   payload: { 
+                      actions: [
+                         { type: 'DISCARD', payload: { cardId: cId }, playerId: pId },
+                         { type: 'ENERGY', payload: { amount: c.cost }, playerId: pId },
+                         { type: 'METAMORPH_PROMPT', playerId: pId }
+                      ]
+                   }
+                }
              };
           });
           options.push({ label: 'Done', action: { type: 'NOP' } });
@@ -44,17 +53,6 @@ export const Metamorph: CardImplementation = {
        }
     }
     
-    if (action.type === 'METAMORPH_DISCARD' && action.playerId === pId) {
-       const cId = action.payload.cardId;
-       const c = CARD_REGISTRY[cId];
-       if (st.players[pId].cards.includes(cId)) {
-          st.players[pId].cards = st.players[pId].cards.filter(id => id !== cId);
-          st.players[pId].energy += c.cost;
-          addLog(st, action, `🔄 ${st.players[pId].name} used Metamorph to discard ${c.name} and gained ${c.cost}⚡`);
-       }
-       // Ask again in case they want to discard more
-       st.pendingActions.unshift({ type: 'METAMORPH_PROMPT', playerId: pId });
-    }
     return st;
   }
 };
