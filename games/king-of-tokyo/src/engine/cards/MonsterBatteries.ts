@@ -18,8 +18,8 @@ export const MonsterBatteries: CardImplementation = {
        const options = [];
        for (let i = 0; i <= energy; i++) {
           options.push({
-             label: `Put ${i}⚡ (Get ${i * 2}⚡)`,
-             action: { type: 'MONSTER_BATTERIES_SET', payload: { amount: i } }
+             label: `${i}`,
+             action: { type: 'RESPONSE_MONSTER_BATTERIES_SET', payload: { amount: i } }
           });
        }
        st.pendingActions.unshift({ type: 'ASK', payload: {
@@ -31,7 +31,7 @@ export const MonsterBatteries: CardImplementation = {
        }});
     }
     
-    if (action.type === 'MONSTER_BATTERIES_SET' && action.playerId === pId) {
+    if ((action.type === 'MONSTER_BATTERIES_SET' || action.type === 'RESPONSE_MONSTER_BATTERIES_SET') && action.playerId === pId) {
        const amount = action.payload.amount;
        st.players[pId].energy -= amount;
        st.players[pId].cardState = st.players[pId].cardState || {};

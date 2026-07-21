@@ -28,7 +28,7 @@ export const Mimic: CardImplementation = {
                playerId: pId,
                text: 'Mimic: Spend 1⚡ to change the mimicked card?',
                options: [
-                  { label: 'Yes (1⚡)', action: { type: 'MIMIC_PROMPT_CHANGE', playerId: pId } },
+                  { label: 'Yes (1⚡)', action: { type: 'RESPONSE_MIMIC_PROMPT_CHANGE', playerId: pId } },
                   { label: 'No', action: { type: 'NOP' } }
                ]
             }
@@ -36,8 +36,8 @@ export const Mimic: CardImplementation = {
       }
     }
     
-    if (action.type === 'MIMIC_PROMPT' || action.type === 'MIMIC_PROMPT_CHANGE') {
-      if (action.type === 'MIMIC_PROMPT_CHANGE') {
+    if (action.type === 'MIMIC_PROMPT' || action.type === 'MIMIC_PROMPT_CHANGE' || action.type === 'RESPONSE_MIMIC_PROMPT_CHANGE') {
+      if (action.type === 'MIMIC_PROMPT_CHANGE' || action.type === 'RESPONSE_MIMIC_PROMPT_CHANGE') {
          if (st.players[pId].energy < 1) return st; // Should not happen
          st.players[pId].energy -= 1;
       }
@@ -57,7 +57,7 @@ export const Mimic: CardImplementation = {
       } else {
          const options = allCards.map(c => ({
             label: `${CARD_REGISTRY[c.cId].name} (${st.players[c.owner].name})`,
-            action: { type: 'MIMIC_SET', payload: { cardId: c.cId } }
+            action: { type: 'RESPONSE_MIMIC_SET', payload: { cardId: c.cId } }
          }));
          st.pendingActions.unshift({ type: 'ASK', payload: {
             prompt: {
@@ -69,7 +69,7 @@ export const Mimic: CardImplementation = {
       }
     }
     
-    if (action.type === 'MIMIC_SET' && action.playerId === pId) {
+    if ((action.type === 'MIMIC_SET' || action.type === 'RESPONSE_MIMIC_SET') && action.playerId === pId) {
       const targetId = action.payload.cardId;
       st.players[pId].cardState = st.players[pId].cardState || {};
       st.players[pId].cardState['mimic'] = targetId;

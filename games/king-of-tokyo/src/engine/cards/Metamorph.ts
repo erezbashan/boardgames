@@ -11,7 +11,7 @@ export const Metamorph: CardImplementation = {
   description: 'At the end of your turn you can discard any keep cards you have to receive the ⚡ they were purchased for.',
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     // Only prompt when it's literally the END_TURN action being processed
-    if (action.type === 'END_TURN' && action.playerId === pId) {
+    if (action.type === 'END_TURN' && pId === st.playerOrder[st.currentPlayerIndex]) {
        const keepCards = st.players[pId].cards.filter(cId => cId !== 'metamorph');
        if (keepCards.length > 0) {
           st.pendingActions.unshift({ type: 'METAMORPH_PROMPT', playerId: pId });
@@ -26,7 +26,7 @@ export const Metamorph: CardImplementation = {
              return {
                 label: `Discard ${c.name} (+${c.cost}⚡)`,
                 action: { 
-                   type: 'MULTIPLE_ACTIONS', 
+                   type: 'RESPONSE_MULTIPLE_ACTIONS', 
                    payload: { 
                       actions: [
                          { type: 'DISCARD', payload: { cardId: cId }, playerId: pId },

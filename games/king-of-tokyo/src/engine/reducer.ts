@@ -26,7 +26,7 @@ function handleNextAction(state: KotState): KotState {
   if (st.pendingActions.length === 0) return st;
   let topAction = st.pendingActions[0];
 
-  if (topAction.type === 'MULTIPLE_ACTIONS') {
+  if (topAction.type === 'MULTIPLE_ACTIONS' || topAction.type === 'RESPONSE_MULTIPLE_ACTIONS') {
      st.pendingActions.shift();
      st.pendingActions = [...topAction.payload.actions, ...st.pendingActions];
      return handleNextAction(st);
