@@ -20,6 +20,7 @@ export interface KotPlayer extends BasePlayer {
     energyGained: number;
     damageDealt: number;
     playersKilled: number;
+    turnDied?: number;
   };
   cards: string[];
   cardState?: Record<string, any>;

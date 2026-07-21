@@ -9,6 +9,7 @@ export function handleVP(st: KotState, action: PendingAction, pId: string) {
       addLog(st, action, `${st.players[pId].name} wins on VP! 🏆`);
       st.status = 'Finished';
       st.winnerId = pId;
+      st.pendingActions = [];
     }
   }
 }

@@ -20,7 +20,7 @@ export function handleAttack(st: KotState, action: PendingAction, pId: string) {
   } else {
      st.playerOrder.forEach(tId => {
         if (tId !== pId && st.players[tId].location === 'Outside' && st.players[tId].health > 0) {
-           actionsToPush.push({ type: 'TAKE_DAMAGE', payload: { amount: damage }, playerId: tId });
+           actionsToPush.push({ type: 'TAKE_DAMAGE', payload: { amount: damage, attackerId: pId }, playerId: tId });
         }
      });
   }

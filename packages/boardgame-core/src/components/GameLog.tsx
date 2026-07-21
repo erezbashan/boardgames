@@ -3,9 +3,10 @@ import { Modal } from './Modal';
 
 export interface GameLogProps {
   logs: React.ReactNode[];
+  allLogs?: React.ReactNode[];
 }
 
-export const GameLog: React.FC<GameLogProps> = ({ logs }) => {
+export const GameLog: React.FC<GameLogProps> = ({ logs, allLogs }) => {
   const [showAll, setShowAll] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -20,7 +21,7 @@ export const GameLog: React.FC<GameLogProps> = ({ logs }) => {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '10px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '5px', marginBottom: '10px' }}>
         <h4 style={{ margin: 0, fontSize: '18px' }}>Game Log</h4>
-        <button onClick={() => setShowAll(true)} style={{ background: 'transparent', border: 'none', color: '#3b82f6', cursor: 'pointer', fontSize: '12px' }}>See All</button>
+        <button onClick={() => setShowAll(true)} style={{ background: 'transparent', border: 'none', color: '#3b82f6', cursor: 'pointer', fontSize: '12px' }}>View All</button>
       </div>
 
       <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', background: 'rgba(0,0,0,0.2)', borderRadius: '8px', padding: '10px' }}>
@@ -35,7 +36,7 @@ export const GameLog: React.FC<GameLogProps> = ({ logs }) => {
 
       <Modal isOpen={showAll} title="Full Game Log" onClose={() => setShowAll(false)} width="600px">
         <div style={{ maxHeight: '60vh', overflowY: 'auto' }}>
-          {logs.map((l, i) => {
+          {(allLogs || logs).map((l, i) => {
             if (l === '---') {
               return <hr key={i} style={{ borderColor: 'rgba(255,255,255,0.1)', margin: '15px 0' }} />;
             }

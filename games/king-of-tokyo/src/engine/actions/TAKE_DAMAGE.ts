@@ -5,9 +5,18 @@ export function handleTakeDamage(st: KotState, action: PendingAction, pId: strin
   const targetId = pId;
   const dmg = action.payload.amount;
   if (st.players[targetId] && st.players[targetId].health > 0) {
-     const newHealth = Math.max(0, st.players[targetId].health - dmg);
+     const actualDamageTaken = Math.min(st.players[targetId].health, dmg);
+     const newHealth = st.players[targetId].health - actualDamageTaken;
      st.players[targetId] = { ...st.players[targetId], health: newHealth };
      addLog(st, action, `${st.players[targetId].name} took ${dmg} 💥`);
+     
+     if (action.payload.attackerId && st.players[action.payload.attackerId]) {
+         st.players[action.payload.attackerId].stats.damageDealt += actualDamageTaken;
+         if (newHealth === 0) {
+             st.players[action.payload.attackerId].stats.playersKilled += 1;
+         }
+     }
+
      if (newHealth === 0) {
         st.pendingActions.unshift({ type: 'DEAD', playerId: targetId });
      } else if (action.payload.yield_after) {

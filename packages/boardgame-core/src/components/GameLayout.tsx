@@ -68,6 +68,20 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
   const myIndex = playerOrder.indexOf(myPlayerId);
   const displayOrder = myIndex >= 0 ? [...playerOrder.slice(myIndex), ...playerOrder.slice(0, myIndex)] : playerOrder;
   const players = displayOrder.map((id: string) => playersMap[id]);
+  
+  players.sort((aPlayer, bPlayer) => {
+    const a = aPlayer as any;
+    const b = bPlayer as any;
+    const aAlive = a.health === undefined || a.health > 0;
+    const bAlive = b.health === undefined || b.health > 0;
+    if (aAlive && !bAlive) return -1;
+    if (!aAlive && bAlive) return 1;
+    if (aAlive && bAlive) {
+       return (b.vp || 0) - (a.vp || 0); 
+    }
+    return (b.stats?.turnDied || 0) - (a.stats?.turnDied || 0); 
+  });
+
   const currentPlayerId = playerOrder[currentPlayerIndex];
 
   // Auto-show stats after 2 seconds when finished
@@ -120,7 +134,33 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
           </div>
           <div className="game-bottom-area">
             <div className="game-log-wrapper">
-              <GameLog logs={logs.map((l: string, index: number) => <span key={`msg-${index}`}>{renderLogMessage ? renderLogMessage(l, (m) => colorizeLog(m, players)) : colorizeLog(l, players)}</span>)} />
+              {(() => {
+                let recentLogsStartIndex = 0;
+                const myPlayerName = playersMap[myPlayerId]?.name;
+                if (myPlayerName) {
+                  for (let i = logs.length - 1; i >= 0; i--) {
+                    if (logs[i].includes(`${myPlayerName}'s Turn ---`)) {
+                      recentLogsStartIndex = i;
+                      break;
+                    }
+                  }
+                  let isMyTurnNow = (playerOrder[currentPlayerIndex] === myPlayerId);
+                  if (isMyTurnNow) {
+                     for (let i = recentLogsStartIndex - 1; i >= 0; i--) {
+                        if (logs[i].includes(`${myPlayerName}'s Turn ---`)) {
+                           recentLogsStartIndex = i;
+                           break;
+                        }
+                     }
+                  }
+                }
+                if (logs.length - recentLogsStartIndex < 5) {
+                   recentLogsStartIndex = Math.max(0, logs.length - 5);
+                }
+                const renderedAllLogs = logs.map((l: string, index: number) => <span key={`msg-${index}`}>{renderLogMessage ? renderLogMessage(l, (m) => colorizeLog(m, players)) : colorizeLog(l, players)}</span>);
+                const renderedRecentLogs = renderedAllLogs.slice(recentLogsStartIndex);
+                return <GameLog logs={renderedRecentLogs} allLogs={renderedAllLogs} />;
+              })()}
             </div>
             <div className="game-chat-wrapper">
               <ChatWindow 
