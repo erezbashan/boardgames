@@ -56,7 +56,7 @@ export const Mimic: CardImplementation = {
          }
       } else {
          const options = allCards.map(c => ({
-            label: `${CARD_REGISTRY[c.cId].name} (${st.players[c.owner].name})`,
+            label: CARD_REGISTRY[c.cId].name,
             action: { type: 'RESPONSE_MIMIC_SET', payload: { cardId: c.cId } }
          }));
          st.pendingActions.unshift({ type: 'ASK', payload: {

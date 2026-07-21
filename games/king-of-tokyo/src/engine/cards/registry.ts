@@ -9,6 +9,12 @@ import { Metamorph } from './Metamorph';
 import { Mimic } from './Mimic';
 import { MonsterBatteries } from './MonsterBatteries';
 
+import { NationalGuard } from './NationalGuard';
+import { NuclearPowerPlant } from './NuclearPowerPlant';
+import { Skyscraper } from './Skyscraper';
+import { Tanks } from './Tanks';
+import { AmusementPark } from './AmusementPark';
+
 export const CARD_REGISTRY: Record<string, CardImplementation> = {
   [HighAltitudeBombing.id]: HighAltitudeBombing,
   [ItHasAChild.id]: ItHasAChild,
@@ -18,4 +24,9 @@ export const CARD_REGISTRY: Record<string, CardImplementation> = {
   [Metamorph.id]: Metamorph,
   [Mimic.id]: Mimic,
   [MonsterBatteries.id]: MonsterBatteries,
+  [NationalGuard.id]: NationalGuard,
+  [NuclearPowerPlant.id]: NuclearPowerPlant,
+  [Skyscraper.id]: Skyscraper,
+  [Tanks.id]: Tanks,
+  [AmusementPark.id]: AmusementPark,
 };
