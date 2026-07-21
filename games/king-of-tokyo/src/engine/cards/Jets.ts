@@ -23,11 +23,11 @@ export const Jets: CardImplementation = {
                playerId: pId,
                text: `Will you yield Tokyo to avoid damage?`,
                options: [
-                  { label: 'Yield', action: { type: 'MULTIPLE_ACTIONS', payload: { actions: [
+                  { label: 'Yield', action: { type: 'RESPONSE_MULTIPLE_ACTIONS', payload: { actions: [
                      { type: 'LOG_JETS', playerId: pId },
                      { type: 'RESPONSE_YIELD', payload: { yield: true, attackerId: action.payload.attackerId } }
                   ]}} },
-                  { label: 'Stay', action: { type: 'MULTIPLE_ACTIONS', payload: { actions: [
+                  { label: 'Stay', action: { type: 'RESPONSE_MULTIPLE_ACTIONS', payload: { actions: [
                      { type: 'RESPONSE_YIELD', payload: { yield: false } },
                      { type: 'TAKE_DAMAGE', payload: { amount: action.payload.amount, yield_after: false }, playerId: pId }
                   ]}} }
