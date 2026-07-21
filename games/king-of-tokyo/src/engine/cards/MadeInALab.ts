@@ -12,10 +12,13 @@ export const MadeInALab: CardImplementation = {
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'BUY_OR_SWEEP' && action.playerId === pId) {
       if (st.deck.length > 0) {
+         const otherExtras = (st.turnContext.marketExtraCards || []).filter((e: any) => e.source !== 'deck');
          st.turnContext.marketExtraCards = [
-            ...(st.turnContext.marketExtraCards || []),
+            ...otherExtras,
             { cardId: st.deck[0], source: 'deck' }
          ];
+      } else {
+         st.turnContext.marketExtraCards = (st.turnContext.marketExtraCards || []).filter((e: any) => e.source !== 'deck');
       }
     }
     return st;
