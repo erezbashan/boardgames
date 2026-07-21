@@ -16,5 +16,6 @@ export function handleEndTurn(st: KotState, action: PendingAction, pId: string) 
   });
 
   st.currentPlayerIndex = nextIdx;
+  st.turnContext = {}; // Clear context for the new turn
   st.pendingActions.unshift({ type: 'START_TURN', playerId: st.playerOrder[nextIdx] });
 }

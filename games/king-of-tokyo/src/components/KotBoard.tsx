@@ -359,7 +359,14 @@ export const KotBoard: React.FC = () => {
                     onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
-                      <div style={{ fontSize: '16px', fontWeight: 'bold' }}>{card.name}</div>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <div style={{ fontSize: '16px', fontWeight: 'bold' }}>{card.name}</div>
+                        {isExtra && source === 'deck' && (
+                          <div style={{ fontSize: '11px', color: '#eab308', marginTop: '2px', fontWeight: 'bold', textTransform: 'uppercase' }}>
+                            ★ Top of Deck
+                          </div>
+                        )}
+                      </div>
                       <div style={{ fontSize: '12px', color: 'gray', padding: '2px 6px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px' }}>{card.type}</div>
                     </div>
                     
