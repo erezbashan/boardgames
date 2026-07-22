@@ -11,12 +11,12 @@ export function handleResolveRolls(st: KotState, action: PendingAction, pId: str
   const outcomeStr = st.dice.map(d => emojiMap[d.value] || d.value).join(' ');
   addLog(st, action, `${st.players[pId].name} resolved: ${outcomeStr}`);
 
-  if (outcomeMap['Heart']) diceActions.push({ type: 'HEALTH', payload: { amount: outcomeMap['Heart'] }, playerId: pId });
-  if (outcomeMap['Energy']) diceActions.push({ type: 'ENERGY', payload: { amount: outcomeMap['Energy'] }, playerId: pId });
   if (outcomeMap['1'] >= 3) diceActions.push({ type: 'VP', payload: { amount: 1 + (outcomeMap['1'] - 3) }, playerId: pId });
   if (outcomeMap['2'] >= 3) diceActions.push({ type: 'VP', payload: { amount: 2 + (outcomeMap['2'] - 3) }, playerId: pId });
   if (outcomeMap['3'] >= 3) diceActions.push({ type: 'VP', payload: { amount: 3 + (outcomeMap['3'] - 3) }, playerId: pId });
   if (outcomeMap['Smash']) diceActions.push({ type: 'ATTACK', payload: { damage: outcomeMap['Smash'] }, playerId: pId });
+  if (outcomeMap['Heart']) diceActions.push({ type: 'HEALTH', payload: { amount: outcomeMap['Heart'] }, playerId: pId });
+  if (outcomeMap['Energy']) diceActions.push({ type: 'ENERGY', payload: { amount: outcomeMap['Energy'] }, playerId: pId });
 
   st.pendingActions = [...diceActions, ...st.pendingActions];
 }
