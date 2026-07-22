@@ -12,6 +12,7 @@ export function handleBuy(st: KotState, action: PendingAction, pId: string) {
   // Deduct cost
   if (st.players[pId].energy < card.cost) return;
   st.players[pId].energy -= card.cost;
+  st.players[pId].stats.cardsBought = (st.players[pId].stats.cardsBought || 0) + 1;
   
   addLog(st, action, `${st.players[pId].name} bought ${card.name} for ${card.cost} ⚡`);
   

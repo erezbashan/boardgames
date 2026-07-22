@@ -105,20 +105,24 @@ export const KotStats: React.FC<KotStatsProps> = ({ gameState }) => {
           <thead>
             <tr style={{ background: 'rgba(255,255,255,0.1)' }}>
               <th style={{ padding: '10px' }}>Player</th>
+              <th style={{ padding: '10px' }}>⭐ VPs</th>
               <th style={{ padding: '10px' }}>❤️ Healed</th>
               <th style={{ padding: '10px' }}>⚡ Gained</th>
               <th style={{ padding: '10px' }}>💥 Dealt</th>
               <th style={{ padding: '10px' }}>💀 Kills</th>
+              <th style={{ padding: '10px' }}>🃏 Cards Bought</th>
             </tr>
           </thead>
           <tbody>
             {tableData.map(p => (
               <tr key={p.id} style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
                 <td style={{ padding: '10px', fontWeight: 'bold', color: p.color }}>{p.name}</td>
-                <td style={{ padding: '10px' }}>{p.stats.healthHealed}</td>
-                <td style={{ padding: '10px' }}>{p.stats.energyGained}</td>
-                <td style={{ padding: '10px' }}>{p.stats.damageDealt}</td>
-                <td style={{ padding: '10px' }}>{p.stats.playersKilled}</td>
+                <td style={{ padding: '10px' }}>{p.vp}</td>
+                <td style={{ padding: '10px' }}>{p.stats?.healthHealed || 0}</td>
+                <td style={{ padding: '10px' }}>{p.stats?.energyGained || 0}</td>
+                <td style={{ padding: '10px' }}>{p.stats?.damageDealt || 0}</td>
+                <td style={{ padding: '10px' }}>{p.stats?.playersKilled || 0}</td>
+                <td style={{ padding: '10px' }}>{p.stats?.cardsBought || 0}</td>
               </tr>
             ))}
           </tbody>

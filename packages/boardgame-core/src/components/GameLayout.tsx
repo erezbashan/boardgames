@@ -161,10 +161,6 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
 
         {/* RIGHT PANE (Players) */}
         <div className="game-right-pane">
-          <h3 style={{ margin: '0 0 10px 0', borderBottom: '1px solid rgba(255,255,255,0.2)', paddingBottom: '10px' }}>
-            Players ({players.length})
-          </h3>
-          
           {players.map((p: any) => {
             const isPlaying = p.id === currentPlayerId && status === 'Playing';
             const isMe = p.id === myPlayerId;
