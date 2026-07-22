@@ -21,6 +21,12 @@ import { PoisonQuills } from './PoisonQuills';
 import { Regeneration } from './Regeneration';
 import { SolarPowered } from './SolarPowered';
 
+import { SpikedTail } from './SpikedTail';
+import { Army } from './Army';
+import { Cannibalistic } from './Cannibalistic';
+import { Urbavore } from './Urbavore';
+import { ThrowATanker } from './ThrowATanker';
+
 export const CARD_REGISTRY: Record<string, CardImplementation> = {
   [HighAltitudeBombing.id]: HighAltitudeBombing,
   [ItHasAChild.id]: ItHasAChild,
@@ -40,4 +46,9 @@ export const CARD_REGISTRY: Record<string, CardImplementation> = {
   [PoisonQuills.id]: PoisonQuills,
   [Regeneration.id]: Regeneration,
   [SolarPowered.id]: SolarPowered,
+  [SpikedTail.id]: SpikedTail,
+  [Army.id]: Army,
+  [Cannibalistic.id]: Cannibalistic,
+  [Urbavore.id]: Urbavore,
+  [ThrowATanker.id]: ThrowATanker,
 };
