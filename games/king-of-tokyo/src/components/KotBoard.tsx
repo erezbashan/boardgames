@@ -279,8 +279,8 @@ export const KotBoard: React.FC = () => {
     // 1. If there's an active prompt for ME (except ASK_ROLL, which uses native controls)
     if (prompt && prompt.playerId === myPlayerId && topAction?.type !== 'ASK_ROLL') {
       return (
-        <div style={{ padding: '20px', display: 'flex', flexDirection: 'column' }}>
-          <h3 style={{ margin: '0 0 15px 0' }}>{prompt.text}</h3>
+        <div style={{ padding: '10px', display: 'flex', flexDirection: 'column' }}>
+          <h3 style={{ margin: '0 0 10px 0' }}>{prompt.text}</h3>
           <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '10px' }}>
             {prompt.options.map((opt: any, i: number) => (
               <button key={i} className="btn primary" style={{ width: '160px', height: '60px', fontSize: '20px' }} onClick={() => dispatch(opt.action as KotAction)}>
@@ -327,12 +327,12 @@ export const KotBoard: React.FC = () => {
     if (status !== 'Playing' && status !== 'Finished') return null;
 
     return (
-      <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', gap: '20px', height: '100%', padding: '20px', boxSizing: 'border-box', overflow: 'hidden' }}>
+      <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', gap: '10px', height: '100%', padding: '10px', boxSizing: 'border-box', overflow: 'hidden' }}>
         <style dangerouslySetInnerHTML={{ __html: styles }} />
         
         {/* Left Half: Cards Market */}
-        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '20px', overflow: 'hidden' }}>
-          <div style={{ display: 'flex', gap: '15px', flexWrap: 'nowrap', justifyContent: 'center', height: '100%' }}>
+        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '10px', overflow: 'hidden' }}>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'nowrap', justifyContent: 'center', height: '100%' }}>
             {(() => {
               const standardMarket = (gameState.market || []).map((cardId, i) => ({ cardId, index: i, isExtra: false, source: 'market', overrideCost: undefined }));
               const extraMarket = (gameState.turnContext?.marketExtraCards || []).map((extra: any, i: number) => ({ cardId: extra.cardId, index: i, isExtra: true, source: extra.source, overrideCost: extra.cost }));
@@ -419,21 +419,21 @@ export const KotBoard: React.FC = () => {
         </div>
 
         {/* Right Half: Prompts Top, Dice Bottom */}
-        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '20px', overflow: 'hidden' }}>
+        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '10px', overflow: 'hidden' }}>
           {/* Top Right: Prompts & Turn Controls */}
           <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
             {renderPromptsAndControls()}
           </div>
 
           {/* Bottom Right: Dice */}
-          <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px', overflow: 'hidden' }}>
+          <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '10px', overflow: 'hidden' }}>
             {status === 'Finished' && (
               <div style={{ padding: '15px 40px', background: gameState.winnerId === myPlayerId ? '#22c55e' : 'rgba(255,255,255,0.1)', color: 'white', borderRadius: '12px', marginBottom: '30px', textAlign: 'center', fontSize: '32px', fontWeight: 'bold' }}>
                 {gameState.winnerId === myPlayerId ? "🏆 You Won!" : `Winner: ${gameState.winnerId && players[gameState.winnerId] ? players[gameState.winnerId].name : 'Unknown'}`}
               </div>
             )}
 
-            <div style={{ display: 'flex', gap: '15px', marginTop: '20px', flexWrap: 'nowrap', justifyContent: 'center', width: '100%', maxWidth: '500px' }}>
+            <div style={{ display: 'flex', gap: '10px', marginTop: '10px', flexWrap: 'nowrap', justifyContent: 'center', width: '100%', maxWidth: '500px' }}>
               {dice.map((d) => {
                 const isDiceKept = rollCount < maxRolls && keptDiceIds.includes(d.id);
                 return (
