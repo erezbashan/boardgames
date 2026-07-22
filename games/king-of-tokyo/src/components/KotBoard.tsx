@@ -327,12 +327,12 @@ export const KotBoard: React.FC = () => {
     if (status !== 'Playing' && status !== 'Finished') return null;
 
     return (
-      <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: '20px', height: '100%', padding: '20px', boxSizing: 'border-box' }}>
+      <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', gap: '20px', height: '100%', padding: '20px', boxSizing: 'border-box', overflow: 'hidden' }}>
         <style dangerouslySetInnerHTML={{ __html: styles }} />
         
         {/* Left Half: Cards Market */}
-        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', border: '2px dashed rgba(255,255,255,0.2)', borderRadius: '12px', padding: '20px', background: 'rgba(0,0,0,0.2)', overflowY: 'hidden', overflowX: 'hidden' }}>
-          <div style={{ display: 'flex', gap: '15px', flexWrap: 'nowrap', justifyContent: 'center' }}>
+        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', border: '2px dashed rgba(255,255,255,0.2)', borderRadius: '12px', padding: '20px', background: 'rgba(0,0,0,0.2)', overflow: 'hidden' }}>
+          <div style={{ display: 'flex', gap: '15px', flexWrap: 'nowrap', justifyContent: 'center', height: '100%' }}>
             {(() => {
               const standardMarket = (gameState.market || []).map((cardId, i) => ({ cardId, index: i, isExtra: false, source: 'market', overrideCost: undefined }));
               const extraMarket = (gameState.turnContext?.marketExtraCards || []).map((extra: any, i: number) => ({ cardId: extra.cardId, index: i, isExtra: true, source: extra.source, overrideCost: extra.cost }));
@@ -354,7 +354,7 @@ export const KotBoard: React.FC = () => {
                 return (
                   <div 
                     key={`${cardId}-${i}`}
-                    style={{ background: '#1e293b', border: '1px solid #475569', borderRadius: '8px', padding: '15px', flex: 1, minWidth: '150px', maxWidth: '220px', height: '380px', display: 'flex', flexDirection: 'column', transition: 'transform 0.2s', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', boxSizing: 'border-box', animation: 'slideDown 0.4s ease-out' }}
+                    style={{ background: '#1e293b', border: '1px solid #475569', borderRadius: '8px', padding: '15px', flex: 1, minWidth: 0, maxWidth: '220px', height: '100%', maxHeight: '380px', display: 'flex', flexDirection: 'column', transition: 'transform 0.2s', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', boxSizing: 'border-box', animation: 'slideDown 0.4s ease-out', overflow: 'hidden' }}
                     onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
                     onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
                   >
@@ -370,7 +370,7 @@ export const KotBoard: React.FC = () => {
                       <div style={{ fontSize: '12px', color: 'gray', padding: '2px 6px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px' }}>{card.type}</div>
                     </div>
                     
-                    <div style={{ fontSize: '14px', flex: 1, marginBottom: '15px', color: '#cbd5e1', overflowY: 'auto' }}>{card.description}</div>
+                    <div style={{ fontSize: '14px', flex: 1, marginBottom: '15px', color: '#cbd5e1', overflow: 'hidden', textOverflow: 'ellipsis' }}>{card.description}</div>
                     
                     {isMyTurn && prompt?.text === 'Buy Phase' && (
                       <button 
@@ -418,14 +418,14 @@ export const KotBoard: React.FC = () => {
         </div>
 
         {/* Right Half: Prompts Top, Dice Bottom */}
-        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '20px' }}>
+        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '20px', overflow: 'hidden' }}>
           {/* Top Right: Prompts & Turn Controls */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
+          <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
             {renderPromptsAndControls()}
           </div>
 
           {/* Bottom Right: Dice */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', background: 'rgba(0,0,0,0.2)', padding: '20px', borderRadius: '12px' }}>
+          <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.2)', padding: '20px', borderRadius: '12px', overflow: 'hidden' }}>
             {status === 'Finished' && (
               <div style={{ padding: '15px 40px', background: gameState.winnerId === myPlayerId ? '#22c55e' : 'rgba(255,255,255,0.1)', color: 'white', borderRadius: '12px', marginBottom: '30px', textAlign: 'center', fontSize: '32px', fontWeight: 'bold' }}>
                 {gameState.winnerId === myPlayerId ? "🏆 You Won!" : `Winner: ${gameState.winnerId && players[gameState.winnerId] ? players[gameState.winnerId].name : 'Unknown'}`}
@@ -441,8 +441,10 @@ export const KotBoard: React.FC = () => {
                     onClick={() => toggleKeep(d.id)}
                     className={rollCount < maxRolls && !isDiceKept ? 'dice-rolling' : ''}
                     style={{
-                      width: dice.length > 6 ? '65px' : '80px',
-                      height: dice.length > 6 ? '65px' : '80px',
+                      flex: '1 1 auto',
+                      maxWidth: dice.length > 6 ? '65px' : '80px',
+                      height: 'auto',
+                      aspectRatio: '1 / 1',
                       background: isDiceKept ? '#22c55e' : 'rgba(255,255,255,0.1)',
                       border: isDiceKept ? '3px solid #4ade80' : '2px solid rgba(255,255,255,0.3)',
                       borderRadius: '12px',

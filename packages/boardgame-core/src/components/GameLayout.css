@@ -40,7 +40,7 @@
 }
 
 .game-left-pane {
-  flex: 1;
+  flex: 3;
   display: flex;
   flex-direction: column;
   padding: 20px;
@@ -49,10 +49,10 @@
 }
 
 .game-stage-area {
-  flex: 2;
+  flex: 3;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  overflow: hidden;
   border-radius: 12px;
 }
 
@@ -60,7 +60,7 @@
   flex: 1;
   display: flex;
   gap: 20px;
-  min-height: 250px;
+  min-height: 0;
 }
 
 .game-log-wrapper, .game-chat-wrapper {
@@ -74,14 +74,14 @@
 }
 
 .game-right-pane {
-  width: 300px;
+  flex: 1;
   background: rgba(0, 0, 0, 0.2);
   border-left: 1px solid rgba(255, 255, 255, 0.1);
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  overflow-y: auto;
+  overflow-y: hidden;
 }
 
 .player-card {
