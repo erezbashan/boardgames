@@ -18,8 +18,11 @@ export function getBotAction(state: KotState, playerId: string): KotAction | nul
        const affordableCards = availableMarketCards.filter(c => {
           const cardDef = CARD_REGISTRY[c.cardId];
           if (!cardDef) return false;
+          
+          if (cardDef.type === 'Keep' && player.cards.includes(c.cardId)) return false;
+
           let cost = cardDef.cost;
-          if (player.cards.includes('alienMetabolism')) {
+          if (player.cards.includes('alien_metabolism') || player.cards.includes('alienMetabolism')) {
              cost = Math.max(0, cost - 1);
           }
           return energy >= cost;
