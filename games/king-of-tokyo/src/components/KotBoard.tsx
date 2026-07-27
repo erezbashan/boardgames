@@ -237,6 +237,14 @@ export const KotBoard: React.FC = () => {
   }, [gameState.turnContext?.animatedCard]);
 
   React.useEffect(() => {
+    if (prompt && prompt.playerId === myPlayerId && topAction?.type !== 'ASK_ROLL' && prompt.options.length > 2) {
+      setIsPromptModalOpen(true);
+    } else {
+      setIsPromptModalOpen(false);
+    }
+  }, [prompt?.text, prompt?.options?.length, prompt?.playerId, topAction?.type, myPlayerId]);
+
+  React.useEffect(() => {
     if (gameState.logs && gameState.logs.length > prevLogsLength.current) {
       const newLogs = gameState.logs.slice(prevLogsLength.current);
       const highlighted: {cardId: string, playerId: string}[] = [];

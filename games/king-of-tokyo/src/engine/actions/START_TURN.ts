@@ -7,6 +7,17 @@ export function handleStartTurn(st: KotState, action: PendingAction, pId: string
   // Log the start of the turn
   addLog(st, action, `--- 👾 ${p.name}'s Turn ---`);
   
+  // Sanity check: Ensure only one person is in Tokyo
+  const peopleInTokyo = st.playerOrder.filter(id => st.players[id].location === 'TokyoCity' && st.players[id].health > 0);
+  if (peopleInTokyo.length > 1) {
+     addLog(st, action, `⚠️ WARNING: Multiple monsters detected in Tokyo! Evicting everyone except the current player or the first one found.`);
+     peopleInTokyo.forEach(id => {
+        if (id !== pId && (peopleInTokyo[0] !== id || peopleInTokyo.includes(pId))) {
+           st.players[id] = { ...st.players[id], location: 'Outside' };
+        }
+     });
+  }
+  
   st.pendingActions = [
     { type: 'SETUP_DICE', playerId: pId },
     { type: 'ASK_ROLL', playerId: pId, payload: {

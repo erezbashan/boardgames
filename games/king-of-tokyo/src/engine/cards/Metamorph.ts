@@ -24,7 +24,7 @@ export const Metamorph: CardImplementation = {
           const options: any[] = keepCards.map(cId => {
              const c = CARD_REGISTRY[cId];
              return {
-                label: `Discard ${c.name} (+${c.cost}⚡)`,
+                label: `${c.name} (+${c.cost}⚡)`,
                 action: { 
                    type: 'RESPONSE_MULTIPLE_ACTIONS', 
                    payload: { 

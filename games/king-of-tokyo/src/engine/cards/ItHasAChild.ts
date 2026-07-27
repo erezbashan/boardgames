@@ -15,8 +15,9 @@ export const ItHasAChild: CardImplementation = {
       // Heal to 10
       st.players[pId].health = st.settings.maxHealth;
       
-      // Lose all stars
+      // Lose all stars and energy
       st.players[pId].vp = 0;
+      st.players[pId].energy = 0;
       
       // Discard all cards
       st.players[pId].cards = [];

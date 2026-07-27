@@ -44,9 +44,11 @@ export const Mimic: CardImplementation = {
       
       const allCards: {cId: string, owner: string}[] = [];
       st.playerOrder.forEach(id => {
-         st.players[id].cards.forEach(cId => {
-            if (cId !== 'mimic') allCards.push({cId, owner: id});
-         });
+         if (id !== pId) {
+            st.players[id].cards.forEach(cId => {
+               if (cId !== 'mimic') allCards.push({cId, owner: id});
+            });
+         }
       });
       
       if (allCards.length === 0) {
@@ -101,7 +103,9 @@ export const Mimic: CardImplementation = {
   getLabel: (st: KotState, pId: string) => {
     const mimickedId = st.players[pId].cardState?.['mimic'];
     if (mimickedId && CARD_REGISTRY[mimickedId]) {
-      return CARD_REGISTRY[mimickedId].name;
+      const baseLabel = CARD_REGISTRY[mimickedId].name;
+      const extraLabel = CARD_REGISTRY[mimickedId].getLabel ? CARD_REGISTRY[mimickedId].getLabel(st, pId) : undefined;
+      return extraLabel ? `${baseLabel} (${extraLabel})` : baseLabel;
     }
     return 'Empty';
   }

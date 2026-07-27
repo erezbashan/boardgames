@@ -21,6 +21,8 @@ import { handleSweep } from './SWEEP';
 import { handleBuy } from './BUY';
 import { handleDiscard } from './DISCARD';
 
+import { handleFillMarket } from './FILL_MARKET';
+
 export type ActionHandler = (st: KotState, action: PendingAction, pId: string) => void;
 
 export const ACTION_HANDLERS: Record<string, ActionHandler> = {
@@ -44,4 +46,5 @@ export const ACTION_HANDLERS: Record<string, ActionHandler> = {
   SWEEP: handleSweep,
   BUY: handleBuy,
   DISCARD: handleDiscard,
+  FILL_MARKET: handleFillMarket,
 };

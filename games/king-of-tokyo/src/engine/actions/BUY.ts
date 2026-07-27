@@ -29,13 +29,8 @@ export function handleBuy(st: KotState, action: PendingAction, pId: string) {
   
   // Replace card in market
   if (marketIndex >= 0) {
-    if (st.deck.length > 0) {
-       const newCardId = st.deck.shift()!;
-       st.market[marketIndex] = newCardId;
-       st.pendingActions.unshift({ type: 'CARD_REVEALED', playerId: pId, payload: { cardId: newCardId, marketIndex } });
-    } else {
-       st.market[marketIndex] = ''; // Preserve slot, but it's empty
-    }
+     st.market[marketIndex] = ''; // clear the slot temporarily
+     st.pendingActions.unshift({ type: 'FILL_MARKET', playerId: pId, payload: { index: marketIndex } });
   } else if (action.payload.source === 'deck') {
     // If buying directly from the deck (e.g. via Made In A Lab), just remove the top card
     st.deck.shift();

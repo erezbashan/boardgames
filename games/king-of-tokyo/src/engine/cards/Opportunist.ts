@@ -38,6 +38,12 @@ export const Opportunist: CardImplementation = {
        
        // Verify the card is still in the market (another Opportunist might have bought it first)
        if (st.market[marketIndex] === cardId && st.players[pId].energy >= cost) {
+          // If it's your turn, you don't need a prompt to buy newly revealed cards since you can buy them normally from the market.
+          if (st.playerOrder[st.currentPlayerIndex] === pId) {
+             action.type = 'NOP';
+             return st;
+          }
+          
           // Mutate the CHECK_OPPORTUNIST action into a generic ASK action
           action.type = 'ASK';
           action.payload = {
@@ -45,7 +51,7 @@ export const Opportunist: CardImplementation = {
                 playerId: pId,
                 text: `Opportunist: Buy ${cardDef.name}?`,
                 options: [
-                   { label: `Buy for ${cost} ⚡`, action: { type: 'BUY', payload: { cardId, marketIndex, source: 'market' } } },
+                   { label: `Buy for ${cost} ⚡`, action: { type: 'BUY', payload: { cardId, marketIndex, source: 'market' }, playerId: pId } },
                    { label: 'Decline', action: { type: 'RESPONSE_NOP', payload: {} } }
                 ]
              }
