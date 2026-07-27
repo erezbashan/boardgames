@@ -279,7 +279,8 @@ export const KotBoard: React.FC = () => {
   React.useEffect(() => {
     setKeptDiceIds(gameState.dice.filter(d => d.kept).map(d => d.id));
   }, [gameState.dice]);
-  const maxRolls = 3;
+  
+  const maxRolls = gameState.maxRolls || 3;
 
   const handleRoll = () => {
     if (!isMyTurn || status !== 'Playing' || rollCount === 0 || topAction?.type !== 'ASK_ROLL') return;
@@ -441,10 +442,15 @@ export const KotBoard: React.FC = () => {
                 const card = CARD_REGISTRY[cardId];
                 if (!card) return null;
 
-                let displayCost = overrideCost !== undefined ? overrideCost : card.cost;
-                // BUY_CARD_EVAL is deprecated, just use default cost for now
+                const override = overrideCost !== undefined ? overrideCost : card.cost;
+                let discount = 0;
+                if (gameState.turnContext?.buyDiscount) {
+                  discount -= gameState.turnContext.buyDiscount;
+                }
+                const displayCost = Math.max(0, override + discount);
+
                 if (isMyTurn && prompt?.text === 'Buy Phase') {
-                  displayCost = overrideCost !== undefined ? overrideCost : card.cost;
+                  // Keep displayCost as calculated above
                 }
                 const canAfford = (players[myPlayerId]?.energy || 0) >= displayCost;
                 const alreadyOwned = players[myPlayerId]?.cards?.includes(cardId) && cardId !== 'mimic';

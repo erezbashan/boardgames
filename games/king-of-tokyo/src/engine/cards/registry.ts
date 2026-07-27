@@ -25,10 +25,30 @@ import { Tanks } from './Tanks';
 import { ThrowATanker } from './ThrowATanker';
 import { Urbavore } from './Urbavore';
 
+import { AlienMetabolism } from './AlienMetabolism';
+import { DropFromHighAltitude } from './DropFromHighAltitude';
+import { Energize } from './Energize';
+import { Evade } from './Evade';
+import { ExtraHead } from './ExtraHead';
+import { Frenzy } from './Frenzy';
+import { GasRefinery } from './GasRefinery';
+import { GiantBrain } from './GiantBrain';
+import { HealCard } from './HealCard';
+import { WeAreOnlyMakingItStronger } from './WeAreOnlyMakingItStronger';
+
 export const CARD_REGISTRY: Record<string, CardImplementation> = {
+  [AlienMetabolism.id]: AlienMetabolism,
   [AmusementPark.id]: AmusementPark,
   [Army.id]: Army,
   [Cannibalistic.id]: Cannibalistic,
+  [DropFromHighAltitude.id]: DropFromHighAltitude,
+  [Energize.id]: Energize,
+  [Evade.id]: Evade,
+  [ExtraHead.id]: ExtraHead,
+  [Frenzy.id]: Frenzy,
+  [GasRefinery.id]: GasRefinery,
+  [GiantBrain.id]: GiantBrain,
+  [HealCard.id]: HealCard,
   [HighAltitudeBombing.id]: HighAltitudeBombing,
   [ItHasAChild.id]: ItHasAChild,
   [JetFighters.id]: JetFighters,
@@ -51,4 +71,5 @@ export const CARD_REGISTRY: Record<string, CardImplementation> = {
   [Tanks.id]: Tanks,
   [ThrowATanker.id]: ThrowATanker,
   [Urbavore.id]: Urbavore,
+  [WeAreOnlyMakingItStronger.id]: WeAreOnlyMakingItStronger,
 };

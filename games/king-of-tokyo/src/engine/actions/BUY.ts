@@ -1,4 +1,4 @@
-import { KotState, PendingAction } from '../types';
+  import { KotState, PendingAction } from '../types';
 import { addLog } from '../utils';
 import { CARD_REGISTRY } from '../cards/registry';
 
@@ -14,18 +14,23 @@ export function handleBuy(st: KotState, action: PendingAction, pId: string) {
      return;
   }
 
+  let actualCost = action.payload.cost !== undefined ? action.payload.cost : card.cost;
+  if (st.turnContext?.buyDiscount) {
+      actualCost = Math.max(0, actualCost - st.turnContext.buyDiscount);
+  }
+
   // Deduct cost
-  if (st.players[pId].energy < card.cost) return;
+  if (st.players[pId].energy < actualCost) return;
   st.players[pId] = {
       ...st.players[pId],
-      energy: st.players[pId].energy - card.cost,
+      energy: st.players[pId].energy - actualCost,
       stats: {
           ...st.players[pId].stats,
           cardsBought: (st.players[pId].stats.cardsBought || 0) + 1
       }
   };
   
-  addLog(st, action, `${st.players[pId].name} bought ${card.name} for ${card.cost} ⚡`);
+  addLog(st, action, `${st.players[pId].name} bought ${card.name} for ${actualCost} ⚡`);
   
   // Replace card in market
   if (marketIndex >= 0) {

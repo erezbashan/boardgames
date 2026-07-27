@@ -8,6 +8,7 @@ export function handleTakeDamage(st: KotState, action: PendingAction, pId: strin
      const actualDamageTaken = Math.min(st.players[targetId].health, dmg);
      const newHealth = st.players[targetId].health - actualDamageTaken;
      st.players[targetId] = { ...st.players[targetId], health: newHealth };
+     action.payload._actualDamageTaken = actualDamageTaken;
      addLog(st, action, `${st.players[targetId].name} took ${dmg} 💥`);
      
      if (action.payload.attackerId && st.players[action.payload.attackerId]) {

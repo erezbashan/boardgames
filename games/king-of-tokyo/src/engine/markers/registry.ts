@@ -10,7 +10,9 @@ export interface MarkerImplementation {
 }
 
 import { PoisonMarker } from './PoisonMarker';
+import { ExtraTurnMarker } from './ExtraTurnMarker';
 
 export const MARKER_REGISTRY: Record<string, MarkerImplementation> = {
-  [PoisonMarker.id]: PoisonMarker
+  [PoisonMarker.id]: PoisonMarker,
+  [ExtraTurnMarker.id]: ExtraTurnMarker
 };

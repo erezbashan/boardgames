@@ -39,6 +39,7 @@ export interface PendingAction {
 export interface KotState extends BaseGameState<KotPlayer> {
   dice: KotDice[];
   rollCount: number;
+  maxRolls?: number;
   settings: {
     maxHealth: number;
     maxVp: number;
