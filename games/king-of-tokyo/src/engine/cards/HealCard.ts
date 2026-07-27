@@ -1,4 +1,5 @@
-import { CardImplementation, KotState, PendingAction } from './types';
+import { CardImplementation } from './types';
+import { KotState, PendingAction } from '../types';
 
 export const HealCard: CardImplementation = {
   id: 'heal',
@@ -8,5 +9,6 @@ export const HealCard: CardImplementation = {
   description: 'Heal 2 damage.',
   onBuy: (st: KotState, action: PendingAction, pId: string) => {
     st.pendingActions.unshift({ type: 'HEALTH', payload: { amount: 2, sourceCard: 'heal' }, playerId: pId });
+    return st;
   },
 };

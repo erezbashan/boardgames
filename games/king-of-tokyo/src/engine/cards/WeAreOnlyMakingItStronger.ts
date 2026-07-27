@@ -13,5 +13,6 @@ export const WeAreOnlyMakingItStronger: CardImplementation = {
         st.pendingActions.unshift({ type: 'ENERGY', payload: { amount: 1 }, playerId: pId });
       }
     }
+    return st;
   },
 };

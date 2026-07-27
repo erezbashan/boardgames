@@ -20,5 +20,6 @@ export const AlienMetabolism: CardImplementation = {
     st.turnContext = st.turnContext || {};
     st.turnContext.buyDiscount = (st.turnContext.buyDiscount || 0) + 1;
     addLog(st, action, `${st.players[pId].name} gets a 1⚡ discount on cards immediately from Alien Metabolism!`);
+    return st;
   }
 };

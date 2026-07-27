@@ -1,4 +1,5 @@
-import { CardImplementation, KotState, PendingAction } from './types';
+import { CardImplementation } from './types';
+import { KotState, PendingAction } from '../types';
 import { addLog } from '../utils';
 
 export const Frenzy: CardImplementation = {
@@ -11,5 +12,6 @@ export const Frenzy: CardImplementation = {
     st.players[pId].markers = st.players[pId].markers || {};
     st.players[pId].markers!.extra_turn = (st.players[pId].markers!.extra_turn || 0) + 1;
     addLog(st, action, `${st.players[pId].name} gains an extra turn after this one!`);
+    return st;
   },
 };

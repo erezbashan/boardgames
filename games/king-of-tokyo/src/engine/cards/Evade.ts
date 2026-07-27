@@ -1,5 +1,5 @@
-import { CardImplementation, KotState, PendingAction } from './types';
-import { addLog } from '../utils';
+import { CardImplementation } from './types';
+import { KotState, PendingAction } from '../types';
 
 export const Evade: CardImplementation = {
   id: 'evade',
@@ -7,14 +7,13 @@ export const Evade: CardImplementation = {
   cost: 7,
   type: 'Keep',
   description: 'When you take 1 or more damage, you can spend 1⚡ to take 1 less damage.',
-  onPreEvent: (st: KotState, action: PendingAction) => {
+  onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'TAKE_DAMAGE') {
-      const pId = action.playerId;
       if (st.players[pId] && st.players[pId].cards.includes('evade') && action.payload.amount > 0 && st.players[pId].energy >= 1) {
         
         // Prevent infinite loops or re-asking for the same damage event
         if (action.payload._evadePrompted) {
-            return;
+            return st;
         }
         
         action.payload._evadePrompted = true;
@@ -50,5 +49,6 @@ export const Evade: CardImplementation = {
         });
       }
     }
-  },
+    return st;
+  }
 };

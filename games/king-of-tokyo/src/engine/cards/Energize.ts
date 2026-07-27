@@ -1,4 +1,5 @@
-import { CardImplementation, KotState, PendingAction } from './types';
+import { CardImplementation } from './types';
+import { KotState, PendingAction } from '../types';
 
 export const Energize: CardImplementation = {
   id: 'energize',
@@ -8,5 +9,6 @@ export const Energize: CardImplementation = {
   description: '+ 9⚡',
   onBuy: (st: KotState, action: PendingAction, pId: string) => {
     st.pendingActions.unshift({ type: 'ENERGY', payload: { amount: 9 }, playerId: pId });
-  },
+    return st;
+  }
 };
