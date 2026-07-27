@@ -20,8 +20,10 @@ export const Opportunist: CardImplementation = {
       const cost = cardDef.cost;
 
       if (owner.energy >= cost && !owner.cards.includes(cardId)) {
-         // Instead of generating a generic ASK right now (which applies to all Opportunists at once),
-         // we inject CHECK_OPPORTUNIST so that it executes in player order sequentially.
+         // We inject CHECK_OPPORTUNIST instead of a generic ASK directly.
+         // Why? If multiple players have Opportunist, onPostEvent would push an ASK for all of them instantly.
+         // If Player A buys the card, Player B's ASK prompt would still trigger, showing them a "ghost prompt" for a card that's already gone.
+         // By using CHECK_OPPORTUNIST, we defer the decision to show the ASK prompt until it's actually that player's turn in the queue to answer!
          st.pendingActions.unshift({ type: 'CHECK_OPPORTUNIST', playerId: pId, payload: { cardId, marketIndex, cost } });
       }
     }
