@@ -1,0 +1,3452 @@
+{
+  "gameType": {
+    "stringValue": "king-of-tokyo"
+  },
+  "createdAt": {
+    "timestampValue": "2026-07-27T16:15:05.945Z"
+  },
+  "state": {
+    "mapValue": {
+      "fields": {
+        "status": {
+          "stringValue": "Finished"
+        },
+        "players": {
+          "mapValue": {
+            "fields": {
+              "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                "mapValue": {
+                  "fields": {
+                    "id": {
+                      "stringValue": "oL0Sb45TU48V56kdUcJoU46EOwol"
+                    },
+                    "name": {
+                      "stringValue": "qqq"
+                    },
+                    "isBot": {
+                      "booleanValue": false
+                    },
+                    "color": {
+                      "stringValue": "#ef4444"
+                    },
+                    "energy": {
+                      "integerValue": "7"
+                    },
+                    "health": {
+                      "integerValue": "0"
+                    },
+                    "vp": {
+                      "integerValue": "7"
+                    },
+                    "location": {
+                      "stringValue": "Outside"
+                    },
+                    "cards": {
+                      "arrayValue": {}
+                    },
+                    "stats": {
+                      "mapValue": {
+                        "fields": {
+                          "healthHealed": {
+                            "integerValue": "0"
+                          },
+                          "energyGained": {
+                            "integerValue": "12"
+                          },
+                          "damageDealt": {
+                            "integerValue": "18"
+                          },
+                          "playersKilled": {
+                            "integerValue": "0"
+                          },
+                          "cardsBought": {
+                            "integerValue": "6"
+                          },
+                          "turnDied": {
+                            "integerValue": "34"
+                          }
+                        }
+                      }
+                    },
+                    "cardState": {
+                      "mapValue": {
+                        "fields": {
+                          "monster_batteries": {
+                            "integerValue": "2"
+                          },
+                          "mimic": {
+                            "stringValue": "opportunist"
+                          }
+                        }
+                      }
+                    },
+                    "markers": {
+                      "mapValue": {
+                        "fields": {
+                          "poison": {
+                            "integerValue": "2"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "bot-f3vx": {
+                "mapValue": {
+                  "fields": {
+                    "id": {
+                      "stringValue": "bot-f3vx"
+                    },
+                    "name": {
+                      "stringValue": "Bob"
+                    },
+                    "isBot": {
+                      "booleanValue": true
+                    },
+                    "color": {
+                      "stringValue": "#eab308"
+                    },
+                    "botStrategy": {
+                      "stringValue": "random"
+                    },
+                    "health": {
+                      "integerValue": "2"
+                    },
+                    "energy": {
+                      "integerValue": "0"
+                    },
+                    "vp": {
+                      "integerValue": "8"
+                    },
+                    "location": {
+                      "stringValue": "Outside"
+                    },
+                    "cards": {
+                      "arrayValue": {}
+                    },
+                    "stats": {
+                      "mapValue": {
+                        "fields": {
+                          "healthHealed": {
+                            "integerValue": "0"
+                          },
+                          "energyGained": {
+                            "integerValue": "5"
+                          },
+                          "damageDealt": {
+                            "integerValue": "6"
+                          },
+                          "playersKilled": {
+                            "integerValue": "0"
+                          },
+                          "cardsBought": {
+                            "integerValue": "6"
+                          }
+                        }
+                      }
+                    },
+                    "markers": {
+                      "mapValue": {
+                        "fields": {
+                          "poison": {
+                            "integerValue": "1"
+                          }
+                        }
+                      }
+                    },
+                    "cardState": {
+                      "mapValue": {
+                        "fields": {
+                          "mimic": {
+                            "stringValue": "nova_breath"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "bot-se19": {
+                "mapValue": {
+                  "fields": {
+                    "id": {
+                      "stringValue": "bot-se19"
+                    },
+                    "name": {
+                      "stringValue": "Eve"
+                    },
+                    "isBot": {
+                      "booleanValue": true
+                    },
+                    "color": {
+                      "stringValue": "#a855f7"
+                    },
+                    "botStrategy": {
+                      "stringValue": "random"
+                    },
+                    "health": {
+                      "integerValue": "0"
+                    },
+                    "energy": {
+                      "integerValue": "34"
+                    },
+                    "vp": {
+                      "integerValue": "13"
+                    },
+                    "location": {
+                      "stringValue": "Outside"
+                    },
+                    "cards": {
+                      "arrayValue": {
+                        "values": [
+                          {
+                            "stringValue": "cannibalistic"
+                          },
+                          {
+                            "stringValue": "mimic"
+                          },
+                          {
+                            "stringValue": "nova_breath"
+                          }
+                        ]
+                      }
+                    },
+                    "stats": {
+                      "mapValue": {
+                        "fields": {
+                          "healthHealed": {
+                            "integerValue": "0"
+                          },
+                          "energyGained": {
+                            "integerValue": "2"
+                          },
+                          "damageDealt": {
+                            "integerValue": "6"
+                          },
+                          "playersKilled": {
+                            "integerValue": "0"
+                          },
+                          "cardsBought": {
+                            "integerValue": "3"
+                          },
+                          "turnDied": {
+                            "integerValue": "26"
+                          }
+                        }
+                      }
+                    },
+                    "markers": {
+                      "mapValue": {
+                        "fields": {
+                          "poison": {
+                            "integerValue": "2"
+                          }
+                        }
+                      }
+                    },
+                    "cardState": {
+                      "mapValue": {
+                        "fields": {
+                          "mimic": {
+                            "stringValue": "poison_spit"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "playerOrder": {
+          "arrayValue": {
+            "values": [
+              {
+                "stringValue": "bot-se19"
+              },
+              {
+                "stringValue": "bot-f3vx"
+              },
+              {
+                "stringValue": "oL0Sb45TU48V56kdUcJoU46EOwol"
+              }
+            ]
+          }
+        },
+        "winnerId": {
+          "stringValue": "bot-f3vx"
+        },
+        "chatMessages": {
+          "arrayValue": {}
+        },
+        "logs": {
+          "arrayValue": {
+            "values": [
+              {
+                "stringValue": "Bob joined the game"
+              },
+              {
+                "stringValue": "Eve joined the game"
+              },
+              {
+                "stringValue": "🎴 Market slot 3 revealed: Nova Breath"
+              },
+              {
+                "stringValue": "🎴 Market slot 2 revealed: Mimic"
+              },
+              {
+                "stringValue": "🎴 Market slot 1 revealed: Cannibalistic"
+              },
+              {
+                "stringValue": "--- 👾 Eve's Turn ---"
+              },
+              {
+                "stringValue": "6 dice are ready for up to 3 rolls."
+              },
+              {
+                "stringValue": "Eve resolved: 💥 💥 2️⃣ ❤️ ❤️ 3️⃣"
+              },
+              {
+                "stringValue": "Eve attacks for 2!"
+              },
+              {
+                "stringValue": "Eve enters Tokyo!"
+              },
+              {
+                "stringValue": "Eve gained 1 ⭐"
+              },
+              {
+                "stringValue": "Eve paid 2 ⚡ to sweep the market!"
+              },
+              {
+                "stringValue": "🎴 Market slot 1 revealed: Nova Breath"
+              },
+              {
+                "stringValue": "🎴 Market slot 2 revealed: Cannibalistic"
+              },
+              {
+                "stringValue": "🎴 Market slot 3 revealed: Poison Spit"
+              },
+              {
+                "stringValue": "--- 👾 Bob's Turn ---"
+              },
+              {
+                "stringValue": "6 dice are ready for up to 3 rolls."
+              },
+              {
+                "stringValue": "Bob resolved: 1️⃣ 1️⃣ 1️⃣ 1️⃣ 1️⃣ 1️⃣"
+              },
+              {
+                "stringValue": "Bob gained 4 ⭐"
+              },
+              {
+                "stringValue": "Bob bought Cannibalistic for 5 ⚡"
+              },
+              {
+                "stringValue": "🎴 Market slot 2 revealed: Nova Breath"
+              },
+              {
+                "stringValue": "Bob bought Poison Spit for 4 ⚡"
+              },
+              {
+                "stringValue": "🎴 Market slot 3 revealed: Poison Spit"
+              },
+              {
+                "stringValue": "--- 👾 qqq's Turn ---"
+              },
+              {
+                "stringValue": "6 dice are ready for up to 3 rolls."
+              },
+              {
+                "stringValue": "qqq resolved: ⚡ 1️⃣ ❤️ 2️⃣ 💥 2️⃣"
+              },
+              {
+                "stringValue": "qqq attacks for 1!"
+              },
+              {
+                "stringValue": "Eve took 1 💥"
+              },
+              {
+                "stringValue": "Eve yielded Tokyo!"
+              },
+              {
+                "stringValue": "qqq enters Tokyo!"
+              },
+              {
+                "stringValue": "qqq gained 1 ⭐"
+              },
+              {
+                "stringValue": "qqq gained 1 ⚡"
+              },
+              {
+                "stringValue": "qqq bought Nova Breath for 7 ⚡"
+              },
+              {
+                "stringValue": "🎴 Market slot 1 revealed: Opportunist"
+              },
+              {
+                "stringValue": "qqq bought Opportunist for 3 ⚡"
+              },
+              {
+                "stringValue": "🎴 Market slot 1 revealed: Mimic"
+              },
+              {
+                "stringValue": "qqq bought Mimic for 8 ⚡"
+              },
+              {
+                "stringValue": "🎭 qqq is now mimicking Poison Spit!"
+              },
+              {
+                "stringValue": "🎴 Market slot 1 revealed: Nova Breath"
+              },
+              {
+                "stringValue": "qqq paid 2 ⚡ to sweep the market!"
+              },
+              {
+                "stringValue": "🎴 Market slot 1 revealed: Opportunist"
+              },
+              {
+                "stringValue": "🎴 Market slot 2 revealed: Opportunist"
+              },
+              {
+                "stringValue": "🎴 Market slot 3 revealed: Mimic"
+              },
+              {
+                "stringValue": "qqq paid 2 ⚡ to sweep the market!"
+              },
+              {
+                "stringValue": "🎴 Market slot 1 revealed: Nova Breath"
+              },
+              {
+                "stringValue": "🎴 Market slot 2 revealed: Poison Spit"
+              },
+              {
+                "stringValue": "🎴 Market slot 3 revealed: Opportunist"
+              },
+              {
+                "stringValue": "qqq paid 2 ⚡ to sweep the market!"
+              },
+              {
+                "stringValue": "🎴 Market slot 1 revealed: Poison Spit"
+              },
+              {
+                "stringValue": "🎴 Market slot 2 revealed: Cannibalistic"
+              },
+              {
+                "stringValue": "🎴 Market slot 3 revealed: It Has a Child"
+              },
+              {
+                "stringValue": "qqq bought Cannibalistic for 5 ⚡"
+              },
+              {
+                "stringValue": "🎴 Market slot 2 revealed: Nova Breath"
+              },
+              {
+                "stringValue": "qqq bought It Has a Child for 7 ⚡"
+              },
+              {
+                "stringValue": "🎴 Market slot 3 revealed: Mimic"
+              },
+              {
+                "stringValue": "qqq paid 2 ⚡ to sweep the market!"
+              },
+              {
+                "stringValue": "🎴 Market slot 1 revealed: Cannibalistic"
+              },
+              {
+                "stringValue": "🎴 Market slot 2 revealed: Opportunist"
+              },
+              {
+                "stringValue": "🎴 Market slot 3 revealed: Nova Breath"
+              },
+              {
+                "stringValue": "qqq paid 2 ⚡ to sweep the market!"
+              },
+              {
+                "stringValue": "🎴 Market slot 1 revealed: Mimic"
+              },
+              {
+                "stringValue": "🎴 Market slot 2 revealed: Mimic"
+              },
+              {
+                "stringValue": "🎴 Market slot 3 revealed: It Has a Child"
+              },
+              {
+                "stringValue": "qqq paid 2 ⚡ to sweep the market!"
+              },
+              {
+                "stringValue": "🎴 Market slot 1 revealed: Nova Breath"
+              },
+              {
+                "stringValue": "🎴 Market slot 2 revealed: It Has a Child"
+              },
+              {
+                "stringValue": "🎴 Market slot 3 revealed: Mimic"
+              },
+              {
+                "stringValue": "qqq paid 2 ⚡ to sweep the market!"
+              },
+              {
+                "stringValue": "🎴 Market slot 1 revealed: Mimic"
+              },
+              {
+                "stringValue": "🎴 Market slot 2 revealed: Cannibalistic"
+              },
+              {
+                "stringValue": "🎴 Market slot 3 revealed: Mimic"
+              },
+              {
+                "stringValue": "--- 👾 Eve's Turn ---"
+              },
+              {
+                "stringValue": "6 dice are ready for up to 3 rolls."
+              },
+              {
+                "stringValue": "Eve resolved: 1️⃣ 1️⃣ 1️⃣ 1️⃣ 1️⃣ 1️⃣"
+              },
+              {
+                "stringValue": "Eve gained 4 ⭐"
+              },
+              {
+                "stringValue": "Eve bought Cannibalistic for 5 ⚡"
+              },
+              {
+                "stringValue": "🎴 Market slot 2 revealed: Poison Spit"
+              },
+              {
+                "stringValue": "--- 👾 Bob's Turn ---"
+              },
+              {
+                "stringValue": "6 dice are ready for up to 3 rolls."
+              },
+              {
+                "stringValue": "Bob resolved: ❤️ ⚡ 1️⃣ 3️⃣ 2️⃣ 2️⃣"
+              },
+              {
+                "stringValue": "Bob gained 1 ⚡"
+              },
+              {
+                "stringValue": "--- 👾 qqq's Turn ---"
+              },
+              {
+                "stringValue": "qqq starts turn in Tokyo!"
+              },
+              {
+                "stringValue": "qqq gained 2 ⭐"
+              },
+              {
+                "stringValue": "6 dice are ready for up to 3 rolls."
+              },
+              {
+                "stringValue": "qqq resolved: 💥 ⚡ ⚡ ⚡ 💥 ⚡"
+              },
+              {
+                "stringValue": "qqq attacks for 2 everywhere! (Nova Breath)"
+              },
+              {
+                "stringValue": "Eve took 2 💥"
+              },
+              {
+                "stringValue": "☠️ Eve gets a Poison counter from Poison Spit!"
+              },
+              {
+                "stringValue": "Bob took 2 💥"
+              },
+              {
+                "stringValue": "☠️ Bob gets a Poison counter from Poison Spit!"
+              },
+              {
+                "stringValue": "qqq gained 4 ⚡"
+              },
+              {
+                "stringValue": "qqq bought Poison Spit for 4 ⚡"
+              },
+              {
+                "stringValue": "🎴 Market slot 2 revealed: Opportunist"
+              },
+              {
+                "stringValue": "--- 👾 Eve's Turn ---"
+              },
+              {
+                "stringValue": "6 dice are ready for up to 3 rolls."
+              },
+              {
+                "stringValue": "Eve resolved: 1️⃣ 1️⃣ 1️⃣ 1️⃣ 1️⃣ 1️⃣"
+              },
+              {
+                "stringValue": "Eve gained 4 ⭐"
+              },
+              {
+                "stringValue": "Eve takes 1 damage from Poison!"
+              },
+              {
+                "stringValue": "Eve took 1 💥"
+              },
+              {
+                "stringValue": "--- 👾 Bob's Turn ---"
+              },
+              {
+                "stringValue": "6 dice are ready for up to 3 rolls."
+              },
+              {
+                "stringValue": "Bob resolved: 💥 ❤️ ❤️ ⚡ 2️⃣ 💥"
+              },
+              {
+                "stringValue": "Bob attacks for 2!"
+              },
+              {
+                "stringValue": "🧪 Bob spent 1 ❤️ to cure poison!"
+              },
+              {
+                "stringValue": "qqq took 2 💥"
+              },
+              {
+                "stringValue": "☠️ qqq gets a Poison counter from Poison Spit!"
+              },
+              {
+                "stringValue": "qqq yielded Tokyo!"
+              },
+              {
+                "stringValue": "Bob enters Tokyo!"
+              },
+              {
+                "stringValue": "Bob gained 1 ⭐"
+              },
+              {
+                "stringValue": "Bob gained 1 ⚡"
+              },
+              {
+                "stringValue": "Bob bought Opportunist for 3 ⚡"
+              },
+              {
+                "stringValue": "🎴 Market slot 2 revealed: Mimic"
+              },
+              {
+                "stringValue": "Bob bought Mimic for 8 ⚡"
+              },
+              {
+                "stringValue": "🎭 qqq is now mimicking Poison Spit!"
+              },
+              {
+                "stringValue": "🎭 Bob is now mimicking Poison Spit!"
+              },
+              {
+                "stringValue": "🎴 Market slot 3 revealed: Nova Breath"
+              },
+              {
+                "stringValue": "🎭 Bob is now mimicking Opportunist!"
+              },
+              {
+                "stringValue": "🎭 qqq is now mimicking Cannibalistic!"
+              },
+              {
+                "stringValue": "--- 👾 qqq's Turn ---"
+              },
+              {
+                "stringValue": "6 dice are ready for up to 3 rolls."
+              },
+              {
+                "stringValue": "qqq resolved: 3️⃣ 💥 3️⃣ 2️⃣ 1️⃣ 3️⃣"
+              },
+              {
+                "stringValue": "qqq gained 3 ⭐"
+              },
+              {
+                "stringValue": "qqq attacks for 1 everywhere! (Nova Breath)"
+              },
+              {
+                "stringValue": "Eve took 1 💥"
+              },
+              {
+                "stringValue": "☠️ Eve gets a Poison counter from Poison Spit!"
+              },
+              {
+                "stringValue": "Bob took 1 💥"
+              },
+              {
+                "stringValue": "☠️ Bob gets a Poison counter from Poison Spit!"
+              },
+              {
+                "stringValue": "Bob yielded Tokyo!"
+              },
+              {
+                "stringValue": "qqq enters Tokyo!"
+              },
+              {
+                "stringValue": "qqq gained 1 ⭐"
+              },
+              {
+                "stringValue": "qqq takes 1 damage from Poison!"
+              },
+              {
+                "stringValue": "qqq took 1 💥"
+              },
+              {
+                "stringValue": "--- 👾 Eve's Turn ---"
+              },
+              {
+                "stringValue": "6 dice are ready for up to 3 rolls."
+              },
+              {
+                "stringValue": "Eve resolved: 💥 💥 💥 ⚡ 💥 ❤️"
+              },
+              {
+                "stringValue": "Eve attacks for 4!"
+              },
+              {
+                "stringValue": "🧪 Eve spent 1 ❤️ to cure poison!"
+              },
+              {
+                "stringValue": "qqq took 4 💥"
+              },
+              {
+                "stringValue": "qqq yielded Tokyo!"
+              },
+              {
+                "stringValue": "Eve enters Tokyo!"
+              },
+              {
+                "stringValue": "Eve gained 1 ⭐"
+              },
+              {
+                "stringValue": "🧪 Eve spent 1 ❤️ to cure poison!"
+              },
+              {
+                "stringValue": "Eve gained 1 ⚡"
+              },
+              {
+                "stringValue": "Eve bought Mimic for 8 ⚡"
+              },
+              {
+                "stringValue": "🎭 qqq is now mimicking Opportunist!"
+              },
+              {
+                "stringValue": "🎭 Bob is now mimicking Cannibalistic!"
+              },
+              {
+                "stringValue": "🎭 Eve is now mimicking Poison Spit!"
+              },
+              {
+                "stringValue": "🎴 Market slot 2 revealed: It Has a Child"
+              },
+              {
+                "stringValue": "Eve bought Nova Breath for 7 ⚡"
+              },
+              {
+                "stringValue": "🎴 Market slot 3 revealed: Mimic"
+              },
+              {
+                "stringValue": "🎭 Eve is now mimicking Poison Spit!"
+              },
+              {
+                "stringValue": "🎭 qqq is now mimicking Opportunist!"
+              },
+              {
+                "stringValue": "🎭 Bob is now mimicking Nova Breath!"
+              },
+              {
+                "stringValue": "--- 👾 Bob's Turn ---"
+              },
+              {
+                "stringValue": "6 dice are ready for up to 3 rolls."
+              },
+              {
+                "stringValue": "Bob resolved: ❤️ 1️⃣ 💥 💥 2️⃣ ❤️"
+              },
+              {
+                "stringValue": "Bob attacks for 2 everywhere! (Nova Breath)"
+              },
+              {
+                "stringValue": "Eve took 2 💥"
+              },
+              {
+                "stringValue": "☠️ Eve gets a Poison counter from Poison Spit!"
+              },
+              {
+                "stringValue": "Eve yielded Tokyo!"
+              },
+              {
+                "stringValue": "Bob enters Tokyo!"
+              },
+              {
+                "stringValue": "Bob gained 1 ⭐"
+              },
+              {
+                "stringValue": "qqq took 2 💥"
+              },
+              {
+                "stringValue": "☠️ qqq gets a Poison counter from Poison Spit!"
+              },
+              {
+                "stringValue": "🧪 Bob spent 1 ❤️ to cure poison!"
+              },
+              {
+                "stringValue": "Bob bought It Has a Child for 7 ⚡"
+              },
+              {
+                "stringValue": "🎴 Market slot 2 revealed: Nova Breath"
+              },
+              {
+                "stringValue": "Bob bought Nova Breath for 7 ⚡"
+              },
+              {
+                "stringValue": "🎴 Market slot 2 revealed: Opportunist"
+              },
+              {
+                "stringValue": "Bob paid 2 ⚡ to sweep the market!"
+              },
+              {
+                "stringValue": "🎴 Market slot 1 revealed: It Has a Child"
+              },
+              {
+                "stringValue": "🎴 Market slot 2 revealed: Poison Spit"
+              },
+              {
+                "stringValue": "🎴 Market slot 3 revealed: Poison Spit"
+              },
+              {
+                "stringValue": "--- 👾 qqq's Turn ---"
+              },
+              {
+                "stringValue": "6 dice are ready for up to 3 rolls."
+              },
+              {
+                "stringValue": "qqq resolved: 3️⃣ 3️⃣ 💥 💥 3️⃣ 2️⃣"
+              },
+              {
+                "stringValue": "qqq gained 3 ⭐"
+              },
+              {
+                "stringValue": "qqq attacks for 2 everywhere! (Nova Breath)"
+              },
+              {
+                "stringValue": "Eve took 2 💥"
+              },
+              {
+                "stringValue": "☠️ Eve gets a Poison counter from Poison Spit!"
+              },
+              {
+                "stringValue": "Bob took 2 💥"
+              },
+              {
+                "stringValue": "☠️ Bob gets a Poison counter from Poison Spit!"
+              },
+              {
+                "stringValue": "Bob stays in Tokyo!"
+              },
+              {
+                "stringValue": "qqq takes 2 damage from Poison!"
+              },
+              {
+                "stringValue": "qqq took 2 💥"
+              },
+              {
+                "stringValue": "🌟 qqq used It Has a Child! They are reborn!"
+              },
+              {
+                "stringValue": "--- 👾 Eve's Turn ---"
+              },
+              {
+                "stringValue": "6 dice are ready for up to 3 rolls."
+              },
+              {
+                "stringValue": "Eve resolved: ⚡ 3️⃣ 3️⃣ 3️⃣ 💥 1️⃣"
+              },
+              {
+                "stringValue": "Eve gained 3 ⭐"
+              },
+              {
+                "stringValue": "Eve attacks for 1 everywhere! (Nova Breath)"
+              },
+              {
+                "stringValue": "Bob took 1 💥"
+              },
+              {
+                "stringValue": "☠️ Bob gets a Poison counter from Poison Spit!"
+              },
+              {
+                "stringValue": "Bob stays in Tokyo!"
+              },
+              {
+                "stringValue": "qqq took 1 💥"
+              },
+              {
+                "stringValue": "☠️ qqq gets a Poison counter from Poison Spit!"
+              },
+              {
+                "stringValue": "Eve gained 1 ⚡"
+              },
+              {
+                "stringValue": "Eve takes 2 damage from Poison!"
+              },
+              {
+                "stringValue": "Eve took 2 💥"
+              },
+              {
+                "stringValue": "💀 Eve died!"
+              },
+              {
+                "stringValue": "--- 👾 Bob's Turn ---"
+              },
+              {
+                "stringValue": "Bob starts turn in Tokyo!"
+              },
+              {
+                "stringValue": "Bob gained 2 ⭐"
+              },
+              {
+                "stringValue": "6 dice are ready for up to 3 rolls."
+              },
+              {
+                "stringValue": "Bob resolved: 1️⃣ 1️⃣ 1️⃣ 1️⃣ 1️⃣ 1️⃣"
+              },
+              {
+                "stringValue": "Bob gained 4 ⭐"
+              },
+              {
+                "stringValue": "Bob takes 2 damage from Poison!"
+              },
+              {
+                "stringValue": "Bob took 2 💥"
+              },
+              {
+                "stringValue": "--- 👾 qqq's Turn ---"
+              },
+              {
+                "stringValue": "6 dice are ready for up to 3 rolls."
+              },
+              {
+                "stringValue": "qqq resolved: ⚡ 1️⃣ 1️⃣ 💥 ⚡ 2️⃣"
+              },
+              {
+                "stringValue": "qqq attacks for 1!"
+              },
+              {
+                "stringValue": "Bob took 1 💥"
+              },
+              {
+                "stringValue": "Bob yielded Tokyo!"
+              },
+              {
+                "stringValue": "qqq enters Tokyo!"
+              },
+              {
+                "stringValue": "qqq gained 1 ⭐"
+              },
+              {
+                "stringValue": "qqq gained 2 ⚡"
+              },
+              {
+                "stringValue": "qqq takes 3 damage from Poison!"
+              },
+              {
+                "stringValue": "qqq took 3 💥"
+              },
+              {
+                "stringValue": "--- 👾 Bob's Turn ---"
+              },
+              {
+                "stringValue": "6 dice are ready for up to 3 rolls."
+              },
+              {
+                "stringValue": "Bob resolved: ⚡ ❤️ ⚡ 1️⃣ 2️⃣ ⚡"
+              },
+              {
+                "stringValue": "🧪 Bob spent 1 ❤️ to cure poison!"
+              },
+              {
+                "stringValue": "Bob gained 3 ⚡"
+              },
+              {
+                "stringValue": "Bob takes 1 damage from Poison!"
+              },
+              {
+                "stringValue": "Bob took 1 💥"
+              },
+              {
+                "stringValue": "🌟 Bob used It Has a Child! They are reborn!"
+              },
+              {
+                "stringValue": "--- 👾 qqq's Turn ---"
+              },
+              {
+                "stringValue": "qqq starts turn in Tokyo!"
+              },
+              {
+                "stringValue": "qqq gained 2 ⭐"
+              },
+              {
+                "stringValue": "6 dice are ready for up to 3 rolls."
+              },
+              {
+                "stringValue": "qqq resolved: 1️⃣ ❤️ 💥 💥 1️⃣ 3️⃣"
+              },
+              {
+                "stringValue": "qqq attacks for 2!"
+              },
+              {
+                "stringValue": "Bob took 2 💥"
+              },
+              {
+                "stringValue": "🧪 qqq spent 1 ❤️ to cure poison!"
+              },
+              {
+                "stringValue": "qqq takes 2 damage from Poison!"
+              },
+              {
+                "stringValue": "qqq took 2 💥"
+              },
+              {
+                "stringValue": "--- 👾 Bob's Turn ---"
+              },
+              {
+                "stringValue": "6 dice are ready for up to 3 rolls."
+              },
+              {
+                "stringValue": "Bob resolved: 1️⃣ 1️⃣ 1️⃣ 1️⃣ 1️⃣ 1️⃣"
+              },
+              {
+                "stringValue": "Bob gained 4 ⭐"
+              },
+              {
+                "stringValue": "Bob takes 1 damage from Poison!"
+              },
+              {
+                "stringValue": "Bob took 1 💥"
+              },
+              {
+                "stringValue": "--- 👾 qqq's Turn ---"
+              },
+              {
+                "stringValue": "qqq starts turn in Tokyo!"
+              },
+              {
+                "stringValue": "qqq gained 2 ⭐"
+              },
+              {
+                "stringValue": "6 dice are ready for up to 3 rolls."
+              },
+              {
+                "stringValue": "qqq resolved: 💥 1️⃣ 2️⃣ ⚡ 1️⃣ 💥"
+              },
+              {
+                "stringValue": "qqq attacks for 2!"
+              },
+              {
+                "stringValue": "Bob took 2 💥"
+              },
+              {
+                "stringValue": "qqq gained 1 ⚡"
+              },
+              {
+                "stringValue": "qqq takes 2 damage from Poison!"
+              },
+              {
+                "stringValue": "qqq took 2 💥"
+              },
+              {
+                "stringValue": "--- 👾 Bob's Turn ---"
+              },
+              {
+                "stringValue": "6 dice are ready for up to 3 rolls."
+              },
+              {
+                "stringValue": "Bob resolved: 1️⃣ 1️⃣ 1️⃣ 1️⃣ 1️⃣ 1️⃣"
+              },
+              {
+                "stringValue": "Bob gained 4 ⭐"
+              },
+              {
+                "stringValue": "Bob takes 1 damage from Poison!"
+              },
+              {
+                "stringValue": "Bob took 1 💥"
+              },
+              {
+                "stringValue": "--- 👾 qqq's Turn ---"
+              },
+              {
+                "stringValue": "qqq starts turn in Tokyo!"
+              },
+              {
+                "stringValue": "qqq gained 2 ⭐"
+              },
+              {
+                "stringValue": "6 dice are ready for up to 3 rolls."
+              },
+              {
+                "stringValue": "qqq resolved: ⚡ ⚡ 💥 ⚡ 💥 ⚡"
+              },
+              {
+                "stringValue": "qqq attacks for 2!"
+              },
+              {
+                "stringValue": "Bob took 2 💥"
+              },
+              {
+                "stringValue": "qqq gained 4 ⚡"
+              },
+              {
+                "stringValue": "qqq takes 2 damage from Poison!"
+              },
+              {
+                "stringValue": "qqq took 2 💥"
+              },
+              {
+                "stringValue": "💀 qqq died!"
+              },
+              {
+                "stringValue": "Bob is the last monster standing! 🏆"
+              }
+            ]
+          }
+        },
+        "currentPlayerIndex": {
+          "integerValue": "2"
+        },
+        "settings": {
+          "mapValue": {
+            "fields": {
+              "maxHealth": {
+                "integerValue": "10"
+              },
+              "maxVp": {
+                "integerValue": "20"
+              },
+              "cardsPerType": {
+                "integerValue": "55"
+              },
+              "startingEnergy": {
+                "integerValue": "55"
+              },
+              "activeCards": {
+                "arrayValue": {
+                  "values": [
+                    {
+                      "stringValue": "cannibalistic"
+                    },
+                    {
+                      "stringValue": "it_has_a_child"
+                    },
+                    {
+                      "stringValue": "mimic"
+                    },
+                    {
+                      "stringValue": "nova_breath"
+                    },
+                    {
+                      "stringValue": "opportunist"
+                    },
+                    {
+                      "stringValue": "poison_spit"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deck": {
+          "arrayValue": {
+            "values": [
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "opportunist"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "nova_breath"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "mimic"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "cannibalistic"
+              },
+              {
+                "stringValue": "mimic"
+              }
+            ]
+          }
+        },
+        "market": {
+          "arrayValue": {
+            "values": [
+              {
+                "stringValue": "it_has_a_child"
+              },
+              {
+                "stringValue": "poison_spit"
+              },
+              {
+                "stringValue": "poison_spit"
+              }
+            ]
+          }
+        },
+        "dice": {
+          "arrayValue": {
+            "values": [
+              {
+                "mapValue": {
+                  "fields": {
+                    "id": {
+                      "stringValue": "d1"
+                    },
+                    "value": {
+                      "stringValue": "Energy"
+                    },
+                    "kept": {
+                      "booleanValue": false
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "id": {
+                      "stringValue": "d2"
+                    },
+                    "value": {
+                      "stringValue": "Energy"
+                    },
+                    "kept": {
+                      "booleanValue": true
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "id": {
+                      "stringValue": "d3"
+                    },
+                    "value": {
+                      "stringValue": "Smash"
+                    },
+                    "kept": {
+                      "booleanValue": true
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "id": {
+                      "stringValue": "d4"
+                    },
+                    "value": {
+                      "stringValue": "Energy"
+                    },
+                    "kept": {
+                      "booleanValue": true
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "id": {
+                      "stringValue": "d5"
+                    },
+                    "value": {
+                      "stringValue": "Smash"
+                    },
+                    "kept": {
+                      "booleanValue": true
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "id": {
+                      "stringValue": "d6"
+                    },
+                    "value": {
+                      "stringValue": "Energy"
+                    },
+                    "kept": {
+                      "booleanValue": true
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "rollCount": {
+          "integerValue": "0"
+        },
+        "turnContext": {
+          "mapValue": {}
+        },
+        "pendingActions": {
+          "arrayValue": {}
+        },
+        "history": {
+          "arrayValue": {
+            "values": [
+              {
+                "mapValue": {
+                  "fields": {
+                    "turnNum": {
+                      "integerValue": "1"
+                    },
+                    "healths": {
+                      "mapValue": {
+                        "fields": {
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "5"
+                          },
+                          "bot-sc0k": {
+                            "integerValue": "10"
+                          }
+                        }
+                      }
+                    },
+                    "vps": {
+                      "mapValue": {
+                        "fields": {
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "7"
+                          },
+                          "bot-sc0k": {
+                            "integerValue": "0"
+                          }
+                        }
+                      }
+                    },
+                    "tokyoOccupant": {
+                      "stringValue": "oL0Sb45TU48V56kdUcJoU46EOwol"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "turnNum": {
+                      "integerValue": "2"
+                    },
+                    "healths": {
+                      "mapValue": {
+                        "fields": {
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "5"
+                          },
+                          "bot-sc0k": {
+                            "integerValue": "10"
+                          }
+                        }
+                      }
+                    },
+                    "vps": {
+                      "mapValue": {
+                        "fields": {
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "7"
+                          },
+                          "bot-sc0k": {
+                            "integerValue": "4"
+                          }
+                        }
+                      }
+                    },
+                    "tokyoOccupant": {
+                      "stringValue": "oL0Sb45TU48V56kdUcJoU46EOwol"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "turnNum": {
+                      "integerValue": "3"
+                    },
+                    "healths": {
+                      "mapValue": {
+                        "fields": {
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "5"
+                          },
+                          "bot-sc0k": {
+                            "integerValue": "10"
+                          }
+                        }
+                      }
+                    },
+                    "vps": {
+                      "mapValue": {
+                        "fields": {
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "9"
+                          },
+                          "bot-sc0k": {
+                            "integerValue": "4"
+                          }
+                        }
+                      }
+                    },
+                    "tokyoOccupant": {
+                      "stringValue": "oL0Sb45TU48V56kdUcJoU46EOwol"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "turnNum": {
+                      "integerValue": "4"
+                    },
+                    "healths": {
+                      "mapValue": {
+                        "fields": {
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "5"
+                          },
+                          "bot-sc0k": {
+                            "integerValue": "10"
+                          }
+                        }
+                      }
+                    },
+                    "vps": {
+                      "mapValue": {
+                        "fields": {
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "9"
+                          },
+                          "bot-sc0k": {
+                            "integerValue": "8"
+                          }
+                        }
+                      }
+                    },
+                    "tokyoOccupant": {
+                      "stringValue": "oL0Sb45TU48V56kdUcJoU46EOwol"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "turnNum": {
+                      "integerValue": "5"
+                    },
+                    "healths": {
+                      "mapValue": {
+                        "fields": {
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "5"
+                          },
+                          "bot-sc0k": {
+                            "integerValue": "7"
+                          }
+                        }
+                      }
+                    },
+                    "vps": {
+                      "mapValue": {
+                        "fields": {
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "13"
+                          },
+                          "bot-sc0k": {
+                            "integerValue": "8"
+                          }
+                        }
+                      }
+                    },
+                    "tokyoOccupant": {
+                      "stringValue": "oL0Sb45TU48V56kdUcJoU46EOwol"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "turnNum": {
+                      "integerValue": "6"
+                    },
+                    "healths": {
+                      "mapValue": {
+                        "fields": {
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "5"
+                          },
+                          "bot-sc0k": {
+                            "integerValue": "9"
+                          }
+                        }
+                      }
+                    },
+                    "vps": {
+                      "mapValue": {
+                        "fields": {
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "13"
+                          },
+                          "bot-sc0k": {
+                            "integerValue": "8"
+                          }
+                        }
+                      }
+                    },
+                    "tokyoOccupant": {
+                      "stringValue": "oL0Sb45TU48V56kdUcJoU46EOwol"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "turnNum": {
+                      "integerValue": "7"
+                    },
+                    "healths": {
+                      "mapValue": {
+                        "fields": {
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "2"
+                          },
+                          "bot-sc0k": {
+                            "integerValue": "5"
+                          }
+                        }
+                      }
+                    },
+                    "vps": {
+                      "mapValue": {
+                        "fields": {
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "15"
+                          },
+                          "bot-sc0k": {
+                            "integerValue": "8"
+                          }
+                        }
+                      }
+                    },
+                    "tokyoOccupant": {
+                      "stringValue": "oL0Sb45TU48V56kdUcJoU46EOwol"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "turnNum": {
+                      "integerValue": "8"
+                    },
+                    "healths": {
+                      "mapValue": {
+                        "fields": {
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "1"
+                          },
+                          "bot-sc0k": {
+                            "integerValue": "5"
+                          }
+                        }
+                      }
+                    },
+                    "vps": {
+                      "mapValue": {
+                        "fields": {
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "15"
+                          },
+                          "bot-sc0k": {
+                            "integerValue": "9"
+                          }
+                        }
+                      }
+                    },
+                    "tokyoOccupant": {
+                      "stringValue": "bot-sc0k"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "turnNum": {
+                      "integerValue": "9"
+                    },
+                    "healths": {
+                      "mapValue": {
+                        "fields": {
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "1"
+                          },
+                          "bot-sc0k": {
+                            "integerValue": "2"
+                          }
+                        }
+                      }
+                    },
+                    "vps": {
+                      "mapValue": {
+                        "fields": {
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "18"
+                          },
+                          "bot-sc0k": {
+                            "integerValue": "9"
+                          }
+                        }
+                      }
+                    },
+                    "tokyoOccupant": {
+                      "stringValue": "oL0Sb45TU48V56kdUcJoU46EOwol"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "turnNum": {
+                      "integerValue": "10"
+                    },
+                    "healths": {
+                      "mapValue": {
+                        "fields": {
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "10"
+                          },
+                          "bot-sc0k": {
+                            "integerValue": "2"
+                          }
+                        }
+                      }
+                    },
+                    "vps": {
+                      "mapValue": {
+                        "fields": {
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "0"
+                          },
+                          "bot-sc0k": {
+                            "integerValue": "10"
+                          }
+                        }
+                      }
+                    },
+                    "tokyoOccupant": {
+                      "stringValue": "oL0Sb45TU48V56kdUcJoU46EOwol"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "turnNum": {
+                      "integerValue": "11"
+                    },
+                    "healths": {
+                      "mapValue": {
+                        "fields": {
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "6"
+                          },
+                          "bot-sc0k": {
+                            "integerValue": "2"
+                          }
+                        }
+                      }
+                    },
+                    "vps": {
+                      "mapValue": {
+                        "fields": {
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "7"
+                          },
+                          "bot-sc0k": {
+                            "integerValue": "10"
+                          }
+                        }
+                      }
+                    },
+                    "tokyoOccupant": {
+                      "stringValue": "oL0Sb45TU48V56kdUcJoU46EOwol"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "turnNum": {
+                      "integerValue": "12"
+                    },
+                    "healths": {
+                      "mapValue": {
+                        "fields": {
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "6"
+                          },
+                          "bot-sc0k": {
+                            "integerValue": "2"
+                          }
+                        }
+                      }
+                    },
+                    "vps": {
+                      "mapValue": {
+                        "fields": {
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "7"
+                          },
+                          "bot-sc0k": {
+                            "integerValue": "12"
+                          }
+                        }
+                      }
+                    },
+                    "tokyoOccupant": {
+                      "stringValue": "oL0Sb45TU48V56kdUcJoU46EOwol"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "turnNum": {
+                      "integerValue": "13"
+                    },
+                    "healths": {
+                      "mapValue": {
+                        "fields": {
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "6"
+                          },
+                          "bot-sc0k": {
+                            "integerValue": "2"
+                          }
+                        }
+                      }
+                    },
+                    "vps": {
+                      "mapValue": {
+                        "fields": {
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "9"
+                          },
+                          "bot-sc0k": {
+                            "integerValue": "12"
+                          }
+                        }
+                      }
+                    },
+                    "tokyoOccupant": {
+                      "stringValue": "oL0Sb45TU48V56kdUcJoU46EOwol"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "turnNum": {
+                      "integerValue": "14"
+                    },
+                    "healths": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "10"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "10"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "10"
+                          }
+                        }
+                      }
+                    },
+                    "vps": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "1"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "0"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "0"
+                          }
+                        }
+                      }
+                    },
+                    "tokyoOccupant": {
+                      "stringValue": "bot-se19"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "turnNum": {
+                      "integerValue": "15"
+                    },
+                    "healths": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "10"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "10"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "10"
+                          }
+                        }
+                      }
+                    },
+                    "vps": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "1"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "4"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "0"
+                          }
+                        }
+                      }
+                    },
+                    "tokyoOccupant": {
+                      "stringValue": "bot-se19"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "turnNum": {
+                      "integerValue": "16"
+                    },
+                    "healths": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "9"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "10"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "10"
+                          }
+                        }
+                      }
+                    },
+                    "vps": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "1"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "4"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "1"
+                          }
+                        }
+                      }
+                    },
+                    "tokyoOccupant": {
+                      "stringValue": "oL0Sb45TU48V56kdUcJoU46EOwol"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "turnNum": {
+                      "integerValue": "17"
+                    },
+                    "healths": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "9"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "10"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "10"
+                          }
+                        }
+                      }
+                    },
+                    "vps": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "5"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "4"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "1"
+                          }
+                        }
+                      }
+                    },
+                    "tokyoOccupant": {
+                      "stringValue": "oL0Sb45TU48V56kdUcJoU46EOwol"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "turnNum": {
+                      "integerValue": "18"
+                    },
+                    "healths": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "9"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "10"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "10"
+                          }
+                        }
+                      }
+                    },
+                    "vps": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "5"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "4"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "1"
+                          }
+                        }
+                      }
+                    },
+                    "tokyoOccupant": {
+                      "stringValue": "oL0Sb45TU48V56kdUcJoU46EOwol"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "turnNum": {
+                      "integerValue": "19"
+                    },
+                    "healths": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "7"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "8"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "10"
+                          }
+                        }
+                      }
+                    },
+                    "vps": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "5"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "4"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "3"
+                          }
+                        }
+                      }
+                    },
+                    "tokyoOccupant": {
+                      "stringValue": "oL0Sb45TU48V56kdUcJoU46EOwol"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "turnNum": {
+                      "integerValue": "20"
+                    },
+                    "healths": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "6"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "8"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "10"
+                          }
+                        }
+                      }
+                    },
+                    "vps": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "9"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "4"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "3"
+                          }
+                        }
+                      }
+                    },
+                    "tokyoOccupant": {
+                      "stringValue": "oL0Sb45TU48V56kdUcJoU46EOwol"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "turnNum": {
+                      "integerValue": "21"
+                    },
+                    "healths": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "6"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "8"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "8"
+                          }
+                        }
+                      }
+                    },
+                    "vps": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "9"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "5"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "3"
+                          }
+                        }
+                      }
+                    },
+                    "tokyoOccupant": {
+                      "stringValue": "bot-f3vx"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "turnNum": {
+                      "integerValue": "22"
+                    },
+                    "healths": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "5"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "7"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "7"
+                          }
+                        }
+                      }
+                    },
+                    "vps": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "9"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "5"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "7"
+                          }
+                        }
+                      }
+                    },
+                    "tokyoOccupant": {
+                      "stringValue": "oL0Sb45TU48V56kdUcJoU46EOwol"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "turnNum": {
+                      "integerValue": "23"
+                    },
+                    "healths": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "5"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "7"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "3"
+                          }
+                        }
+                      }
+                    },
+                    "vps": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "10"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "5"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "7"
+                          }
+                        }
+                      }
+                    },
+                    "tokyoOccupant": {
+                      "stringValue": "bot-se19"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "turnNum": {
+                      "integerValue": "24"
+                    },
+                    "healths": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "3"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "7"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "1"
+                          }
+                        }
+                      }
+                    },
+                    "vps": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "10"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "6"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "7"
+                          }
+                        }
+                      }
+                    },
+                    "tokyoOccupant": {
+                      "stringValue": "bot-f3vx"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "turnNum": {
+                      "integerValue": "25"
+                    },
+                    "healths": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "1"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "5"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "10"
+                          }
+                        }
+                      }
+                    },
+                    "vps": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "10"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "6"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "0"
+                          }
+                        }
+                      }
+                    },
+                    "tokyoOccupant": {
+                      "stringValue": "bot-f3vx"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "turnNum": {
+                      "integerValue": "26"
+                    },
+                    "healths": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "0"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "4"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "9"
+                          }
+                        }
+                      }
+                    },
+                    "vps": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "13"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "6"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "0"
+                          }
+                        }
+                      }
+                    },
+                    "tokyoOccupant": {
+                      "stringValue": "bot-f3vx"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "turnNum": {
+                      "integerValue": "27"
+                    },
+                    "healths": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "0"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "2"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "9"
+                          }
+                        }
+                      }
+                    },
+                    "vps": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "13"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "12"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "0"
+                          }
+                        }
+                      }
+                    },
+                    "tokyoOccupant": {
+                      "stringValue": "bot-f3vx"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "turnNum": {
+                      "integerValue": "28"
+                    },
+                    "healths": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "0"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "1"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "6"
+                          }
+                        }
+                      }
+                    },
+                    "vps": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "13"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "12"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "1"
+                          }
+                        }
+                      }
+                    },
+                    "tokyoOccupant": {
+                      "stringValue": "oL0Sb45TU48V56kdUcJoU46EOwol"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "turnNum": {
+                      "integerValue": "29"
+                    },
+                    "healths": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "0"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "10"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "6"
+                          }
+                        }
+                      }
+                    },
+                    "vps": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "13"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "0"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "1"
+                          }
+                        }
+                      }
+                    },
+                    "tokyoOccupant": {
+                      "stringValue": "oL0Sb45TU48V56kdUcJoU46EOwol"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "turnNum": {
+                      "integerValue": "30"
+                    },
+                    "healths": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "0"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "8"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "4"
+                          }
+                        }
+                      }
+                    },
+                    "vps": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "13"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "0"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "3"
+                          }
+                        }
+                      }
+                    },
+                    "tokyoOccupant": {
+                      "stringValue": "oL0Sb45TU48V56kdUcJoU46EOwol"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "turnNum": {
+                      "integerValue": "31"
+                    },
+                    "healths": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "0"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "7"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "4"
+                          }
+                        }
+                      }
+                    },
+                    "vps": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "13"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "4"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "3"
+                          }
+                        }
+                      }
+                    },
+                    "tokyoOccupant": {
+                      "stringValue": "oL0Sb45TU48V56kdUcJoU46EOwol"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "turnNum": {
+                      "integerValue": "32"
+                    },
+                    "healths": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "0"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "5"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "2"
+                          }
+                        }
+                      }
+                    },
+                    "vps": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "13"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "4"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "5"
+                          }
+                        }
+                      }
+                    },
+                    "tokyoOccupant": {
+                      "stringValue": "oL0Sb45TU48V56kdUcJoU46EOwol"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "turnNum": {
+                      "integerValue": "33"
+                    },
+                    "healths": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "0"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "4"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "2"
+                          }
+                        }
+                      }
+                    },
+                    "vps": {
+                      "mapValue": {
+                        "fields": {
+                          "bot-se19": {
+                            "integerValue": "13"
+                          },
+                          "bot-f3vx": {
+                            "integerValue": "8"
+                          },
+                          "oL0Sb45TU48V56kdUcJoU46EOwol": {
+                            "integerValue": "5"
+                          }
+                        }
+                      }
+                    },
+                    "tokyoOccupant": {
+                      "stringValue": "oL0Sb45TU48V56kdUcJoU46EOwol"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "actionQueue": {
+          "arrayValue": {}
+        }
+      }
+    }
+  }
+}

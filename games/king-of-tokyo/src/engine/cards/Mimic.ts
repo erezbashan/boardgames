@@ -36,17 +36,21 @@ export const Mimic: CardImplementation = {
       }
     }
     
-    if (action.type === 'MIMIC_PROMPT' || action.type === 'MIMIC_PROMPT_CHANGE' || action.type === 'RESPONSE_MIMIC_PROMPT_CHANGE') {
+    if ((action.type === 'MIMIC_PROMPT' || action.type === 'MIMIC_PROMPT_CHANGE' || action.type === 'RESPONSE_MIMIC_PROMPT_CHANGE') && action.playerId === pId) {
       if (action.type === 'MIMIC_PROMPT_CHANGE' || action.type === 'RESPONSE_MIMIC_PROMPT_CHANGE') {
          if (st.players[pId].energy < 1) return st; // Should not happen
          st.players[pId].energy -= 1;
       }
       
       const allCards: {cId: string, owner: string}[] = [];
+      const seenCards = new Set<string>();
       st.playerOrder.forEach(id => {
          if (id !== pId) {
             st.players[id].cards.forEach(cId => {
-               if (cId !== 'mimic') allCards.push({cId, owner: id});
+               if (cId !== 'mimic' && !seenCards.has(cId)) {
+                   allCards.push({cId, owner: id});
+                   seenCards.add(cId);
+               }
             });
          }
       });

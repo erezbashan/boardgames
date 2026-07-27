@@ -9,7 +9,7 @@ export function handleFillMarket(st: KotState, action: PendingAction, pId: strin
       st.market[index] = newCardId;
       const cardDef = CARD_REGISTRY[newCardId];
       if (cardDef) {
-          addLog(st, action, `🎴 Market slot ${index + 1} revealed: ${cardDef.name}`);
+          addLog(st, action, `🎴 Card revealed: ${cardDef.name}`);
       }
       st.pendingActions.unshift({ type: 'CARD_REVEALED', playerId: pId, payload: { cardId: newCardId, marketIndex: index } });
   }

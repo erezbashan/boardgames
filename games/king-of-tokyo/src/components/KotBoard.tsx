@@ -422,10 +422,22 @@ export const KotBoard: React.FC = () => {
           <div style={{ display: 'flex', gap: '10px', flexWrap: 'nowrap', justifyContent: 'center', height: '100%' }}>
             {(() => {
               const standardMarket = (gameState.market || []).map((cardId, i) => ({ cardId, index: i, isExtra: false, source: 'market', overrideCost: undefined }));
+              while (standardMarket.length < 3) {
+                 standardMarket.push({ cardId: '', index: standardMarket.length, isExtra: false, source: 'market', overrideCost: undefined });
+              }
               const extraMarket = (gameState.turnContext?.marketExtraCards || []).map((extra: any, i: number) => ({ cardId: extra.cardId, index: i, isExtra: true, source: extra.source, overrideCost: extra.cost }));
               const allMarketCards = [...standardMarket, ...extraMarket];
 
               return allMarketCards.map(({ cardId, index, isExtra, source, overrideCost }, i) => {
+                if (!cardId) {
+                   return (
+                     <div 
+                       key={`empty-${i}`}
+                       style={{ background: 'rgba(255,255,255,0.05)', border: '1px dashed #475569', borderRadius: '8px', padding: '15px', flex: 1, minWidth: 0, maxWidth: '220px', height: '100%', maxHeight: '380px', boxSizing: 'border-box' }}
+                     />
+                   );
+                }
+
                 const card = CARD_REGISTRY[cardId];
                 if (!card) return null;
 
@@ -435,7 +447,7 @@ export const KotBoard: React.FC = () => {
                   displayCost = overrideCost !== undefined ? overrideCost : card.cost;
                 }
                 const canAfford = (players[myPlayerId]?.energy || 0) >= displayCost;
-                const alreadyOwned = players[myPlayerId]?.cards?.includes(cardId);
+                const alreadyOwned = players[myPlayerId]?.cards?.includes(cardId) && cardId !== 'mimic';
                 const canBuy = isMyTurn && prompt?.text === 'Buy Phase' && canAfford && !alreadyOwned;
 
                 return (

@@ -19,7 +19,7 @@ export const Opportunist: CardImplementation = {
 
       const cost = cardDef.cost;
 
-      if (owner.energy >= cost && !owner.cards.includes(cardId)) {
+      if (owner.energy >= cost && (!owner.cards.includes(cardId) || cardId === 'mimic')) {
          // We inject CHECK_OPPORTUNIST instead of a generic ASK directly.
          // Why? If multiple players have Opportunist, onPostEvent would push an ASK for all of them instantly.
          // If Player A buys the card, Player B's ASK prompt would still trigger, showing them a "ghost prompt" for a card that's already gone.
@@ -37,7 +37,7 @@ export const Opportunist: CardImplementation = {
        const cardDef = CARD_REGISTRY[cardId];
        
        // Verify the card is still in the market (another Opportunist might have bought it first)
-       if (st.market[marketIndex] === cardId && st.players[pId].energy >= cost) {
+       if (st.market[marketIndex] === cardId && st.players[pId].energy >= cost && (!st.players[pId].cards.includes(cardId) || cardId === 'mimic')) {
           // If it's your turn, you don't need a prompt to buy newly revealed cards since you can buy them normally from the market.
           if (st.playerOrder[st.currentPlayerIndex] === pId) {
              action.type = 'NOP';
@@ -51,7 +51,7 @@ export const Opportunist: CardImplementation = {
                 playerId: pId,
                 text: `Opportunist: Buy ${cardDef.name}?`,
                 options: [
-                   { label: `Buy for ${cost} ⚡`, action: { type: 'BUY', payload: { cardId, marketIndex, source: 'market' }, playerId: pId } },
+                   { label: `Buy for ${cost} ⚡`, action: { type: 'RESPONSE_MULTIPLE_ACTIONS', payload: { actions: [{ type: 'BUY', payload: { cardId, marketIndex, source: 'market' }, playerId: pId }] }, playerId: pId } },
                    { label: 'Decline', action: { type: 'RESPONSE_NOP', payload: {} } }
                 ]
              }
