@@ -11,10 +11,15 @@ export function handleTakeDamage(st: KotState, action: PendingAction, pId: strin
      addLog(st, action, `${st.players[targetId].name} took ${dmg} 💥`);
      
      if (action.payload.attackerId && st.players[action.payload.attackerId]) {
-         st.players[action.payload.attackerId].stats.damageDealt += actualDamageTaken;
-         if (newHealth === 0) {
-             st.players[action.payload.attackerId].stats.playersKilled += 1;
-         }
+         const attacker = st.players[action.payload.attackerId];
+         st.players[action.payload.attackerId] = {
+             ...attacker,
+             stats: {
+                 ...attacker.stats,
+                 damageDealt: (attacker.stats.damageDealt || 0) + actualDamageTaken,
+                 playersKilled: (attacker.stats.playersKilled || 0) + (newHealth === 0 ? 1 : 0)
+             }
+         };
      }
 
      if (newHealth === 0) {

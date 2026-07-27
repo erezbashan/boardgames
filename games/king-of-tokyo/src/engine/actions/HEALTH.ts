@@ -10,8 +10,14 @@ export function handleHealth(st: KotState, action: PendingAction, pId: string) {
     const canHeal = st.players[pId].location !== 'TokyoCity' || !!action.payload.sourceCard;
     
     if (actual > 0 && canHeal) {
-      st.players[pId] = { ...st.players[pId], health: st.players[pId].health + actual };
-      st.players[pId].stats.healthHealed += actual;
+      st.players[pId] = { 
+         ...st.players[pId], 
+         health: st.players[pId].health + actual,
+         stats: {
+             ...st.players[pId].stats,
+             healthHealed: (st.players[pId].stats.healthHealed || 0) + actual
+         }
+      };
       const reasonStr = action.payload.reason ? ` (${action.payload.reason})` : '';
       addLog(st, action, `${st.players[pId].name} healed ${actual} ❤️${reasonStr}`);
     }
