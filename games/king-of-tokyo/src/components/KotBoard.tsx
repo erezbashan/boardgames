@@ -304,18 +304,32 @@ export const KotBoard: React.FC = () => {
 
     // 1. If there's an active prompt for ME (except ASK_ROLL, which uses native controls)
     if (prompt && prompt.playerId === myPlayerId && topAction?.type !== 'ASK_ROLL') {
-      return (
-        <div style={{ padding: '10px', display: 'flex', flexDirection: 'column', height: '100%', maxHeight: '400px' }}>
-          <h3 style={{ margin: '0 0 10px 0', flexShrink: 0 }}>{prompt.text}</h3>
-          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '10px', flexWrap: 'wrap', overflowY: 'auto', paddingRight: '10px', paddingBottom: '10px' }}>
+      const isModal = prompt.options.length > 2;
+      
+      const content = (
+        <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', height: '100%', maxHeight: isModal ? '80vh' : '400px' }}>
+          <h3 style={{ margin: '0 0 15px 0', flexShrink: 0, textAlign: 'center' }}>{prompt.text}</h3>
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap', overflowY: 'auto', paddingRight: '5px' }}>
             {prompt.options.map((opt: any, i: number) => (
-              <button key={i} className="btn primary" style={{ width: '160px', minHeight: '60px', height: 'auto', fontSize: '16px', padding: '10px' }} onClick={() => dispatch(opt.action as KotAction)}>
+              <button key={i} className="btn primary" style={{ width: isModal ? '100%' : '160px', maxWidth: '300px', minHeight: '50px', height: 'auto', fontSize: '16px', padding: '10px' }} onClick={() => dispatch(opt.action as KotAction)}>
                 {opt.label}
               </button>
             ))}
           </div>
         </div>
       );
+
+      if (isModal) {
+         return (
+           <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', zIndex: 100000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+             <div style={{ background: '#1e293b', border: '2px solid #3b82f6', borderRadius: '12px', width: '90%', maxWidth: '500px', maxHeight: '90vh', overflow: 'hidden' }}>
+               {content}
+             </div>
+           </div>
+         );
+      }
+
+      return content;
     }
 
     // 2. If it's MY turn and NO prompt (or if it's ASK_ROLL)
