@@ -9,7 +9,7 @@ export const Army: CardImplementation = {
   onBuy: (st, action, pId) => {
     const cardCount = st.players[pId].cards.length;
     if (cardCount > 0) {
-      st.pendingActions.unshift({ type: 'TAKE_DAMAGE', payload: { damage: cardCount, reason: 'Army' }, playerId: pId });
+      st.pendingActions.unshift({ type: 'TAKE_DAMAGE', payload: { amount: cardCount, sourceCard: 'army' }, playerId: pId });
       st.pendingActions.unshift({ type: 'VP', payload: { amount: cardCount, reason: 'Army' }, playerId: pId });
     }
     return st;
