@@ -17,5 +17,16 @@ export function addLog(state: KotState, action: PendingAction, logStr: string): 
 }
 
 export function getPlayerMaxHealth(state: KotState, playerId: string): number {
-  return state.settings.maxHealth;
+  let max = state.settings.maxHealth;
+  const player = state.players[playerId];
+  if (player && player.cards) {
+    player.cards.forEach(cardId => {
+       const card = CARD_REGISTRY[cardId];
+       if (card && card.getMaxHealth) {
+           const cardMax = card.getMaxHealth(state, playerId);
+           if (cardMax > max) max = cardMax;
+       }
+    });
+  }
+  return max;
 }

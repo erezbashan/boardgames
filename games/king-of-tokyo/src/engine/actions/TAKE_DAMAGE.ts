@@ -9,7 +9,9 @@ export function handleTakeDamage(st: KotState, action: PendingAction, pId: strin
      const newHealth = st.players[targetId].health - actualDamageTaken;
      st.players[targetId] = { ...st.players[targetId], health: newHealth };
      action.payload._actualDamageTaken = actualDamageTaken;
-     addLog(st, action, `${st.players[targetId].name} took ${dmg} 💥`);
+     if (!action.payload.skipLog) {
+       addLog(st, action, `${st.players[targetId].name} took ${dmg} 💥`);
+     }
      
      if (action.payload.attackerId && st.players[action.payload.attackerId]) {
          const attacker = st.players[action.payload.attackerId];

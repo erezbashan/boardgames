@@ -36,14 +36,35 @@ import { GiantBrain } from './GiantBrain';
 import { HealCard } from './HealCard';
 import { WeAreOnlyMakingItStronger } from './WeAreOnlyMakingItStronger';
 
+import { AlphaMonster } from './AlphaMonster';
+import { ArmorPlating } from './ArmorPlating';
+import { BackgroundSecurity } from './BackgroundSecurity';
+import { Camouflage } from './Camouflage';
+import { CommuterTrain } from './CommuterTrain';
+import { CompleteDestruction } from './CompleteDestruction';
+import { CornerStore } from './CornerStore';
+import { DedicatedNewsTeam } from './DedicatedNewsTeam';
+import { EaterOfTheDead } from './EaterOfTheDead';
+import { EvenBigger } from './EvenBigger';
+
 export const CARD_REGISTRY: Record<string, CardImplementation> = {
+  [AlphaMonster.id]: AlphaMonster,
   [AlienMetabolism.id]: AlienMetabolism,
   [AmusementPark.id]: AmusementPark,
+  [ArmorPlating.id]: ArmorPlating,
   [Army.id]: Army,
+  [BackgroundSecurity.id]: BackgroundSecurity,
+  [Camouflage.id]: Camouflage,
   [Cannibalistic.id]: Cannibalistic,
+  [CommuterTrain.id]: CommuterTrain,
+  [CompleteDestruction.id]: CompleteDestruction,
+  [CornerStore.id]: CornerStore,
+  [DedicatedNewsTeam.id]: DedicatedNewsTeam,
   [DropFromHighAltitude.id]: DropFromHighAltitude,
+  [EaterOfTheDead.id]: EaterOfTheDead,
   [Energize.id]: Energize,
   [Evade.id]: Evade,
+  [EvenBigger.id]: EvenBigger,
   [ExtraHead.id]: ExtraHead,
   [Frenzy.id]: Frenzy,
   [GasRefinery.id]: GasRefinery,

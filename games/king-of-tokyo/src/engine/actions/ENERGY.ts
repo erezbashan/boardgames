@@ -22,10 +22,12 @@ export function handleEnergy(st: KotState, action: PendingAction, pId: string) {
     const reasonStr = action.payload.reason ? ` (${action.payload.reason})` : '';
     
     const amt = action.payload.amount;
-    if (amt >= 0) {
-       addLog(st, action, `${st.players[pId].name} gained ${amt} ⚡${reasonStr}${sourceText}`);
-    } else {
-       addLog(st, action, `${st.players[pId].name} lost ${Math.abs(amt)} ⚡${reasonStr}${sourceText}`);
+    if (!action.payload.skipLog) {
+       if (amt >= 0) {
+          addLog(st, action, `${st.players[pId].name} gained ${amt} ⚡${reasonStr}${sourceText}`);
+       } else {
+          addLog(st, action, `${st.players[pId].name} lost ${Math.abs(amt)} ⚡${reasonStr}${sourceText}`);
+       }
     }
   }
 }
