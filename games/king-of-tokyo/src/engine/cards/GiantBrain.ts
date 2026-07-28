@@ -8,6 +8,7 @@ export const GiantBrain: CardImplementation = {
   cost: 5,
   type: 'Keep',
   description: 'You get 1 extra reroll.',
+  verified: true,
   onPostEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'SETUP_DICE' && action.playerId === pId) {
        st.maxRolls = (st.maxRolls || 3) + 1;

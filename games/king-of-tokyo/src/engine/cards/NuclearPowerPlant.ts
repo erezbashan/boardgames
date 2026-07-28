@@ -7,6 +7,7 @@ export const NuclearPowerPlant: CardImplementation = {
   cost: 6,
   type: 'Discard',
   description: '+2⭐ and heal 3 damage.',
+  verified: true,
   onBuy: (st: KotState, action: PendingAction, pId: string) => {
     st.pendingActions.unshift(
        { type: 'HEALTH', payload: { amount: 3, sourceCard: 'nuclear_power_plant' }, playerId: pId },

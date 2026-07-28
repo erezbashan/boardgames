@@ -7,6 +7,7 @@ export const Skyscraper: CardImplementation = {
   cost: 6,
   type: 'Discard',
   description: '+4⭐',
+  verified: true,
   onBuy: (st: KotState, action: PendingAction, pId: string) => {
     st.pendingActions.unshift({ type: 'VP', payload: { amount: 4, sourceCard: 'skyscraper' }, playerId: pId });
     return st;

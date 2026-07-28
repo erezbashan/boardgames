@@ -7,6 +7,7 @@ export const CompleteDestruction: CardImplementation = {
   cost: 3,
   type: 'Keep',
   description: 'If you roll 1, 2, 3, ❤️, 💥, and ⚡ gain 9⭐.',
+  verified: true,
   onPostEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'RESOLVE_ROLLS' && action.playerId === pId) {
       const faces = new Set(st.dice.map(d => d.value));

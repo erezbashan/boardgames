@@ -7,6 +7,7 @@ export const PoisonQuills: CardImplementation = {
   cost: 3,
   type: 'Keep',
   description: 'When you score 2️⃣2️⃣2️⃣ also deal 2 damage.',
+  verified: true,
   onPostEvent: (st, action, pId) => {
     if (action.type === 'RESOLVE_ROLLS' && action.playerId === pId) {
       const outcomeMap: Record<string, number> = {};

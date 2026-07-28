@@ -9,6 +9,7 @@ export const Metamorph: CardImplementation = {
   cost: 3,
   type: 'Keep',
   description: 'At the end of your turn you can discard any keep cards you have to receive the ⚡ they were purchased for.',
+  verified: true,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     // Only prompt when it's literally the END_TURN action being processed
     if (action.type === 'END_TURN' && pId === st.playerOrder[st.currentPlayerIndex]) {

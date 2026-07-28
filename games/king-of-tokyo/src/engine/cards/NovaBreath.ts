@@ -8,6 +8,7 @@ export const NovaBreath: CardImplementation = {
   cost: 7,
   type: 'Keep',
   description: 'Your attacks damage all other monsters.',
+  verified: true,
   onPreEvent: (st, action, pId) => {
     if (action.type === 'ATTACK' && action.playerId === pId) {
       const damage = action.payload.damage;

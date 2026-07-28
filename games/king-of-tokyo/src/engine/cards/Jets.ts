@@ -8,6 +8,7 @@ export const Jets: CardImplementation = {
   cost: 5,
   type: 'Keep',
   description: 'You suffer no damage when yielding Tokyo.',
+  verified: true,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     // Log intercept for Jets usage
     if (action.type === 'LOG_JETS' && action.playerId === pId) {

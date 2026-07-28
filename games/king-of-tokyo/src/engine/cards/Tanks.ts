@@ -7,6 +7,7 @@ export const Tanks: CardImplementation = {
   cost: 4,
   type: 'Discard',
   description: '+4⭐ and take 3 damage.',
+  verified: true,
   onBuy: (st: KotState, action: PendingAction, pId: string) => {
     st.pendingActions.unshift(
        { type: 'TAKE_DAMAGE', payload: { amount: 3, sourceCard: 'tanks' }, playerId: pId },

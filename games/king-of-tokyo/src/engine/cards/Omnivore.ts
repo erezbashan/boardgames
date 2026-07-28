@@ -7,6 +7,7 @@ export const Omnivore: CardImplementation = {
   cost: 4,
   type: 'Keep',
   description: 'Once each turn you can score 1️⃣2️⃣3️⃣ for 2⭐. You can use these dice in other combinations.',
+  verified: true,
   onPostEvent: (st, action, pId) => {
     if (action.type === 'RESOLVE_ROLLS' && action.playerId === pId) {
       const outcomeMap: Record<string, number> = {};

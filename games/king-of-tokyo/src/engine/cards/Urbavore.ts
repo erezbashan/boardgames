@@ -6,6 +6,7 @@ export const Urbavore: CardImplementation = {
   cost: 4,
   type: 'Keep',
   description: 'Gain 1 extra ⭐ when beginning the turn in Tokyo. Deal 1 extra damage when dealing any damage from Tokyo.',
+  verified: true,
   onPreEvent: (st, action, pId) => {
     if (action.type === 'ATTACK' && action.playerId === pId && action.payload.damage > 0) {
       if (st.players[pId].location.startsWith('Tokyo')) {

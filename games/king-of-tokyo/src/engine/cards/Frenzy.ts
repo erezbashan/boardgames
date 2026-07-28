@@ -8,6 +8,7 @@ export const Frenzy: CardImplementation = {
   cost: 7,
   type: 'Discard',
   description: 'When you purchase this card, take another turn immediately after this one.',
+  verified: true,
   onBuy: (st: KotState, action: PendingAction, pId: string) => {
     st.players[pId].markers = st.players[pId].markers || {};
     st.players[pId].markers!.extra_turn = (st.players[pId].markers!.extra_turn || 0) + 1;

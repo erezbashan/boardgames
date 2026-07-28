@@ -8,6 +8,7 @@ export const AlienMetabolism: CardImplementation = {
   cost: 3,
   type: 'Keep',
   description: 'Buying cards costs you 1 less ⚡.',
+  verified: true,
   onPostEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'GO_TO_MARKET' && action.playerId === pId) {
        st.turnContext = st.turnContext || {};

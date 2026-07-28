@@ -7,6 +7,7 @@ export const EaterOfTheDead: CardImplementation = {
   cost: 4,
   type: 'Keep',
   description: 'Gain 1⭐ every time a monster reaches 0❤️.',
+  verified: false,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     // We trigger on DEAD action before it executes
     if (action.type === 'DEAD') {

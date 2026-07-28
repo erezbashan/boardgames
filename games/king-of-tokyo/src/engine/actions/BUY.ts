@@ -48,6 +48,18 @@ export function handleBuy(st: KotState, action: PendingAction, pId: string) {
   
   // Run onBuy hook if exists
   if (card.onBuy) {
+     const preLength = st.pendingActions.length;
      card.onBuy(st, action, pId);
+     const addedCount = st.pendingActions.length - preLength;
+     if (addedCount > 0) {
+        for (let i = 0; i < addedCount; i++) {
+           if (!st.pendingActions[i].affectedByCards) {
+              st.pendingActions[i] = {
+                 ...st.pendingActions[i],
+                 affectedByCards: [{ cardId: card.id, playerId: pId }]
+              };
+           }
+        }
+     }
   }
 }

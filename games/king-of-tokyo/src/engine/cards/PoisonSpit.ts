@@ -7,6 +7,7 @@ export const PoisonSpit: CardImplementation = {
   cost: 4,
   type: 'Keep',
   description: 'When you deal damage to monsters give them a poison counter. Monsters take 1 damage for each poison counter they have at the end of their turn. You can get rid of a poison counter with a ❤️ (that ❤️ doesn\'t heal a damage also).',
+  verified: true,
   onPreEvent: (st, action, pId) => {
     // Cure poison with hearts
     if (action.type === 'HEALTH' && action.payload.amount > 0 && action.playerId) {

@@ -9,6 +9,7 @@ export const Mimic: CardImplementation = {
   cost: 8,
   type: 'Keep',
   description: 'Choose a card any monster has in play and put a mimic counter on it. This card counts as a duplicate of that card as if it just had been bought. Spend 1⚡ at the start of your turn to change the power you are mimicking.',
+  verified: true,
   onBuy: (st: KotState, action: PendingAction, pId: string) => {
     st.pendingActions.unshift({ type: 'MIMIC_PROMPT', playerId: pId });
     return st;

@@ -7,6 +7,7 @@ export const SolarPowered: CardImplementation = {
   cost: 2,
   type: 'Keep',
   description: 'At the end of your turn gain 1⚡ if you have no ⚡.',
+  verified: true,
   onPreEvent: (st, action, pId) => {
     if (action.type === 'END_TURN' && action.playerId === pId) {
       if (st.players[pId].energy === 0) {

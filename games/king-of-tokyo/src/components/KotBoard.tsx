@@ -170,6 +170,13 @@ const renderSettings = (settings: any, dispatch: any, status: string, setSelecte
           >
             Select None
           </button>
+          <button 
+            disabled={status !== 'Lobby'} 
+            onClick={() => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...currentSettings, activeCards: Object.keys(CARD_REGISTRY).filter(c => !CARD_REGISTRY[c].verified) } })}
+            style={{ padding: '4px 8px', fontSize: '12px', background: 'transparent', color: '#60a5fa', border: '1px solid #60a5fa', borderRadius: '4px', cursor: status === 'Lobby' ? 'pointer' : 'default', opacity: status === 'Lobby' ? 1 : 0.5 }}
+          >
+            Select Unverified
+          </button>
         </div>
         <div style={{ textAlign: 'left', background: 'rgba(0,0,0,0.2)', padding: '10px', borderRadius: '8px', width: '100%', boxSizing: 'border-box' }}>
           {[...(status === 'Lobby' ? Object.keys(CARD_REGISTRY) : currentSettings.activeCards)]

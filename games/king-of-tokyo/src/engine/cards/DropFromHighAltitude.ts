@@ -8,6 +8,7 @@ export const DropFromHighAltitude: CardImplementation = {
   cost: 5,
   type: 'Discard',
   description: '+ 2⭐ and take control of Tokyo. If someone is already there, they still take no damage.',
+  verified: true,
   onBuy: (st: KotState, action: PendingAction, pId: string) => {
     st.pendingActions.unshift({ type: 'VP', payload: { amount: 2 }, playerId: pId });
     const tokyoOccupant = st.playerOrder.find(id => st.players[id].location === 'TokyoCity');

@@ -7,6 +7,7 @@ export const NationalGuard: CardImplementation = {
   cost: 3,
   type: 'Discard',
   description: '+2⭐ and take 2 damage.',
+  verified: true,
   onBuy: (st: KotState, action: PendingAction, pId: string) => {
     st.pendingActions.unshift(
        { type: 'TAKE_DAMAGE', payload: { amount: 2, sourceCard: 'national_guard' }, playerId: pId },

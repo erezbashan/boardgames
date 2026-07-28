@@ -6,6 +6,7 @@ export interface CardImplementation {
   cost: number;
   type: 'Keep' | 'Discard';
   description: string;
+  verified?: boolean;
   onPreEvent?: (state: KotState, action: PendingAction, pId: string) => KotState;
   onPostEvent?: (state: KotState, action: PendingAction, pId: string) => KotState;
   onBuy?: (state: KotState, action: PendingAction, pId: string) => KotState;

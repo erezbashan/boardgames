@@ -9,6 +9,7 @@ export const MadeInALab: CardImplementation = {
   cost: 2,
   type: 'Keep',
   description: 'When purchasing cards you can peek at and purchase the top card of the deck.',
+  verified: true,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'BUY_OR_SWEEP' && action.playerId === pId) {
       if (st.deck.length > 0) {

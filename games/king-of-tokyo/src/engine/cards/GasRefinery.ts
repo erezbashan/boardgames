@@ -7,6 +7,7 @@ export const GasRefinery: CardImplementation = {
   cost: 6,
   type: 'Discard',
   description: '+ 2⭐ and all other monsters take 3 damage.',
+  verified: true,
   onBuy: (st: KotState, action: PendingAction, pId: string) => {
     st.pendingActions.unshift({ type: 'VP', payload: { amount: 2 }, playerId: pId });
     st.playerOrder.forEach((id: string) => {

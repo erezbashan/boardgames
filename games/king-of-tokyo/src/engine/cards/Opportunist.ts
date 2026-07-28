@@ -7,6 +7,7 @@ export const Opportunist: CardImplementation = {
   cost: 3,
   type: 'Keep',
   description: 'Whenever a new card is revealed, you have the option of buying it as soon as it is revealed.',
+  verified: true,
   onPostEvent: (st, action, pId) => {
     // When a new card is revealed in the market, ask the Opportunist owner if they want to buy it.
     if (action.type === 'CARD_REVEALED') {

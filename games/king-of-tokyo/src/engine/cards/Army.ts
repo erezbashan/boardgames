@@ -6,6 +6,7 @@ export const Army: CardImplementation = {
   cost: 2,
   type: 'Discard',
   description: '+ 1⭐ and suffer 1 damage for each card you have.',
+  verified: true,
   onBuy: (st, action, pId) => {
     const cardCount = st.players[pId].cards.length;
     if (cardCount > 0) {

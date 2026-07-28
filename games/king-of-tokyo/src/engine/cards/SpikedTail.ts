@@ -6,6 +6,7 @@ export const SpikedTail: CardImplementation = {
   cost: 5,
   type: 'Keep',
   description: 'When you attack deal 1 extra damage.',
+  verified: true,
   onPreEvent: (st, action, pId) => {
     if (action.type === 'ATTACK' && action.playerId === pId && action.payload.damage > 0) {
       action.payload.damage += 1;

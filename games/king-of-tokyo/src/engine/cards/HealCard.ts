@@ -7,6 +7,7 @@ export const HealCard: CardImplementation = {
   cost: 3,
   type: 'Discard',
   description: 'Heal 2 damage.',
+  verified: true,
   onBuy: (st: KotState, action: PendingAction, pId: string) => {
     st.pendingActions.unshift({ type: 'HEALTH', payload: { amount: 2, sourceCard: 'heal' }, playerId: pId });
     return st;

@@ -82,7 +82,19 @@ function triggerCards(state: KotState, action: PendingAction, hook: 'onPreEvent'
         
         const card = CARD_REGISTRY[cardId];
         if (card && card[hook]) {
+          const preLength = st.pendingActions.length;
           st = card[hook]!(st, action, pId);
+          const addedCount = st.pendingActions.length - preLength;
+          if (addedCount > 0) {
+             for (let i = 0; i < addedCount; i++) {
+                if (!st.pendingActions[i].affectedByCards) {
+                   st.pendingActions[i] = {
+                      ...st.pendingActions[i],
+                      affectedByCards: [{ cardId, playerId: pId }]
+                   };
+                }
+             }
+          }
         }
       });
     }

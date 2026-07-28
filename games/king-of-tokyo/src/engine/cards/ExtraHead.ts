@@ -8,6 +8,7 @@ export const ExtraHead: CardImplementation = {
   cost: 7,
   type: 'Keep',
   description: 'You get 1 extra die.',
+  verified: true,
   onPostEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'SETUP_DICE' && action.playerId === pId) {
        st.dice.push({ id: `d${st.dice.length}`, value: '1', kept: false });

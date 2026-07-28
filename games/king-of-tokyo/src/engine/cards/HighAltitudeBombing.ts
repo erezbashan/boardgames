@@ -8,6 +8,7 @@ export const HighAltitudeBombing: CardImplementation = {
   cost: 4,
   type: 'Discard',
   description: 'All monsters (including you) take 3 damage.',
+  verified: true,
   onBuy: (st: KotState, action: PendingAction, pId: string) => {
     addLog(st, action, `${st.players[pId].name} used High Altitude Bombing! All monsters take 3 damage.`);
     

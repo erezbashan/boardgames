@@ -7,6 +7,7 @@ export const RootingForTheUnderdog: CardImplementation = {
   cost: 3,
   type: 'Keep',
   description: 'At the end of your turn, if you have the fewest ⭐, gain 1⭐.',
+  verified: true,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'END_TURN' && action.playerId === pId) {
       const myVp = st.players[pId].vp;

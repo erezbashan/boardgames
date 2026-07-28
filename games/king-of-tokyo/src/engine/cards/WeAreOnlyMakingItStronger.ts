@@ -7,6 +7,7 @@ export const WeAreOnlyMakingItStronger: CardImplementation = {
   cost: 3,
   type: 'Keep',
   description: 'When you lose 2❤️ or more, gain 1⚡.',
+  verified: true,
   onPostEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'TAKE_DAMAGE' && action.playerId === pId) {
       if (action.payload._actualDamageTaken >= 2) {

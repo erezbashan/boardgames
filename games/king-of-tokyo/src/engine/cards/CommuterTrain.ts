@@ -7,6 +7,7 @@ export const CommuterTrain: CardImplementation = {
   cost: 4,
   type: 'Discard',
   description: '+ 2⭐',
+  verified: false,
   onBuy: (st: KotState, action: PendingAction, pId: string) => {
     st.pendingActions.unshift({ type: 'VP', payload: { amount: 2 }, playerId: pId });
     return st;

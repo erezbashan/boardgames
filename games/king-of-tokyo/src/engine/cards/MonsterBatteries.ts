@@ -8,6 +8,7 @@ export const MonsterBatteries: CardImplementation = {
   cost: 2,
   type: 'Keep',
   description: 'When you purchase this put as many ⚡ as you want on it from your reserve. Match this from the bank. At the start of each turn take 2⚡ off and add them to your reserve. When there are no ⚡ left discard this card.',
+  verified: true,
   onBuy: (st: KotState, action: PendingAction, pId: string) => {
     st.pendingActions.unshift({ type: 'MONSTER_BATTERIES_PROMPT', playerId: pId });
     return st;
