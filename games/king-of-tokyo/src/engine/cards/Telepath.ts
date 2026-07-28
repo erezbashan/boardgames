@@ -7,7 +7,7 @@ export const Telepath: CardImplementation = {
   cost: 4,
   type: 'Keep',
   description: 'You have 1 extra reroll each turn.',
-  verified: false,
+  verified: true,
   // Effect logic is handled generically in utils/game loop where maxRolls is calculated
   onBuy: (st: KotState, action: PendingAction, pId: string) => {
     // maxRolls modifier handled in hook or state initialization?

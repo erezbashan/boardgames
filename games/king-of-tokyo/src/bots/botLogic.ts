@@ -6,6 +6,18 @@ export function getBotAction(state: KotState, playerId: string): KotAction | nul
   if (!player) return null;
 
   const topAction = state.pendingActions[0];
+  
+  if (topAction?.type === 'ASK_QUESTION' && topAction.playerId === playerId) {
+     const options = topAction.payload.options as string[];
+     if (options && options.length > 0) {
+        // Just pick 'No' if available, otherwise random, to avoid spending energy aimlessly
+        if (options.includes('No')) {
+           return { type: 'RESPONSE_QUESTION', payload: { response: 'No' } };
+        }
+        return { type: 'RESPONSE_QUESTION', payload: { response: options[0] } };
+     }
+  }
+
   if (topAction?.type.startsWith('ASK') && topAction.payload?.prompt?.playerId === playerId) {
     const prompt = topAction.payload.prompt;
 

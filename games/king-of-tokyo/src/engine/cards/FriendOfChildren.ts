@@ -7,7 +7,7 @@ export const FriendOfChildren: CardImplementation = {
   cost: 3,
   type: 'Keep',
   description: 'When you gain ⚡, gain 1 extra ⚡.',
-  verified: false,
+  verified: true,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'ENERGY' && action.playerId === pId && action.payload.amount > 0 && !action.affectedByCards?.some(c => c.cardId === 'friend_of_children')) {
       action.payload.amount += 1;

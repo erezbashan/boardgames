@@ -57,13 +57,27 @@ import { SuperJump } from './SuperJump';
 import { Telepath } from './Telepath';
 import { Vampiric } from './Vampiric';
 import { Unstoppable } from './Unstoppable';
+import { AcidAttack } from './AcidAttack';
+import { BackgroundDweller } from './BackgroundDweller';
+import { Burrowing } from './Burrowing';
+import { FireBlast } from './FireBlast';
+import { FireBreathing } from './FireBreathing';
+import { FreezeTime } from './FreezeTime';
+import { HealingRay } from './HealingRay';
+import { Herbivore } from './Herbivore';
+import { HerdCuller } from './HerdCuller';
+import { PlotTwist } from './PlotTwist';
+import { RapidHealing } from './RapidHealing';
 
 export const CARD_REGISTRY: Record<string, CardImplementation> = {
-  [AlphaMonster.id]: AlphaMonster,
+  [AcidAttack.id]: AcidAttack,
   [AlienMetabolism.id]: AlienMetabolism,
+  [AlphaMonster.id]: AlphaMonster,
   [AmusementPark.id]: AmusementPark,
   [ArmorPlating.id]: ArmorPlating,
   [Army.id]: Army,
+  [BackgroundDweller.id]: BackgroundDweller,
+  [Burrowing.id]: Burrowing,
   [Camouflage.id]: Camouflage,
   [Cannibalistic.id]: Cannibalistic,
   [CommuterTrain.id]: CommuterTrain,
@@ -78,12 +92,18 @@ export const CARD_REGISTRY: Record<string, CardImplementation> = {
   [EvacuationOrders.id]: EvacuationOrders,
   [EvenBigger.id]: EvenBigger,
   [ExtraHead.id]: ExtraHead,
+  [FireBlast.id]: FireBlast,
+  [FireBreathing.id]: FireBreathing,
+  [FreezeTime.id]: FreezeTime,
   [Frenzy.id]: Frenzy,
   [FriendOfChildren.id]: FriendOfChildren,
   [GasRefinery.id]: GasRefinery,
   [GiantBrain.id]: GiantBrain,
   [Gourmet.id]: Gourmet,
   [HealCard.id]: HealCard,
+  [HealingRay.id]: HealingRay,
+  [Herbivore.id]: Herbivore,
+  [HerdCuller.id]: HerdCuller,
   [HighAltitudeBombing.id]: HighAltitudeBombing,
   [ItHasAChild.id]: ItHasAChild,
   [JetFighters.id]: JetFighters,
@@ -97,20 +117,23 @@ export const CARD_REGISTRY: Record<string, CardImplementation> = {
   [NuclearPowerPlant.id]: NuclearPowerPlant,
   [Omnivore.id]: Omnivore,
   [Opportunist.id]: Opportunist,
+  [PlotTwist.id]: PlotTwist,
   [PoisonQuills.id]: PoisonQuills,
   [PoisonSpit.id]: PoisonSpit,
+  [RapidHealing.id]: RapidHealing,
   [Regeneration.id]: Regeneration,
   [RootingForTheUnderdog.id]: RootingForTheUnderdog,
   [Skyscraper.id]: Skyscraper,
   [SolarPowered.id]: SolarPowered,
   [SpikedTail.id]: SpikedTail,
-  [Tanks.id]: Tanks,
-  [ThrowATanker.id]: ThrowATanker,
-  [Urbavore.id]: Urbavore,
-  [WeAreOnlyMakingItStronger.id]: WeAreOnlyMakingItStronger,
   [SuperJump.id]: SuperJump,
+  [Tanks.id]: Tanks,
   [Telepath.id]: Telepath,
-  [Vampiric.id]: Vampiric,
+  [ThrowATanker.id]: ThrowATanker,
   [Unstoppable.id]: Unstoppable,
+  [Urbavore.id]: Urbavore,
+  [UrbanLegend.id]: UrbanLegend,
+  [Vampiric.id]: Vampiric,
+  [WeAreOnlyMakingItStronger.id]: WeAreOnlyMakingItStronger,
   [Wings.id]: Wings,
 };
