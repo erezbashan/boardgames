@@ -7,7 +7,7 @@ export const EvacuationOrders: CardImplementation = {
   cost: 7,
   type: 'Discard',
   description: 'All other monsters lose 5⭐.',
-  verified: false,
+  verified: true,
   onBuy: (st: KotState, action: PendingAction, pId: string) => {
     st.playerOrder.forEach(id => {
       if (id !== pId && st.players[id].health > 0) {

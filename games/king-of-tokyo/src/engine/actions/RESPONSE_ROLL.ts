@@ -1,5 +1,5 @@
 import { KotState, PendingAction } from '../types';
-import { DICE_FACES } from '../utils';
+import { DICE_FACES, addLog } from '../utils';
 
 export function handleResponseRoll(st: KotState, action: PendingAction, pId: string) {
   if (action.payload.roll) {
@@ -14,5 +14,11 @@ export function handleResponseRoll(st: KotState, action: PendingAction, pId: str
          }
       } });
     }
+  }
+  
+  if (!action.payload.roll || st.rollCount === 0) {
+      const emojiMap: Record<string, string> = { Heart: '❤️', Energy: '⚡', Smash: '💥', '1': '1️⃣', '2': '2️⃣', '3': '3️⃣' };
+      const outcomeStr = st.dice.map(d => emojiMap[d.value] || d.value).join(' ');
+      addLog(st, action, `${st.players[pId].name} finished rolling: ${outcomeStr}`);
   }
 }

@@ -422,7 +422,7 @@ export const KotBoard: React.FC = () => {
     if (status !== 'Playing' && status !== 'Finished') return null;
 
     return (
-      <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', gap: '10px', height: '100%', padding: '10px', boxSizing: 'border-box', overflow: 'hidden' }}>
+      <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', gap: '5px', height: '100%', padding: '5px', boxSizing: 'border-box', overflow: 'hidden' }}>
         <style dangerouslySetInnerHTML={{ __html: styles }} />
         
         {/* Left Half: Cards Market */}

@@ -10,9 +10,9 @@ export const Burrowing: CardImplementation = {
   verified: false,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'ATTACK' && action.playerId === pId && st.players[pId].location !== 'Outside') {
-      st.pendingActions.unshift({ ...action, payload: { ...action.payload, amount: action.payload.amount + 1 }, affectedByCards: [{cardId: 'burrowing', playerId: pId}] });
+      st.pendingActions.unshift({ ...action, payload: { ...action.payload, damage: action.payload.damage + 1 }, affectedByCards: [{cardId: 'burrowing', playerId: pId}] });
       const index = st.pendingActions.findIndex(a => a === action);
-      if (index > 0) st.pendingActions.splice(index, 1);
+      if (index !== -1) st.pendingActions.splice(index, 1);
     }
     if (action.type === 'RESPONSE_YIELD' && action.playerId === pId && action.payload.yield) {
       // Find who attacked to make them yield

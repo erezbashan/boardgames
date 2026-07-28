@@ -66,7 +66,7 @@ import { FreezeTime } from './FreezeTime';
 import { Herbivore } from './Herbivore';
 import { HerdCuller } from './HerdCuller';
 import { PlotTwist } from './PlotTwist';
-import { RapidHealing } from './RapidHealing';
+
 
 export const CARD_REGISTRY: Record<string, CardImplementation> = {
   [AcidAttack.id]: AcidAttack,
@@ -118,7 +118,6 @@ export const CARD_REGISTRY: Record<string, CardImplementation> = {
   [PlotTwist.id]: PlotTwist,
   [PoisonQuills.id]: PoisonQuills,
   [PoisonSpit.id]: PoisonSpit,
-  [RapidHealing.id]: RapidHealing,
   [Regeneration.id]: Regeneration,
   [RootingForTheUnderdog.id]: RootingForTheUnderdog,
   [Skyscraper.id]: Skyscraper,

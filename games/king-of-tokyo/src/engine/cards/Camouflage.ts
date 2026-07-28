@@ -1,5 +1,6 @@
 import { CardImplementation } from './types';
 import { KotState, PendingAction } from '../types';
+import { addLog } from '../utils';
 
 export const Camouflage: CardImplementation = {
   id: 'camouflage',
@@ -26,6 +27,7 @@ export const Camouflage: CardImplementation = {
       if (heartsRolled > 0) {
         action.payload.amount = Math.max(0, action.payload.amount - heartsRolled);
         action.affectedByCards = [...(action.affectedByCards || []), { cardId: 'camouflage', playerId: pId }];
+        addLog(st, action, `${st.players[pId].name} rolled ${heartsRolled} ❤️ with Camouflage and ignored ${heartsRolled} damage!`);
       }
     }
     return st;

@@ -1,5 +1,6 @@
 import { CardImplementation } from './types';
 import { KotState, PendingAction } from '../types';
+import { addLog } from '../utils';
 
 export const FreezeTime: CardImplementation = {
   id: 'freeze_time',
@@ -7,33 +8,25 @@ export const FreezeTime: CardImplementation = {
   cost: 5,
   type: 'Keep',
   description: 'On a turn where you score 1️⃣1️⃣1️⃣, you can take another turn with one less die.',
-  verified: false,
+  verified: true,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'START_TURN' && action.playerId === pId) {
       st.players[pId].cardState = st.players[pId].cardState || {};
-      st.players[pId].cardState.freezeTimeActive = false;
+      st.players[pId].cardState.freezeTimeEarnedThisTurn = false;
     }
     if (action.type === 'RESOLVE_ROLLS' && action.playerId === pId) {
       const counts: Record<string, number> = {};
       st.dice.forEach(d => { counts[d.value] = (counts[d.value] || 0) + 1; });
       if (counts['1'] >= 3) {
          st.players[pId].cardState = st.players[pId].cardState || {};
-         st.players[pId].cardState.freezeTimeActive = true;
+         if (!st.players[pId].cardState.freezeTimeEarnedThisTurn) {
+            st.players[pId].cardState.freezeTimeEarnedThisTurn = true;
+            st.players[pId].cardState.freezeTimeExtraTurn = true;
+            st.players[pId].markers = st.players[pId].markers || {};
+            st.players[pId].markers.extra_turn = (st.players[pId].markers.extra_turn || 0) + 1;
+            addLog(st, action, `${st.players[pId].name} scored 1️⃣1️⃣1️⃣ and gets an extra turn from Freeze Time!`);
+         }
       }
-    }
-    if (action.type === 'END_TURN' && action.playerId === pId) {
-       const state = st.players[pId].cardState || {};
-       if (state.freezeTimeActive) {
-          state.freezeTimeActive = false;
-          // Needs engine support for taking another turn. Since we don't have a built in "extra turn" action, 
-          // we inject a custom action that sets the next player to be this player again.
-          st.pendingActions.unshift({ type: 'FREEZE_TIME_EXTRA_TURN', playerId: pId });
-       }
-    }
-    if (action.type === 'FREEZE_TIME_EXTRA_TURN' && action.playerId === pId) {
-       st.currentPlayerIndex = (st.currentPlayerIndex - 1 + st.playerOrder.length) % st.playerOrder.length;
-       st.players[pId].cardState = st.players[pId].cardState || {};
-       st.players[pId].cardState.freezeTimeExtraTurn = true;
     }
     return st;
   },

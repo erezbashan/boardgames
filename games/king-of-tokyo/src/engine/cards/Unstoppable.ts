@@ -7,7 +7,7 @@ export const Unstoppable: CardImplementation = {
   cost: 4,
   type: 'Keep',
   description: 'You can heal while in Tokyo.',
-  verified: false,
+  verified: true,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'HEALTH' && action.playerId === pId) {
       // By adding Unstoppable to affectedByCards, HEALTH.ts will consider it isFromCard and allow healing!

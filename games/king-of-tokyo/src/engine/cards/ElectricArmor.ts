@@ -29,7 +29,7 @@ export const ElectricArmor: CardImplementation = {
         });
         
         const index = st.pendingActions.findIndex(a => a === action);
-        if (index > 0) st.pendingActions.splice(index, 1);
+        if (index !== -1) st.pendingActions.splice(index, 1);
       }
     }
 

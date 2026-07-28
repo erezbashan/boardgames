@@ -21,7 +21,7 @@ export const AcidAttack: CardImplementation = {
       st.players[pId].cardState = st.players[pId].cardState || {};
       st.players[pId].cardState.acidAttackUsed = true;
       const index = st.pendingActions.findIndex(a => a === action);
-      if (index > 0) st.pendingActions.splice(index, 1);
+      if (index !== -1) st.pendingActions.splice(index, 1);
     }
     if (action.type === 'END_TURN' && action.playerId === pId) {
       const state = st.players[pId].cardState || {};

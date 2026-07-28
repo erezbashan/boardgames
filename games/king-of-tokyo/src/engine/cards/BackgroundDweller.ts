@@ -10,24 +10,26 @@ export const BackgroundDweller: CardImplementation = {
   verified: false,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'RESOLVE_ROLLS' && action.playerId === pId) {
-       const hasThree = st.dice.some(d => d.value === '3');
-       if (hasThree) {
-          st.pendingActions.unshift({
-             type: 'ASK',
-             playerId: pId,
-             payload: {
-                prompt: {
-                   playerId: pId,
-                   text: `Background Dweller: Reroll a 3️⃣?`,
-                   options: [
-                      { label: 'Yes', action: { type: 'RESPONSE_BG_DWELLER_YES', playerId: pId, payload: { originalAction: action } } },
-                      { label: 'No', action: { type: 'RESPONSE_BG_DWELLER_NO', playerId: pId, payload: { originalAction: action } } }
-                   ]
+       const index = st.pendingActions.findIndex(a => a === action);
+       if (index !== -1) {
+          const hasThree = st.dice.some(d => d.value === '3');
+          if (hasThree) {
+             st.pendingActions.splice(index, 1);
+             st.pendingActions.unshift({
+                type: 'ASK',
+                playerId: pId,
+                payload: {
+                   prompt: {
+                      playerId: pId,
+                      text: `Background Dweller: Reroll a 3️⃣?`,
+                      options: [
+                         { label: 'Yes', action: { type: 'RESPONSE_BG_DWELLER_YES', playerId: pId, payload: { originalAction: action } } },
+                         { label: 'No', action: { type: 'RESPONSE_BG_DWELLER_NO', playerId: pId, payload: { originalAction: action } } }
+                      ]
+                   }
                 }
-             }
-          });
-          const index = st.pendingActions.findIndex(a => a === action);
-          if (index > 0) st.pendingActions.splice(index, 1);
+             });
+          }
        }
     }
     
