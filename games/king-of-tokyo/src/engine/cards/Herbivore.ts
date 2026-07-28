@@ -7,7 +7,7 @@ export const Herbivore: CardImplementation = {
   cost: 5,
   type: 'Keep',
   description: 'Gain 1⭐ on your turn if you don\'t damage anyone.',
-  verified: false,
+  verified: true,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'START_TURN' && action.playerId === pId) {
       st.players[pId].cardState = st.players[pId].cardState || {};

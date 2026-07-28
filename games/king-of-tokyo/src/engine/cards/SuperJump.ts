@@ -7,7 +7,7 @@ export const SuperJump: CardImplementation = {
   cost: 4,
   type: 'Keep',
   description: 'Take 1 less damage from all attacks.',
-  verified: false,
+  verified: true,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'TAKE_DAMAGE' && action.playerId === pId && action.payload.amount > 0) {
       action.payload.amount -= 1;
