@@ -1,18 +1,54 @@
 import { CardImplementation } from './types';
 import { KotState, PendingAction } from '../types';
+import { addLog } from '../utils';
 
 export const Telepath: CardImplementation = {
   id: 'telepath',
   name: 'Telepath',
   cost: 4,
   type: 'Keep',
-  description: 'You have 1 extra reroll each turn.',
-  verified: false,
-  // Effect logic is handled generically in utils/game loop where maxRolls is calculated
-  onBuy: (st: KotState, action: PendingAction, pId: string) => {
-    // maxRolls modifier handled in hook or state initialization?
-    // Since EvenBigger modified state directly, let's modify maxRolls here if we add it to player state
-    st.players[pId].stats = { ...st.players[pId].stats, extraRerolls: (st.players[pId].stats.extraRerolls || 0) + 1 };
+  description: 'Spend 1⚡ to get 1 extra reroll.',
+  verified: true,
+  onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
+    if (action.type === 'RESOLVE_ROLLS' && action.playerId === pId && st.players[pId].energy >= 1) {
+      if (!action.payload._telepathPrompted) {
+        action.payload._telepathPrompted = true;
+        const index = st.pendingActions.findIndex(a => a === action);
+        if (index !== -1) {
+          st.pendingActions.splice(index, 1);
+          st.pendingActions.unshift({
+            type: 'ASK',
+            playerId: pId,
+            payload: {
+              prompt: {
+                playerId: pId,
+                text: 'Telepath: Spend 1⚡ for an extra reroll?',
+                options: [
+                  { label: 'Yes', action: { type: 'RESPONSE_TELEPATH', playerId: pId, payload: { originalAction: action } } },
+                  { label: 'No', action: { type: 'RESPONSE_TELEPATH_NO', playerId: pId, payload: { originalAction: action } } }
+                ]
+              }
+            }
+          });
+        }
+      }
+    }
+    
+    if (action.type === 'RESPONSE_TELEPATH' && action.playerId === pId) {
+      st.players[pId].energy -= 1;
+      st.maxRolls = (st.maxRolls || 3) + 1;
+      st.rollCount = 1;
+      addLog(st, action, `${st.players[pId].name} spent 1⚡ for an extra reroll using Telepath`);
+      
+      // Go back to rolling phase
+      st.pendingActions.unshift({ type: 'RESOLVE_ROLLS', playerId: pId });
+      st.pendingActions.unshift({ type: 'ASK_ROLL', playerId: pId, payload: { prompt: { playerId: pId, text: 'Roll Dice?', options: [] } } });
+    }
+    
+    if (action.type === 'RESPONSE_TELEPATH_NO' && action.playerId === pId) {
+       st.pendingActions.unshift({ ...action.payload.originalAction, affectedByCards: action.payload.originalAction.affectedByCards || [] });
+    }
+    
     return st;
   }
 };

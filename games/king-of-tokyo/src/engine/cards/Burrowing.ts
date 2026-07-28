@@ -6,8 +6,8 @@ export const Burrowing: CardImplementation = {
   name: 'Burrowing',
   cost: 5,
   type: 'Keep',
-  description: 'Deal 1 extra damage on Tokyo. Deal 1 damage when yielding Tokyo to the monster taking it.',
-  verified: false,
+  description: 'Deal 1 extra damage when attacking from Tokyo. Deal 1 damage when yielding Tokyo to the monster taking it.',
+  verified: true,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'ATTACK' && action.playerId === pId && st.players[pId].location !== 'Outside') {
       st.pendingActions.unshift({ ...action, payload: { ...action.payload, damage: action.payload.damage + 1 }, affectedByCards: [{cardId: 'burrowing', playerId: pId}] });
