@@ -22,7 +22,6 @@ import { handleBuy } from './BUY';
 import { handleDiscard } from './DISCARD';
 
 import { handleFillMarket } from './FILL_MARKET';
-import { handleLog } from './LOG';
 
 export type ActionHandler = (st: KotState, action: PendingAction, pId: string) => void;
 
@@ -48,6 +47,5 @@ export const ACTION_HANDLERS: Record<string, ActionHandler> = {
   BUY: handleBuy,
   DISCARD: handleDiscard,
   FILL_MARKET: handleFillMarket,
-  LOG: handleLog,
 };
 

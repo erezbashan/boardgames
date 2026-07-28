@@ -38,7 +38,6 @@ import { WeAreOnlyMakingItStronger } from './WeAreOnlyMakingItStronger';
 
 import { AlphaMonster } from './AlphaMonster';
 import { ArmorPlating } from './ArmorPlating';
-import { BackgroundSecurity } from './BackgroundSecurity';
 import { Camouflage } from './Camouflage';
 import { CommuterTrain } from './CommuterTrain';
 import { CompleteDestruction } from './CompleteDestruction';
@@ -46,6 +45,7 @@ import { CornerStore } from './CornerStore';
 import { DedicatedNewsTeam } from './DedicatedNewsTeam';
 import { EaterOfTheDead } from './EaterOfTheDead';
 import { EvenBigger } from './EvenBigger';
+import { RootingForTheUnderdog } from './RootingForTheUnderdog';
 
 export const CARD_REGISTRY: Record<string, CardImplementation> = {
   [AlphaMonster.id]: AlphaMonster,
@@ -53,7 +53,6 @@ export const CARD_REGISTRY: Record<string, CardImplementation> = {
   [AmusementPark.id]: AmusementPark,
   [ArmorPlating.id]: ArmorPlating,
   [Army.id]: Army,
-  [BackgroundSecurity.id]: BackgroundSecurity,
   [Camouflage.id]: Camouflage,
   [Cannibalistic.id]: Cannibalistic,
   [CommuterTrain.id]: CommuterTrain,
@@ -86,6 +85,7 @@ export const CARD_REGISTRY: Record<string, CardImplementation> = {
   [PoisonQuills.id]: PoisonQuills,
   [PoisonSpit.id]: PoisonSpit,
   [Regeneration.id]: Regeneration,
+  [RootingForTheUnderdog.id]: RootingForTheUnderdog,
   [Skyscraper.id]: Skyscraper,
   [SolarPowered.id]: SolarPowered,
   [SpikedTail.id]: SpikedTail,

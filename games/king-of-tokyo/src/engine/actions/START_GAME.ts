@@ -27,6 +27,7 @@ export function handleStartGame(st: KotState, action: PendingAction, pId: string
       isBot: originalPlayer.isBot,
       botStrategy: originalPlayer.botStrategy,
       color: originalPlayer.color,
+      maxHealth: st.settings.maxHealth,
       health: st.settings.maxHealth,
       energy: st.settings.startingEnergy,
       vp: 0,

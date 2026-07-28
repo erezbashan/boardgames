@@ -9,6 +9,5 @@ export interface CardImplementation {
   onPreEvent?: (state: KotState, action: PendingAction, pId: string) => KotState;
   onPostEvent?: (state: KotState, action: PendingAction, pId: string) => KotState;
   onBuy?: (state: KotState, action: PendingAction, pId: string) => KotState;
-  getMaxHealth?: (state: KotState, pId: string) => number;
   getLabel?: (state: KotState, pId: string) => string | undefined;
 }

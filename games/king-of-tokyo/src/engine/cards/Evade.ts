@@ -23,9 +23,8 @@ export const Evade: CardImplementation = {
           playerId: pId,
           payload: {
             actions: [
-              { type: 'ENERGY', playerId: pId, payload: { amount: -1, skipLog: true } },
-              { type: 'LOG', playerId: pId, payload: { message: `${st.players[pId].name} used Evade, lost 1 ⚡, and took ${action.payload.amount - 1} 💥` } },
-              { ...action, payload: { ...action.payload, amount: action.payload.amount - 1, skipLog: true } }
+              { type: 'ENERGY', playerId: pId, payload: { amount: -1, reason: 'Evade' }, affectedByCards: [{cardId: 'evade', playerId: pId}] },
+              { ...action, payload: { ...action.payload, amount: action.payload.amount - 1, reason: 'Evade' }, affectedByCards: [{cardId: 'evade', playerId: pId}] }
             ]
           }
         };
