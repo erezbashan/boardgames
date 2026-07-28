@@ -8,10 +8,14 @@ export function addLog(state: KotState, action: PendingAction, logStr: string): 
   if (action.affectedByCards && action.affectedByCards.length > 0) {
     const cardNames = action.affectedByCards.map(c => {
        const card = CARD_REGISTRY[c.cardId];
+       const isActivePlayer = c.playerId === state.playerOrder[state.currentPlayerIndex];
+       if (isActivePlayer) {
+          return `${card?.name || c.cardId}`;
+       }
        const ownerName = state.players[c.playerId]?.name || 'Unknown';
        return `${card?.name || c.cardId} (${ownerName})`;
     }).join(', ');
-    finalStr += ` [due to ${cardNames}]`;
+    finalStr += ` [${cardNames}]`;
   }
   state.logs.push(finalStr);
 }

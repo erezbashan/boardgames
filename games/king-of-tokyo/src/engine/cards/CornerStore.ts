@@ -7,7 +7,7 @@ export const CornerStore: CardImplementation = {
   cost: 3,
   type: 'Discard',
   description: '+ 1⭐',
-  verified: false,
+  verified: true,
   onBuy: (st: KotState, action: PendingAction, pId: string) => {
     st.pendingActions.unshift({ type: 'VP', payload: { amount: 1 }, playerId: pId });
     return st;

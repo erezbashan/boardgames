@@ -7,7 +7,7 @@ export const AlphaMonster: CardImplementation = {
   cost: 5,
   type: 'Keep',
   description: 'Gain 1⭐ for each 💥 you roll.',
-  verified: false,
+  verified: true,
   onPostEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'RESOLVE_ROLLS' && action.playerId === pId) {
       const smashCount = st.dice.filter(d => d.value === 'Smash').length;

@@ -44,6 +44,17 @@ export function handleStartGame(st: KotState, action: PendingAction, pId: string
       cardState: {}
     };
   });
+  
+  st.history = [{
+    turnNum: 0,
+    players: Object.fromEntries(
+      Object.values(st.players).map(p => [
+        p.id, 
+        { health: p.health, vp: p.vp, energy: p.energy, location: p.location }
+      ])
+    )
+  }];
+  
   st.pendingActions = [
       { type: 'FILL_MARKET', playerId: pId, payload: { index: 2 } },
       { type: 'FILL_MARKET', playerId: pId, payload: { index: 1 } },

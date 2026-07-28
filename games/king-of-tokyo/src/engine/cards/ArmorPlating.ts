@@ -11,7 +11,7 @@ export const ArmorPlating: CardImplementation = {
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'TAKE_DAMAGE' && action.playerId === pId && action.payload.amount === 1) {
       action.payload.amount = 0;
-      action.payload.reason = action.payload.reason ? action.payload.reason + ', Armor Plating' : 'Armor Plating';
+      action.affectedByCards = [...(action.affectedByCards || []), { cardId: 'armor_plating', playerId: pId }];
     }
     return st;
   }
