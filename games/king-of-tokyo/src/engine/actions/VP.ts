@@ -7,7 +7,7 @@ export function handleVP(st: KotState, action: PendingAction, pId: string) {
     const reasonStr = action.payload.reason ? ` (${action.payload.reason})` : '';
     addLog(st, action, `${st.players[pId].name} gained ${action.payload.amount} ⭐${reasonStr}`);
     if (st.players[pId].vp >= st.settings.maxVp) {
-      addLog(st, action, `${st.players[pId].name} wins on VP! 🏆`);
+      addLog(st, action, `${st.players[pId].name} wins on VP 🏆`);
       st.status = 'Finished';
       st.winnerId = pId;
       st.pendingActions = [];

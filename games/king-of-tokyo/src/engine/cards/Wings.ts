@@ -44,7 +44,7 @@ export const Wings: CardImplementation = {
     }
 
     if (action.type === 'RESPONSE_WINGS_NO' && action.playerId === pId) {
-      st.pendingActions.unshift(action.payload.originalAction);
+      st.pendingActions.unshift({ ...action.payload.originalAction, affectedByCards: action.payload.originalAction.affectedByCards || [] });
     }
     
     return st;

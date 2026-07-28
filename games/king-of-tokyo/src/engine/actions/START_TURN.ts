@@ -34,7 +34,7 @@ export function handleStartTurn(st: KotState, action: PendingAction, pId: string
   ];
   
   if (p && p.location === 'TokyoCity') {
-    addLog(st, action, `${p.name} starts turn in Tokyo!`);
+    addLog(st, action, `${p.name} starts turn in Tokyo`);
     st.pendingActions.unshift({ type: 'VP', payload: { amount: 2 }, playerId: pId });
   }
 }

@@ -9,7 +9,10 @@ export function handleResolveRolls(st: KotState, action: PendingAction, pId: str
   
   const emojiMap: Record<string, string> = { Heart: '❤️', Energy: '⚡', Smash: '💥', '1': '1️⃣', '2': '2️⃣', '3': '3️⃣' };
   const outcomeStr = st.dice.map(d => emojiMap[d.value] || d.value).join(' ');
-  addLog(st, action, `${st.players[pId].name} resolved: ${outcomeStr}`);
+  st.turnContext = st.turnContext || {};
+  if (st.turnContext.originalRollStr !== outcomeStr) {
+     addLog(st, action, `${st.players[pId].name} resolved: ${outcomeStr}`);
+  }
 
   if (outcomeMap['1'] >= 3) diceActions.push({ type: 'VP', payload: { amount: 1 + (outcomeMap['1'] - 3) }, playerId: pId });
   if (outcomeMap['2'] >= 3) diceActions.push({ type: 'VP', payload: { amount: 2 + (outcomeMap['2'] - 3) }, playerId: pId });
