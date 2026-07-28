@@ -14,7 +14,7 @@ export const Burrowing: CardImplementation = {
       const index = st.pendingActions.findIndex(a => a === action);
       if (index > 0) st.pendingActions.splice(index, 1);
     }
-    if (action.type === 'YIELD_TOKYO' && action.playerId === pId) {
+    if (action.type === 'RESPONSE_YIELD' && action.playerId === pId && action.payload.yield) {
       // Find who attacked to make them yield
       const attackerId = action.payload?.attackerId;
       if (attackerId) {

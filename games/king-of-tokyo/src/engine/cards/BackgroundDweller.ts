@@ -6,15 +6,41 @@ export const BackgroundDweller: CardImplementation = {
   name: 'Background Dweller',
   cost: 4,
   type: 'Keep',
-  description: 'You can always reroll any [3] you have.',
+  description: 'You can always reroll any 3️⃣ you have.',
   verified: false,
-  // Not easily implemented with standard rules because extra rerolls are generic in the engine. 
-  // We can hook into ROLL to not consume roll counts if they only roll 3s? Or give a special action.
-  // We'll give a special extra roll action for '3's.
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
-    if (action.type === 'START_TURN' && action.playerId === pId) {
-      st.players[pId].cardState = st.players[pId].cardState || {};
-      st.players[pId].cardState.backgroundDwellerActive = true;
+    if (action.type === 'RESOLVE_ROLLS' && action.playerId === pId) {
+       const hasThree = st.dice.some(d => d.value === '3');
+       if (hasThree) {
+          st.pendingActions.unshift({
+             type: 'ASK',
+             playerId: pId,
+             payload: {
+                prompt: {
+                   playerId: pId,
+                   text: `Background Dweller: Reroll a 3️⃣?`,
+                   options: [
+                      { label: 'Yes', action: { type: 'RESPONSE_BG_DWELLER_YES', playerId: pId, payload: { originalAction: action } } },
+                      { label: 'No', action: { type: 'RESPONSE_BG_DWELLER_NO', playerId: pId, payload: { originalAction: action } } }
+                   ]
+                }
+             }
+          });
+          const index = st.pendingActions.findIndex(a => a === action);
+          if (index > 0) st.pendingActions.splice(index, 1);
+       }
+    }
+    
+    if (action.type === 'RESPONSE_BG_DWELLER_YES' && action.playerId === pId) {
+       const threeIndex = st.dice.findIndex(d => d.value === '3');
+       if (threeIndex !== -1) {
+          const DICE_FACES = ['1', '2', '3', 'Energy', 'Heart', 'Smash'];
+          st.dice[threeIndex].value = DICE_FACES[Math.floor(Math.random() * DICE_FACES.length)] as any;
+       }
+       st.pendingActions.unshift(action.payload.originalAction);
+    }
+    if (action.type === 'RESPONSE_BG_DWELLER_NO' && action.playerId === pId) {
+       st.pendingActions.unshift(action.payload.originalAction);
     }
     return st;
   }

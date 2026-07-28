@@ -6,15 +6,16 @@ export const FreezeTime: CardImplementation = {
   name: 'Freeze Time',
   cost: 5,
   type: 'Keep',
-  description: 'On a turn where you score [1][1][1], you can take another turn with one less die.',
+  description: 'On a turn where you score 1️⃣1️⃣1️⃣, you can take another turn with one less die.',
   verified: false,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'START_TURN' && action.playerId === pId) {
       st.players[pId].cardState = st.players[pId].cardState || {};
       st.players[pId].cardState.freezeTimeActive = false;
     }
-    if (action.type === 'SCORE_DICE' && action.playerId === pId) {
-      const counts = action.payload.counts;
+    if (action.type === 'RESOLVE_ROLLS' && action.playerId === pId) {
+      const counts: Record<string, number> = {};
+      st.dice.forEach(d => { counts[d.value] = (counts[d.value] || 0) + 1; });
       if (counts['1'] >= 3) {
          st.players[pId].cardState = st.players[pId].cardState || {};
          st.players[pId].cardState.freezeTimeActive = true;

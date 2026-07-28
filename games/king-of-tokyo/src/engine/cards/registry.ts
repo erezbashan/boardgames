@@ -63,7 +63,6 @@ import { Burrowing } from './Burrowing';
 import { FireBlast } from './FireBlast';
 import { FireBreathing } from './FireBreathing';
 import { FreezeTime } from './FreezeTime';
-import { HealingRay } from './HealingRay';
 import { Herbivore } from './Herbivore';
 import { HerdCuller } from './HerdCuller';
 import { PlotTwist } from './PlotTwist';
@@ -101,7 +100,6 @@ export const CARD_REGISTRY: Record<string, CardImplementation> = {
   [GiantBrain.id]: GiantBrain,
   [Gourmet.id]: Gourmet,
   [HealCard.id]: HealCard,
-  [HealingRay.id]: HealingRay,
   [Herbivore.id]: Herbivore,
   [HerdCuller.id]: HerdCuller,
   [HighAltitudeBombing.id]: HighAltitudeBombing,
