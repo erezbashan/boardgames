@@ -45,7 +45,12 @@ export const KotStats: React.FC<KotStatsProps> = ({ gameState }) => {
     const hpEntry: LineChartData = { name: `T${snapshot.turnNum}` };
     
     playerOrder.forEach((id, pIdx) => {
-      const p = snapshot.healths[id] !== undefined ? { health: snapshot.healths[id], vp: snapshot.vps[id] } : null;
+      let p = null;
+      if (snapshot.healths && snapshot.healths[id] !== undefined) {
+        p = { health: snapshot.healths[id], vp: snapshot.vps[id] };
+      } else if (snapshot.players && snapshot.players[id]) {
+        p = { health: snapshot.players[id].health, vp: snapshot.players[id].vp };
+      }
       if (!p) return;
 
       if (isDeadObj[id]) {
