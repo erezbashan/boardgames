@@ -8,7 +8,7 @@ export const Evade: CardImplementation = {
   type: 'Keep',
   description: 'When you take 1 or more damage, you can spend 1⚡ to take 1 less damage.',
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
-    if (action.type === 'TAKE_DAMAGE') {
+    if (action.type === 'TAKE_DAMAGE' && action.playerId === pId) {
       if (st.players[pId] && st.players[pId].cards.includes('evade') && action.payload.amount > 0 && st.players[pId].energy >= 1) {
         
         // Prevent infinite loops or re-asking for the same damage event
@@ -29,7 +29,15 @@ export const Evade: CardImplementation = {
           }
         };
 
-        const takeDamageAction: PendingAction = { ...action };
+        const takeDamageAction: PendingAction = {
+          type: 'RESPONSE_MULTIPLE_ACTIONS',
+          playerId: pId,
+          payload: {
+            actions: [
+              { ...action }
+            ]
+          }
+        };
 
         st.pendingActions.shift(); // Remove the current TAKE_DAMAGE action
 
