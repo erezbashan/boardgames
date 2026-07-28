@@ -7,7 +7,7 @@ export const Wings: CardImplementation = {
   cost: 6,
   type: 'Keep',
   description: 'When you take damage, you can spend 2⚡ to ignore it.',
-  verified: true,
+  verified: false,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'TAKE_DAMAGE' && action.playerId === pId && action.payload.amount > 0 && st.players[pId].energy >= 2) {
       if (!action.payload._wingsPrompted) {

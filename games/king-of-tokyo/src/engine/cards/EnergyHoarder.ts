@@ -7,7 +7,7 @@ export const EnergyHoarder: CardImplementation = {
   cost: 3,
   type: 'Keep',
   description: 'At the end of your turn, gain 1⭐ for every 6⚡ you have.',
-  verified: true,
+  verified: false,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'END_TURN' && action.playerId === pId) {
       const vps = Math.floor(st.players[pId].energy / 6);
