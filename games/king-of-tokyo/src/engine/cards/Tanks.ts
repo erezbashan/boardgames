@@ -10,8 +10,8 @@ export const Tanks: CardImplementation = {
   verified: true,
   onBuy: (st: KotState, action: PendingAction, pId: string) => {
     st.pendingActions.unshift(
-       { type: 'TAKE_DAMAGE', payload: { amount: 3, sourceCard: 'tanks' }, playerId: pId },
-       { type: 'VP', payload: { amount: 4, sourceCard: 'tanks' }, playerId: pId }
+       { type: 'TAKE_DAMAGE', payload: { amount: 3 }, playerId: pId },
+       { type: 'VP', payload: { amount: 4 }, playerId: pId }
     );
     return st;
   }

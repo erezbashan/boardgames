@@ -9,7 +9,7 @@ export const Skyscraper: CardImplementation = {
   description: '+4⭐',
   verified: true,
   onBuy: (st: KotState, action: PendingAction, pId: string) => {
-    st.pendingActions.unshift({ type: 'VP', payload: { amount: 4, sourceCard: 'skyscraper' }, playerId: pId });
+    st.pendingActions.unshift({ type: 'VP', payload: { amount: 4 }, playerId: pId });
     return st;
   }
 };

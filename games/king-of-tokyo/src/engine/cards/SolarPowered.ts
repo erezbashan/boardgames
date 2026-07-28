@@ -11,7 +11,7 @@ export const SolarPowered: CardImplementation = {
   onPreEvent: (st, action, pId) => {
     if (action.type === 'END_TURN' && action.playerId === pId) {
       if (st.players[pId].energy === 0) {
-         st.pendingActions.unshift({ type: 'ENERGY', payload: { amount: 1, reason: 'Solar Powered' }, playerId: pId });
+         st.pendingActions.unshift({ type: 'ENERGY', payload: { amount: 1 }, playerId: pId });
       }
     }
     return st;

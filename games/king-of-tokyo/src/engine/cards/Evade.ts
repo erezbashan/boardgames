@@ -24,8 +24,8 @@ export const Evade: CardImplementation = {
           playerId: pId,
           payload: {
             actions: [
-              { type: 'ENERGY', playerId: pId, payload: { amount: -1, reason: 'Evade' }, affectedByCards: [{cardId: 'evade', playerId: pId}] },
-              { ...action, payload: { ...action.payload, amount: action.payload.amount - 1, reason: 'Evade' }, affectedByCards: [{cardId: 'evade', playerId: pId}] }
+              { type: 'ENERGY', playerId: pId, payload: { amount: -1 }, affectedByCards: [{cardId: 'evade', playerId: pId}] },
+              { ...action, payload: { ...action.payload, amount: action.payload.amount - 1 }, affectedByCards: [{cardId: 'evade', playerId: pId}] }
             ]
           }
         };

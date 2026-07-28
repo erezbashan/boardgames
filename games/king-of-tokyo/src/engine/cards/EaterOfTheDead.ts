@@ -6,12 +6,12 @@ export const EaterOfTheDead: CardImplementation = {
   name: 'Eater of the Dead',
   cost: 4,
   type: 'Keep',
-  description: 'Gain 1⭐ every time a monster reaches 0❤️.',
-  verified: false,
+  description: 'Gain 3⭐ every time a monster reaches 0❤️.',
+  verified: true,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     // We trigger on DEAD action before it executes
     if (action.type === 'DEAD') {
-      st.pendingActions.unshift({ type: 'VP', payload: { amount: 1 }, playerId: pId });
+      st.pendingActions.unshift({ type: 'VP', payload: { amount: 3 }, playerId: pId });
     }
     return st;
   }

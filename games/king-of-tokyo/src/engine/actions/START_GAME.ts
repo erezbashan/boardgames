@@ -47,12 +47,9 @@ export function handleStartGame(st: KotState, action: PendingAction, pId: string
   
   st.history = [{
     turnNum: 0,
-    players: Object.fromEntries(
-      Object.values(st.players).map(p => [
-        p.id, 
-        { health: p.health, vp: p.vp, energy: p.energy, location: p.location }
-      ])
-    )
+    healths: Object.fromEntries(Object.keys(st.players).map(id => [id, st.players[id].health])),
+    vps: Object.fromEntries(Object.keys(st.players).map(id => [id, st.players[id].vp])),
+    tokyoOccupant: null
   }];
   
   st.pendingActions = [

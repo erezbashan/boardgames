@@ -13,7 +13,7 @@ export const Omnivore: CardImplementation = {
       const outcomeMap: Record<string, number> = {};
       st.dice.forEach(d => { outcomeMap[d.value] = (outcomeMap[d.value] || 0) + 1; });
       if (outcomeMap['1'] >= 1 && outcomeMap['2'] >= 1 && outcomeMap['3'] >= 1) {
-         st.pendingActions.unshift({ type: 'VP', payload: { amount: 2, reason: 'Omnivore' }, playerId: pId });
+         st.pendingActions.unshift({ type: 'VP', payload: { amount: 2 }, playerId: pId });
       }
     }
     return st;

@@ -21,19 +21,8 @@ export const Camouflage: CardImplementation = {
       const rolledFace = faces[faceIndex];
       
       if (rolledFace === 'Heart') {
-        const preventDamageAction: PendingAction = {
-          type: 'RESPONSE_MULTIPLE_ACTIONS',
-          playerId: pId,
-          payload: {
-            actions: [
-              { type: 'LOG', payload: { message: `${st.players[pId].name} rolled a Heart with Camouflage and takes no damage!` } },
-              { ...action, payload: { ...action.payload, amount: 0, reason: 'Camouflage', skipLog: true } }
-            ]
-          }
-        };
-        
-        st.pendingActions.shift();
-        st.pendingActions.unshift(preventDamageAction);
+        action.payload.amount = 0;
+        action.affectedByCards = [...(action.affectedByCards || []), { cardId: 'camouflage', playerId: pId }];
       } else {
         st.pendingActions.unshift({ type: 'LOG', payload: { message: `${st.players[pId].name} rolled a ${rolledFace} for Camouflage and failed to evade damage.` } });
       }

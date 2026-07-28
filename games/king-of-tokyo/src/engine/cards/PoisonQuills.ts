@@ -13,7 +13,7 @@ export const PoisonQuills: CardImplementation = {
       const outcomeMap: Record<string, number> = {};
       st.dice.forEach(d => { outcomeMap[d.value] = (outcomeMap[d.value] || 0) + 1; });
       if (outcomeMap['2'] >= 3) {
-         st.pendingActions.unshift({ type: 'ATTACK', payload: { damage: 2, reason: 'Poison Quills' }, playerId: pId });
+         st.pendingActions.unshift({ type: 'ATTACK', payload: { damage: 2 }, playerId: pId });
       }
     }
     return st;

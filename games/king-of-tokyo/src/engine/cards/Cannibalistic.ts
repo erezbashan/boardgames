@@ -9,7 +9,7 @@ export const Cannibalistic: CardImplementation = {
   verified: true,
   onPostEvent: (st, action, pId) => {
     if (action.type === 'ATTACK' && action.playerId === pId && action.payload.damage > 0) {
-      st.pendingActions.unshift({ type: 'HEALTH', payload: { amount: 1, reason: 'Cannibalistic', sourceCard: 'cannibalistic' }, playerId: pId });
+      st.pendingActions.unshift({ type: 'HEALTH', payload: { amount: 1 }, playerId: pId });
     }
     return st;
   }

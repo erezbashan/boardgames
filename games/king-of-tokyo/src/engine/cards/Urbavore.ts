@@ -19,7 +19,7 @@ export const Urbavore: CardImplementation = {
   onPostEvent: (st, action, pId) => {
     if (action.type === 'START_TURN' && action.playerId === pId) {
       if (st.players[pId].location.startsWith('Tokyo')) {
-        st.pendingActions.unshift({ type: 'VP', payload: { amount: 1, reason: 'Urbavore' }, playerId: pId });
+        st.pendingActions.unshift({ type: 'VP', payload: { amount: 1 }, playerId: pId });
       }
     }
     return st;

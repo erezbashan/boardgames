@@ -30,8 +30,8 @@ export const Metamorph: CardImplementation = {
                    type: 'RESPONSE_MULTIPLE_ACTIONS', 
                    payload: { 
                       actions: [
-                         { type: 'DISCARD', payload: { cardId: cId, sourceCard: 'metamorph' }, playerId: pId },
-                         { type: 'ENERGY', payload: { amount: c.cost, sourceCard: 'metamorph' }, playerId: pId },
+                         { type: 'DISCARD', payload: { cardId: cId }, playerId: pId },
+                         { type: 'ENERGY', payload: { amount: c.cost }, playerId: pId },
                          { type: 'METAMORPH_PROMPT', playerId: pId }
                       ]
                    }

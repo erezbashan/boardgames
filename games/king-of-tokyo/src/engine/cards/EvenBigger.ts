@@ -8,10 +8,10 @@ export const EvenBigger: CardImplementation = {
   cost: 4,
   type: 'Keep',
   description: 'Your maximum health becomes 12. Gain 2❤️ immediately.',
-  verified: false,
+  verified: true,
   onBuy: (st: KotState, action: PendingAction, pId: string) => {
     st.players[pId].maxHealth = 12;
-    st.pendingActions.unshift({ type: 'HEALTH', payload: { amount: 2, skipLog: false, reason: 'Even Bigger' }, playerId: pId });
+    st.pendingActions.unshift({ type: 'HEALTH', payload: { amount: 2, skipLog: false }, playerId: pId });
     return st;
   }
 };

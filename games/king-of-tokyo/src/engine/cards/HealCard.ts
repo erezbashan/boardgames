@@ -9,7 +9,7 @@ export const HealCard: CardImplementation = {
   description: 'Heal 2 damage.',
   verified: true,
   onBuy: (st: KotState, action: PendingAction, pId: string) => {
-    st.pendingActions.unshift({ type: 'HEALTH', payload: { amount: 2, sourceCard: 'heal' }, playerId: pId });
+    st.pendingActions.unshift({ type: 'HEALTH', payload: { amount: 2 }, playerId: pId });
     return st;
   },
 };

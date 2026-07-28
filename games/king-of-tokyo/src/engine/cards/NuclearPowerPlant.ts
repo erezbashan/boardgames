@@ -10,8 +10,8 @@ export const NuclearPowerPlant: CardImplementation = {
   verified: true,
   onBuy: (st: KotState, action: PendingAction, pId: string) => {
     st.pendingActions.unshift(
-       { type: 'HEALTH', payload: { amount: 3, sourceCard: 'nuclear_power_plant' }, playerId: pId },
-       { type: 'VP', payload: { amount: 2, sourceCard: 'nuclear_power_plant' }, playerId: pId }
+       { type: 'HEALTH', payload: { amount: 3 }, playerId: pId },
+       { type: 'VP', payload: { amount: 2 }, playerId: pId }
     );
     return st;
   }

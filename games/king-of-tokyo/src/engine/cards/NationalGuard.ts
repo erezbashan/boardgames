@@ -10,8 +10,8 @@ export const NationalGuard: CardImplementation = {
   verified: true,
   onBuy: (st: KotState, action: PendingAction, pId: string) => {
     st.pendingActions.unshift(
-       { type: 'TAKE_DAMAGE', payload: { amount: 2, sourceCard: 'national_guard' }, playerId: pId },
-       { type: 'VP', payload: { amount: 2, sourceCard: 'national_guard' }, playerId: pId }
+       { type: 'TAKE_DAMAGE', payload: { amount: 2 }, playerId: pId },
+       { type: 'VP', payload: { amount: 2 }, playerId: pId }
     );
     return st;
   }

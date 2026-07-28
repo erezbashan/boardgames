@@ -10,19 +10,22 @@ export interface KotDice {
   kept: boolean;
 }
 
+export interface PlayerStats {
+  healthHealed: number;
+  energyGained: number;
+  damageDealt: number;
+  playersKilled: number;
+  turnDied?: number;
+  cardsBought?: number;
+  extraRerolls?: number;
+}
+
 export interface KotPlayer extends BasePlayer {
   health: number;
   vp: number;
   energy: number;
   location: 'Outside' | 'TokyoCity';
-  stats: {
-    healthHealed: number;
-    energyGained: number;
-    damageDealt: number;
-    playersKilled: number;
-    turnDied?: number;
-    cardsBought?: number;
-  };
+  stats: PlayerStats;
   cards: string[];
   cardState?: Record<string, any>;
   markers?: Record<string, number>;

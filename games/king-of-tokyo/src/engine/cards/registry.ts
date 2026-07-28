@@ -47,6 +47,17 @@ import { EaterOfTheDead } from './EaterOfTheDead';
 import { EvenBigger } from './EvenBigger';
 import { RootingForTheUnderdog } from './RootingForTheUnderdog';
 
+import { FriendOfChildren } from './FriendOfChildren';
+import { Gourmet } from './Gourmet';
+import { EnergyHoarder } from './EnergyHoarder';
+import { EvacuationOrders } from './EvacuationOrders';
+import { UrbanLegend } from './UrbanLegend';
+import { ElectricArmor } from './ElectricArmor';
+import { SuperJump } from './SuperJump';
+import { Telepath } from './Telepath';
+import { Vampiric } from './Vampiric';
+import { Unstoppable } from './Unstoppable';
+
 export const CARD_REGISTRY: Record<string, CardImplementation> = {
   [AlphaMonster.id]: AlphaMonster,
   [AlienMetabolism.id]: AlienMetabolism,
@@ -61,13 +72,18 @@ export const CARD_REGISTRY: Record<string, CardImplementation> = {
   [DedicatedNewsTeam.id]: DedicatedNewsTeam,
   [DropFromHighAltitude.id]: DropFromHighAltitude,
   [EaterOfTheDead.id]: EaterOfTheDead,
+  [ElectricArmor.id]: ElectricArmor,
   [Energize.id]: Energize,
+  [EnergyHoarder.id]: EnergyHoarder,
+  [EvacuationOrders.id]: EvacuationOrders,
   [Evade.id]: Evade,
   [EvenBigger.id]: EvenBigger,
   [ExtraHead.id]: ExtraHead,
   [Frenzy.id]: Frenzy,
+  [FriendOfChildren.id]: FriendOfChildren,
   [GasRefinery.id]: GasRefinery,
   [GiantBrain.id]: GiantBrain,
+  [Gourmet.id]: Gourmet,
   [HealCard.id]: HealCard,
   [HighAltitudeBombing.id]: HighAltitudeBombing,
   [ItHasAChild.id]: ItHasAChild,
@@ -93,4 +109,8 @@ export const CARD_REGISTRY: Record<string, CardImplementation> = {
   [ThrowATanker.id]: ThrowATanker,
   [Urbavore.id]: Urbavore,
   [WeAreOnlyMakingItStronger.id]: WeAreOnlyMakingItStronger,
+  [SuperJump.id]: SuperJump,
+  [Telepath.id]: Telepath,
+  [Vampiric.id]: Vampiric,
+  [Unstoppable.id]: Unstoppable,
 };
