@@ -6,13 +6,13 @@ export const AlphaMonster: CardImplementation = {
   name: 'Alpha Monster',
   cost: 5,
   type: 'Keep',
-  description: 'Gain 1⭐ for each 💥 you roll.',
-  verified: true,
-  onPostEvent: (st: KotState, action: PendingAction, pId: string) => {
-    if (action.type === 'RESOLVE_ROLLS' && action.playerId === pId) {
-      const smashCount = st.dice.filter(d => d.value === 'Smash').length;
-      if (smashCount > 0) {
-        st.pendingActions.unshift({ type: 'VP', payload: { amount: smashCount }, playerId: pId });
+  description: 'Gain 1⭐ when you attack.',
+  verified: false,
+  onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
+    if (action.type === 'ATTACK' && action.playerId === pId && action.payload.damage > 0) {
+      if (!action.payload._alphaMonsterTriggered) {
+        action.payload._alphaMonsterTriggered = true;
+        st.pendingActions.unshift({ type: 'VP', payload: { amount: 1 }, playerId: pId });
       }
     }
     return st;

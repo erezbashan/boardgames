@@ -28,7 +28,7 @@ import { Urbavore } from './Urbavore';
 import { AlienMetabolism } from './AlienMetabolism';
 import { DropFromHighAltitude } from './DropFromHighAltitude';
 import { Energize } from './Energize';
-import { Evade } from './Evade';
+import { Wings } from './Wings';
 import { ExtraHead } from './ExtraHead';
 import { Frenzy } from './Frenzy';
 import { GasRefinery } from './GasRefinery';
@@ -76,7 +76,6 @@ export const CARD_REGISTRY: Record<string, CardImplementation> = {
   [Energize.id]: Energize,
   [EnergyHoarder.id]: EnergyHoarder,
   [EvacuationOrders.id]: EvacuationOrders,
-  [Evade.id]: Evade,
   [EvenBigger.id]: EvenBigger,
   [ExtraHead.id]: ExtraHead,
   [Frenzy.id]: Frenzy,
@@ -113,4 +112,5 @@ export const CARD_REGISTRY: Record<string, CardImplementation> = {
   [Telepath.id]: Telepath,
   [Vampiric.id]: Vampiric,
   [Unstoppable.id]: Unstoppable,
+  [Wings.id]: Wings,
 };
