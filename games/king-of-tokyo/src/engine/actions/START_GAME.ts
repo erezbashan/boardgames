@@ -20,7 +20,28 @@ export function handleStartGame(st: KotState, action: PendingAction, pId: string
   st.market = ['', '', ''];
   st.status = 'Playing';
   st.playerOrder.forEach(id => {
-    st.players[id] = { ...st.players[id], health: st.settings.maxHealth, energy: st.settings.startingEnergy, vp: 0, location: 'Outside', cards: [], markers: {}, cardState: {}, stats: { healthHealed: 0, energyGained: 0, damageDealt: 0, playersKilled: 0 } };
+    const originalPlayer = st.players[id];
+    st.players[id] = {
+      id: originalPlayer.id,
+      name: originalPlayer.name,
+      isBot: originalPlayer.isBot,
+      botStrategy: originalPlayer.botStrategy,
+      color: originalPlayer.color,
+      health: st.settings.maxHealth,
+      energy: st.settings.startingEnergy,
+      vp: 0,
+      location: 'Outside',
+      cards: [],
+      stats: {
+        healthHealed: 0,
+        energyGained: 0,
+        damageDealt: 0,
+        playersKilled: 0,
+        cardsBought: 0
+      },
+      markers: {},
+      cardState: {}
+    };
   });
   st.pendingActions = [
       { type: 'FILL_MARKET', playerId: pId, payload: { index: 2 } },
