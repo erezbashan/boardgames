@@ -8,7 +8,7 @@ export const Telepath: CardImplementation = {
   cost: 4,
   type: 'Keep',
   description: 'Spend 1⚡ to get 1 extra reroll.',
-  verified: true,
+  verified: false,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'RESOLVE_ROLLS' && action.playerId === pId && st.players[pId].energy >= 1) {
       if (!action.payload._telepathPrompted) {
