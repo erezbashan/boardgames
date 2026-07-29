@@ -7,7 +7,7 @@ export const AlphaMonster: CardImplementation = {
   cost: 5,
   type: 'Keep',
   description: 'Gain 1⭐ when you attack.',
-  verified: false,
+  verified: true,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'ATTACK' && action.playerId === pId && action.payload.damage > 0) {
       if (!action.payload._alphaMonsterTriggered) {

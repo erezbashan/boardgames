@@ -65,7 +65,6 @@ import { FireBreathing } from './FireBreathing';
 import { FreezeTime } from './FreezeTime';
 import { Herbivore } from './Herbivore';
 import { HerdCuller } from './HerdCuller';
-import { PlotTwist } from './PlotTwist';
 
 
 export const CARD_REGISTRY: Record<string, CardImplementation> = {
@@ -115,7 +114,6 @@ export const CARD_REGISTRY: Record<string, CardImplementation> = {
   [NuclearPowerPlant.id]: NuclearPowerPlant,
   [Omnivore.id]: Omnivore,
   [Opportunist.id]: Opportunist,
-  [PlotTwist.id]: PlotTwist,
   [PoisonQuills.id]: PoisonQuills,
   [PoisonSpit.id]: PoisonSpit,
   [Regeneration.id]: Regeneration,

@@ -7,7 +7,7 @@ export const ElectricArmor: CardImplementation = {
   cost: 4,
   type: 'Keep',
   description: 'When you take damage, you can spend 1⚡ to reduce it by 1.',
-  verified: false,
+  verified: true,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'TAKE_DAMAGE' && action.playerId === pId && action.payload.amount > 0 && st.players[pId].energy >= 1) {
       if (!action.payload._electricArmorPrompted) {
