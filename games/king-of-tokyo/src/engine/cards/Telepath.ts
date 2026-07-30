@@ -11,7 +11,8 @@ export const Telepath: CardImplementation = {
   verified: false,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'RESOLVE_ROLLS' && action.playerId === pId && st.players[pId].energy >= 1) {
-      if (!action.payload._telepathPrompted) {
+      if (!action.payload?._telepathPrompted) {
+        action.payload = action.payload || {};
         action.payload._telepathPrompted = true;
         const index = st.pendingActions.findIndex(a => a === action);
         if (index !== -1) {
