@@ -16,8 +16,8 @@ export const AcidAttack: CardImplementation = {
       st.players[pId].cardState = st.players[pId].cardState || {};
       st.players[pId].cardState.acidAttackUsed = false;
     }
-    if (action.type === 'ATTACK' && action.playerId === pId) {
-      st.pendingActions.unshift({ ...action, payload: { ...action.payload, damage: action.payload.damage + 1 }, affectedByCards: [{cardId: 'acid_attack', playerId: pId}] });
+    if (action.type === 'ATTACK' && action.playerId === pId && !action.affectedByCards?.some(c => c.cardId === 'acid_attack')) {
+      st.pendingActions.unshift({ ...action, payload: { ...action.payload, damage: action.payload.damage + 1 }, affectedByCards: [...(action.affectedByCards || []), {cardId: 'acid_attack', playerId: pId}] });
       st.players[pId].cardState = st.players[pId].cardState || {};
       st.players[pId].cardState.acidAttackUsed = true;
       const index = st.pendingActions.findIndex(a => a === action);
