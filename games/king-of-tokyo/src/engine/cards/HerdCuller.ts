@@ -16,7 +16,7 @@ export const HerdCuller: CardImplementation = {
     }
     
     if (action.type === 'RESOLVE_ROLLS' && action.playerId === pId) {
-       if (action.payload._herdCullerDone) return st;
+       if (action.payload?._herdCullerDone) return st;
        
        const index = st.pendingActions.findIndex(a => a === action);
        if (index !== -1) {

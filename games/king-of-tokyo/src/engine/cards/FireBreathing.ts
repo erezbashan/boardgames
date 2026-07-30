@@ -10,7 +10,7 @@ export const FireBreathing: CardImplementation = {
   verified: false,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     // "Neighbors" usually means adjacent in playerOrder.
-    if (action.type === 'ATTACK' && action.playerId === pId && action.payload.amount > 0) {
+    if (action.type === 'ATTACK' && action.playerId === pId && action.payload.damage > 0) {
        const order = st.playerOrder.filter(id => st.players[id].health > 0);
        const idx = order.indexOf(pId);
        if (idx !== -1 && order.length > 1) {
