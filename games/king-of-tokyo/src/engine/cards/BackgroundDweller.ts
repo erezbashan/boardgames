@@ -1,5 +1,6 @@
 import { CardImplementation } from './types';
 import { KotState, PendingAction } from '../types';
+import { addLog } from '../utils';
 
 export const BackgroundDweller: CardImplementation = {
   id: 'background_dweller',

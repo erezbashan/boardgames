@@ -8,7 +8,7 @@ export const FireBlast: CardImplementation = {
   cost: 3,
   type: 'Discard',
   description: 'Deal 2 damage to all other monsters.',
-  verified: false,
+  verified: true,
   onBuy: (st: KotState, action: PendingAction, pId: string) => {
     st.playerOrder.forEach(id => {
        if (id !== pId && st.players[id].health > 0) {

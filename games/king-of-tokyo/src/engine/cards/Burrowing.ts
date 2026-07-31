@@ -9,8 +9,8 @@ export const Burrowing: CardImplementation = {
   description: 'Deal 1 extra damage when attacking from Tokyo. Deal 1 damage when yielding Tokyo to the monster taking it.',
   verified: true,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
-    if (action.type === 'ATTACK' && action.playerId === pId && st.players[pId].location !== 'Outside') {
-      st.pendingActions.unshift({ ...action, payload: { ...action.payload, damage: action.payload.damage + 1 }, affectedByCards: [{cardId: 'burrowing', playerId: pId}] });
+    if (action.type === 'ATTACK' && action.playerId === pId && st.players[pId].location !== 'Outside' && !action.affectedByCards?.some(c => c.cardId === 'burrowing')) {
+      st.pendingActions.unshift({ ...action, payload: { ...action.payload, damage: action.payload.damage + 1 }, affectedByCards: [...(action.affectedByCards || []), {cardId: 'burrowing', playerId: pId}] });
       const index = st.pendingActions.findIndex(a => a === action);
       if (index !== -1) st.pendingActions.splice(index, 1);
     }

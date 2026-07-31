@@ -35,15 +35,21 @@ export const Telepath: CardImplementation = {
       }
     }
     
-    if (action.type === 'RESPONSE_TELEPATH' && action.playerId === pId) {
+    if ((action.type === 'RESPONSE_TELEPATH' || action.type === 'USE_TELEPATH') && action.playerId === pId) {
       st.players[pId].energy -= 1;
       st.maxRolls = (st.maxRolls || 3) + 1;
-      st.rollCount = 1;
-      addLog(st, action, `${st.players[pId].name} spent 1⚡ for an extra reroll using Telepath`);
       
-      // Go back to rolling phase
-      st.pendingActions.unshift({ type: 'RESOLVE_ROLLS', playerId: pId });
-      st.pendingActions.unshift({ type: 'ASK_ROLL', playerId: pId, payload: { prompt: { playerId: pId, text: 'Roll Dice?', options: [] } } });
+      if (action.type === 'RESPONSE_TELEPATH') {
+        st.rollCount = 1;
+        // Go back to rolling phase
+        st.pendingActions.unshift({ type: 'RESOLVE_ROLLS', playerId: pId });
+        st.pendingActions.unshift({ type: 'ASK_ROLL', playerId: pId, payload: { prompt: { playerId: pId, text: 'Roll Dice?', options: [] } } });
+      } else {
+        // Just incremented maxRolls during ASK_ROLL, so nothing else to push, just let ASK_ROLL continue
+        st.players[pId].cardState = st.players[pId].cardState || {};
+        st.players[pId].cardState.telepathUsed = true;
+      }
+      addLog(st, action, `${st.players[pId].name} spent 1⚡ for an extra reroll using Telepath`);
     }
     
     if (action.type === 'RESPONSE_TELEPATH_NO' && action.playerId === pId) {
