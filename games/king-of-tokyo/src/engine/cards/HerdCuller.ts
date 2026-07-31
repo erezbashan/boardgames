@@ -57,11 +57,14 @@ export const HerdCuller: CardImplementation = {
           st.players[pId].cardState!.herdCullerUsed = true;
           addLog(st, action, `${st.players[pId].name} used Herd Culler to change a die to a 1️⃣!`);
        }
-       st.pendingActions.unshift(action.payload.originalAction);
+       const nextAction = { ...action.payload.originalAction };
+       delete nextAction.skipPreEvent;
+       st.pendingActions.unshift(nextAction);
     }
     
     if (action.type === 'RESPONSE_HERD_CULLER_NO' && action.playerId === pId) {
        const nextAction = { ...action.payload.originalAction, payload: { ...action.payload.originalAction.payload, _herdCullerDone: true } };
+       delete nextAction.skipPreEvent;
        st.pendingActions.unshift(nextAction);
     }
     return st;

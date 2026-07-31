@@ -7,7 +7,7 @@ export const AcidAttack: CardImplementation = {
   cost: 6,
   type: 'Keep',
   description: 'Deal 1 extra damage each turn (even when you don\'t otherwise attack).',
-  verified: false,
+  verified: true,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     // Inject 1 extra damage whenever ATTACK is resolved, or if no attack was made, still deal 1 damage?
     // The rules say "Deal 1 extra damage each turn". The cleanest way is to do it on END_TURN if they didn't attack?

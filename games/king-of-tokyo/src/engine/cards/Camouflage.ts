@@ -8,7 +8,7 @@ export const Camouflage: CardImplementation = {
   cost: 3,
   type: 'Keep',
   description: 'If you take damage, roll a die for each damage point. On a ❤️ result, you do not take that damage point.',
-  verified: false,
+  verified: true,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'TAKE_DAMAGE' && action.playerId === pId && action.payload.amount > 0) {
       if (action.payload._camouflagePrompted) {

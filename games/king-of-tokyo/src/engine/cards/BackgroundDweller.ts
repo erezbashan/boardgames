@@ -43,10 +43,13 @@ export const BackgroundDweller: CardImplementation = {
           st.dice[threeIndex].value = DICE_FACES[Math.floor(Math.random() * DICE_FACES.length)] as any;
           addLog(st, action, `${st.players[pId].name} rerolled a 3️⃣ using Background Dweller`);
        }
-       st.pendingActions.unshift(action.payload.originalAction);
+       const nextAction = { ...action.payload.originalAction };
+       delete nextAction.skipPreEvent;
+       st.pendingActions.unshift(nextAction);
     }
     if (action.type === 'RESPONSE_BG_DWELLER_NO' && action.playerId === pId) {
        const nextAction = { ...action.payload.originalAction, payload: { ...action.payload.originalAction.payload, _bgDwellerDone: true } };
+       delete nextAction.skipPreEvent;
        st.pendingActions.unshift(nextAction);
     }
     return st;

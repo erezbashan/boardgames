@@ -305,14 +305,15 @@ export const KotBoard: React.FC = () => {
   };
 
   const getDiceFace = (val: string) => {
+    const wrapperStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' };
     switch (val) {
-      case 'Heart': return <span style={{color: '#ef4444', textShadow: '0 0 5px rgba(0,0,0,0.5)'}}>❤️</span>;
-      case 'Energy': return <span style={{color: '#06b6d4', filter: 'drop-shadow(0 0 5px rgba(0,0,0,0.5))'}}><LightningIcon /></span>;
-      case 'Smash': return <span style={{color: '#f97316', textShadow: '0 0 5px rgba(0,0,0,0.5)'}}>💥</span>;
-      case '1': return <span style={{color: 'white', textShadow: '0 0 5px rgba(0,0,0,0.5)'}}>1</span>;
-      case '2': return <span style={{color: 'white', textShadow: '0 0 5px rgba(0,0,0,0.5)'}}>2</span>;
-      case '3': return <span style={{color: 'white', textShadow: '0 0 5px rgba(0,0,0,0.5)'}}>3</span>;
-      default: return '?';
+      case 'Heart': return <span style={{...wrapperStyle, color: '#ef4444', textShadow: '0 0 5px rgba(0,0,0,0.5)'}}>❤️</span>;
+      case 'Energy': return <span style={{...wrapperStyle, color: '#06b6d4', filter: 'drop-shadow(0 0 5px rgba(0,0,0,0.5))'}}><LightningIcon /></span>;
+      case 'Smash': return <span style={{...wrapperStyle, color: '#f97316', textShadow: '0 0 5px rgba(0,0,0,0.5)'}}>💥</span>;
+      case '1': return <span style={{...wrapperStyle, color: 'white', textShadow: '0 0 5px rgba(0,0,0,0.5)'}}>1</span>;
+      case '2': return <span style={{...wrapperStyle, color: 'white', textShadow: '0 0 5px rgba(0,0,0,0.5)'}}>2</span>;
+      case '3': return <span style={{...wrapperStyle, color: 'white', textShadow: '0 0 5px rgba(0,0,0,0.5)'}}>3</span>;
+      default: return <span style={wrapperStyle}>?</span>;
     }
   };
 
@@ -689,20 +690,7 @@ export const KotBoard: React.FC = () => {
       parts = newParts;
     });
 
-    const finalParts: React.ReactNode[] = [];
-    parts.forEach((part, i) => {
-      if (typeof part === 'string') {
-        const split = part.split('⚡');
-        split.forEach((s, idx) => {
-          finalParts.push(s);
-          if (idx < split.length - 1) {
-            finalParts.push(<span key={`energy-${i}-${idx}`} style={{ color: '#06b6d4', filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.5))' }}><LightningIcon /></span>);
-          }
-        });
-      } else {
-        finalParts.push(part);
-      }
-    });
+    const finalParts: React.ReactNode[] = parts;
 
     return finalParts.map((p, i) => typeof p === 'string' ? <React.Fragment key={i}>{defaultRenderer(p)}</React.Fragment> : p);
   };

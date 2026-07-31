@@ -8,7 +8,7 @@ export const Telepath: CardImplementation = {
   cost: 4,
   type: 'Keep',
   description: 'Spend 1⚡ to get 1 extra reroll.',
-  verified: false,
+  verified: true,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'RESOLVE_ROLLS' && action.playerId === pId && st.players[pId].energy >= 1) {
       if (!action.payload?._telepathPrompted) {
@@ -40,7 +40,6 @@ export const Telepath: CardImplementation = {
       st.maxRolls = (st.maxRolls || 3) + 1;
       
       if (action.type === 'RESPONSE_TELEPATH') {
-        st.rollCount = 1;
         // Go back to rolling phase
         st.pendingActions.unshift({ type: 'RESOLVE_ROLLS', playerId: pId });
         st.pendingActions.unshift({ type: 'ASK_ROLL', playerId: pId, payload: { prompt: { playerId: pId, text: 'Roll Dice?', options: [] } } });
@@ -53,7 +52,9 @@ export const Telepath: CardImplementation = {
     }
     
     if (action.type === 'RESPONSE_TELEPATH_NO' && action.playerId === pId) {
-       st.pendingActions.unshift({ ...action.payload.originalAction, affectedByCards: action.payload.originalAction.affectedByCards || [] });
+       const nextAction = { ...action.payload.originalAction, affectedByCards: action.payload.originalAction.affectedByCards || [] };
+       delete nextAction.skipPreEvent;
+       st.pendingActions.unshift(nextAction);
     }
     
     return st;
