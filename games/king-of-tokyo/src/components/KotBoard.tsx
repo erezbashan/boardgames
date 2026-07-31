@@ -690,7 +690,25 @@ export const KotBoard: React.FC = () => {
       parts = newParts;
     });
 
-    const finalParts: React.ReactNode[] = parts;
+    const finalParts: React.ReactNode[] = [];
+    parts.forEach((p, index) => {
+      if (typeof p === 'string') {
+        const energySplit = p.split('⚡');
+        energySplit.forEach((s, idx) => {
+          finalParts.push(s);
+          if (idx < energySplit.length - 1) {
+            finalParts.push(
+              <span key={`lightning-${index}-${idx}`} style={{ display: 'inline-flex', alignItems: 'center', position: 'relative' }}>
+                <span style={{ color: '#06b6d4', pointerEvents: 'none', filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.5))' }}><LightningIcon /></span>
+                <span style={{ position: 'absolute', opacity: 0 }}>⚡</span>
+              </span>
+            );
+          }
+        });
+      } else {
+        finalParts.push(p);
+      }
+    });
 
     return finalParts.map((p, i) => typeof p === 'string' ? <React.Fragment key={i}>{defaultRenderer(p)}</React.Fragment> : p);
   };
