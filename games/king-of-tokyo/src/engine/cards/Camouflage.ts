@@ -26,8 +26,7 @@ export const Camouflage: CardImplementation = {
       
       if (heartsRolled > 0) {
         action.payload.amount = Math.max(0, action.payload.amount - heartsRolled);
-        action.affectedByCards = [...(action.affectedByCards || []), { cardId: 'camouflage', playerId: pId }];
-        addLog(st, action, `${st.players[pId].name} rolled ${heartsRolled} ❤️ with Camouflage and ignored ${heartsRolled} damage!`);
+        addLog(st, action, `${st.players[pId].name} rolled ${heartsRolled} ❤️ and ignored ${heartsRolled} damage! [Camouflage]`);
       } else {
         addLog(st, action, `${st.players[pId].name} used Camouflage but rolled no ❤️!`);
       }

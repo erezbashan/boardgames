@@ -8,7 +8,7 @@ export const HerdCuller: CardImplementation = {
   cost: 3,
   type: 'Keep',
   description: 'You can change one of your dice to a 1️⃣ each turn.',
-  verified: false,
+  verified: true,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'START_TURN' && action.playerId === pId) {
       st.players[pId].cardState = st.players[pId].cardState || {};
