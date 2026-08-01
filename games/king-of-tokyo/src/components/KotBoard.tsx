@@ -254,30 +254,8 @@ export const KotBoard: React.FC = () => {
   React.useEffect(() => {
     if (gameState.logs && gameState.logs.length > prevLogsLength.current) {
       const newLogs = gameState.logs.slice(prevLogsLength.current);
-      const highlighted: {cardId: string, playerId: string}[] = [];
-      newLogs.forEach(log => {
-        Object.keys(CARD_REGISTRY).forEach(cId => {
-          if (log.includes(CARD_REGISTRY[cId].name)) {
-            let foundPlayerId: string | null = null;
-            for (const pId of gameState.playerOrder || []) {
-              const p = gameState.players[pId];
-              if (p && log.includes(p.name) && p.cards?.includes(cId)) {
-                foundPlayerId = pId;
-                break;
-              }
-            }
-            if (foundPlayerId) {
-              highlighted.push({ cardId: cId, playerId: foundPlayerId });
-            }
-          }
-        });
-      });
-      if (highlighted.length > 0) {
-        setHighlightedCards(prev => [...prev, ...highlighted]);
-        setTimeout(() => {
-           setHighlightedCards(prev => prev.filter(hc => !highlighted.find(h => h.cardId === hc.cardId && h.playerId === hc.playerId)));
-        }, 2000);
-      }
+      // We now rely purely on gameState.turnContext.animatedCard for highlights
+      // Legacy string matching is removed to prevent false positives when names appear in logs
       prevLogsLength.current = gameState.logs.length;
     }
   }, [gameState.logs]);

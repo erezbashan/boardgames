@@ -11,6 +11,10 @@ export function addLog(state: KotState, action: PendingAction, logStr: string): 
        return `${card?.name || c.cardId}`;
     }).join(', ');
     finalStr += ` [${cardNames}]`;
+    
+    if (!state.turnContext) state.turnContext = {};
+    // Use the first affected card for animation
+    state.turnContext.animatedCard = { ...action.affectedByCards[0] };
   }
   state.logs.push(finalStr);
 }

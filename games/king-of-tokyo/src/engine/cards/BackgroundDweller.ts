@@ -8,7 +8,7 @@ export const BackgroundDweller: CardImplementation = {
   cost: 4,
   type: 'Keep',
   description: 'You can always reroll any 3️⃣ you have.',
-  verified: false,
+  verified: true,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'RESOLVE_ROLLS' && action.playerId === pId) {
        if (action.payload?._bgDwellerDone) return st;
@@ -40,8 +40,23 @@ export const BackgroundDweller: CardImplementation = {
        const threeIndex = st.dice.findIndex(d => d.value === '3');
        if (threeIndex !== -1) {
           const DICE_FACES = ['1', '2', '3', 'Energy', 'Heart', 'Smash'];
-          st.dice[threeIndex].value = DICE_FACES[Math.floor(Math.random() * DICE_FACES.length)] as any;
-          addLog(st, action, `${st.players[pId].name} rerolled a 3️⃣ using Background Dweller`);
+          const newValue = DICE_FACES[Math.floor(Math.random() * DICE_FACES.length)];
+          st.dice[threeIndex].value = newValue as any;
+          
+          let faceStr = '';
+          switch(newValue) {
+             case 'Heart': faceStr = '❤️'; break;
+             case 'Energy': faceStr = '⚡'; break;
+             case 'Smash': faceStr = '💥'; break;
+             case '1': faceStr = '1️⃣'; break;
+             case '2': faceStr = '2️⃣'; break;
+             case '3': faceStr = '3️⃣'; break;
+          }
+          
+          const suffix = newValue === '3' ? 'again' : 'instead';
+          
+          action.affectedByCards = [{ cardId: 'background_dweller', playerId: pId }];
+          addLog(st, action, `${st.players[pId].name} rerolled a 3️⃣ using Background Dweller and got ${faceStr} ${suffix}`);
        }
        const nextAction = { ...action.payload.originalAction };
        delete nextAction.skipPreEvent;
