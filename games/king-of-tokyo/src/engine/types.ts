@@ -8,6 +8,7 @@ export interface KotDice {
   id: string;
   value: DiceFace;
   kept: boolean;
+  version?: number;
 }
 
 export interface PlayerStats {

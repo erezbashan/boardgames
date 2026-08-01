@@ -13,6 +13,8 @@ export const BackgroundDweller: CardImplementation = {
     if (action.type === 'RESOLVE_ROLLS' && action.playerId === pId) {
        if (action.payload?._bgDwellerDone) return st;
        
+       if (st.turnContext) delete st.turnContext.rerolledDiceId;
+       
        const index = st.pendingActions.findIndex(a => a === action);
        if (index !== -1) {
           const threeCount = st.dice.filter(d => d.value === '3').length;
@@ -41,7 +43,12 @@ export const BackgroundDweller: CardImplementation = {
        if (threeIndex !== -1) {
           const DICE_FACES = ['1', '2', '3', 'Energy', 'Heart', 'Smash'];
           const newValue = DICE_FACES[Math.floor(Math.random() * DICE_FACES.length)];
-          st.dice[threeIndex].value = newValue as any;
+          st.dice[threeIndex] = {
+             ...st.dice[threeIndex],
+             value: newValue as any,
+             version: (st.dice[threeIndex].version || 0) + 1,
+             kept: false
+          };
           
           let faceStr = '';
           switch(newValue) {
@@ -56,6 +63,10 @@ export const BackgroundDweller: CardImplementation = {
           const suffix = newValue === '3' ? 'again' : 'instead';
           
           action.affectedByCards = [{ cardId: 'background_dweller', playerId: pId }];
+          
+          if (!st.turnContext) st.turnContext = {};
+          st.turnContext.rerolledDiceId = st.dice[threeIndex].id;
+          
           addLog(st, action, `${st.players[pId].name} rerolled a 3️⃣ using Background Dweller and got ${faceStr} ${suffix}`);
        }
        const nextAction = { ...action.payload.originalAction };
@@ -63,6 +74,7 @@ export const BackgroundDweller: CardImplementation = {
        st.pendingActions.unshift(nextAction);
     }
     if (action.type === 'RESPONSE_BG_DWELLER_NO' && action.playerId === pId) {
+       if (st.turnContext) delete st.turnContext.rerolledDiceId;
        const nextAction = { ...action.payload.originalAction, payload: { ...action.payload.originalAction.payload, _bgDwellerDone: true } };
        delete nextAction.skipPreEvent;
        st.pendingActions.unshift(nextAction);

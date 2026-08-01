@@ -525,13 +525,13 @@ export const KotBoard: React.FC = () => {
             )}
 
             <div style={{ display: 'flex', gap: '10px', marginTop: '10px', flexWrap: 'nowrap', justifyContent: 'center', width: '100%', maxWidth: '500px' }}>
-              {dice.map((d) => {
+              {dice.map((d, index) => {
                 const isDiceKept = rollCount < maxRolls && keptDiceIds.includes(d.id);
                 return (
                   <div 
-                    key={`${d.id}-${rollCount}`}
+                    key={`${d.id}-${rollCount}-${(d as any).version || 0}`}
                     onClick={() => toggleKeep(d.id)}
-                    className={rollCount < maxRolls && !isDiceKept ? 'dice-rolling' : ''}
+                    className={(rollCount < maxRolls && !isDiceKept) || gameState.turnContext?.rerolledDiceId === d.id ? 'dice-rolling' : ''}
                     style={{
                       flex: '1 1 0',
                       minWidth: 0,
