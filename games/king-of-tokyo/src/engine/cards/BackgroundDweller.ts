@@ -67,7 +67,7 @@ export const BackgroundDweller: CardImplementation = {
           if (!st.turnContext) st.turnContext = {};
           st.turnContext.rerolledDiceId = st.dice[threeIndex].id;
           
-          addLog(st, action, `${st.players[pId].name} rerolled a 3️⃣ using Background Dweller and got ${faceStr} ${suffix}`);
+          addLog(st, action, `${st.players[pId].name} rerolled a 3️⃣ and got ${faceStr} ${suffix}`);
        }
        const nextAction = { ...action.payload.originalAction };
        delete nextAction.skipPreEvent;
