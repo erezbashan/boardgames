@@ -7,7 +7,7 @@ export const FireBreathing: CardImplementation = {
   cost: 4,
   type: 'Keep',
   description: 'Your neighbors take 1 extra damage when you deal damage.',
-  verified: false,
+  verified: true,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     // "Neighbors" usually means adjacent in playerOrder.
     if (action.type === 'ATTACK' && action.playerId === pId && action.payload.damage > 0) {
