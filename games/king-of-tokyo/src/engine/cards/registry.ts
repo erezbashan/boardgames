@@ -23,6 +23,19 @@ import { SolarPowered } from './SolarPowered';
 import { SpikedTail } from './SpikedTail';
 import { Tanks } from './Tanks';
 import { ThrowATanker } from './ThrowATanker';
+import { ApartmentBuilding } from './ApartmentBuilding';
+import { VastStorm } from './VastStorm';
+import { SleepWalker } from './SleepWalker';
+import { RapidHealing } from './RapidHealing';
+import { ReflectiveHide } from './ReflectiveHide';
+import { IntimidatingRoar } from './IntimidatingRoar';
+import { Stretchy } from './Stretchy';
+import { PlotTwist } from './PlotTwist';
+import { ShrinkRay } from './ShrinkRay';
+import { SmokeCloud } from './SmokeCloud';
+import { ThunderStomp } from './ThunderStomp';
+import { UnstableDNA } from './UnstableDNA';
+import { HealingRay } from './HealingRay';
 import { Urbavore } from './Urbavore';
 
 import { AlienMetabolism } from './AlienMetabolism';
@@ -131,4 +144,17 @@ export const CARD_REGISTRY: Record<string, CardImplementation> = {
   [Vampiric.id]: Vampiric,
   [WeAreOnlyMakingItStronger.id]: WeAreOnlyMakingItStronger,
   [Wings.id]: Wings,
+  [ApartmentBuilding.id]: ApartmentBuilding,
+  [VastStorm.id]: VastStorm,
+  [SleepWalker.id]: SleepWalker,
+  [RapidHealing.id]: RapidHealing,
+  [ReflectiveHide.id]: ReflectiveHide,
+  [IntimidatingRoar.id]: IntimidatingRoar,
+  [Stretchy.id]: Stretchy,
+  [PlotTwist.id]: PlotTwist,
+  [ShrinkRay.id]: ShrinkRay,
+  [SmokeCloud.id]: SmokeCloud,
+  [ThunderStomp.id]: ThunderStomp,
+  [UnstableDNA.id]: UnstableDNA,
+  [HealingRay.id]: HealingRay
 };
