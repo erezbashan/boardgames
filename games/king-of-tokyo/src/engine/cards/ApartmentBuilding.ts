@@ -7,7 +7,7 @@ export const ApartmentBuilding: CardImplementation = {
   cost: 5,
   type: 'Discard',
   description: '+ 3⭐',
-  verified: false,
+  verified: true,
   onBuy: (st: KotState, action: PendingAction, pId: string) => {
     st.pendingActions.unshift({ type: 'VP', payload: { amount: 3 }, playerId: pId });
     return st;

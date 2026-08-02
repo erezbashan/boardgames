@@ -8,7 +8,7 @@ export const PlotTwist: CardImplementation = {
   cost: 3,
   type: 'Keep',
   description: 'Change one die to any result. Discard when used.',
-  verified: false,
+  verified: true,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'RESOLVE_ROLLS') {
        if (action.payload?._plotTwistDone) return st;

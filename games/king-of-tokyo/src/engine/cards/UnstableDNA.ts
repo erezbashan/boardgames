@@ -9,7 +9,7 @@ export const UnstableDNA: CardImplementation = {
   cost: 3,
   type: 'Keep',
   description: 'If you yield Tokyo you can take any card the recipient has and give him this card.',
-  verified: false,
+  verified: true,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'RESPONSE_YIELD' && action.playerId === pId && action.payload.yield) {
        if (action.payload._unstableDnaDone) return st;
@@ -74,7 +74,7 @@ export const UnstableDNA: CardImplementation = {
     }
     
     if (action.type === 'RESPONSE_UNSTABLE_DNA_NO' && action.playerId === pId) {
-       const nextAction = { ...action.payload.originalAction, payload: { ...action.payload.originalAction.payload, _unstableDnaDone: true } };
+       const nextAction = { ...action.payload.originalAction, payload: { ...action.payload.originalAction.payload, _unstableDnaDone: true }, affectedByCards: action.payload.originalAction.affectedByCards || [] };
        delete nextAction.skipPreEvent;
        st.pendingActions.unshift(nextAction);
     }

@@ -8,7 +8,7 @@ export const ReflectiveHide: CardImplementation = {
   cost: 6,
   type: 'Keep',
   description: 'If you suffer damage the monster that inflicted the damage suffers 1 as well.',
-  verified: false,
+  verified: true,
   onPostEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'TAKE_DAMAGE' && action.playerId === pId && action.payload.amount > 0) {
       if (action.payload.attackerId && action.payload.attackerId !== pId) {

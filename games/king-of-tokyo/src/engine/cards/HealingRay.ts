@@ -11,6 +11,7 @@ export const HealingRay: CardImplementation = {
   verified: false,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'HEALTH' && action.playerId === pId) {
+       if (action.payload?._healingRayDone) return st;
        // Find how many hearts we rolled that we haven't spent on healing ray yet
        st.players[pId].cardState = st.players[pId].cardState || {};
        const spentHearts = st.players[pId].cardState.healingRaySpentHearts || 0;
@@ -25,10 +26,13 @@ export const HealingRay: CardImplementation = {
              if (index !== -1) {
                 st.pendingActions.splice(index, 1);
                 
-                const options = damagedPlayers.map(targetId => ({
-                   label: `Heal ${st.players[targetId].name} for up to 2⚡`,
-                   action: { type: 'RESPONSE_HEALING_RAY', playerId: pId, payload: { originalAction: action, targetId } }
-                }));
+                const options = damagedPlayers.map(targetId => {
+                   const cost = Math.min(2, st.players[targetId].energy);
+                   return {
+                      label: `Heal ${st.players[targetId].name} for ${cost > 0 ? cost + '⚡' : 'free'}`,
+                      action: { type: 'RESPONSE_HEALING_RAY', playerId: pId, payload: { originalAction: action, targetId } }
+                   };
+                });
                 options.push({ label: 'Done', action: { type: 'RESPONSE_HEALING_RAY_DONE', playerId: pId, payload: { originalAction: action } as any } });
                 
                 st.pendingActions.unshift({
@@ -76,7 +80,7 @@ export const HealingRay: CardImplementation = {
        if (st.players[pId].cardState) {
           st.players[pId].cardState.healingRaySpentHearts = 0;
        }
-       const nextAction = { ...action.payload.originalAction };
+       const nextAction = { ...action.payload.originalAction, payload: { ...action.payload.originalAction.payload, _healingRayDone: true } };
        delete nextAction.skipPreEvent;
        st.pendingActions.unshift(nextAction);
     }
