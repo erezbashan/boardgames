@@ -48,7 +48,9 @@ export const SmokeCloud: CardImplementation = {
           charges -= 1;
           st.players[pId].cardState!.smokeCloudCharges = charges;
           st.maxRolls = (st.maxRolls || 3) + 1;
+          st.rollCount = (st.rollCount || 0) + 1;
           
+          action.affectedByCards = [{ cardId: 'smoke_cloud', playerId: pId }];
           addLog(st, action, `☁️ ${st.players[pId].name} spent a charge from Smoke Cloud for an extra reroll! (${charges} left)`);
           
           if (charges === 0) {

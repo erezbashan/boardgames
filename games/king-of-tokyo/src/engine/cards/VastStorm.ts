@@ -8,7 +8,7 @@ export const VastStorm: CardImplementation = {
   cost: 6,
   type: 'Discard',
   description: '+ 2⭐. All other monsters lose 1⚡ for every 2⚡ they have.',
-  verified: false,
+  verified: true,
   onBuy: (st: KotState, action: PendingAction, pId: string) => {
     st.pendingActions.unshift({ type: 'VP', payload: { amount: 2 }, playerId: pId });
     
