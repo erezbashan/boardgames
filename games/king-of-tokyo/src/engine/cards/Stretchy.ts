@@ -28,7 +28,7 @@ export const Stretchy: CardImplementation = {
                 const emojiMap: Record<string, string> = { Heart: '❤️', Energy: '⚡', Smash: '💥', '1': '1️⃣', '2': '2️⃣', '3': '3️⃣' };
                 const options = uniqueFaces.map(face => ({
                     label: `Change a ${emojiMap[face] || face}`, 
-                    action: { type: 'ASK_STRETCHY_TARGET', playerId: pId, payload: { originalAction: action, faceToChange: face } }
+                    action: { type: 'RESPONSE_STRETCHY_TARGET', playerId: pId, payload: { originalAction: action, faceToChange: face } }
                 }));
                 options.push({ label: 'No', action: { type: 'RESPONSE_STRETCHY_NO', playerId: pId, payload: { originalAction: action } as any } });
                 
@@ -48,7 +48,7 @@ export const Stretchy: CardImplementation = {
        }
     }
     
-    if (action.type === 'ASK_STRETCHY_TARGET' && action.playerId === pId) {
+    if (action.type === 'RESPONSE_STRETCHY_TARGET' && action.playerId === pId) {
        const emojiMap: Record<string, string> = { Heart: '❤️', Energy: '⚡', Smash: '💥', '1': '1️⃣', '2': '2️⃣', '3': '3️⃣' };
        const faces = ['1', '2', '3', 'Heart', 'Energy', 'Smash'];
        const options = faces.map(f => ({

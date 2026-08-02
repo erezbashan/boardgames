@@ -36,23 +36,23 @@ export const SleepWalker: CardImplementation = {
     if (action.type === 'RESPONSE_SLEEP_WALKER' && action.playerId === pId) {
        if (st.players[pId].energy >= 3) {
           st.players[pId].energy -= 3;
-          st.pendingActions.unshift({ type: 'VP', playerId: pId, payload: { amount: 1 } });
           addLog(st, action, `🚶 ${st.players[pId].name} spent 3⚡ to gain 1⭐ using Sleep Walker`);
           
-          // Allow them to do it again if they still have energy! So we unshift START_TURN again without _sleepWalkerDone
-          const nextAction = { ...action.payload.originalAction };
+          const nextAction = { ...action.payload.originalAction, affectedByCards: action.payload.originalAction.affectedByCards || [] };
           delete nextAction.skipPreEvent;
-          st.pendingActions.push(nextAction); // put it back after VP
+          
+          st.pendingActions.unshift(nextAction);
+          st.pendingActions.unshift({ type: 'VP', playerId: pId, payload: { amount: 1 } });
        } else {
           // just continue
-          const nextAction = { ...action.payload.originalAction, payload: { ...action.payload.originalAction.payload, _sleepWalkerDone: true } };
+          const nextAction = { ...action.payload.originalAction, payload: { ...action.payload.originalAction.payload, _sleepWalkerDone: true }, affectedByCards: action.payload.originalAction.affectedByCards || [] };
           delete nextAction.skipPreEvent;
           st.pendingActions.unshift(nextAction);
        }
     }
     
     if (action.type === 'RESPONSE_SLEEP_WALKER_NO' && action.playerId === pId) {
-       const nextAction = { ...action.payload.originalAction, payload: { ...action.payload.originalAction.payload, _sleepWalkerDone: true } };
+       const nextAction = { ...action.payload.originalAction, payload: { ...action.payload.originalAction.payload, _sleepWalkerDone: true }, affectedByCards: action.payload.originalAction.affectedByCards || [] };
        delete nextAction.skipPreEvent;
        st.pendingActions.unshift(nextAction);
     }

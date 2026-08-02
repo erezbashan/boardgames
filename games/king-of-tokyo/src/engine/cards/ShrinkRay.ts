@@ -13,8 +13,9 @@ export const ShrinkRay: CardImplementation = {
     // 1. Give shrink counters on damage
     if (action.type === 'TAKE_DAMAGE' && action.payload.amount > 0 && action.payload.attackerId === pId) {
        const targetId = action.playerId;
-       st.players[targetId].cardState = st.players[targetId].cardState || {};
-       st.players[targetId].cardState.shrinkCounters = (st.players[targetId].cardState.shrinkCounters || 0) + 1;
+       if (!targetId) return st;
+       st.players[targetId].markers = st.players[targetId].markers || {};
+       st.players[targetId].markers['shrink_marker'] = (st.players[targetId].markers['shrink_marker'] || 0) + 1;
        addLog(st, action, `📉 ${st.players[targetId].name} got a Shrink counter from ${st.players[pId].name}'s Shrink Ray!`);
     }
 
@@ -25,7 +26,8 @@ export const ShrinkRay: CardImplementation = {
     // We can just hook into SETUP_DICE for ALL players! 
     if (action.type === 'SETUP_DICE') {
        const rollerId = action.playerId;
-       const shrinkCounters = st.players[rollerId].cardState?.shrinkCounters || 0;
+       if (!rollerId) return st;
+       const shrinkCounters = st.players[rollerId].markers?.['shrink_marker'] || 0;
        if (shrinkCounters > 0) {
           const reduction = Math.min(shrinkCounters, st.dice.length - 1); // always leave at least 1 die? Or can they roll 0? Let's say they can roll 0.
           if (reduction > 0) {
@@ -41,20 +43,20 @@ export const ShrinkRay: CardImplementation = {
     // Again, this applies to ALL players, but the hook only runs if Shrink Ray is in play.
     if (action.type === 'RESOLVE_ROLLS') {
        const rollerId = action.playerId;
-       let shrinkCounters = st.players[rollerId].cardState?.shrinkCounters || 0;
+       if (!rollerId) return st;
+       let shrinkCounters = st.players[rollerId].markers?.['shrink_marker'] || 0;
        if (shrinkCounters > 0) {
           // See how many Hearts they rolled
           const hearts = st.dice.filter(d => d.value === 'Heart');
           if (hearts.length > 0) {
              const removed = Math.min(shrinkCounters, hearts.length);
-             st.players[rollerId].cardState.shrinkCounters -= removed;
+             st.players[rollerId].markers!['shrink_marker'] -= removed;
              
              // Convert those hearts to something else so they don't heal? 
              // Or just change them to a dummy value so RESOLVE_ROLLS ignores them
              let converted = 0;
              for (let i = 0; i < st.dice.length; i++) {
                 if (st.dice[i].value === 'Heart' && converted < removed) {
-                   st.dice[i] = { ...st.dice[i], value: '1' }; // change to 1? Wait, 1 could give VP!
                    // We need a dummy value that does nothing. Let's use 'Heart' but handle it by intercepting HEALTH?
                    // Actually, if we change it to an empty string, outcomeMap[''] gets incremented, which does nothing!
                    st.dice[i] = { ...st.dice[i], value: '' as any };

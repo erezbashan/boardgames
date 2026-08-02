@@ -10,7 +10,7 @@ export const PlotTwist: CardImplementation = {
   description: 'Change one die to any result. Discard when used.',
   verified: false,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
-    if (action.type === 'RESOLVE_ROLLS' && action.playerId === pId) {
+    if (action.type === 'RESOLVE_ROLLS') {
        if (action.payload?._plotTwistDone) return st;
        
        const index = st.pendingActions.findIndex(a => a === action);
@@ -21,7 +21,7 @@ export const PlotTwist: CardImplementation = {
              const emojiMap: Record<string, string> = { Heart: '❤️', Energy: '⚡', Smash: '💥', '1': '1️⃣', '2': '2️⃣', '3': '3️⃣' };
              const options = uniqueFaces.map(face => ({
                  label: `Change a ${emojiMap[face] || face}`, 
-                 action: { type: 'ASK_PLOT_TWIST_TARGET', playerId: pId, payload: { originalAction: action, faceToChange: face } }
+                 action: { type: 'RESPONSE_PLOT_TWIST_TARGET', playerId: pId, payload: { originalAction: action, faceToChange: face } }
              }));
              options.push({ label: 'No', action: { type: 'RESPONSE_PLOT_TWIST_NO', playerId: pId, payload: { originalAction: action } as any } });
              
@@ -40,7 +40,7 @@ export const PlotTwist: CardImplementation = {
        }
     }
     
-    if (action.type === 'ASK_PLOT_TWIST_TARGET' && action.playerId === pId) {
+    if (action.type === 'RESPONSE_PLOT_TWIST_TARGET' && action.playerId === pId) {
        const emojiMap: Record<string, string> = { Heart: '❤️', Energy: '⚡', Smash: '💥', '1': '1️⃣', '2': '2️⃣', '3': '3️⃣' };
        const faces = ['1', '2', '3', 'Heart', 'Energy', 'Smash'];
        const options = faces.map(f => ({

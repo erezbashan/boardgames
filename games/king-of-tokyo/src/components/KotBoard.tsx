@@ -608,6 +608,10 @@ export const KotBoard: React.FC = () => {
           <div style={{ display: 'flex', gap: '5px', marginTop: '5px', flexWrap: 'wrap' }}>
             {p.cards.map((cId, i) => {
                const isHighlighted = highlightedCards.some(hc => hc.cardId === cId && hc.playerId === p.id);
+               let displayStr = CARD_REGISTRY[cId]?.name || cId;
+               if (cId === 'smoke_cloud' && p.cardState?.smokeCloudCharges !== undefined) {
+                  displayStr += ` (${p.cardState.smokeCloudCharges})`;
+               }
                return (
                  <div 
                    key={i} 
@@ -620,14 +624,11 @@ export const KotBoard: React.FC = () => {
                      borderRadius: '4px', 
                      cursor: 'pointer',
                      transition: 'background 0.3s, transform 0.3s',
-                     transform: isHighlighted ? 'scale(1.2)' : 'scale(1)'
+                     transform: isHighlighted ? 'scale(1.2)' : 'scale(1)',
+                     userSelect: 'none'
                    }}
                  >
-                   {CARD_REGISTRY[cId]?.name || cId}
-                   {(() => {
-                      const label = CARD_REGISTRY[cId]?.getLabel?.(gameState, p.id);
-                      return label ? ` (${label})` : '';
-                   })()}
+                   {displayStr}
                  </div>
                );
             })}

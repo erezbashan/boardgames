@@ -18,7 +18,7 @@ export const ThunderStomp: CardImplementation = {
     }
     
     // 2. Track VP gained during your turn
-    if (action.type === 'VP' && action.playerId === pId && st.turnContext?.currentPlayerId === pId) {
+    if (action.type === 'VP' && action.playerId === pId && st.playerOrder[st.currentPlayerIndex] === pId) {
        st.players[pId].cardState = st.players[pId].cardState || {};
        st.players[pId].cardState.vpGainedThisTurn = (st.players[pId].cardState.vpGainedThisTurn || 0) + action.payload.amount;
        
@@ -29,7 +29,7 @@ export const ThunderStomp: CardImplementation = {
     }
     
     // 3. Reduce dice for everyone else
-    if (action.type === 'SETUP_DICE' && action.playerId !== pId) {
+    if (action.type === 'SETUP_DICE' && action.playerId && action.playerId !== pId) {
        if (st.players[pId].cardState?.thunderStompActive) {
           st.dice.pop(); // remove one die
           addLog(st, action, `🌩️ ${st.players[action.playerId].name} rolls 1 fewer die due to ${st.players[pId].name}'s Thunder Stomp!`);
