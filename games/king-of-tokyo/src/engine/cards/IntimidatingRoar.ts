@@ -8,7 +8,7 @@ export const IntimidatingRoar: CardImplementation = {
   cost: 3,
   type: 'Keep',
   description: 'The monsters in Tokyo must yield if you damage them.',
-  verified: false,
+  verified: true,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'ASK') {
       const prompt = action.payload?.prompt;

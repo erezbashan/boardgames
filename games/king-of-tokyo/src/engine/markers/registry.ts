@@ -5,8 +5,8 @@ export interface MarkerImplementation {
   name: string;
   icon: string;
   description: string;
-  onPreEvent?: (st: KotState, action: PendingAction, ownerId: string) => KotState;
-  onPostEvent?: (st: KotState, action: PendingAction, ownerId: string) => KotState;
+  onPreEvent?: (st: KotState, action: PendingAction, ownerId: string, count?: number) => KotState;
+  onPostEvent?: (st: KotState, action: PendingAction, ownerId: string, count?: number) => KotState;
 }
 
 import { PoisonMarker } from './PoisonMarker';

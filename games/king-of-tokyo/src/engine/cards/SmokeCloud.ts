@@ -8,7 +8,7 @@ export const SmokeCloud: CardImplementation = {
   cost: 4,
   type: 'Keep',
   description: 'This card starts with 3 charges. Spend a charge for an extra reroll. Discard this card when all charges are spent.',
-  verified: false,
+  verified: true,
   onBuy: (st: KotState, action: PendingAction, pId: string) => {
      st.players[pId].cardState = st.players[pId].cardState || {};
      st.players[pId].cardState.smokeCloudCharges = 3;

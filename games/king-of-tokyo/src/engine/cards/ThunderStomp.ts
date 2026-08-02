@@ -8,7 +8,7 @@ export const ThunderStomp: CardImplementation = {
   cost: 3,
   type: 'Keep',
   description: 'If you score 4⭐ in a turn, all players roll one less die until your next turn.',
-  verified: false,
+  verified: true,
   onPostEvent: (st: KotState, action: PendingAction, pId: string) => {
     // 1. Reset at the start of your turn
     if (action.type === 'START_TURN' && action.playerId === pId) {

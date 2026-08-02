@@ -8,7 +8,7 @@ export const HealingRay: CardImplementation = {
   cost: 4,
   type: 'Keep',
   description: 'You can heal other monsters with your ❤️ results. They must pay you 2⚡ for each damage you heal (or their remaining ⚡ if they haven\'t got enough.',
-  verified: false,
+  verified: true,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'HEALTH' && action.playerId === pId) {
        if (action.payload?._healingRayDone) return st;
@@ -72,6 +72,7 @@ export const HealingRay: CardImplementation = {
        const nextAction = { ...action.payload.originalAction };
        nextAction.payload.amount = Math.max(0, (nextAction.payload.amount || 0) - 1);
        delete nextAction.skipPreEvent;
+       if (!nextAction.affectedByCards) nextAction.affectedByCards = [];
        st.pendingActions.unshift(nextAction);
     }
     
@@ -82,6 +83,8 @@ export const HealingRay: CardImplementation = {
        }
        const nextAction = { ...action.payload.originalAction, payload: { ...action.payload.originalAction.payload, _healingRayDone: true } };
        delete nextAction.skipPreEvent;
+       // Prevent triggerCards from tagging this leftover dice heal as coming from Healing Ray
+       if (!nextAction.affectedByCards) nextAction.affectedByCards = [];
        st.pendingActions.unshift(nextAction);
     }
     

@@ -7,8 +7,8 @@ export const SleepWalker: CardImplementation = {
   name: 'Sleep Walker',
   cost: 3,
   type: 'Keep',
-  description: 'Spend 3⚡ to gain 1⭐.',
-  verified: false,
+  description: 'Spend 3⚡ to gain 1⭐ (Prompts at the start of your turn).',
+  verified: true,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'START_TURN' && action.playerId === pId && st.players[pId].energy >= 3) {
        if (action.payload?._sleepWalkerDone) return st;

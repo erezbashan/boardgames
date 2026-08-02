@@ -8,7 +8,7 @@ export const Stretchy: CardImplementation = {
   cost: 3,
   type: 'Keep',
   description: 'You can spend 2⚡ to change one of your dice to any result.',
-  verified: false,
+  verified: true,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'START_TURN' && action.playerId === pId) {
       st.players[pId].cardState = st.players[pId].cardState || {};
