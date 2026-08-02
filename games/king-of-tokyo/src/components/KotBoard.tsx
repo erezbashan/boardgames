@@ -641,7 +641,13 @@ export const KotBoard: React.FC = () => {
   const renderLogMessage = (msg: string, defaultRenderer: (m: string) => React.ReactNode) => {
     let parts: React.ReactNode[] = [msg];
     
-    Object.keys(CARD_REGISTRY).forEach(cId => {
+    const cardKeys = Object.keys(CARD_REGISTRY).sort((a, b) => {
+      const nameA = CARD_REGISTRY[a]?.name || '';
+      const nameB = CARD_REGISTRY[b]?.name || '';
+      return nameB.length - nameA.length;
+    });
+
+    cardKeys.forEach(cId => {
       const card = CARD_REGISTRY[cId];
       if (!card) return;
       const newParts: React.ReactNode[] = [];

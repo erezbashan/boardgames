@@ -124,6 +124,10 @@ export function kingOfTokyoReducer(state: KotState = initialKotState, action: Ko
   
   // run framework commands if any:
   let st = baseReducer(state, action) as KotState;
+  
+  if (st.turnContext?.animatedCard) {
+     delete st.turnContext.animatedCard;
+  }
 
   if (action.type === 'NOP') {
     // no need to do anything - we'll just run what's already in pendingActions

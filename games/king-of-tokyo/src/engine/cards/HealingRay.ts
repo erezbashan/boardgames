@@ -10,11 +10,11 @@ export const HealingRay: CardImplementation = {
   description: 'You can heal other monsters with your ❤️ results. They must pay you 2⚡ for each damage you heal (or their remaining ⚡ if they haven\'t got enough.',
   verified: false,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
-    if (action.type === 'RESOLVE_ROLLS' && action.playerId === pId) {
+    if (action.type === 'HEALTH' && action.playerId === pId) {
        // Find how many hearts we rolled that we haven't spent on healing ray yet
        st.players[pId].cardState = st.players[pId].cardState || {};
        const spentHearts = st.players[pId].cardState.healingRaySpentHearts || 0;
-       const totalHearts = st.dice.filter(d => d.value === 'Heart').length;
+       const totalHearts = action.payload.amount + spentHearts;
        const availableHearts = totalHearts - spentHearts;
        
        if (availableHearts > 0) {
@@ -62,19 +62,11 @@ export const HealingRay: CardImplementation = {
        st.players[targetId].energy -= payment;
        st.players[pId].energy += payment;
        
-       addLog(st, action, `💖 ${st.players[pId].name} spent a ❤️ to heal ${st.players[targetId].name} by 1 and gained ${payment}⚡!`);
+       addLog(st, action, `💖 ${st.players[pId].name} spent a ❤️ to heal ${st.players[targetId].name} by 1 and gained ${payment}⚡! [Healing Ray]`);
        
-       // Remove one heart from the dice so it doesn't heal pId normally
-       let removed = false;
-       for (let i = 0; i < st.dice.length; i++) {
-          if (st.dice[i].value === 'Heart' && !removed) {
-             st.dice[i] = { ...st.dice[i], value: '' as any }; // dummy face
-             removed = true;
-          }
-       }
-       
-       // Put RESOLVE_ROLLS back to allow multiple uses if more hearts exist
+       // Reduce one heart from the HEALTH payload so it doesn't heal pId normally
        const nextAction = { ...action.payload.originalAction };
+       nextAction.payload.amount = Math.max(0, (nextAction.payload.amount || 0) - 1);
        delete nextAction.skipPreEvent;
        st.pendingActions.unshift(nextAction);
     }

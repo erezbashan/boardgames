@@ -41,28 +41,17 @@ export const ShrinkRay: CardImplementation = {
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     // 3. Getting rid of shrink counters with a Heart
     // Again, this applies to ALL players, but the hook only runs if Shrink Ray is in play.
-    if (action.type === 'RESOLVE_ROLLS') {
+    if (action.type === 'HEALTH') {
        const rollerId = action.playerId;
        if (!rollerId) return st;
        let shrinkCounters = st.players[rollerId].markers?.['shrink_marker'] || 0;
        if (shrinkCounters > 0) {
-          // See how many Hearts they rolled
-          const hearts = st.dice.filter(d => d.value === 'Heart');
-          if (hearts.length > 0) {
-             const removed = Math.min(shrinkCounters, hearts.length);
+          const hearts = action.payload.amount || 0;
+          if (hearts > 0) {
+             const removed = Math.min(shrinkCounters, hearts);
              st.players[rollerId].markers!['shrink_marker'] -= removed;
              
-             // Convert those hearts to something else so they don't heal? 
-             // Or just change them to a dummy value so RESOLVE_ROLLS ignores them
-             let converted = 0;
-             for (let i = 0; i < st.dice.length; i++) {
-                if (st.dice[i].value === 'Heart' && converted < removed) {
-                   // We need a dummy value that does nothing. Let's use 'Heart' but handle it by intercepting HEALTH?
-                   // Actually, if we change it to an empty string, outcomeMap[''] gets incremented, which does nothing!
-                   st.dice[i] = { ...st.dice[i], value: '' as any };
-                   converted++;
-                }
-             }
+             action.payload.amount -= removed; // Reduce hearts available for normal healing
              addLog(st, action, `📉 ${st.players[rollerId].name} spent ${removed} ❤️ to remove Shrink counters!`);
           }
        }
