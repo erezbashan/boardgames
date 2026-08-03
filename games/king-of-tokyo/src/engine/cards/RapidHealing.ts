@@ -9,31 +9,29 @@ export const RapidHealing: CardImplementation = {
   type: 'Keep',
   description: 'Spend 2⚡ at any time to heal 1 damage (Prompts at start of turn or before taking fatal damage).',
   verified: false,
-  onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
-    // Prompt at start of turn if they are damaged
+  onPostEvent: (st: KotState, action: PendingAction, pId: string) => {
+    // Prompt at start of turn if they are damaged (after UI updates for their turn)
     if (action.type === 'START_TURN' && action.playerId === pId && st.players[pId].energy >= 2 && st.players[pId].health < (st.players[pId].maxHealth || 10)) {
        if (action.payload?._rapidHealingDone) return st;
        
-       const index = st.pendingActions.findIndex(a => a === action);
-       if (index !== -1) {
-          st.pendingActions.splice(index, 1);
-          st.pendingActions.unshift({
-             type: 'ASK',
-             playerId: pId,
-             payload: {
-                prompt: {
-                   playerId: pId,
-                   text: `Rapid Healing: Spend 2⚡ to heal 1❤️?`,
-                   options: [
-                      { label: 'Yes', action: { type: 'RESPONSE_RAPID_HEALING', playerId: pId, payload: { originalAction: action } } },
-                      { label: 'No', action: { type: 'RESPONSE_RAPID_HEALING_NO', playerId: pId, payload: { originalAction: action } } }
-                   ]
-                }
+       st.pendingActions.unshift({
+          type: 'ASK',
+          playerId: pId,
+          payload: {
+             prompt: {
+                playerId: pId,
+                text: `Rapid Healing: Spend 2⚡ to heal 1❤️?`,
+                options: [
+                   { label: 'Yes', action: { type: 'RESPONSE_RAPID_HEALING', playerId: pId, payload: { originalAction: action } } },
+                   { label: 'No', action: { type: 'RESPONSE_RAPID_HEALING_NO', playerId: pId, payload: { originalAction: action } } }
+                ]
              }
-          });
-       }
+          }
+       });
     }
-    
+    return st;
+  },
+  onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     // Also prompt if they take damage that would kill them (simulate "at any time")
     if (action.type === 'TAKE_DAMAGE' && action.playerId === pId && action.payload.amount >= st.players[pId].health && st.players[pId].energy >= 2) {
        if (action.payload?._rapidHealingDone) return st;

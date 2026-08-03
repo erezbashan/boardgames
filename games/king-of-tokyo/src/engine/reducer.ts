@@ -105,7 +105,7 @@ function triggerCards(state: KotState, action: PendingAction, hook: 'onPreEvent'
          if (count > 0) {
             const marker = MARKER_REGISTRY[markerId];
             if (marker && marker[hook]) {
-               st = marker[hook]!(st, action, pId);
+               st = marker[hook]!(st, action, pId, count);
             }
          }
       });

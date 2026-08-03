@@ -9,8 +9,15 @@ export function handleAttack(st: KotState, action: PendingAction, pId: string) {
 
   const actionsToPush: PendingAction[] = [];
 
+  const getPlayersInTurnOrderFrom = (st: KotState, pId: string) => {
+    const idx = st.playerOrder.indexOf(pId);
+    return [...st.playerOrder.slice(idx + 1), ...st.playerOrder.slice(0, idx)];
+  };
+
+  const targets = getPlayersInTurnOrderFrom(st, pId);
+
   if (attacker.location === 'Outside') {
-     const tokyoPlayers = st.playerOrder.filter(id => st.players[id].location === 'TokyoCity' && st.players[id].health > 0);
+     const tokyoPlayers = targets.filter(id => st.players[id].location === 'TokyoCity' && st.players[id].health > 0);
      if (tokyoPlayers.length === 0) {
         actionsToPush.push({ type: 'ENTER_TOKYO', playerId: pId });
      } else {
@@ -19,8 +26,8 @@ export function handleAttack(st: KotState, action: PendingAction, pId: string) {
         });
      }
   } else {
-     st.playerOrder.forEach(tId => {
-        if (tId !== pId && st.players[tId].location === 'Outside' && st.players[tId].health > 0) {
+     targets.forEach(tId => {
+        if (st.players[tId].location === 'Outside' && st.players[tId].health > 0) {
            actionsToPush.push({ type: 'TAKE_DAMAGE', payload: { amount: damage, attackerId: pId }, playerId: tId });
         }
      });

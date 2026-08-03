@@ -8,30 +8,29 @@ export const SleepWalker: CardImplementation = {
   cost: 3,
   type: 'Keep',
   description: 'Spend 3⚡ to gain 1⭐ (Prompts at the start of your turn).',
-  verified: true,
-  onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
+  verified: false,
+  onPostEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'START_TURN' && action.playerId === pId && st.players[pId].energy >= 3) {
        if (action.payload?._sleepWalkerDone) return st;
        
-       const index = st.pendingActions.findIndex(a => a === action);
-       if (index !== -1) {
-          st.pendingActions.splice(index, 1);
-          st.pendingActions.unshift({
-             type: 'ASK',
-             playerId: pId,
-             payload: {
-                prompt: {
-                   playerId: pId,
-                   text: `Sleep Walker: Spend 3⚡ to gain 1⭐?`,
-                   options: [
-                      { label: 'Yes', action: { type: 'RESPONSE_SLEEP_WALKER', playerId: pId, payload: { originalAction: action } } },
-                      { label: 'No', action: { type: 'RESPONSE_SLEEP_WALKER_NO', playerId: pId, payload: { originalAction: action } } }
-                   ]
-                }
+       st.pendingActions.unshift({
+          type: 'ASK',
+          playerId: pId,
+          payload: {
+             prompt: {
+                playerId: pId,
+                text: `Sleep Walker: Spend 3⚡ to gain 1⭐?`,
+                options: [
+                   { label: 'Yes', action: { type: 'RESPONSE_SLEEP_WALKER', playerId: pId, payload: { originalAction: action } } },
+                   { label: 'No', action: { type: 'RESPONSE_SLEEP_WALKER_NO', playerId: pId, payload: { originalAction: action } } }
+                ]
              }
-          });
-       }
+          }
+       });
     }
+    return st;
+  },
+  onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     
     if (action.type === 'RESPONSE_SLEEP_WALKER' && action.playerId === pId) {
        if (st.players[pId].energy >= 3) {
