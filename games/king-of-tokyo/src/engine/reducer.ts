@@ -151,13 +151,16 @@ export function kingOfTokyoReducer(state: KotState = initialKotState, action: Ko
        const topAction = st.pendingActions[0];
        const targetPlayerId = topAction.payload?.prompt?.playerId || topAction.playerId || st.playerOrder[st.currentPlayerIndex];
        
-       const botResponse = getBotAction(st, targetPlayerId);
-       if (botResponse) {
-          // Remove the ASK action that prompted the bot!
-          if (st.pendingActions[0].type.startsWith('ASK')) {
-            st.pendingActions.shift();
-          }
-          st.pendingActions.unshift({ ...botResponse, playerId: targetPlayerId });
+       // CRITICAL: Only play bot if the target is ACTUALLY a bot! (Prevents delayed bot triggers from auto-answering human prompts)
+       if (st.players[targetPlayerId]?.isBot) {
+           const botResponse = getBotAction(st, targetPlayerId);
+           if (botResponse) {
+              // Remove the ASK action that prompted the bot!
+              if (st.pendingActions[0].type.startsWith('ASK')) {
+                st.pendingActions.shift();
+              }
+              st.pendingActions.unshift({ ...botResponse, playerId: targetPlayerId });
+           }
        }
     }
   }
