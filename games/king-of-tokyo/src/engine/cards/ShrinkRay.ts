@@ -7,9 +7,9 @@ export const ShrinkRay: CardImplementation = {
   name: 'Shrink Ray',
   cost: 6,
   type: 'Keep',
-  description: 'When you deal damage to monsters give them a shrink counter. A monster rolls one less die for each shrink counter. You can get rid of a shrink counter with a ❤️ (that ❤️ doesn\'t heal a damage also).',
-  verified: false,
-  onPostEvent: (st: KotState, action: PendingAction, pId: string) => {
+  description: 'When you deal damage to a monster, give them a Shrink counter. They roll 1 less die for each counter. They can spend 1❤️ to remove a counter.',
+  verified: true,
+  onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     // 1. Give shrink counters on damage
     if (action.type === 'TAKE_DAMAGE' && action.payload.amount > 0 && action.payload.attackerId === pId) {
        const targetId = action.playerId;

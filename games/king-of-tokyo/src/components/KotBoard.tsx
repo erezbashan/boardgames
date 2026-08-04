@@ -599,17 +599,9 @@ export const KotBoard: React.FC = () => {
             </div>
           )}
           {isDead && (
-            <>
-              <style>{`
-                 .player-card:has(.dead-player-marker-${p.id}) .player-name {
-                    text-decoration: line-through;
-                    opacity: 0.5;
-                 }
-              `}</style>
-              <div className={`dead-player-marker-${p.id}`} style={{ color: 'gray', fontWeight: 'bold', border: '1px solid gray', padding: '2px 6px', borderRadius: '4px', fontSize: '12px', marginLeft: 'auto' }}>
-                DEAD
-              </div>
-            </>
+            <div style={{ color: 'gray', fontWeight: 'bold', border: '1px solid gray', padding: '2px 6px', borderRadius: '4px', fontSize: '12px', marginLeft: 'auto' }}>
+              DEAD
+            </div>
           )}
         </div>
         {p.cards && p.cards.length > 0 && (
@@ -633,8 +625,7 @@ export const KotBoard: React.FC = () => {
                      cursor: 'pointer',
                      transition: 'background 0.3s, transform 0.3s',
                      transform: isHighlighted ? 'scale(1.2)' : 'scale(1)',
-                     userSelect: 'none',
-                     textDecoration: isDead ? 'line-through' : 'none'
+                     userSelect: 'none'
                    }}
                  >
                    {displayStr}

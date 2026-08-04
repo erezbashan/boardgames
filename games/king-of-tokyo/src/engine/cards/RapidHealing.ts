@@ -7,8 +7,8 @@ export const RapidHealing: CardImplementation = {
   name: 'Rapid Healing',
   cost: 3,
   type: 'Keep',
-  description: 'Spend 2⚡ at any time to heal 1 damage (Prompts at start of turn or before taking fatal damage).',
-  verified: false,
+  description: 'Spend 2⚡ at any time to heal 1❤️.',
+  verified: true,
   onPostEvent: (st: KotState, action: PendingAction, pId: string) => {
     // Prompt at start of turn if they are damaged (after UI updates for their turn)
     if (action.type === 'START_TURN' && action.playerId === pId && st.players[pId].energy >= 2 && st.players[pId].health < (st.players[pId].maxHealth || 10)) {
