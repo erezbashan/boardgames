@@ -20,13 +20,12 @@ export function handleAttack(st: KotState, action: PendingAction, pId: string) {
      const tokyoPlayers = targets.filter(id => st.players[id].location.startsWith('Tokyo') && st.players[id].health > 0);
      const totalTokyoSlots = isTokyoBayActive(st) ? 2 : 1;
      
+     tokyoPlayers.forEach(tId => {
+        actionsToPush.push({ type: 'TAKE_DAMAGE', payload: { amount: damage, yield_after: true, attackerId: pId }, playerId: tId });
+     });
+     
      if (tokyoPlayers.length < totalTokyoSlots) {
-        // Take an empty slot without dealing damage
         actionsToPush.push({ type: 'ENTER_TOKYO', playerId: pId });
-     } else {
-        tokyoPlayers.forEach(tId => {
-           actionsToPush.push({ type: 'TAKE_DAMAGE', payload: { amount: damage, yield_after: true, attackerId: pId }, playerId: tId });
-        });
      }
   } else {
      targets.forEach(tId => {

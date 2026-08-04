@@ -125,7 +125,7 @@ export const KotStats: React.FC<KotStatsProps> = ({ gameState }) => {
     return { name: snapshot.turnNum, color, label };
   });
 
-  const hasBayHistory = fullHistory.some((s: any) => s.tokyoBayOccupant);
+  const showBayOccupancy = playerOrder.length >= 5;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
@@ -165,7 +165,7 @@ export const KotStats: React.FC<KotStatsProps> = ({ gameState }) => {
       {fullHistory.length > 0 ? (
         <>
           <TimelineBarWidget title="Tokyo City Occupancy" data={tokyoCityData} height={40} />
-          {hasBayHistory && <TimelineBarWidget title="Tokyo Bay Occupancy" data={tokyoBayData} height={40} />}
+          {showBayOccupancy && <TimelineBarWidget title="Tokyo Bay Occupancy" data={tokyoBayData} height={40} />}
           <LineChartWidget title="VP Progression" data={vpData} lines={lines} height={200} hideLegend hideXAxis hideTooltip yAxisWidth={40} />
           <LineChartWidget title="Health Progression" data={healthData} lines={lines} height={200} hideLegend hideXAxis hideTooltip yAxisWidth={40} />
         </>
