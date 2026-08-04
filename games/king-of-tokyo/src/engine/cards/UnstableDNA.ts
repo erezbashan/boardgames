@@ -9,7 +9,7 @@ export const UnstableDNA: CardImplementation = {
   cost: 3,
   type: 'Keep',
   description: 'If you yield Tokyo you can take any card the recipient has and give him this card.',
-  verified: true,
+  verified: false,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'RESPONSE_YIELD' && action.playerId === pId && action.payload.yield) {
        if (action.payload._unstableDnaDone) return st;
@@ -60,10 +60,17 @@ export const UnstableDNA: CardImplementation = {
        st.players[pId].cards.push(cardToSteal);
        
        // Transfer cardState for cardToSteal
-       if (st.players[targetId].cardState && st.players[targetId].cardState![cardToSteal]) {
-           st.players[pId].cardState = st.players[pId].cardState || {};
-           st.players[pId].cardState![cardToSteal] = st.players[targetId].cardState![cardToSteal];
-           delete st.players[targetId].cardState![cardToSteal];
+       if (st.players[targetId].cardState) {
+           const toCamelCase = (str: string) => str.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
+           const camelId = toCamelCase(cardToSteal);
+           
+           for (const key in st.players[targetId].cardState) {
+               if (key === cardToSteal || key.startsWith(camelId)) {
+                   st.players[pId].cardState = st.players[pId].cardState || {};
+                   st.players[pId].cardState[key] = st.players[targetId].cardState[key];
+                   delete st.players[targetId].cardState[key];
+               }
+           }
        }
        
        addLog(st, action, `${st.players[pId].name} used Unstable DNA to steal ${CARD_REGISTRY[cardToSteal]?.name || cardToSteal} from ${st.players[targetId].name}!`);

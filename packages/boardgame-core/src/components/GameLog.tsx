@@ -4,9 +4,10 @@ import { Modal } from './Modal';
 export interface GameLogProps {
   logs: React.ReactNode[];
   allLogs?: React.ReactNode[];
+  rawLogs?: string[];
 }
 
-export const GameLog: React.FC<GameLogProps> = ({ logs, allLogs }) => {
+export const GameLog: React.FC<GameLogProps> = ({ logs, allLogs, rawLogs }) => {
   const [showAll, setShowAll] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -35,6 +36,19 @@ export const GameLog: React.FC<GameLogProps> = ({ logs, allLogs }) => {
       </div>
 
       <Modal isOpen={showAll} title="Full Game Log" onClose={() => setShowAll(false)} width="600px">
+        {rawLogs && (
+          <div style={{ marginBottom: '10px', textAlign: 'right' }}>
+            <button 
+              onClick={() => {
+                navigator.clipboard.writeText(rawLogs.join('\n'));
+                alert('Copied to clipboard!');
+              }}
+              style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}
+            >
+              Copy to Clipboard
+            </button>
+          </div>
+        )}
         <div style={{ maxHeight: '60vh', overflowY: 'auto' }}>
           {(allLogs || logs).map((l, i) => {
             if (l === '---') {

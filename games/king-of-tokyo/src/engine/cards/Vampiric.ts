@@ -6,7 +6,7 @@ export const Vampiric: CardImplementation = {
   name: 'Vampiric',
   cost: 4,
   type: 'Keep',
-  description: 'When you damage another monster, heal 1❤️.',
+  description: 'When you deal damage to a monster, heal 1❤️.',
   verified: true,
   onPostEvent: (st: KotState, action: PendingAction, pId: string) => {
     // If we trigger ATTACK and it deals damage

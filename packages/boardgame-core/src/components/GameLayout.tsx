@@ -147,7 +147,7 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
                 }
                 const renderedAllLogs = logs.map((l: string, index: number) => <span key={`msg-${index}`}>{renderLogMessage ? renderLogMessage(l, (m) => colorizeLog(m, players)) : colorizeLog(l, players)}</span>);
                 const renderedRecentLogs = renderedAllLogs.slice(recentLogsStartIndex);
-                return <GameLog logs={renderedRecentLogs} allLogs={renderedAllLogs} />;
+                return <GameLog logs={renderedRecentLogs} allLogs={renderedAllLogs} rawLogs={logs} />;
               })()}
             </div>
             <div className="game-chat-wrapper">
