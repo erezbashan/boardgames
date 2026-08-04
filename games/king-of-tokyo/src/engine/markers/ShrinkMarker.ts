@@ -13,7 +13,7 @@ export const ShrinkMarker: MarkerImplementation = {
        const reduction = Math.min(count!, st.dice.length - 1);
        if (reduction > 0) {
           st.dice.splice(st.dice.length - reduction, reduction);
-          addLog(st, action, `📉 ${st.players[pId].name} rolls ${reduction} fewer dice due to Shrink counters!`);
+          addLog(st, action, `${st.players[pId].name} rolls ${reduction} fewer dice due to Shrink counters!`);
        }
     }
     return st;
@@ -26,7 +26,7 @@ export const ShrinkMarker: MarkerImplementation = {
           st.players[pId].markers!['shrink_marker'] -= removed;
           
           action.payload.amount -= removed; // Reduce hearts available for normal healing
-          addLog(st, action, `📉 ${st.players[pId].name} spent ${removed} ❤️ to remove Shrink counters!`);
+          addLog(st, action, `${st.players[pId].name} spent ${removed} ❤️ to remove Shrink counters!`);
        }
     }
     return st;

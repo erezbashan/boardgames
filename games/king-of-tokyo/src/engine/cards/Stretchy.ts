@@ -16,10 +16,13 @@ export const Stretchy: CardImplementation = {
     }
     
     if (action.type === 'RESOLVE_ROLLS' && action.playerId === pId && st.players[pId].energy >= 2) {
-       if (action.payload?._stretchyDone) return st;
+       // if they already prompted this turn, skip
+       if (action.payload?._stretchyPrompted) return st;
        
        const index = st.pendingActions.findIndex(a => a === action);
        if (index !== -1) {
+          action.payload = action.payload || {};
+          action.payload._stretchyPrompted = true;
           const state = st.players[pId].cardState || {};
           if (!state.stretchyUsed) {
              const uniqueFaces = Array.from(new Set(st.dice.map(d => d.value)));

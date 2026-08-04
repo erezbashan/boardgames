@@ -12,7 +12,7 @@ export const Jets: CardImplementation = {
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     // Log intercept for Jets usage
     if (action.type === 'LOG_JETS' && action.playerId === pId) {
-       addLog(st, action, `🛩️ ${st.players[pId].name} used Jets to avoid damage while yielding!`);
+       addLog(st, action, `${st.players[pId].name} used Jets to avoid damage while yielding!`);
        action.type = 'NOP';
        return st;
     }

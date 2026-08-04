@@ -16,7 +16,7 @@ export const ShrinkRay: CardImplementation = {
        if (!targetId) return st;
        st.players[targetId].markers = st.players[targetId].markers || {};
        st.players[targetId].markers['shrink_marker'] = (st.players[targetId].markers['shrink_marker'] || 0) + 1;
-       addLog(st, action, `📉 ${st.players[targetId].name} got a Shrink counter from ${st.players[pId].name}'s Shrink Ray!`);
+       addLog(st, action, `${st.players[targetId].name} got a Shrink counter from ${st.players[pId].name}'s Shrink Ray!`);
     }
     return st;
   }

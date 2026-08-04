@@ -57,7 +57,7 @@ export const Mimic: CardImplementation = {
       });
       
       if (allCards.length === 0) {
-         addLog(st, action, `🎭 ${st.players[pId].name} has no cards to mimic!`);
+         addLog(st, action, `${st.players[pId].name} has no cards to mimic!`);
          if (st.players[pId].cardState) {
             st.players[pId].cardState['mimic'] = undefined;
          }
@@ -80,7 +80,7 @@ export const Mimic: CardImplementation = {
       const targetId = action.payload.cardId;
       st.players[pId].cardState = st.players[pId].cardState || {};
       st.players[pId].cardState['mimic'] = targetId;
-      addLog(st, action, `🎭 ${st.players[pId].name} is now mimicking ${CARD_REGISTRY[targetId].name}!`);
+      addLog(st, action, `${st.players[pId].name} is now mimicking ${CARD_REGISTRY[targetId].name}!`);
       
       // Simulate onBuy of the mimicked card if it exists
       const targetCard = CARD_REGISTRY[targetId];

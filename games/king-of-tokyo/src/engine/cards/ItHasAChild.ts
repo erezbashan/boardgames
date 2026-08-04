@@ -11,7 +11,7 @@ export const ItHasAChild: CardImplementation = {
   verified: true,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'DEAD' && action.playerId === pId) {
-      addLog(st, action, `🌟 ${st.players[pId].name} used It Has a Child! They are reborn!`);
+      addLog(st, action, `${st.players[pId].name} used It Has a Child! They are reborn!`);
       
       // Heal to 10
       st.players[pId].health = st.settings.maxHealth;

@@ -17,7 +17,7 @@ export const PoisonSpit: CardImplementation = {
         const cured = Math.min(counters, action.payload.amount);
         st.players[targetId].markers!['poison'] -= cured;
         action.payload.amount -= cured;
-        addLog(st, action, `🧪 ${st.players[targetId].name} spent ${cured} ❤️ to cure poison!`);
+        addLog(st, action, `${st.players[targetId].name} spent ${cured} ❤️ to cure poison!`);
       }
     }
     // Note: Take damage at end of turn is now handled by the PoisonMarker's onPostEvent hook!
@@ -30,7 +30,7 @@ export const PoisonSpit: CardImplementation = {
       if (st.players[targetId] && st.players[targetId].health > 0) {
          st.players[targetId].markers = st.players[targetId].markers || {};
          st.players[targetId].markers!['poison'] = (st.players[targetId].markers!['poison'] || 0) + 1;
-         addLog(st, action, `☠️ ${st.players[targetId].name} gets a Poison counter from Poison Spit!`);
+         addLog(st, action, `${st.players[targetId].name} gets a Poison counter from Poison Spit!`);
       }
     }
     return st;

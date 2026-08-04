@@ -66,7 +66,7 @@ export const HealingRay: CardImplementation = {
        st.players[targetId].energy -= payment;
        st.players[pId].energy += payment;
        
-       addLog(st, action, `💖 ${st.players[pId].name} spent a ❤️ to heal ${st.players[targetId].name} by 1 and gained ${payment}⚡! [Healing Ray]`);
+       addLog(st, action, `${st.players[pId].name} spent a ❤️ to heal ${st.players[targetId].name} by 1 and gained ${payment}⚡! [Healing Ray]`);
        
        // Reduce one heart from the HEALTH payload so it doesn't heal pId normally
        const nextAction = { ...action.payload.originalAction };

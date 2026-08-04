@@ -21,7 +21,7 @@ export const IntimidatingRoar: CardImplementation = {
              if (index !== -1) {
                 st.pendingActions.splice(index, 1);
                 st.pendingActions.unshift(firstOption);
-                addLog(st, action, `🦁 ${st.players[prompt.playerId].name} is forced to yield Tokyo due to Intimidating Roar!`);
+                addLog(st, action, `${st.players[prompt.playerId].name} is forced to yield Tokyo due to Intimidating Roar!`);
              }
           }
         }

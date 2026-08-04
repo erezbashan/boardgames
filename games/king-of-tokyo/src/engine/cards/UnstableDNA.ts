@@ -66,7 +66,7 @@ export const UnstableDNA: CardImplementation = {
            delete st.players[targetId].cardState![cardToSteal];
        }
        
-       addLog(st, action, `🧬 ${st.players[pId].name} used Unstable DNA to steal ${CARD_REGISTRY[cardToSteal]?.name || cardToSteal} from ${st.players[targetId].name}!`);
+       addLog(st, action, `${st.players[pId].name} used Unstable DNA to steal ${CARD_REGISTRY[cardToSteal]?.name || cardToSteal} from ${st.players[targetId].name}!`);
        
        const nextAction = { ...action.payload.originalAction, payload: { ...action.payload.originalAction.payload, _unstableDnaDone: true } };
        delete nextAction.skipPreEvent;

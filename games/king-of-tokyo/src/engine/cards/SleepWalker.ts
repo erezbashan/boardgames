@@ -35,26 +35,12 @@ export const SleepWalker: CardImplementation = {
     if (action.type === 'RESPONSE_SLEEP_WALKER' && action.playerId === pId) {
        if (st.players[pId].energy >= 3) {
           st.players[pId].energy -= 3;
-          addLog(st, action, `🚶 ${st.players[pId].name} spent 3⚡ to gain 1⭐ using Sleep Walker`);
-          
-          const nextAction = { ...action.payload.originalAction, affectedByCards: action.payload.originalAction.affectedByCards || [] };
-          delete nextAction.skipPreEvent;
-          
-          st.pendingActions.unshift(nextAction);
+          addLog(st, action, `${st.players[pId].name} spent 3⚡ to gain 1⭐ using Sleep Walker`);
           st.pendingActions.unshift({ type: 'VP', playerId: pId, payload: { amount: 1 } });
-       } else {
-          // just continue
-          const nextAction = { ...action.payload.originalAction, payload: { ...action.payload.originalAction.payload, _sleepWalkerDone: true }, affectedByCards: action.payload.originalAction.affectedByCards || [] };
-          delete nextAction.skipPreEvent;
-          st.pendingActions.unshift(nextAction);
        }
     }
     
-    if (action.type === 'RESPONSE_SLEEP_WALKER_NO' && action.playerId === pId) {
-       const nextAction = { ...action.payload.originalAction, payload: { ...action.payload.originalAction.payload, _sleepWalkerDone: true }, affectedByCards: action.payload.originalAction.affectedByCards || [] };
-       delete nextAction.skipPreEvent;
-       st.pendingActions.unshift(nextAction);
-    }
+    // RESPONSE_SLEEP_WALKER_NO doesn't need to do anything anymore since originalAction is already done.
     
     return st;
   }

@@ -40,7 +40,7 @@ export const MonsterBatteries: CardImplementation = {
            updatedCards = updatedCards.filter(c => c !== 'monster_batteries');
            addLog(st, action, `Monster Batteries is empty and discarded!`);
        } else {
-           addLog(st, action, `🔋 ${st.players[pId].name} put ${amount}⚡ on Monster Batteries, doubled to ${amount * 2}⚡!`);
+           addLog(st, action, `${st.players[pId].name} put ${amount}⚡ on Monster Batteries, doubled to ${amount * 2}⚡!`);
        }
        
        st.players[pId] = {
@@ -70,13 +70,13 @@ export const MonsterBatteries: CardImplementation = {
           
           st.pendingActions.unshift({ type: 'ENERGY', payload: { amount: take }, playerId: pId });
           
-          addLog(st, action, `🔋 ${st.players[pId].name} took ${take}⚡ from Monster Batteries (${bat}⚡ remaining).`);
+          addLog(st, action, `${st.players[pId].name} took ${take}⚡ from Monster Batteries (${bat}⚡ remaining).`);
           if (bat === 0) {
              st.players[pId] = {
                  ...st.players[pId],
                  cards: st.players[pId].cards.filter(c => c !== 'monster_batteries')
              };
-             addLog(st, action, `🔋 Monster Batteries is empty and discarded!`);
+             addLog(st, action, `Monster Batteries is empty and discarded!`);
           }
        }
     }

@@ -529,7 +529,7 @@ export const KotBoard: React.FC = () => {
                 const isDiceKept = rollCount < maxRolls && keptDiceIds.includes(d.id);
                 return (
                   <div 
-                    key={`${d.id}-${rollCount}-${(d as any).version || 0}`}
+                    key={`${d.id}-${maxRolls - rollCount}-${(d as any).version || 0}`}
                     onClick={() => toggleKeep(d.id)}
                     className={(rollCount < maxRolls && !isDiceKept) || gameState.turnContext?.rerolledDiceId === d.id ? 'dice-rolling' : ''}
                     style={{
@@ -599,13 +599,21 @@ export const KotBoard: React.FC = () => {
             </div>
           )}
           {isDead && (
-            <div style={{ color: 'gray', fontWeight: 'bold', border: '1px solid gray', padding: '2px 6px', borderRadius: '4px', fontSize: '12px', marginLeft: 'auto' }}>
-              DEAD
-            </div>
+            <>
+              <style>{`
+                 .player-card:has(.dead-player-marker-${p.id}) .player-name {
+                    text-decoration: line-through;
+                    opacity: 0.5;
+                 }
+              `}</style>
+              <div className={`dead-player-marker-${p.id}`} style={{ color: 'gray', fontWeight: 'bold', border: '1px solid gray', padding: '2px 6px', borderRadius: '4px', fontSize: '12px', marginLeft: 'auto' }}>
+                DEAD
+              </div>
+            </>
           )}
         </div>
         {p.cards && p.cards.length > 0 && (
-          <div style={{ display: 'flex', gap: '5px', marginTop: '5px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '5px', marginTop: '5px', flexWrap: 'wrap', filter: isDead ? 'grayscale(100%)' : 'none', opacity: isDead ? 0.5 : 1 }}>
             {p.cards.map((cId, i) => {
                const isHighlighted = highlightedCards.some(hc => hc.cardId === cId && hc.playerId === p.id);
                let displayStr = CARD_REGISTRY[cId]?.name || cId;
@@ -625,7 +633,8 @@ export const KotBoard: React.FC = () => {
                      cursor: 'pointer',
                      transition: 'background 0.3s, transform 0.3s',
                      transform: isHighlighted ? 'scale(1.2)' : 'scale(1)',
-                     userSelect: 'none'
+                     userSelect: 'none',
+                     textDecoration: isDead ? 'line-through' : 'none'
                    }}
                  >
                    {displayStr}

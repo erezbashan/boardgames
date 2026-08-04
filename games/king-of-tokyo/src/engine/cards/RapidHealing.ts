@@ -60,23 +60,29 @@ export const RapidHealing: CardImplementation = {
        if (st.players[pId].energy >= 2) {
           st.players[pId].energy -= 2;
           st.pendingActions.unshift({ type: 'HEALTH', playerId: pId, payload: { amount: 1 } });
-          addLog(st, action, `🩹 ${st.players[pId].name} spent 2⚡ to heal 1❤️ using Rapid Healing`);
+          addLog(st, action, `${st.players[pId].name} spent 2⚡ to heal 1❤️ using Rapid Healing`);
           
-          // Re-insert original action so they can do it again if needed!
-          const nextAction = { ...action.payload.originalAction };
-          delete nextAction.skipPreEvent;
-          st.pendingActions.push(nextAction);
+          if (action.payload.originalAction.type !== 'START_TURN') {
+             // Re-insert original action so they can do it again if needed!
+             const nextAction = { ...action.payload.originalAction };
+             delete nextAction.skipPreEvent;
+             st.pendingActions.push(nextAction);
+          }
        } else {
-          const nextAction = { ...action.payload.originalAction, payload: { ...action.payload.originalAction.payload, _rapidHealingDone: true } };
-          delete nextAction.skipPreEvent;
-          st.pendingActions.unshift(nextAction);
+          if (action.payload.originalAction.type !== 'START_TURN') {
+             const nextAction = { ...action.payload.originalAction, payload: { ...action.payload.originalAction.payload, _rapidHealingDone: true } };
+             delete nextAction.skipPreEvent;
+             st.pendingActions.unshift(nextAction);
+          }
        }
     }
     
     if (action.type === 'RESPONSE_RAPID_HEALING_NO' && action.playerId === pId) {
-       const nextAction = { ...action.payload.originalAction, payload: { ...action.payload.originalAction.payload, _rapidHealingDone: true } };
-       delete nextAction.skipPreEvent;
-       st.pendingActions.unshift(nextAction);
+       if (action.payload.originalAction.type !== 'START_TURN') {
+          const nextAction = { ...action.payload.originalAction, payload: { ...action.payload.originalAction.payload, _rapidHealingDone: true } };
+          delete nextAction.skipPreEvent;
+          st.pendingActions.unshift(nextAction);
+       }
     }
     
     return st;

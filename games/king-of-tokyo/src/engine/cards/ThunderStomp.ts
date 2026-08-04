@@ -24,7 +24,7 @@ export const ThunderStomp: CardImplementation = {
        
        if (st.players[pId].cardState.vpGainedThisTurn >= 4 && !st.players[pId].cardState.thunderStompActive) {
           st.players[pId].cardState.thunderStompActive = true;
-          addLog(st, action, `🌩️ ${st.players[pId].name} scored 4⭐ this turn! Thunder Stomp activates!`);
+          addLog(st, action, `${st.players[pId].name} scored 4⭐ this turn! Thunder Stomp activates!`);
        }
     }
     
@@ -32,7 +32,7 @@ export const ThunderStomp: CardImplementation = {
     if (action.type === 'SETUP_DICE' && action.playerId && action.playerId !== pId) {
        if (st.players[pId].cardState?.thunderStompActive) {
           st.dice.pop(); // remove one die
-          addLog(st, action, `🌩️ ${st.players[action.playerId].name} rolls 1 fewer die due to ${st.players[pId].name}'s Thunder Stomp!`);
+          addLog(st, action, `${st.players[action.playerId].name} rolls 1 fewer die due to ${st.players[pId].name}'s Thunder Stomp!`);
        }
     }
     

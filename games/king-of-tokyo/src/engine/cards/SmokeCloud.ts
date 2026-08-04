@@ -12,17 +12,17 @@ export const SmokeCloud: CardImplementation = {
   onBuy: (st: KotState, action: PendingAction, pId: string) => {
      st.players[pId].cardState = st.players[pId].cardState || {};
      st.players[pId].cardState.smokeCloudCharges = 3;
-     addLog(st, action, `☁️ ${st.players[pId].name} got Smoke Cloud with 3 charges!`);
+     addLog(st, action, `${st.players[pId].name} got Smoke Cloud with 3 charges!`);
      return st;
   },
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'RESOLVE_ROLLS' && action.playerId === pId) {
        const charges = st.players[pId].cardState?.smokeCloudCharges || 0;
        if (charges > 0 && !action.payload?._smokeCloudPrompted) {
-          action.payload = action.payload || {};
-          action.payload._smokeCloudPrompted = true;
           const index = st.pendingActions.findIndex(a => a === action);
           if (index !== -1) {
+             action.payload = action.payload || {};
+             action.payload._smokeCloudPrompted = true;
              st.pendingActions.splice(index, 1);
              st.pendingActions.unshift({
                 type: 'ASK',
@@ -51,11 +51,11 @@ export const SmokeCloud: CardImplementation = {
           st.rollCount = (st.rollCount || 0) + 1;
           
           action.affectedByCards = [{ cardId: 'smoke_cloud', playerId: pId }];
-          addLog(st, action, `☁️ ${st.players[pId].name} spent a charge from Smoke Cloud for an extra reroll! (${charges} left)`);
+          addLog(st, action, `${st.players[pId].name} spent a charge from Smoke Cloud for an extra reroll! (${charges} left)`);
           
           if (charges === 0) {
              st.players[pId].cards = st.players[pId].cards.filter(c => c !== 'smoke_cloud');
-             addLog(st, action, `☁️ Smoke Cloud is out of charges and is discarded!`);
+             addLog(st, action, `Smoke Cloud is out of charges and is discarded!`);
           }
           
           // Go back to rolling phase
