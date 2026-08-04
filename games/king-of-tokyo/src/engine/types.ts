@@ -25,7 +25,7 @@ export interface KotPlayer extends BasePlayer {
   health: number;
   vp: number;
   energy: number;
-  location: 'Outside' | 'TokyoCity';
+  location: 'Outside' | 'TokyoCity' | 'TokyoBay';
   stats: PlayerStats;
   cards: string[];
   cardState?: Record<string, any>;

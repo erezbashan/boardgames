@@ -593,9 +593,9 @@ export const KotBoard: React.FC = () => {
              }
              return null;
           })}
-          {p.location === 'TokyoCity' && !isDead && (
+          {p.location.startsWith('Tokyo') && !isDead && (
             <div style={{ color: '#a855f7', fontWeight: 'bold', border: '1px solid #a855f7', padding: '2px 6px', borderRadius: '4px', fontSize: '12px', marginLeft: 'auto' }}>
-              TOKYO
+              {p.location === 'TokyoBay' ? 'TOKYO BAY' : 'TOKYO CITY'}
             </div>
           )}
           {isDead && (

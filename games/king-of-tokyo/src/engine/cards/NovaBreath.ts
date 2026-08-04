@@ -14,17 +14,19 @@ export const NovaBreath: CardImplementation = {
       const damage = action.payload.damage;
       addLog(st, action, `${st.players[pId].name} attacks for ${damage} everywhere! (Nova Breath)`);
       const actionsToPush: PendingAction[] = [];
-      const tokyoPlayers = st.playerOrder.filter(id => st.players[id].location === 'TokyoCity' && st.players[id].health > 0);
+      const { isTokyoBayActive } = require('../utils');
+      const tokyoPlayers = st.playerOrder.filter(id => st.players[id].location.startsWith('Tokyo') && st.players[id].health > 0);
+      const totalTokyoSlots = isTokyoBayActive(st) ? 2 : 1;
       
-      if (st.players[pId].location === 'Outside' && tokyoPlayers.length === 0) {
-         // Tokyo is empty, attacker must enter Tokyo.
+      if (st.players[pId].location === 'Outside' && tokyoPlayers.length < totalTokyoSlots) {
+         // Tokyo has an empty slot, attacker must enter Tokyo.
          actionsToPush.push({ type: 'ENTER_TOKYO', playerId: pId });
       }
 
       st.playerOrder.forEach(tId => {
          if (tId !== pId && st.players[tId].health > 0) {
-            const isTokyo = st.players[tId].location === 'TokyoCity';
-            // Only deal damage if target is in Tokyo, OR if target is outside and we are outside? No, Nova Breath damages EVERYONE.
+            const isTokyo = st.players[tId].location.startsWith('Tokyo');
+            // Nova Breath damages EVERYONE.
             actionsToPush.push({ type: 'TAKE_DAMAGE', payload: { amount: damage, yield_after: isTokyo && st.players[pId].location === 'Outside', attackerId: pId }, playerId: tId });
          }
       });

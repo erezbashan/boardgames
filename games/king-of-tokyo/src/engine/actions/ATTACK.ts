@@ -17,8 +17,12 @@ export function handleAttack(st: KotState, action: PendingAction, pId: string) {
   const targets = getPlayersInTurnOrderFrom(st, pId);
 
   if (attacker.location === 'Outside') {
-     const tokyoPlayers = targets.filter(id => st.players[id].location === 'TokyoCity' && st.players[id].health > 0);
-     if (tokyoPlayers.length === 0) {
+     const tokyoPlayers = targets.filter(id => st.players[id].location.startsWith('Tokyo') && st.players[id].health > 0);
+     const { isTokyoBayActive } = require('../utils');
+     const totalTokyoSlots = isTokyoBayActive(st) ? 2 : 1;
+     
+     if (tokyoPlayers.length < totalTokyoSlots) {
+        // Take an empty slot without dealing damage
         actionsToPush.push({ type: 'ENTER_TOKYO', playerId: pId });
      } else {
         tokyoPlayers.forEach(tId => {

@@ -16,12 +16,14 @@ export function handleEndTurn(st: KotState, action: PendingAction, pId: string) 
   }
   
   const tokyoOccupant = st.playerOrder.find(id => st.players[id].location === 'TokyoCity') || null;
+  const tokyoBayOccupant = st.playerOrder.find(id => st.players[id].location === 'TokyoBay') || null;
   
   st.history.push({
     turnNum: st.history.length + 1,
     healths: st.playerOrder.reduce((acc, id) => ({ ...acc, [id]: st.players[id].health }), {}),
     vps: st.playerOrder.reduce((acc, id) => ({ ...acc, [id]: st.players[id].vp }), {}),
-    tokyoOccupant
+    tokyoOccupant,
+    tokyoBayOccupant
   });
 
   st.currentPlayerIndex = nextIdx;

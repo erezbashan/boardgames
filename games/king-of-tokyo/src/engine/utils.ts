@@ -22,3 +22,9 @@ export function addLog(state: KotState, action: PendingAction, logStr: string): 
 export function getPlayerMaxHealth(state: KotState, playerId: string): number {
   return state.players[playerId]?.maxHealth || state.settings.maxHealth;
 }
+
+export function isTokyoBayActive(st: KotState): boolean {
+  const totalOriginalPlayers = st.playerOrder.length;
+  const totalLivingPlayers = st.playerOrder.filter(id => st.players[id] && st.players[id].health > 0).length;
+  return totalOriginalPlayers >= 5 && totalLivingPlayers >= 5;
+}

@@ -8,7 +8,7 @@ export function handleHealth(st: KotState, action: PendingAction, pId: string) {
     const actual = Math.min(max - st.players[pId].health, action.payload.amount);
     
     const isFromCard = !!action.payload.sourceCard || (action.affectedByCards && action.affectedByCards.length > 0);
-    const canHeal = st.players[pId].location !== 'TokyoCity' || isFromCard;
+    const canHeal = !st.players[pId].location.startsWith('Tokyo') || isFromCard;
     
     if (actual > 0 && canHeal) {
       st.players[pId] = { 

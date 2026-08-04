@@ -32,11 +32,13 @@ export const KotStats: React.FC<KotStatsProps> = ({ gameState }) => {
   const fullHistory = [...history];
   if (gameState.status === 'Finished') {
     const tokyoOccupant = playerOrder.find(id => players[id].location === 'TokyoCity') || null;
+    const tokyoBayOccupant = playerOrder.find(id => players[id].location === 'TokyoBay') || null;
     fullHistory.push({
       turnNum: 'Final',
       healths: playerOrder.reduce((acc, id) => ({ ...acc, [id]: players[id].health }), {}),
       vps: playerOrder.reduce((acc, id) => ({ ...acc, [id]: players[id].vp }), {}),
-      tokyoOccupant
+      tokyoOccupant,
+      tokyoBayOccupant
     });
   }
 
@@ -98,12 +100,17 @@ export const KotStats: React.FC<KotStatsProps> = ({ gameState }) => {
   const tokyoData: TimelineSegment[] = fullHistory.map((snapshot: any) => {
     let color = 'rgba(255,255,255,0.1)';
     let label = 'Empty';
-    if (snapshot.tokyoOccupant) {
-      const occupant = players[snapshot.tokyoOccupant];
-      if (occupant) {
-        const index = playerOrder.indexOf(snapshot.tokyoOccupant);
-        color = occupant.color || PLAYER_COLORS[index % PLAYER_COLORS.length];
-        label = occupant.name;
+    const occupants = [];
+    if (snapshot.tokyoOccupant) occupants.push(snapshot.tokyoOccupant);
+    if (snapshot.tokyoBayOccupant) occupants.push(snapshot.tokyoBayOccupant);
+    
+    if (occupants.length > 0) {
+      const first = players[occupants[0]];
+      if (first) {
+        const index = playerOrder.indexOf(occupants[0]);
+        // Base color on the first occupant, but modify label for both
+        color = first.color || PLAYER_COLORS[index % PLAYER_COLORS.length];
+        label = occupants.map(id => players[id]?.name).join(' & ');
       }
     }
     return {
