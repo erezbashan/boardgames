@@ -1,5 +1,5 @@
 import { KotState, PendingAction } from '../types';
-import { addLog } from '../utils';
+import { addLog, isTokyoBayActive } from '../utils';
 
 export function handleDead(st: KotState, action: PendingAction, pId: string) {
    addLog(st, action, `💀 ${st.players[pId].name} died`);
@@ -13,8 +13,6 @@ export function handleDead(st: KotState, action: PendingAction, pId: string) {
    }
 
    const alive = st.playerOrder.filter(id => st.players[id].health > 0);
-   const { isTokyoBayActive } = require('../utils');
-   
    if (!isTokyoBayActive(st)) {
       // Tokyo Bay is closed. Evict anyone in it.
       const bayOccupant = st.playerOrder.find(id => st.players[id].location === 'TokyoBay' && st.players[id].health > 0);
@@ -30,7 +28,6 @@ export function handleDead(st: KotState, action: PendingAction, pId: string) {
       }
    }
 
-   const alive = st.playerOrder.filter(id => st.players[id].health > 0);
    if (alive.length <= 1 && alive.length > 0) {
       addLog(st, action, `${st.players[alive[0]].name} is the last monster standing 🏆`);
       st.status = 'Finished';

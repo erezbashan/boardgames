@@ -1,6 +1,6 @@
 import { CardImplementation } from './types';
 import { PendingAction } from '../types';
-import { addLog } from '../utils';
+import { addLog, isTokyoBayActive } from '../utils';
 
 export const NovaBreath: CardImplementation = {
   id: 'nova_breath',
@@ -14,7 +14,6 @@ export const NovaBreath: CardImplementation = {
       const damage = action.payload.damage;
       addLog(st, action, `${st.players[pId].name} attacks for ${damage} everywhere! (Nova Breath)`);
       const actionsToPush: PendingAction[] = [];
-      const { isTokyoBayActive } = require('../utils');
       const tokyoPlayers = st.playerOrder.filter(id => st.players[id].location.startsWith('Tokyo') && st.players[id].health > 0);
       const totalTokyoSlots = isTokyoBayActive(st) ? 2 : 1;
       

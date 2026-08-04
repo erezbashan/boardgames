@@ -1,5 +1,5 @@
 import { KotState, PendingAction } from '../types';
-import { addLog } from '../utils';
+import { addLog, isTokyoBayActive } from '../utils';
 
 export function handleAttack(st: KotState, action: PendingAction, pId: string) {
   const attacker = st.players[pId];
@@ -18,7 +18,6 @@ export function handleAttack(st: KotState, action: PendingAction, pId: string) {
 
   if (attacker.location === 'Outside') {
      const tokyoPlayers = targets.filter(id => st.players[id].location.startsWith('Tokyo') && st.players[id].health > 0);
-     const { isTokyoBayActive } = require('../utils');
      const totalTokyoSlots = isTokyoBayActive(st) ? 2 : 1;
      
      if (tokyoPlayers.length < totalTokyoSlots) {

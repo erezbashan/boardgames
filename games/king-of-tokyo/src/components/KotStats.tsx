@@ -97,28 +97,35 @@ export const KotStats: React.FC<KotStatsProps> = ({ gameState }) => {
   }));
 
   // 3. Prepare Timeline Bar Data
-  const tokyoData: TimelineSegment[] = fullHistory.map((snapshot: any) => {
+  const tokyoCityData: TimelineSegment[] = fullHistory.map((snapshot: any) => {
     let color = 'rgba(255,255,255,0.1)';
     let label = 'Empty';
-    const occupants = [];
-    if (snapshot.tokyoOccupant) occupants.push(snapshot.tokyoOccupant);
-    if (snapshot.tokyoBayOccupant) occupants.push(snapshot.tokyoBayOccupant);
-    
-    if (occupants.length > 0) {
-      const first = players[occupants[0]];
-      if (first) {
-        const index = playerOrder.indexOf(occupants[0]);
-        // Base color on the first occupant, but modify label for both
-        color = first.color || PLAYER_COLORS[index % PLAYER_COLORS.length];
-        label = occupants.map(id => players[id]?.name).join(' & ');
+    if (snapshot.tokyoOccupant) {
+      const occupant = players[snapshot.tokyoOccupant];
+      if (occupant) {
+        const index = playerOrder.indexOf(snapshot.tokyoOccupant);
+        color = occupant.color || PLAYER_COLORS[index % PLAYER_COLORS.length];
+        label = occupant.name;
       }
     }
-    return {
-      name: snapshot.turnNum,
-      color,
-      label
-    };
+    return { name: snapshot.turnNum, color, label };
   });
+
+  const tokyoBayData: TimelineSegment[] = fullHistory.map((snapshot: any) => {
+    let color = 'rgba(255,255,255,0.1)';
+    let label = 'Empty';
+    if (snapshot.tokyoBayOccupant) {
+      const occupant = players[snapshot.tokyoBayOccupant];
+      if (occupant) {
+        const index = playerOrder.indexOf(snapshot.tokyoBayOccupant);
+        color = occupant.color || PLAYER_COLORS[index % PLAYER_COLORS.length];
+        label = occupant.name;
+      }
+    }
+    return { name: snapshot.turnNum, color, label };
+  });
+
+  const hasBayHistory = fullHistory.some((s: any) => s.tokyoBayOccupant);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
@@ -157,7 +164,8 @@ export const KotStats: React.FC<KotStatsProps> = ({ gameState }) => {
       {/* Charts */}
       {fullHistory.length > 0 ? (
         <>
-          <TimelineBarWidget title="Tokyo Occupancy" data={tokyoData} height={40} />
+          <TimelineBarWidget title="Tokyo City Occupancy" data={tokyoCityData} height={40} />
+          {hasBayHistory && <TimelineBarWidget title="Tokyo Bay Occupancy" data={tokyoBayData} height={40} />}
           <LineChartWidget title="VP Progression" data={vpData} lines={lines} height={200} hideLegend hideXAxis hideTooltip yAxisWidth={40} />
           <LineChartWidget title="Health Progression" data={healthData} lines={lines} height={200} hideLegend hideXAxis hideTooltip yAxisWidth={40} />
         </>

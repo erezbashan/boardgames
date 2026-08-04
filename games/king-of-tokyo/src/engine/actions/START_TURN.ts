@@ -1,5 +1,5 @@
 import { KotState, PendingAction } from '../types';
-import { addLog } from '../utils';
+import { addLog, isTokyoBayActive } from '../utils';
 
 export function handleStartTurn(st: KotState, action: PendingAction, pId: string) {
   const p = st.players[pId];
@@ -8,7 +8,6 @@ export function handleStartTurn(st: KotState, action: PendingAction, pId: string
   addLog(st, action, `--- 👾 ${p.name}'s Turn ---`);
   
   // Sanity check: Ensure correct number of people in Tokyo
-  const { isTokyoBayActive } = require('../utils');
   const peopleInTokyo = st.playerOrder.filter(id => st.players[id].location.startsWith('Tokyo') && st.players[id].health > 0);
   const maxAllowed = isTokyoBayActive(st) ? 2 : 1;
   if (peopleInTokyo.length > maxAllowed) {
