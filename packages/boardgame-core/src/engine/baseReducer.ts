@@ -80,6 +80,22 @@ export function baseReducer<T extends BaseGameState>(state: T, action: BaseActio
         playerOrder: newPlayerOrder
       };
     }
+    case 'UPDATE_BOT_STRATEGY': {
+      if (state.status !== 'Lobby') return state;
+      const { playerId, botStrategy } = action.payload;
+      if (!state.players[playerId]) return state;
+      
+      return {
+        ...state,
+        players: {
+          ...state.players,
+          [playerId]: {
+            ...state.players[playerId],
+            botStrategy
+          }
+        }
+      };
+    }
     case 'SEND_CHAT_MESSAGE': {
       return {
         ...state,

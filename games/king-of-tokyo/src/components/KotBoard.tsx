@@ -566,6 +566,7 @@ export const KotBoard: React.FC = () => {
 
   const renderPlayerDetails = (playerId: string) => {
     const p = players[playerId];
+    if (!p) return null;
     const isDead = p.health <= 0;
     
     return (
@@ -593,7 +594,7 @@ export const KotBoard: React.FC = () => {
              }
              return null;
           })}
-          {p.location?.startsWith('Tokyo') && !isDead && (
+          {(p.location || '').startsWith('Tokyo') && !isDead && (
             <div style={{ color: '#a855f7', fontWeight: 'bold', border: '1px solid #a855f7', padding: '2px 6px', borderRadius: '4px', fontSize: '12px', marginLeft: 'auto' }}>
               {p.location === 'TokyoBay' ? 'TOKYO BAY' : 'TOKYO CITY'}
             </div>

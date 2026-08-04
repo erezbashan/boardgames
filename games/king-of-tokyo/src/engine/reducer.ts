@@ -3,7 +3,7 @@ import { KotState, KotAction, initialKotState, PendingAction } from './types';
 import { ACTION_HANDLERS } from './actions';
 import { CARD_REGISTRY } from './cards/registry';
 import { MARKER_REGISTRY } from './markers/registry';
-import { getBotAction } from '../bots/botLogic';
+import { getBotAction } from '../bots/registry';
 
 function doAction(state: KotState, action: PendingAction): KotState {
   let st = { ...state };

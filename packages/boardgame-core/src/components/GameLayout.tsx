@@ -169,8 +169,20 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
               <div key={p.id} className={`player-card ${isPlaying ? 'is-playing' : ''} ${isWinner ? 'is-winner' : ''}`} style={{ borderLeftColor: p.color || 'rgba(255,255,255,0.1)', borderLeftWidth: p.color ? '4px' : '1px', position: 'relative' }}>
                 <div className="player-card-header">
                   <span className="player-name" style={{ color: p.color || 'white' }}>
-                    {p.name} {p.isBot && <span title="Bot">🤖</span>} {isMe && <span style={{ color: 'gray', fontSize: '0.8em' }}>(You)</span>}
+                    {p.name} 
+                    {p.isBot && <span title={`Bot Strategy: ${p.botStrategy || 'random'}`}>🤖</span>} 
+                    {isMe && <span style={{ color: 'gray', fontSize: '0.8em' }}>(You)</span>}
                   </span>
+                  {status === 'Lobby' && p.isBot && (
+                    <select 
+                      style={{ marginLeft: '10px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: '4px', padding: '2px 4px', fontSize: '10px' }}
+                      value={p.botStrategy || 'random'}
+                      onChange={(e) => dispatch({ type: 'UPDATE_BOT_STRATEGY', payload: { playerId: p.id, botStrategy: e.target.value }})}
+                    >
+                      <option value="random">Random</option>
+                      <option value="smart">Smart</option>
+                    </select>
+                  )}
                   {isWinner && <span className="winner-banner">🏆 Winner</span>}
                   {isPlaying && <span className="playing-banner">Playing</span>}
                   {status === 'Lobby' && !isMe && (
