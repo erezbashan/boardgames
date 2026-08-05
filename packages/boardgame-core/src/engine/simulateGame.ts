@@ -2,13 +2,11 @@ import { BaseGameState } from './types';
 
 export interface PlayerConfig {
   id: string;
-  name: string;
   botStrategy: string;
 }
 
 export interface SimulationResult {
   winnerId: string | null;
-  winnerName: string | null;
   winnerStrategy: string | null;
   error?: string;
   totalTurns?: number;
@@ -31,7 +29,7 @@ export function runSimulationBatch(
     for (const p of playerConfigs) {
       state = reducer(state, { 
         type: 'JOIN_GAME', 
-        payload: { playerId: p.id, name: p.name, isBot: true, botStrategy: p.botStrategy } 
+        payload: { playerId: p.id, name: p.id, isBot: true, botStrategy: p.botStrategy } 
       });
     }
     
@@ -46,20 +44,19 @@ export function runSimulationBatch(
         state = reducer(state, action);
       } else {
         // Queue is empty but game not finished. 
-        return { winnerId: null, winnerName: null, winnerStrategy: null, error: 'Queue empty before game finished' };
+        return { winnerId: null, winnerStrategy: null, error: 'Queue empty before game finished' };
       }
       loopCount++;
     }
     
     if (loopCount >= 50000) {
-      return { winnerId: null, winnerName: null, winnerStrategy: null, error: 'Infinite loop detected' };
+      return { winnerId: null, winnerStrategy: null, error: 'Infinite loop detected' };
     }
     
     const winnerId = state.winnerId;
     const winnerPlayer = winnerId ? state.players[winnerId] : null;
     return {
       winnerId,
-      winnerName: winnerPlayer?.name || null,
       winnerStrategy: winnerPlayer?.botStrategy || null,
       totalTurns: loopCount
     };
@@ -69,7 +66,7 @@ export function runSimulationBatch(
     try {
        results.push(runSingleGame());
     } catch (e: any) {
-       results.push({ winnerId: null, winnerName: null, winnerStrategy: null, error: e.message || 'Unknown error' });
+       results.push({ winnerId: null, winnerStrategy: null, error: e.message || 'Unknown error' });
     }
   }
 

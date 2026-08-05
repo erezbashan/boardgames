@@ -11,7 +11,7 @@ export interface SimulationDashboardProps {
 export const SimulationDashboard: React.FC<SimulationDashboardProps> = ({ gameName, reducer, initialState }) => {
   const [numPlayers, setNumPlayers] = useState(4);
   const [playerConfigs, setPlayerConfigs] = useState<PlayerConfig[]>(
-    Array.from({ length: 4 }).map((_, i) => ({ id: `bot_${i}`, name: BOT_NAMES[i % BOT_NAMES.length], botStrategy: 'random' }))
+    Array.from({ length: 4 }).map((_, i) => ({ id: `bot_${i}`, botStrategy: 'random' }))
   );
   const [totalSimulations, setTotalSimulations] = useState(100);
   
@@ -28,7 +28,7 @@ export const SimulationDashboard: React.FC<SimulationDashboardProps> = ({ gameNa
       const newConfigs = [...prev];
       while (newConfigs.length < numPlayers) {
         const i = newConfigs.length;
-        newConfigs.push({ id: `bot_${i}`, name: BOT_NAMES[i % BOT_NAMES.length], botStrategy: 'random' });
+        newConfigs.push({ id: `bot_${i}`, botStrategy: 'random' });
       }
       return newConfigs.slice(0, numPlayers);
     });
@@ -69,15 +69,14 @@ export const SimulationDashboard: React.FC<SimulationDashboardProps> = ({ gameNa
 
   // Aggregated stats
   const strategyWins: Record<string, number> = {};
-  const playerWins: Record<string, number> = {};
   let errors = 0;
 
   results.forEach(r => {
     if (r.error) {
+      console.error("Simulation error:", r.error);
       errors++;
-    } else if (r.winnerStrategy && r.winnerName) {
+    } else if (r.winnerStrategy) {
       strategyWins[r.winnerStrategy] = (strategyWins[r.winnerStrategy] || 0) + 1;
-      playerWins[r.winnerName] = (playerWins[r.winnerName] || 0) + 1;
     }
   });
 
@@ -97,11 +96,6 @@ export const SimulationDashboard: React.FC<SimulationDashboardProps> = ({ gameNa
             {playerConfigs.map((p, i) => (
               <div key={i} style={{ display: 'flex', gap: '10px', marginBottom: '10px', alignItems: 'center' }}>
                 <span style={{ width: '80px', color: 'gray' }}>Player {i + 1}:</span>
-                <input value={p.name} onChange={e => {
-                  const newConfigs = [...playerConfigs];
-                  newConfigs[i].name = e.target.value;
-                  setPlayerConfigs(newConfigs);
-                }} style={{ padding: '8px', borderRadius: '4px', border: '1px solid gray', background: 'rgba(0,0,0,0.2)', color: 'white', width: '120px' }} />
                 <select value={p.botStrategy} onChange={e => {
                   const newConfigs = [...playerConfigs];
                   newConfigs[i].botStrategy = e.target.value;
@@ -158,32 +152,11 @@ export const SimulationDashboard: React.FC<SimulationDashboardProps> = ({ gameNa
             </table>
           </div>
           
-          <div style={{ background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '12px' }}>
-            <h3 style={{ margin: '0 0 15px 0' }}>Win Rates by Player</h3>
-            <table style={{ width: '300px', textAlign: 'left', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid gray' }}>
-                  <th style={{ padding: '8px' }}>Player</th>
-                  <th style={{ padding: '8px' }}>Wins</th>
-                  <th style={{ padding: '8px' }}>%</th>
-                </tr>
-              </thead>
-              <tbody>
-                {Object.entries(playerWins).sort((a,b) => b[1]-a[1]).map(([player, wins]) => (
-                  <tr key={player} style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                    <td style={{ padding: '8px' }}>{player}</td>
-                    <td style={{ padding: '8px' }}>{wins}</td>
-                    <td style={{ padding: '8px' }}>{((wins / results.length) * 100).toFixed(1)}%</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
           
           {errors > 0 && (
             <div style={{ color: '#ef4444', background: 'rgba(239, 68, 68, 0.1)', padding: '20px', borderRadius: '12px' }}>
               <h3 style={{ margin: '0 0 10px 0' }}>Errors</h3>
-              <p style={{ margin: 0 }}>{errors} games failed to complete.</p>
+              <p style={{ margin: 0 }}>{errors} games failed to complete. Check console for details.</p>
             </div>
           )}
         </div>
