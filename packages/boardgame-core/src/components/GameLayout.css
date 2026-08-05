@@ -49,7 +49,7 @@
 }
 
 .game-stage-area {
-  flex: 65;
+  flex: 55;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -57,7 +57,7 @@
 }
 
 .game-bottom-area {
-  flex: 35;
+  flex: 45;
   display: flex;
   gap: 10px;
   min-height: 0;

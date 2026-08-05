@@ -1,10 +1,11 @@
 import { Routes, Route, useNavigate, useParams, useLocation } from 'react-router-dom';
 import { Lobby } from '@erez/boardgame-core';
-import { FlipsBoard } from '@erez/flips';
+import { FlipsBoard, flipsReducer, initialFlipsState } from '@erez/flips';
 import type { FlipsState, FlipsAction } from '@erez/flips';
-import { KotBoard } from '@erez/king-of-tokyo';
+import { KotBoard, kingOfTokyoReducer, initialKotState } from '@erez/king-of-tokyo';
 import type { KotState, KotAction } from '@erez/king-of-tokyo';
 import { useMultiplayerGame } from './hooks/useMultiplayerGame';
+import { SimulationDashboard } from '@erez/boardgame-core';
 
 function GameSelector() {
   const navigate = useNavigate();
@@ -141,12 +142,27 @@ function ActiveGameWrapper() {
   );
 }
 
+function SimulationWrapper() {
+  const { gameType } = useParams();
+
+  if (gameType === 'flips') {
+    return <SimulationDashboard gameName="Flips" reducer={flipsReducer as any} initialState={initialFlipsState} />;
+  }
+  
+  if (gameType === 'king-of-tokyo') {
+    return <SimulationDashboard gameName="King of Tokyo" reducer={kingOfTokyoReducer as any} initialState={initialKotState} />;
+  }
+
+  return <div style={{ color: 'white', padding: '40px' }}>Unknown game type for simulation</div>;
+}
+
 function App() {
   return (
     <Routes>
       <Route path="/" element={<GameSelector />} />
       <Route path="/:gameType" element={<GameLobbyWrapper />} />
       <Route path="/:gameType/:gameId" element={<ActiveGameWrapper />} />
+      <Route path="/simulation/:gameType" element={<SimulationWrapper />} />
     </Routes>
   );
 }

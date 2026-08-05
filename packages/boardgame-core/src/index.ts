@@ -10,3 +10,5 @@ export * from './hooks/useGameController';
 export * from './hooks/GameContext';
 export * from './components/LineChartWidget';
 export * from './components/TimelineBarWidget';
+export * from './engine/simulateGame';
+export * from './components/SimulationDashboard';
