@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { runSimulationBatch, PlayerConfig, SimulationResult } from '../engine/simulateGame';
 import { BOT_NAMES } from '../engine/types';
 import { createInitialPopulation, evolvePopulation, getStrategyString, PopulationMember } from '../engine/geneticAlgorithm';
@@ -166,6 +166,61 @@ export const SimulationDashboard: React.FC<SimulationDashboardProps> = ({ gameNa
     }
   });
 
+    const decodeStrategyMask = (mask: number) => {
+      const targets = [];
+      if ((mask & 1) > 0) targets.push('Attack');
+      if ((mask & 2) > 0) targets.push('Health');
+      if ((mask & 4) > 0) targets.push('Energy');
+      if ((mask & 8) > 0) targets.push('Points');
+      return targets.length > 0 ? targets.join(' + ') : 'Nothing';
+    };
+
+    const renderReadableDNA = (dna: number[]) => {
+      const rows = [];
+      for (let inTokyo = 0; inTokyo < 2; inTokyo++) {
+        for (let remGroup = 0; remGroup < 3; remGroup++) {
+          for (let hpGroup = 0; hpGroup < 3; hpGroup++) {
+            for (let vpGroup = 0; vpGroup < 3; vpGroup++) {
+              const index = inTokyo * 27 + remGroup * 9 + hpGroup * 3 + vpGroup;
+              
+              const locStr = inTokyo ? 'In Tokyo' : 'Outside';
+              const pStr = remGroup === 0 ? '2' : remGroup === 1 ? '3-4' : '5-6';
+              const hpStr = hpGroup === 0 ? '1-3' : hpGroup === 1 ? '4-6' : '7-10';
+              const vpStr = vpGroup === 0 ? '0-9' : vpGroup === 1 ? '10-14' : '15-19';
+
+              rows.push(
+                <tr key={index} style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                  <td style={{ padding: '4px 8px' }}>{locStr}</td>
+                  <td style={{ padding: '4px 8px' }}>{pStr} left</td>
+                  <td style={{ padding: '4px 8px', color: hpGroup === 0 ? '#ef4444' : 'inherit' }}>{hpStr} HP</td>
+                  <td style={{ padding: '4px 8px', color: vpGroup === 2 ? '#4ade80' : 'inherit' }}>{vpStr} VP</td>
+                  <td style={{ padding: '4px 8px', fontWeight: 'bold', color: '#a855f7' }}>{decodeStrategyMask(dna[index])}</td>
+                </tr>
+              );
+            }
+          }
+        }
+      }
+      return (
+        <div style={{ maxHeight: '400px', overflowY: 'auto', marginTop: '15px', background: 'rgba(0,0,0,0.5)', padding: '10px', borderRadius: '8px' }}>
+          <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', fontSize: '13px' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid gray' }}>
+                <th style={{ padding: '8px' }}>Location</th>
+                <th style={{ padding: '8px' }}>Players</th>
+                <th style={{ padding: '8px' }}>Health</th>
+                <th style={{ padding: '8px' }}>Victory Points</th>
+                <th style={{ padding: '8px' }}>Target Strategy</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows}
+            </tbody>
+          </table>
+        </div>
+      );
+    };
+
   return (
     <div style={{ padding: '40px', color: 'white', backgroundColor: '#1a1a2e', minHeight: '100vh' }}>
       <h1 style={{ marginBottom: '20px' }}>{gameName} Bot Simulation</h1>
@@ -252,10 +307,11 @@ export const SimulationDashboard: React.FC<SimulationDashboardProps> = ({ gameNa
 
           {bestBotDna && (
             <div style={{ marginTop: '20px', background: 'rgba(0,0,0,0.3)', padding: '20px', borderRadius: '8px' }}>
-              <h3 style={{ color: '#4ade80' }}>🏆 Best Bot DNA (Current Generation Leader)</h3>
-              <div style={{ fontSize: '12px', wordBreak: 'break-all', color: 'gray', marginTop: '10px' }}>
-                {JSON.stringify(bestBotDna)}
-              </div>
+              <h3 style={{ color: '#4ade80', margin: '0 0 10px 0' }}>🏆 Best Bot DNA (Current Generation Leader)</h3>
+              <p style={{ color: 'gray', fontSize: '13px', margin: '0 0 10px 0' }}>
+                This is a map of exactly what this bot targets in all 54 possible game states.
+              </p>
+              {renderReadableDNA(bestBotDna)}
             </div>
           )}
         </div>
