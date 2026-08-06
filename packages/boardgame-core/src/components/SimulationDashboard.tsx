@@ -177,16 +177,36 @@ export const SimulationDashboard: React.FC<SimulationDashboardProps> = ({ gameNa
 
     const renderReadableDNA = (dna: number[]) => {
       const rows = [];
+      const locationStats = { Outside: { total: 0, a: 0, h: 0, e: 0, p: 0 }, InTokyo: { total: 0, a: 0, h: 0, e: 0, p: 0 } };
+      const playerStats = { '2': { total: 0, a: 0, h: 0, e: 0, p: 0 }, '3-4': { total: 0, a: 0, h: 0, e: 0, p: 0 }, '5-6': { total: 0, a: 0, h: 0, e: 0, p: 0 } };
+      const hpStats = { '1-3': { total: 0, a: 0, h: 0, e: 0, p: 0 }, '4-6': { total: 0, a: 0, h: 0, e: 0, p: 0 }, '7-10': { total: 0, a: 0, h: 0, e: 0, p: 0 } };
+      const vpStats = { '0-9': { total: 0, a: 0, h: 0, e: 0, p: 0 }, '10-14': { total: 0, a: 0, h: 0, e: 0, p: 0 }, '15-19': { total: 0, a: 0, h: 0, e: 0, p: 0 } };
+
+      const addStat = (statObj: any, mask: number) => {
+        statObj.total++;
+        if ((mask & 1) > 0) statObj.a++;
+        if ((mask & 2) > 0) statObj.h++;
+        if ((mask & 4) > 0) statObj.e++;
+        if ((mask & 8) > 0) statObj.p++;
+      };
+
       for (let inTokyo = 0; inTokyo < 2; inTokyo++) {
         for (let remGroup = 0; remGroup < 3; remGroup++) {
           for (let hpGroup = 0; hpGroup < 3; hpGroup++) {
             for (let vpGroup = 0; vpGroup < 3; vpGroup++) {
               const index = inTokyo * 27 + remGroup * 9 + hpGroup * 3 + vpGroup;
+              const mask = dna[index];
               
               const locStr = inTokyo ? 'In Tokyo' : 'Outside';
               const pStr = remGroup === 0 ? '2' : remGroup === 1 ? '3-4' : '5-6';
               const hpStr = hpGroup === 0 ? '1-3' : hpGroup === 1 ? '4-6' : '7-10';
               const vpStr = vpGroup === 0 ? '0-9' : vpGroup === 1 ? '10-14' : '15-19';
+
+              // Update summaries
+              addStat(inTokyo ? locationStats.InTokyo : locationStats.Outside, mask);
+              addStat(remGroup === 0 ? playerStats['2'] : remGroup === 1 ? playerStats['3-4'] : playerStats['5-6'], mask);
+              addStat(hpGroup === 0 ? hpStats['1-3'] : hpGroup === 1 ? hpStats['4-6'] : hpStats['7-10'], mask);
+              addStat(vpGroup === 0 ? vpStats['0-9'] : vpGroup === 1 ? vpStats['10-14'] : vpStats['15-19'], mask);
 
               rows.push(
                 <tr key={index} style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
@@ -194,29 +214,68 @@ export const SimulationDashboard: React.FC<SimulationDashboardProps> = ({ gameNa
                   <td style={{ padding: '4px 8px' }}>{pStr} left</td>
                   <td style={{ padding: '4px 8px', color: hpGroup === 0 ? '#ef4444' : 'inherit' }}>{hpStr} HP</td>
                   <td style={{ padding: '4px 8px', color: vpGroup === 2 ? '#4ade80' : 'inherit' }}>{vpStr} VP</td>
-                  <td style={{ padding: '4px 8px', fontWeight: 'bold', color: '#a855f7' }}>{decodeStrategyMask(dna[index])}</td>
+                  <td style={{ padding: '4px 8px', fontWeight: 'bold', color: '#a855f7' }}>{decodeStrategyMask(mask)}</td>
                 </tr>
               );
             }
           }
         }
       }
-      return (
-        <div style={{ maxHeight: '400px', overflowY: 'auto', marginTop: '15px', background: 'rgba(0,0,0,0.5)', padding: '10px', borderRadius: '8px' }}>
-          <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', fontSize: '13px' }}>
+
+      const renderSummaryTable = (title: string, dataObj: any) => (
+        <div style={{ flex: 1, minWidth: '200px' }}>
+          <h4 style={{ margin: '10px 0 5px 0' }}>{title}</h4>
+          <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', fontSize: '13px', background: 'rgba(0,0,0,0.3)', borderRadius: '4px' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid gray' }}>
-                <th style={{ padding: '8px' }}>Location</th>
-                <th style={{ padding: '8px' }}>Players</th>
-                <th style={{ padding: '8px' }}>Health</th>
-                <th style={{ padding: '8px' }}>Victory Points</th>
-                <th style={{ padding: '8px' }}>Target Strategy</th>
+                <th style={{ padding: '4px' }}>Group</th>
+                <th style={{ padding: '4px', color: '#ef4444' }}>ATK</th>
+                <th style={{ padding: '4px', color: '#ec4899' }}>HP</th>
+                <th style={{ padding: '4px', color: '#3b82f6' }}>NRG</th>
+                <th style={{ padding: '4px', color: '#eab308' }}>PTS</th>
               </tr>
             </thead>
             <tbody>
-              {rows}
+              {Object.entries(dataObj).map(([key, stats]: [string, any]) => (
+                <tr key={key} style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                  <td style={{ padding: '4px' }}>{key}</td>
+                  <td style={{ padding: '4px' }}>{Math.round((stats.a / stats.total) * 100)}%</td>
+                  <td style={{ padding: '4px' }}>{Math.round((stats.h / stats.total) * 100)}%</td>
+                  <td style={{ padding: '4px' }}>{Math.round((stats.e / stats.total) * 100)}%</td>
+                  <td style={{ padding: '4px' }}>{Math.round((stats.p / stats.total) * 100)}%</td>
+                </tr>
+              ))}
             </tbody>
           </table>
+        </div>
+      );
+
+      return (
+        <div>
+          <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', marginBottom: '20px' }}>
+             {renderSummaryTable('By Location', locationStats)}
+             {renderSummaryTable('By Players Left', playerStats)}
+             {renderSummaryTable('By Health', hpStats)}
+             {renderSummaryTable('By VP', vpStats)}
+          </div>
+          
+          <h4 style={{ margin: '0 0 10px 0' }}>Full DNA Mapping</h4>
+          <div style={{ maxHeight: '400px', overflowY: 'auto', background: 'rgba(0,0,0,0.5)', padding: '10px', borderRadius: '8px' }}>
+            <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', fontSize: '13px' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid gray' }}>
+                  <th style={{ padding: '8px' }}>Location</th>
+                  <th style={{ padding: '8px' }}>Players</th>
+                  <th style={{ padding: '8px' }}>Health</th>
+                  <th style={{ padding: '8px' }}>Victory Points</th>
+                  <th style={{ padding: '8px' }}>Target Strategy</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows}
+              </tbody>
+            </table>
+          </div>
         </div>
       );
     };
