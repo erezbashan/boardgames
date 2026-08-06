@@ -184,28 +184,6 @@ export const SimulationDashboard: React.FC<SimulationDashboardProps> = ({ gameNa
 
     const renderReadableDNA = (dna: number[]) => {
       const rows = [];
-      const locationStats = { Outside: { total: 0, a: 0, h: 0, e: 0, p: 0 }, InTokyo: { total: 0, a: 0, h: 0, e: 0, p: 0 } };
-      const playerStats = { '2': { total: 0, a: 0, h: 0, e: 0, p: 0 }, '3-4': { total: 0, a: 0, h: 0, e: 0, p: 0 }, '5-6': { total: 0, a: 0, h: 0, e: 0, p: 0 } };
-      const hpStats = { '1-3': { total: 0, a: 0, h: 0, e: 0, p: 0 }, '4-6': { total: 0, a: 0, h: 0, e: 0, p: 0 }, '7-10': { total: 0, a: 0, h: 0, e: 0, p: 0 } };
-      const vpStats = { '0-9': { total: 0, a: 0, h: 0, e: 0, p: 0 }, '10-14': { total: 0, a: 0, h: 0, e: 0, p: 0 }, '15-19': { total: 0, a: 0, h: 0, e: 0, p: 0 } };
-
-      const addStat = (statObj: any, mask: number) => {
-        statObj.total++;
-        let activeTraits = 0;
-        if ((mask & 1) > 0) activeTraits++;
-        if ((mask & 2) > 0) activeTraits++;
-        if ((mask & 4) > 0) activeTraits++;
-        if ((mask & 8) > 0) activeTraits++;
-        
-        if (activeTraits > 0) {
-          const weight = 1 / activeTraits;
-          if ((mask & 1) > 0) statObj.a += weight;
-          if ((mask & 2) > 0) statObj.h += weight;
-          if ((mask & 4) > 0) statObj.e += weight;
-          if ((mask & 8) > 0) statObj.p += weight;
-        }
-      };
-
       for (let inTokyo = 0; inTokyo < 2; inTokyo++) {
         for (let remGroup = 0; remGroup < 3; remGroup++) {
           for (let hpGroup = 0; hpGroup < 3; hpGroup++) {
@@ -217,12 +195,6 @@ export const SimulationDashboard: React.FC<SimulationDashboardProps> = ({ gameNa
               const pStr = remGroup === 0 ? '2' : remGroup === 1 ? '3-4' : '5-6';
               const hpStr = hpGroup === 0 ? '1-3' : hpGroup === 1 ? '4-6' : '7-10';
               const vpStr = vpGroup === 0 ? '0-9' : vpGroup === 1 ? '10-14' : '15-19';
-
-              // Update summaries
-              addStat(inTokyo ? locationStats.InTokyo : locationStats.Outside, mask);
-              addStat(remGroup === 0 ? playerStats['2'] : remGroup === 1 ? playerStats['3-4'] : playerStats['5-6'], mask);
-              addStat(hpGroup === 0 ? hpStats['1-3'] : hpGroup === 1 ? hpStats['4-6'] : hpStats['7-10'], mask);
-              addStat(vpGroup === 0 ? vpStats['0-9'] : vpGroup === 1 ? vpStats['10-14'] : vpStats['15-19'], mask);
 
               rows.push(
                 <tr key={index} style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
@@ -237,64 +209,105 @@ export const SimulationDashboard: React.FC<SimulationDashboardProps> = ({ gameNa
           }
         }
       }
+      return rows;
+    };
 
-      const renderSummaryTable = (title: string, dataObj: any) => (
-        <div style={{ flex: 1, minWidth: '200px' }}>
-          <h4 style={{ margin: '10px 0 5px 0' }}>{title}</h4>
-          <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', fontSize: '13px', background: 'rgba(0,0,0,0.3)', borderRadius: '4px' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid gray' }}>
-                <th style={{ padding: '4px' }}>Group</th>
-                <th style={{ padding: '4px', color: '#ef4444' }}>ATK</th>
-                <th style={{ padding: '4px', color: '#ec4899' }}>HP</th>
-                <th style={{ padding: '4px', color: '#3b82f6' }}>NRG</th>
-                <th style={{ padding: '4px', color: '#eab308' }}>PTS</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Object.entries(dataObj).map(([key, stats]: [string, any]) => (
-                <tr key={key} style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                  <td style={{ padding: '4px' }}>{key}</td>
-                  <td style={{ padding: '4px' }}>{Math.round((stats.a / stats.total) * 100)}%</td>
-                  <td style={{ padding: '4px' }}>{Math.round((stats.h / stats.total) * 100)}%</td>
-                  <td style={{ padding: '4px' }}>{Math.round((stats.e / stats.total) * 100)}%</td>
-                  <td style={{ padding: '4px' }}>{Math.round((stats.p / stats.total) * 100)}%</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      );
-
-      return (
-        <div>
-          <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', marginBottom: '20px' }}>
-             {renderSummaryTable('By Location', locationStats)}
-             {renderSummaryTable('By Players Left', playerStats)}
-             {renderSummaryTable('By Health', hpStats)}
-             {renderSummaryTable('By VP', vpStats)}
-          </div>
+      const renderEvolutionTable = (history: any[]) => {
+        if (!history || history.length === 0) return null;
+        
+        const sortedHistory = [...history].sort((a,b) => a.generation - b.generation);
+        
+        // Define all categories we want to track
+        const categoryKeys = [
+          'Location / Outside', 'Location / In Tokyo',
+          'Players / 2 left', 'Players / 3-4 left', 'Players / 5-6 left',
+          'Health / 1-3 HP', 'Health / 4-6 HP', 'Health / 7-10 HP',
+          'VP / 0-9 VP', 'VP / 10-14 VP', 'VP / 15-19 VP'
+        ];
+        
+        // Initialize an object to hold the computed stats for every generation and every category
+        // genStats[genNum][categoryKey] = { total: 0, a: 0, h: 0, e: 0, p: 0 }
+        const genStats: Record<number, Record<string, any>> = {};
+        
+        sortedHistory.forEach(doc => {
+          const gen = doc.generation;
+          const dna = doc.bestDna;
+          genStats[gen] = {};
+          categoryKeys.forEach(k => { genStats[gen][k] = { total: 0, a: 0, h: 0, e: 0, p: 0 }; });
           
-          <h4 style={{ margin: '0 0 10px 0' }}>Full DNA Mapping</h4>
-          <div style={{ maxHeight: '400px', overflowY: 'auto', background: 'rgba(0,0,0,0.5)', padding: '10px', borderRadius: '8px' }}>
+          const addStat = (catObj: any, mask: number) => {
+            catObj.total++;
+            let activeTraits = 0;
+            if ((mask & 1) > 0) activeTraits++;
+            if ((mask & 2) > 0) activeTraits++;
+            if ((mask & 4) > 0) activeTraits++;
+            if ((mask & 8) > 0) activeTraits++;
+            
+            if (activeTraits > 0) {
+              const weight = 1 / activeTraits;
+              if ((mask & 1) > 0) catObj.a += weight;
+              if ((mask & 2) > 0) catObj.h += weight;
+              if ((mask & 4) > 0) catObj.e += weight;
+              if ((mask & 8) > 0) catObj.p += weight;
+            }
+          };
+
+          for (let inTokyo = 0; inTokyo < 2; inTokyo++) {
+            for (let remGroup = 0; remGroup < 3; remGroup++) {
+              for (let hpGroup = 0; hpGroup < 3; hpGroup++) {
+                for (let vpGroup = 0; vpGroup < 3; vpGroup++) {
+                  const index = inTokyo * 27 + remGroup * 9 + hpGroup * 3 + vpGroup;
+                  const mask = dna[index];
+                  
+                  addStat(genStats[gen][inTokyo ? 'Location / In Tokyo' : 'Location / Outside'], mask);
+                  addStat(genStats[gen][remGroup === 0 ? 'Players / 2 left' : remGroup === 1 ? 'Players / 3-4 left' : 'Players / 5-6 left'], mask);
+                  addStat(genStats[gen][hpGroup === 0 ? 'Health / 1-3 HP' : hpGroup === 1 ? 'Health / 4-6 HP' : 'Health / 7-10 HP'], mask);
+                  addStat(genStats[gen][vpGroup === 0 ? 'VP / 0-9 VP' : vpGroup === 1 ? 'VP / 10-14 VP' : 'VP / 15-19 VP'], mask);
+                }
+              }
+            }
+          }
+        });
+
+        return (
+          <div style={{ overflowX: 'auto', background: 'rgba(0,0,0,0.5)', padding: '15px', borderRadius: '8px', marginBottom: '30px' }}>
             <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', fontSize: '13px' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid gray' }}>
-                  <th style={{ padding: '8px' }}>Location</th>
-                  <th style={{ padding: '8px' }}>Players</th>
-                  <th style={{ padding: '8px' }}>Health</th>
-                  <th style={{ padding: '8px' }}>Victory Points</th>
-                  <th style={{ padding: '8px' }}>Target Strategy</th>
+                  <th style={{ padding: '8px', minWidth: '150px' }}>Category</th>
+                  {sortedHistory.map(doc => (
+                    <th key={doc.generation} style={{ padding: '8px', minWidth: '100px' }}>Gen {doc.generation}</th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {rows}
+                {categoryKeys.map((catKey, i) => (
+                  <tr key={catKey} style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)' }}>
+                    <td style={{ padding: '8px', fontWeight: 'bold' }}>{catKey}</td>
+                    {sortedHistory.map(doc => {
+                      const stats = genStats[doc.generation][catKey];
+                      const a = Math.round((stats.a / stats.total) * 100);
+                      const h = Math.round((stats.h / stats.total) * 100);
+                      const e = Math.round((stats.e / stats.total) * 100);
+                      const p = Math.round((stats.p / stats.total) * 100);
+                      return (
+                        <td key={doc.generation} style={{ padding: '8px', verticalAlign: 'top' }}>
+                          <div style={{ color: '#ef4444' }}>ATK: {a}%</div>
+                          <div style={{ color: '#ec4899' }}>HP: {h}%</div>
+                          <div style={{ color: '#3b82f6' }}>NRG: {e}%</div>
+                          <div style={{ color: '#eab308' }}>PTS: {p}%</div>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
-        </div>
-      );
-    };
+        );
+      };
+
+
 
   return (
     <div style={{ padding: '40px', color: 'white', backgroundColor: '#1a1a2e', minHeight: '100vh' }}>
@@ -479,10 +492,28 @@ export const SimulationDashboard: React.FC<SimulationDashboardProps> = ({ gameNa
                    ))}
                 </select>
               </div>
+              <h4 style={{ margin: '0 0 10px 0' }}>Evolutionary Progress</h4>
+              {renderEvolutionTable(historyDocs)}
+              
               <p style={{ color: 'gray', fontSize: '13px', margin: '0 0 10px 0' }}>
                 This is a map of exactly what this bot targets in all 54 possible game states.
               </p>
-              {bestBotDna && renderReadableDNA(bestBotDna)}
+              <div style={{ maxHeight: '400px', overflowY: 'auto', background: 'rgba(0,0,0,0.5)', padding: '10px', borderRadius: '8px' }}>
+                <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', fontSize: '13px' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid gray' }}>
+                      <th style={{ padding: '8px' }}>Location</th>
+                      <th style={{ padding: '8px' }}>Players</th>
+                      <th style={{ padding: '8px' }}>Health</th>
+                      <th style={{ padding: '8px' }}>Victory Points</th>
+                      <th style={{ padding: '8px' }}>Target Strategy</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {bestBotDna && renderReadableDNA(bestBotDna)}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>
