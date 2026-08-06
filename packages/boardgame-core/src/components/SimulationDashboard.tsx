@@ -72,6 +72,11 @@ export const SimulationDashboard: React.FC<SimulationDashboardProps> = ({ gameNa
       setCurrentGen(data.currentGeneration || 1);
       setGamesCompleted(data.gamesCompleted || 0);
       setIsRunning(data.status === 'running');
+      if (data.config) {
+        setNumGenerations(data.config.numGenerations);
+        setGamesPerGen(data.config.gamesPerGen);
+        setPopSize(data.config.popSize);
+      }
       
       if (data.history && data.history.length > 0) {
         setHistoryDocs(data.history);
