@@ -5,11 +5,14 @@ import { createInitialPopulation, evolvePopulation, getStrategyString, Populatio
 
 export interface SimulationDashboardProps {
   gameName: string;
+  gameType: string;
   reducer: (state: any, action: any) => any;
   initialState: any;
+  onStartGeneticSim?: (config: any) => Promise<string>;
+  onListenGeneticSim?: (simId: string, cb: (data: any) => void) => () => void;
 }
 
-export const SimulationDashboard: React.FC<SimulationDashboardProps> = ({ gameName, reducer, initialState }) => {
+export const SimulationDashboard: React.FC<SimulationDashboardProps> = ({ gameName, gameType, reducer, initialState, onStartGeneticSim, onListenGeneticSim }) => {
   const [mode, setMode] = useState<'standard' | 'genetic'>('standard');
 
   // Standard Mode State
@@ -36,8 +39,33 @@ export const SimulationDashboard: React.FC<SimulationDashboardProps> = ({ gameNa
   const completedRef = useRef(0);
   
   // Genetic Refs
-  const popRef = useRef<PopulationMember[]>([]);
-  const genRef = useRef(0);
+  const [historicalBestDna, setHistoricalBestDna] = useState<number[] | null>(null);
+  const [historyDocs, setHistoryDocs] = useState<any[]>([]);
+  const [selectedGen, setSelectedGen] = useState<number | null>(null);
+  const [simId, setSimId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!simId || !onListenGeneticSim) return;
+    
+    return onListenGeneticSim(simId, (data) => {
+      if (!data) return;
+      setCurrentGen(data.currentGeneration || 1);
+      
+      if (data.history && data.history.length > 0) {
+        setHistoryDocs(data.history);
+        
+        // If user hasn't overridden it, show the latest generation's DNA
+        if (!selectedGen || selectedGen === data.currentGeneration - 1) {
+           const latest = data.history[data.history.length - 1];
+           setBestBotDna(latest.bestDna);
+        }
+      }
+
+      if (data.status === 'finished') {
+        setIsRunning(false);
+      }
+    });
+  }, [simId, onListenGeneticSim, selectedGen]);
 
   useEffect(() => {
     setPlayerConfigs(prev => {
@@ -77,82 +105,22 @@ export const SimulationDashboard: React.FC<SimulationDashboardProps> = ({ gameNa
     }, 0);
   };
 
-  const startGenetic = () => {
+  const startGenetic = async () => {
     setIsRunning(true);
-    setResults([]);
-    setGamesCompleted(0);
     setCurrentGen(1);
     setBestBotDna(null);
+    setHistoryDocs([]);
+    setSelectedGen(null);
     
-    popRef.current = createInitialPopulation(popSize);
-    genRef.current = 1;
-    completedRef.current = 0;
-    resultsRef.current = [];
-    
-    runNextGeneticBatch();
-  };
-
-  const runNextGeneticBatch = () => {
-    if (completedRef.current >= gamesPerGen) {
-      // Generation finished! Evolve!
-      const best = [...popRef.current].sort((a,b) => (b.wins / Math.max(1, b.gamesPlayed)) - (a.wins / Math.max(1, a.gamesPlayed)))[0];
-      setBestBotDna(best.dna);
-
-      if (genRef.current >= numGenerations) {
+    if (onStartGeneticSim) {
+      try {
+        const id = await onStartGeneticSim({ popSize, numGenerations, gamesPerGen, gameType });
+        setSimId(id);
+      } catch (e) {
+        console.error(e);
         setIsRunning(false);
-        return; // All generations done
       }
-      
-      // Evolve
-      popRef.current = evolvePopulation(popRef.current, genRef.current);
-      genRef.current++;
-      setCurrentGen(genRef.current);
-      completedRef.current = 0;
-      resultsRef.current = [];
-      setGamesCompleted(0);
-      
-      // Yield before next generation
-      setTimeout(runNextGeneticBatch, 0);
-      return;
     }
-
-    const batchSize = Math.min(10, gamesPerGen - completedRef.current);
-    
-    // For genetic batch, generate random players per game
-    // To batch this effectively in `runSimulationBatch`, we need identical configs for the batch.
-    // So we'll just run 1 game at a time in a loop synchronously for `batchSize` games, then yield.
-    
-    let batchResults: SimulationResult[] = [];
-    
-    try {
-        for (let i = 0; i < batchSize; i++) {
-          const gamePlayersCount = Math.floor(Math.random() * 5) + 2; // 2 to 6
-          const pConfigs: PlayerConfig[] = [];
-          const selectedBots: PopulationMember[] = [];
-          
-          for (let p = 0; p < gamePlayersCount; p++) {
-            const bot = popRef.current[Math.floor(Math.random() * popRef.current.length)];
-            selectedBots.push(bot);
-            pConfigs.push({ id: bot.id, botStrategy: getStrategyString(bot.dna) });
-          }
-          
-          // Run 1 game synchronously
-          runSimulationBatch(reducer, initialState, pConfigs, 1, (res) => {
-            batchResults.push(res[0]);
-            selectedBots.forEach(b => b.gamesPlayed++);
-            if (res[0].winnerId) {
-              const winnerBot = selectedBots.find(b => b.id === res[0].winnerId);
-              if (winnerBot) winnerBot.wins++;
-            }
-          });
-        }
-    } catch (e) {
-       console.error(e);
-    }
-
-    completedRef.current += batchSize;
-    setGamesCompleted(completedRef.current);
-    setTimeout(runNextGeneticBatch, 0);
   };
 
   const strategyWins: Record<string, number> = {};
@@ -184,10 +152,19 @@ export const SimulationDashboard: React.FC<SimulationDashboardProps> = ({ gameNa
 
       const addStat = (statObj: any, mask: number) => {
         statObj.total++;
-        if ((mask & 1) > 0) statObj.a++;
-        if ((mask & 2) > 0) statObj.h++;
-        if ((mask & 4) > 0) statObj.e++;
-        if ((mask & 8) > 0) statObj.p++;
+        let activeTraits = 0;
+        if ((mask & 1) > 0) activeTraits++;
+        if ((mask & 2) > 0) activeTraits++;
+        if ((mask & 4) > 0) activeTraits++;
+        if ((mask & 8) > 0) activeTraits++;
+        
+        if (activeTraits > 0) {
+          const weight = 1 / activeTraits;
+          if ((mask & 1) > 0) statObj.a += weight;
+          if ((mask & 2) > 0) statObj.h += weight;
+          if ((mask & 4) > 0) statObj.e += weight;
+          if ((mask & 8) > 0) statObj.p += weight;
+        }
       };
 
       for (let inTokyo = 0; inTokyo < 2; inTokyo++) {
@@ -356,21 +333,36 @@ export const SimulationDashboard: React.FC<SimulationDashboardProps> = ({ gameNa
         </div>
       )}
 
-      {(isRunning || bestBotDna) && mode === 'genetic' && (
+      {(isRunning || historyDocs.length > 0) && mode === 'genetic' && (
         <div style={{ marginTop: '30px', background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '12px', maxWidth: '800px' }}>
           <h2>Generation: {currentGen} / {numGenerations}</h2>
-          <p>Games Played: {gamesCompleted} / {gamesPerGen}</p>
-          <div style={{ width: '100%', height: '20px', background: 'rgba(0,0,0,0.4)', borderRadius: '10px', overflow: 'hidden', marginTop: '15px', marginBottom: '20px' }}>
-            <div style={{ width: `${(gamesCompleted / gamesPerGen) * 100}%`, height: '100%', background: '#a855f7', transition: 'width 0.1s' }} />
-          </div>
+          
+          {isRunning && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', color: '#4ade80' }}>
+               <div style={{ width: '20px', height: '20px', border: '3px solid #4ade80', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+               Computing massively parallel simulation on backend...
+            </div>
+          )}
 
-          {bestBotDna && (
+          {historyDocs.length > 0 && (
             <div style={{ marginTop: '20px', background: 'rgba(0,0,0,0.3)', padding: '20px', borderRadius: '8px' }}>
-              <h3 style={{ color: '#4ade80', margin: '0 0 10px 0' }}>🏆 Best Bot DNA (Current Generation Leader)</h3>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                <h3 style={{ color: '#4ade80', margin: 0 }}>🏆 Best Bot DNA</h3>
+                <select value={selectedGen || currentGen - 1} onChange={e => {
+                   const gen = parseInt(e.target.value);
+                   setSelectedGen(gen);
+                   const doc = historyDocs.find(d => d.generation === gen);
+                   if (doc) setBestBotDna(doc.bestDna);
+                }} style={{ background: 'rgba(0,0,0,0.4)', color: 'white', border: '1px solid gray', borderRadius: '4px', padding: '8px' }}>
+                   {historyDocs.map(d => (
+                     <option key={d.generation} value={d.generation}>Generation {d.generation}</option>
+                   ))}
+                </select>
+              </div>
               <p style={{ color: 'gray', fontSize: '13px', margin: '0 0 10px 0' }}>
                 This is a map of exactly what this bot targets in all 54 possible game states.
               </p>
-              {renderReadableDNA(bestBotDna)}
+              {bestBotDna && renderReadableDNA(bestBotDna)}
             </div>
           )}
         </div>

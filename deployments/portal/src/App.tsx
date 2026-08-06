@@ -1,4 +1,6 @@
 import { Routes, Route, useNavigate, useParams, useLocation } from 'react-router-dom';
+import { httpsCallable } from 'firebase/functions';
+import { db, functions } from './firebase';
 import { Lobby } from '@erez/boardgame-core';
 import { FlipsBoard, flipsReducer, initialFlipsState } from '@erez/flips';
 import type { FlipsState, FlipsAction } from '@erez/flips';
@@ -143,14 +145,30 @@ function ActiveGameWrapper() {
 }
 
 function SimulationWrapper() {
-  const { gameType } = useParams();
+  const { view } = useParams();
 
-  if (gameType === 'flips') {
-    return <SimulationDashboard gameName="Flips" reducer={flipsReducer as any} initialState={initialFlipsState} />;
+  const handleStartGeneticSim = async (config: any) => {
+    const startGeneticEvolution = httpsCallable(functions, 'startGeneticEvolution');
+    const result = await startGeneticEvolution(config);
+    return (result.data as any).simId;
+  };
+
+  const handleListenGeneticSim = (simId: string, cb: (data: any) => void) => {
+    import('firebase/firestore').then(({ doc, onSnapshot }) => {
+      const unsubscribe = onSnapshot(doc(db, 'genetic_simulations', simId), (snapshot) => {
+        cb(snapshot.data());
+      });
+      return unsubscribe;
+    });
+    return () => {};
+  };
+
+  if (view === 'sim-flips') {
+    return <SimulationDashboard gameName="Flips" gameType="flips" reducer={flipsReducer as any} initialState={initialFlipsState} onStartGeneticSim={handleStartGeneticSim} onListenGeneticSim={handleListenGeneticSim} />;
   }
   
-  if (gameType === 'king-of-tokyo') {
-    return <SimulationDashboard gameName="King of Tokyo" reducer={kingOfTokyoReducer as any} initialState={initialKotState} />;
+  if (view === 'sim-kot') {
+    return <SimulationDashboard gameName="King of Tokyo" gameType="king-of-tokyo" reducer={kingOfTokyoReducer as any} initialState={initialKotState} onStartGeneticSim={handleStartGeneticSim} onListenGeneticSim={handleListenGeneticSim} />;
   }
 
   return <div style={{ color: 'white', padding: '40px' }}>Unknown game type for simulation</div>;

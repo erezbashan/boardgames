@@ -7,6 +7,8 @@ import * as admin from "firebase-admin";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { flipsReducer, initialFlipsState, FlipsAction } from "@erez/flips/dist/engine/reducer";
 import { kingOfTokyoReducer, initialKotState } from "@erez/king-of-tokyo/dist/engine/reducer";
+import { createInitialPopulation, evolvePopulation, getStrategyString } from "@erez/boardgame-core/dist/engine/geneticAlgorithm";
+import { runSimulationBatch as coreRunSimulationBatch } from "@erez/boardgame-core/dist/engine/simulateGame";
 
 admin.initializeApp();
 const db = getFirestore();
@@ -121,5 +123,105 @@ export const onGameUpdated = onDocumentUpdated("games/{gameId}", async (event) =
     }
 
     transaction.update(gameRef, { state: newState });
+  });
+});
+
+export const startGeneticEvolution = onCall(async (request) => {
+  const { popSize, numGenerations, gamesPerGen, gameType } = request.data;
+  
+  const pop = createInitialPopulation(popSize || 750);
+  
+  const simRef = db.collection('genetic_simulations').doc();
+  await simRef.set({
+    status: 'running',
+    gameType: gameType || 'king-of-tokyo',
+    config: {
+      popSize: popSize || 750,
+      numGenerations: numGenerations || 10,
+      gamesPerGen: gamesPerGen || 20000
+    },
+    currentGeneration: 1,
+    population: JSON.stringify(pop),
+    history: [],
+    createdAt: FieldValue.serverTimestamp()
+  });
+
+  return { simId: simRef.id };
+});
+
+export const onGeneticSimulationUpdated = onDocumentUpdated("genetic_simulations/{simId}", async (event) => {
+  const data = event.data?.after.data();
+  const prevData = event.data?.before.data();
+  if (!data) return;
+
+  // Only trigger if it was just created, or if currentGeneration changed and it's still running
+  // We can use a trick: to prevent infinite loops from random updates, only proceed if status is running
+  // and we haven't already processed this generation.
+  // Actually, wait, if we process a generation, we increment currentGeneration, which triggers this function again!
+  // That's exactly the recursive loop we want. But we must be careful not to trigger if we just updated history but not generation.
+  if (data.status !== 'running') return;
+  if (prevData && prevData.status === 'running' && prevData.currentGeneration === data.currentGeneration) {
+    // Already processed or some other field updated
+    return;
+  }
+
+  const { currentGeneration, config, gameType } = data;
+  
+  if (currentGeneration > config.numGenerations) {
+    return event.data?.after.ref.update({ status: 'finished' });
+  }
+
+  const pop = JSON.parse(data.population);
+  const gamesPerGen = config.gamesPerGen;
+
+  let reducer: any;
+  let initialState: any;
+  if (gameType === 'flips') {
+    reducer = flipsReducer;
+    initialState = initialFlipsState;
+  } else {
+    reducer = kingOfTokyoReducer;
+    initialState = initialKotState;
+  }
+
+  console.log(`Starting Genetic Sim ${event.params.simId} Gen ${currentGeneration} (${gamesPerGen} games)`);
+  
+  // We will run this entirely synchronously. 20,000 games takes ~5 seconds in Node.
+  for (let i = 0; i < gamesPerGen; i++) {
+    const gamePlayersCount = Math.floor(Math.random() * 5) + 2; // 2 to 6
+    const pConfigs: any[] = [];
+    const selectedBots: any[] = [];
+    
+    for (let p = 0; p < gamePlayersCount; p++) {
+      const bot = pop[Math.floor(Math.random() * pop.length)];
+      selectedBots.push(bot);
+      pConfigs.push({ id: bot.id, botStrategy: getStrategyString(bot.dna) });
+    }
+    
+    coreRunSimulationBatch(reducer, initialState, pConfigs, 1, (res: any) => {
+      selectedBots.forEach(b => b.gamesPlayed++);
+      if (res[0].winnerId) {
+        const winnerBot = selectedBots.find(b => b.id === res[0].winnerId);
+        if (winnerBot) winnerBot.wins++;
+      }
+    });
+  }
+
+  // Evolve!
+  const best = [...pop].sort((a,b) => (b.wins / Math.max(1, b.gamesPlayed)) - (a.wins / Math.max(1, a.gamesPlayed)))[0];
+  const newPop = evolvePopulation(pop, currentGeneration);
+
+  const newHistory = [...(data.history || []), {
+    generation: currentGeneration,
+    bestDna: best.dna,
+    wins: best.wins,
+    gamesPlayed: best.gamesPlayed
+  }];
+
+  await event.data?.after.ref.update({
+    currentGeneration: currentGeneration + 1,
+    population: JSON.stringify(newPop),
+    history: newHistory,
+    updatedAt: FieldValue.serverTimestamp()
   });
 });
