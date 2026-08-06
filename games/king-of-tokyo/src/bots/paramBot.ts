@@ -61,8 +61,7 @@ export function getParamBotAction(state: KotState, playerId: string): KotAction 
     state.dice.forEach(d => {
        let keep = false;
        if (d.value === 'Smash' && targetAttack) keep = true;
-       // Hearts don't heal in Tokyo, so don't keep them if in Tokyo even if Health is targeted
-       else if (d.value === 'Heart' && targetHealth && !inTokyo) keep = true;
+       else if (d.value === 'Heart' && targetHealth) keep = true;
        else if (d.value === 'Energy' && targetEnergy) keep = true;
 
        if (keep) {
