@@ -10,8 +10,10 @@ export function handleEndTurn(st: KotState, action: PendingAction, pId: string) 
       addLog(st, action, `${st.players[pId].name} takes an extra turn due to Frenzy!`);
   } else {
       nextIdx = (st.currentPlayerIndex + 1) % st.playerOrder.length;
-      while (st.players[st.playerOrder[nextIdx]].health <= 0) {
+      let safeGuard = 0;
+      while (st.players[st.playerOrder[nextIdx]].health <= 0 && safeGuard < st.playerOrder.length) {
           nextIdx = (nextIdx + 1) % st.playerOrder.length;
+          safeGuard++;
       }
   }
   

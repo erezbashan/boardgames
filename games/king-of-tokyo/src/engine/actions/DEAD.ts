@@ -28,7 +28,12 @@ export function handleDead(st: KotState, action: PendingAction, pId: string) {
       }
    }
 
-   if (alive.length <= 1 && alive.length > 0) {
+   if (alive.length === 0) {
+      addLog(st, action, `All monsters died! It's a draw!`);
+      st.status = 'Finished';
+      st.winnerId = null;
+      st.pendingActions = [];
+   } else if (alive.length === 1) {
       addLog(st, action, `${st.players[alive[0]].name} is the last monster standing 🏆`);
       st.status = 'Finished';
       st.winnerId = alive[0];
