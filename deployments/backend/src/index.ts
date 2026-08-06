@@ -2,7 +2,7 @@
 require.extensions['.css'] = () => {};
 
 import { onCall, HttpsError } from "firebase-functions/v2/https";
-import { onDocumentUpdated } from "firebase-functions/v2/firestore";
+import { onDocumentWritten, onDocumentUpdated } from "firebase-functions/v2/firestore";
 import * as admin from "firebase-admin";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { flipsReducer, initialFlipsState, FlipsAction } from "@erez/flips/dist/engine/reducer";
@@ -93,8 +93,8 @@ export const onGameUpdated = onDocumentUpdated("games/{gameId}", async (event) =
     await new Promise(r => setTimeout(r, scheduledAction.delayMs));
   }
 
-  const gameRef = event.data!.after.ref;
   const gameId = event.params.gameId;
+  const gameRef = db.collection('games').doc(gameId);
   return db.runTransaction(async (transaction) => {
     const gameDoc = await transaction.get(gameRef);
     if (!gameDoc.exists) return;
@@ -150,9 +150,9 @@ export const startGeneticEvolution = onCall(async (request) => {
   return { simId: simRef.id };
 });
 
-export const onGeneticSimulationUpdated = onDocumentUpdated("genetic_simulations/{simId}", async (event) => {
+export const onGeneticSimulationUpdated = onDocumentWritten("genetic_simulations/{simId}", async (event) => {
   const data = event.data?.after.data();
-  const prevData = event.data?.before.data();
+  const prevData = event.data?.before?.data();
   if (!data) return;
 
   // Only trigger if it was just created, or if currentGeneration changed and it's still running
@@ -168,8 +168,10 @@ export const onGeneticSimulationUpdated = onDocumentUpdated("genetic_simulations
 
   const { currentGeneration, config, gameType } = data;
   
+  const simRef = db.collection('genetic_simulations').doc(event.params.simId);
+
   if (currentGeneration > config.numGenerations) {
-    return event.data?.after.ref.update({ status: 'finished' });
+    return simRef.update({ status: 'finished' });
   }
 
   const pop = JSON.parse(data.population);
@@ -215,7 +217,7 @@ export const onGeneticSimulationUpdated = onDocumentUpdated("genetic_simulations
     gamesCompleted += chunk;
     
     // Update progress in Firestore so the UI sees it
-    await event.data?.after.ref.update({ gamesCompleted });
+    await simRef.update({ gamesCompleted });
     
     // Yield to the event loop so the Firebase SDK can actually send the network request
     await new Promise(r => setTimeout(r, 10));
@@ -232,7 +234,7 @@ export const onGeneticSimulationUpdated = onDocumentUpdated("genetic_simulations
     gamesPlayed: best.gamesPlayed
   }];
 
-  await event.data?.after.ref.update({
+  await simRef.update({
     currentGeneration: currentGeneration + 1,
     gamesCompleted: 0,
     population: JSON.stringify(newPop),
