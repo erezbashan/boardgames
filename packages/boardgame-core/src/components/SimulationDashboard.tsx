@@ -50,6 +50,7 @@ export const SimulationDashboard: React.FC<SimulationDashboardProps> = ({ gameNa
     return onListenGeneticSim(simId, (data) => {
       if (!data) return;
       setCurrentGen(data.currentGeneration || 1);
+      setGamesCompleted(data.gamesCompleted || 0);
       
       if (data.history && data.history.length > 0) {
         setHistoryDocs(data.history);
@@ -338,9 +339,15 @@ export const SimulationDashboard: React.FC<SimulationDashboardProps> = ({ gameNa
           <h2>Generation: {currentGen} / {numGenerations}</h2>
           
           {isRunning && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', color: '#4ade80' }}>
-               <div style={{ width: '20px', height: '20px', border: '3px solid #4ade80', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
-               Computing massively parallel simulation on backend...
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '15px', color: '#4ade80' }}>
+                 <div style={{ width: '20px', height: '20px', border: '3px solid #4ade80', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                 Computing massively parallel simulation on backend...
+              </div>
+              <p style={{ marginTop: '10px' }}>Games Played: {gamesCompleted} / {gamesPerGen}</p>
+              <div style={{ width: '100%', height: '20px', background: 'rgba(0,0,0,0.4)', borderRadius: '10px', overflow: 'hidden', marginTop: '10px', marginBottom: '20px' }}>
+                <div style={{ width: `${(gamesCompleted / gamesPerGen) * 100}%`, height: '100%', background: '#a855f7', transition: 'width 0.1s' }} />
+              </div>
             </div>
           )}
 

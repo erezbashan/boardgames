@@ -141,6 +141,7 @@ export const startGeneticEvolution = onCall(async (request) => {
       gamesPerGen: gamesPerGen || 20000
     },
     currentGeneration: 1,
+    gamesCompleted: 0,
     population: JSON.stringify(pop),
     history: [],
     createdAt: FieldValue.serverTimestamp()
@@ -186,25 +187,38 @@ export const onGeneticSimulationUpdated = onDocumentUpdated("genetic_simulations
 
   console.log(`Starting Genetic Sim ${event.params.simId} Gen ${currentGeneration} (${gamesPerGen} games)`);
   
-  // We will run this entirely synchronously. 20,000 games takes ~5 seconds in Node.
-  for (let i = 0; i < gamesPerGen; i++) {
-    const gamePlayersCount = Math.floor(Math.random() * 5) + 2; // 2 to 6
-    const pConfigs: any[] = [];
-    const selectedBots: any[] = [];
-    
-    for (let p = 0; p < gamePlayersCount; p++) {
-      const bot = pop[Math.floor(Math.random() * pop.length)];
-      selectedBots.push(bot);
-      pConfigs.push({ id: bot.id, botStrategy: getStrategyString(bot.dna) });
-    }
-    
-    coreRunSimulationBatch(reducer, initialState, pConfigs, 1, (res: any) => {
-      selectedBots.forEach(b => b.gamesPlayed++);
-      if (res[0].winnerId) {
-        const winnerBot = selectedBots.find(b => b.id === res[0].winnerId);
-        if (winnerBot) winnerBot.wins++;
+  const BATCH_SIZE = Math.min(2000, gamesPerGen);
+  let gamesCompleted = 0;
+
+  while (gamesCompleted < gamesPerGen) {
+    const chunk = Math.min(BATCH_SIZE, gamesPerGen - gamesCompleted);
+    for (let i = 0; i < chunk; i++) {
+      const gamePlayersCount = Math.floor(Math.random() * 5) + 2; // 2 to 6
+      const pConfigs: any[] = [];
+      const selectedBots: any[] = [];
+      
+      for (let p = 0; p < gamePlayersCount; p++) {
+        const bot = pop[Math.floor(Math.random() * pop.length)];
+        selectedBots.push(bot);
+        pConfigs.push({ id: bot.id, botStrategy: getStrategyString(bot.dna) });
       }
-    });
+      
+      coreRunSimulationBatch(reducer, initialState, pConfigs, 1, (res: any) => {
+        selectedBots.forEach(b => b.gamesPlayed++);
+        if (res[0].winnerId) {
+          const winnerBot = selectedBots.find(b => b.id === res[0].winnerId);
+          if (winnerBot) winnerBot.wins++;
+        }
+      });
+    }
+
+    gamesCompleted += chunk;
+    
+    // Update progress in Firestore so the UI sees it
+    await event.data?.after.ref.update({ gamesCompleted });
+    
+    // Yield to the event loop so the Firebase SDK can actually send the network request
+    await new Promise(r => setTimeout(r, 10));
   }
 
   // Evolve!
@@ -220,6 +234,7 @@ export const onGeneticSimulationUpdated = onDocumentUpdated("genetic_simulations
 
   await event.data?.after.ref.update({
     currentGeneration: currentGeneration + 1,
+    gamesCompleted: 0,
     population: JSON.stringify(newPop),
     history: newHistory,
     updatedAt: FieldValue.serverTimestamp()
