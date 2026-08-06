@@ -145,7 +145,7 @@ function ActiveGameWrapper() {
 }
 
 function SimulationWrapper() {
-  const { view } = useParams();
+  const { gameType } = useParams();
 
   const handleStartGeneticSim = async (config: any) => {
     const startGeneticEvolution = httpsCallable(functions, 'startGeneticEvolution');
@@ -163,11 +163,11 @@ function SimulationWrapper() {
     return () => {};
   };
 
-  if (view === 'sim-flips') {
+  if (gameType === 'flips') {
     return <SimulationDashboard gameName="Flips" gameType="flips" reducer={flipsReducer as any} initialState={initialFlipsState} onStartGeneticSim={handleStartGeneticSim} onListenGeneticSim={handleListenGeneticSim} />;
   }
   
-  if (view === 'sim-kot') {
+  if (gameType === 'king-of-tokyo') {
     return <SimulationDashboard gameName="King of Tokyo" gameType="king-of-tokyo" reducer={kingOfTokyoReducer as any} initialState={initialKotState} onStartGeneticSim={handleStartGeneticSim} onListenGeneticSim={handleListenGeneticSim} />;
   }
 
