@@ -118,8 +118,8 @@ export function kingOfTokyoReducer(state: KotState = initialKotState, action: Ko
   const gamePrefix = action.gameId ? `[${action.gameId}]` : '';
   state = JSON.parse(JSON.stringify(state)); // Deep clone state to prevent optimistic UI mutation leaks
   if (action.type !== 'NOP') {
-    console.log(`kingOfTokyoReducer ${gamePrefix} INCOMING:`, action.type);
-    console.log(`kingOfTokyoReducer ${gamePrefix} PENDING:`, state.pendingActions?.map(a => a.type).join(', '));
+    // console.log(`kingOfTokyoReducer ${gamePrefix} INCOMING:`, action.type);
+    // console.log(`kingOfTokyoReducer ${gamePrefix} PENDING:`, state.pendingActions?.map(a => a.type).join(', '));
   }
   
   // run framework commands if any:
