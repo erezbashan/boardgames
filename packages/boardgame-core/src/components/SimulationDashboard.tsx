@@ -8,11 +8,15 @@ export interface SimulationDashboardProps {
   gameType: string;
   reducer: (state: any, action: any) => any;
   initialState: any;
+  simId?: string; // Optional URL parameter for detail view
   onStartGeneticSim?: (config: any) => Promise<string>;
   onListenGeneticSim?: (simId: string, cb: (data: any) => void) => () => void;
+  onListGeneticSims?: (gameType: string, cb: (sims: any[]) => void) => () => void;
+  onStopGeneticSim?: (simId: string) => Promise<void>;
+  onNavigateToSim?: (simId: string) => void;
 }
 
-export const SimulationDashboard: React.FC<SimulationDashboardProps> = ({ gameName, gameType, reducer, initialState, onStartGeneticSim, onListenGeneticSim }) => {
+export const SimulationDashboard: React.FC<SimulationDashboardProps> = ({ gameName, gameType, reducer, initialState, simId: urlSimId, onStartGeneticSim, onListenGeneticSim, onListGeneticSims, onStopGeneticSim, onNavigateToSim }) => {
   const [mode, setMode] = useState<'standard' | 'genetic'>('standard');
 
   // Standard Mode State
@@ -42,10 +46,26 @@ export const SimulationDashboard: React.FC<SimulationDashboardProps> = ({ gameNa
   const [historicalBestDna, setHistoricalBestDna] = useState<number[] | null>(null);
   const [historyDocs, setHistoryDocs] = useState<any[]>([]);
   const [selectedGen, setSelectedGen] = useState<number | null>(null);
-  const [simId, setSimId] = useState<string | null>(null);
+  const [simId, setSimId] = useState<string | null>(urlSimId || null);
+  const [simList, setSimList] = useState<any[]>([]);
+  const [isListView, setIsListView] = useState<boolean>(!urlSimId);
+
+  // Sync state if urlSimId changes
+  useEffect(() => {
+    setSimId(urlSimId || null);
+    setIsListView(!urlSimId);
+  }, [urlSimId]);
 
   useEffect(() => {
-    if (!simId || !onListenGeneticSim) return;
+    if (isListView && onListGeneticSims) {
+      return onListGeneticSims(gameType, (sims) => {
+        setSimList(sims);
+      });
+    }
+  }, [isListView, onListGeneticSims, gameType]);
+
+  useEffect(() => {
+    if (isListView || !simId || !onListenGeneticSim) return;
     
     return onListenGeneticSim(simId, (data) => {
       if (!data) return;
@@ -116,11 +136,23 @@ export const SimulationDashboard: React.FC<SimulationDashboardProps> = ({ gameNa
     if (onStartGeneticSim) {
       try {
         const id = await onStartGeneticSim({ popSize, numGenerations, gamesPerGen, gameType });
-        setSimId(id);
+        if (onNavigateToSim) {
+          onNavigateToSim(id);
+        } else {
+          setSimId(id);
+          setIsListView(false);
+        }
       } catch (e) {
         console.error(e);
         setIsRunning(false);
       }
+    }
+  };
+
+  const handleStopSim = async (id: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (onStopGeneticSim) {
+      await onStopGeneticSim(id);
     }
   };
 
@@ -263,10 +295,27 @@ export const SimulationDashboard: React.FC<SimulationDashboardProps> = ({ gameNa
       <h1 style={{ marginBottom: '20px' }}>{gameName} Bot Simulation</h1>
       
       {!isRunning && (
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
-          <button onClick={() => setMode('standard')} style={{ padding: '10px', background: mode === 'standard' ? '#3b82f6' : '#334155', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Standard Mode</button>
-          <button onClick={() => setMode('genetic')} style={{ padding: '10px', background: mode === 'genetic' ? '#3b82f6' : '#334155', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Genetic Evolution</button>
-        </div>
+        <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
+        <button 
+          onClick={() => {
+            setMode('standard');
+            setIsListView(false);
+          }}
+          style={{ background: mode === 'standard' && !isListView ? '#3b82f6' : 'rgba(255,255,255,0.1)', color: 'white', padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer' }}
+        >
+          Head-to-Head Simulation
+        </button>
+        <button 
+          onClick={() => {
+            setMode('genetic');
+            setIsListView(true); // Always go to list view when clicking the main tab
+            if (onNavigateToSim) onNavigateToSim(''); // clear URL
+          }}
+          style={{ background: mode === 'genetic' || isListView ? '#4ade80' : 'rgba(255,255,255,0.1)', color: mode === 'genetic' ? 'black' : 'white', padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer' }}
+        >
+          Genetic Evolution
+        </button>
+      </div>
       )}
 
       {mode === 'standard' && !isRunning && (
@@ -304,24 +353,72 @@ export const SimulationDashboard: React.FC<SimulationDashboardProps> = ({ gameNa
         </div>
       )}
 
-      {mode === 'genetic' && !isRunning && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '600px', background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '12px' }}>
-          <div>
-            <label style={{ marginRight: '10px' }}>Population Size: </label>
-            <input type="number" value={popSize} onChange={e => setPopSize(parseInt(e.target.value) || 10)} style={{ padding: '8px', borderRadius: '4px', border: '1px solid gray', background: 'rgba(0,0,0,0.2)', color: 'white' }} />
-          </div>
-          <div>
-            <label style={{ marginRight: '10px' }}>Generations: </label>
-            <input type="number" value={numGenerations} onChange={e => setNumGenerations(parseInt(e.target.value) || 1)} style={{ padding: '8px', borderRadius: '4px', border: '1px solid gray', background: 'rgba(0,0,0,0.2)', color: 'white' }} />
-          </div>
-          <div>
-            <label style={{ marginRight: '10px' }}>Games per Gen: </label>
-            <input type="number" value={gamesPerGen} onChange={e => setGamesPerGen(parseInt(e.target.value) || 100)} style={{ padding: '8px', borderRadius: '4px', border: '1px solid gray', background: 'rgba(0,0,0,0.2)', color: 'white' }} />
+      {mode === 'genetic' && isListView && (
+        <div style={{ marginTop: '20px' }}>
+          <div style={{ background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '12px', maxWidth: '800px', marginBottom: '30px' }}>
+            <h3>Start New Evolution</h3>
+            <div style={{ display: 'flex', gap: '20px', marginTop: '15px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', color: 'gray', marginBottom: '5px' }}>Population Size</label>
+                <input type="number" value={popSize} onChange={e => setPopSize(parseInt(e.target.value))} style={{ background: 'rgba(0,0,0,0.5)', color: 'white', border: '1px solid gray', padding: '8px', borderRadius: '4px', width: '120px' }} />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', color: 'gray', marginBottom: '5px' }}>Generations</label>
+                <input type="number" value={numGenerations} onChange={e => setNumGenerations(parseInt(e.target.value))} style={{ background: 'rgba(0,0,0,0.5)', color: 'white', border: '1px solid gray', padding: '8px', borderRadius: '4px', width: '120px' }} />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', color: 'gray', marginBottom: '5px' }}>Games per Generation</label>
+                <input type="number" value={gamesPerGen} onChange={e => setGamesPerGen(parseInt(e.target.value))} style={{ background: 'rgba(0,0,0,0.5)', color: 'white', border: '1px solid gray', padding: '8px', borderRadius: '4px', width: '120px' }} />
+              </div>
+            </div>
+            <button 
+              onClick={startGenetic}
+              style={{ marginTop: '20px', background: '#4ade80', color: 'black', padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
+            >
+              Start Evolution
+            </button>
           </div>
 
-          <button onClick={startGenetic} style={{ padding: '12px 24px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
-            Start Genetic Evolution
-          </button>
+          <div style={{ background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '12px', maxWidth: '800px' }}>
+            <h3>Past & Ongoing Simulations</h3>
+            {simList.length === 0 ? (
+              <p style={{ color: 'gray' }}>No simulations found for this game.</p>
+            ) : (
+              <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', marginTop: '15px' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid gray' }}>
+                    <th style={{ padding: '10px' }}>ID</th>
+                    <th style={{ padding: '10px' }}>Status</th>
+                    <th style={{ padding: '10px' }}>Generation</th>
+                    <th style={{ padding: '10px' }}>Created</th>
+                    <th style={{ padding: '10px' }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {simList.map(s => (
+                    <tr key={s.id} onClick={() => onNavigateToSim ? onNavigateToSim(s.id) : (setSimId(s.id), setIsListView(false))} style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', ':hover': { background: 'rgba(255,255,255,0.05)' } } as any}>
+                      <td style={{ padding: '10px', color: '#3b82f6', textDecoration: 'underline' }}>{s.id.substring(0, 8)}...</td>
+                      <td style={{ padding: '10px', color: s.status === 'running' ? '#4ade80' : s.status === 'stopped' ? '#ef4444' : 'gray' }}>{s.status.toUpperCase()}</td>
+                      <td style={{ padding: '10px' }}>{s.currentGeneration} / {s.config?.numGenerations || '?'}</td>
+                      <td style={{ padding: '10px', fontSize: '12px', color: 'gray' }}>
+                        {s.createdAt?.toDate ? s.createdAt.toDate().toLocaleString() : 'Just now'}
+                      </td>
+                      <td style={{ padding: '10px' }}>
+                        {s.status === 'running' && (
+                          <button 
+                            onClick={(e) => handleStopSim(s.id, e)}
+                            style={{ background: '#ef4444', color: 'white', padding: '4px 10px', borderRadius: '4px', border: 'none', cursor: 'pointer', fontSize: '12px' }}
+                          >
+                            Stop
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
         </div>
       )}
 
@@ -334,9 +431,19 @@ export const SimulationDashboard: React.FC<SimulationDashboardProps> = ({ gameNa
         </div>
       )}
 
-      {(isRunning || historyDocs.length > 0) && mode === 'genetic' && (
+      {(isRunning || historyDocs.length > 0) && mode === 'genetic' && !isListView && (
         <div style={{ marginTop: '30px', background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '12px', maxWidth: '800px' }}>
-          <h2>Generation: {currentGen} / {numGenerations}</h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h2>Generation: {currentGen} / {numGenerations}</h2>
+            {isRunning && (
+              <button 
+                 onClick={() => simId && handleStopSim(simId)}
+                 style={{ background: '#ef4444', color: 'white', padding: '8px 16px', borderRadius: '6px', border: 'none', cursor: 'pointer' }}
+              >
+                 Stop Simulation
+              </button>
+            )}
+          </div>
           
           {isRunning && (
             <div>

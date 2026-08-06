@@ -145,7 +145,8 @@ function ActiveGameWrapper() {
 }
 
 function SimulationWrapper() {
-  const { gameType } = useParams();
+  const { gameType, simId } = useParams();
+  const navigate = useNavigate();
 
   const handleStartGeneticSim = async (config: any) => {
     const startGeneticEvolution = httpsCallable(functions, 'startGeneticEvolution');
@@ -163,12 +164,37 @@ function SimulationWrapper() {
     return () => {};
   };
 
+  const handleListGeneticSims = (gt: string, cb: (sims: any[]) => void) => {
+    import('firebase/firestore').then(({ collection, query, where, onSnapshot, orderBy }) => {
+      const q = query(collection(db, 'genetic_simulations'), where('gameType', '==', gt), orderBy('createdAt', 'desc'));
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const sims = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        cb(sims);
+      });
+      return unsubscribe;
+    });
+    return () => {};
+  };
+
+  const handleStopGeneticSim = async (id: string) => {
+    const { doc, updateDoc } = await import('firebase/firestore');
+    await updateDoc(doc(db, 'genetic_simulations', id), { status: 'stopped' });
+  };
+
+  const handleNavigateToSim = (id: string) => {
+    if (id) {
+      navigate(`/simulation/${gameType}/${id}`);
+    } else {
+      navigate(`/simulation/${gameType}`);
+    }
+  };
+
   if (gameType === 'flips') {
-    return <SimulationDashboard gameName="Flips" gameType="flips" reducer={flipsReducer as any} initialState={initialFlipsState} onStartGeneticSim={handleStartGeneticSim} onListenGeneticSim={handleListenGeneticSim} />;
+    return <SimulationDashboard gameName="Flips" gameType="flips" simId={simId} reducer={flipsReducer as any} initialState={initialFlipsState} onStartGeneticSim={handleStartGeneticSim} onListenGeneticSim={handleListenGeneticSim} onListGeneticSims={handleListGeneticSims} onStopGeneticSim={handleStopGeneticSim} onNavigateToSim={handleNavigateToSim} />;
   }
   
   if (gameType === 'king-of-tokyo') {
-    return <SimulationDashboard gameName="King of Tokyo" gameType="king-of-tokyo" reducer={kingOfTokyoReducer as any} initialState={initialKotState} onStartGeneticSim={handleStartGeneticSim} onListenGeneticSim={handleListenGeneticSim} />;
+    return <SimulationDashboard gameName="King of Tokyo" gameType="king-of-tokyo" simId={simId} reducer={kingOfTokyoReducer as any} initialState={initialKotState} onStartGeneticSim={handleStartGeneticSim} onListenGeneticSim={handleListenGeneticSim} onListGeneticSims={handleListGeneticSims} onStopGeneticSim={handleStopGeneticSim} onNavigateToSim={handleNavigateToSim} />;
   }
 
   return <div style={{ color: 'white', padding: '40px' }}>Unknown game type for simulation</div>;
@@ -181,6 +207,7 @@ function App() {
       <Route path="/:gameType" element={<GameLobbyWrapper />} />
       <Route path="/:gameType/:gameId" element={<ActiveGameWrapper />} />
       <Route path="/simulation/:gameType" element={<SimulationWrapper />} />
+      <Route path="/simulation/:gameType/:simId" element={<SimulationWrapper />} />
     </Routes>
   );
 }
