@@ -193,8 +193,8 @@ export const onGeneticSimulationUpdated = onDocumentWritten({
   console.log(`Starting Genetic Sim ${event.params.simId} Gen ${currentGeneration} (${gamesPerGen} games)`);
   
   // Dynamically calculate a batch size so we get at least 10 progress updates per generation
-  // Cap it at max 1000 to keep the event loop somewhat responsive
-  const BATCH_SIZE = Math.max(10, Math.min(1000, Math.floor(gamesPerGen / 10)));
+  // Cap it at max 500 to keep the UI updating smoothly and the event loop responsive
+  const BATCH_SIZE = Math.max(10, Math.min(500, Math.floor(gamesPerGen / 10)));
   let gamesCompleted = 0;
 
   while (gamesCompleted < gamesPerGen) {
