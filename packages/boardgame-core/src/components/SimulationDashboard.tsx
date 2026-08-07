@@ -54,6 +54,9 @@ export const SimulationDashboard: React.FC<SimulationDashboardProps> = ({ gameNa
   useEffect(() => {
     setSimId(urlSimId || null);
     setIsListView(!urlSimId);
+    if (urlSimId) {
+      setMode('genetic');
+    }
   }, [urlSimId]);
 
   useEffect(() => {
