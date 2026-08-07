@@ -185,9 +185,11 @@ export const onGeneticSimulationUpdated = onDocumentWritten({
     const top20Count = Math.max(1, Math.floor(sortedPop.length * 0.2));
     const top20 = sortedPop.slice(0, top20Count);
     
-    const avgDna = Array.from({ length: 18 }, () => ({ a: 0, h: 0, e: 0, p: 0, s: 0, total: 0 }));
+    const dnaLen = best.dna.length;
+    
+    const avgDna = Array.from({ length: dnaLen }, () => ({ a: 0, h: 0, e: 0, p: 0, s: 0, total: 0 }));
     top20.forEach(bot => {
-      for (let i = 0; i < 18; i++) {
+      for (let i = 0; i < dnaLen; i++) {
         const mask = bot.dna[i];
         let activeTraits = 0;
         if ((mask & 1) > 0) activeTraits++;

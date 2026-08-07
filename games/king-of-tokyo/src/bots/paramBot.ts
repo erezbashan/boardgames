@@ -2,7 +2,7 @@ import type { KotAction, KotState, KotPlayer } from '../engine/types';
 import { getBotAction as getRandomBotAction } from './randomBot';
 import { CARD_REGISTRY } from '../engine/cards/registry';
 
-function getStateIndex(player: KotPlayer): number {
+function getStateIndex(player: KotPlayer, state: KotState): number {
   const inTokyo = player.location.startsWith('Tokyo') ? 1 : 0;
   
   let hpGroup = 0;
@@ -15,10 +15,19 @@ function getStateIndex(player: KotPlayer): number {
   else if (player.vp <= 14) vpGroup = 1;
   else vpGroup = 2;
 
-  return inTokyo * 9 + hpGroup * 3 + vpGroup;
+  // New: Player count group (0: 2 players, 1: 3-4 players, 2: 5-6 players)
+  const numPlayers = Object.keys(state.players).length;
+  let playerGroup = 0;
+  if (numPlayers === 2) playerGroup = 0;
+  else if (numPlayers <= 4) playerGroup = 1;
+  else playerGroup = 2;
+
+  // 3 * 2 * 3 * 3 = 54 combinations
+  // playerGroup (3) * inTokyo (2) * hpGroup (3) * vpGroup (3)
+  return playerGroup * 18 + inTokyo * 9 + hpGroup * 3 + vpGroup;
 }
 
-function getStrategyMask(player: KotPlayer): number {
+function getStrategyMask(player: KotPlayer, state: KotState): number {
   let strategyArray: number[] = [];
   try {
       if (player.botStrategy?.startsWith('param:')) {
@@ -26,8 +35,8 @@ function getStrategyMask(player: KotPlayer): number {
       }
   } catch (e) {}
   
-  if (strategyArray.length === 18) {
-      return strategyArray[getStateIndex(player)];
+  if (strategyArray.length === 54) {
+      return strategyArray[getStateIndex(player, state)];
   }
   return 15; // default
 }
@@ -39,7 +48,7 @@ export function getParamBotAction(state: KotState, playerId: string): KotAction 
   const topAction = state.pendingActions[0];
 
   if (topAction?.type === 'ASK_ROLL' && topAction.payload?.prompt?.playerId === playerId) {
-    const strategyMask = getStrategyMask(player);
+    const strategyMask = getStrategyMask(player, state);
 
     // Decode Strategy Mask
     const targetAttack = (strategyMask & 1) > 0;
@@ -98,7 +107,7 @@ export function getParamBotAction(state: KotState, playerId: string): KotAction 
   // Handle Yield Tokyo using the 16 bit
   if (topAction?.type === 'ASK_QUESTION' && topAction.playerId === playerId) {
     if (topAction.payload.message && topAction.payload.message.includes('yield Tokyo')) {
-      const strategyMask = getStrategyMask(player);
+      const strategyMask = getStrategyMask(player, state);
       const stayTokyo = (strategyMask & 16) > 0;
       
       const options = topAction.payload.options as string[];

@@ -28,24 +28,32 @@ const decodeStrategyMask = (mask: number) => {
 
 const renderReadableDNA = (dna: number[]) => {
   const rows = [];
-  for (let inTokyo = 0; inTokyo < 2; inTokyo++) {
-    for (let hpGroup = 0; hpGroup < 3; hpGroup++) {
-      for (let vpGroup = 0; vpGroup < 3; vpGroup++) {
-        const index = inTokyo * 9 + hpGroup * 3 + vpGroup;
-        const mask = dna[index];
-        
-        const locStr = inTokyo ? 'In Tokyo' : 'Outside';
-        const hpStr = hpGroup === 0 ? '1-3' : hpGroup === 1 ? '4-6' : '7-10';
-        const vpStr = vpGroup === 0 ? '0-9' : vpGroup === 1 ? '10-14' : '15-19';
+  const dnaLen = dna.length;
+  for (let playerGroup = 0; playerGroup < (dnaLen === 54 ? 3 : 1); playerGroup++) {
+    for (let inTokyo = 0; inTokyo < 2; inTokyo++) {
+      for (let hpGroup = 0; hpGroup < 3; hpGroup++) {
+        for (let vpGroup = 0; vpGroup < 3; vpGroup++) {
+          let index = inTokyo * 9 + hpGroup * 3 + vpGroup;
+          if (dnaLen === 54) {
+             index = playerGroup * 18 + inTokyo * 9 + hpGroup * 3 + vpGroup;
+          }
+          const mask = dna[index];
+          
+          const playerStr = playerGroup === 0 ? '2' : playerGroup === 1 ? '3-4' : '5-6';
+          const locStr = inTokyo ? 'In Tokyo' : 'Outside';
+          const hpStr = hpGroup === 0 ? '1-3' : hpGroup === 1 ? '4-6' : '7-10';
+          const vpStr = vpGroup === 0 ? '0-9' : vpGroup === 1 ? '10-14' : '15-19';
 
-        rows.push(
-          <tr key={index} style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-            <td style={{ padding: '4px 8px' }}>{locStr}</td>
-            <td style={{ padding: '4px 8px', color: hpGroup === 0 ? '#ef4444' : 'inherit' }}>{hpStr} HP</td>
-            <td style={{ padding: '4px 8px', color: vpGroup === 2 ? '#4ade80' : 'inherit' }}>{vpStr} VP</td>
-            <td style={{ padding: '4px 8px', fontWeight: 'bold', color: '#a855f7' }}>{decodeStrategyMask(mask)}</td>
-          </tr>
-        );
+          rows.push(
+            <tr key={index} style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+              {dnaLen === 54 && <td style={{ padding: '4px 8px' }}>{playerStr}</td>}
+              <td style={{ padding: '4px 8px' }}>{locStr}</td>
+              <td style={{ padding: '4px 8px', color: hpGroup === 0 ? '#ef4444' : 'inherit' }}>{hpStr} HP</td>
+              <td style={{ padding: '4px 8px', color: vpGroup === 2 ? '#4ade80' : 'inherit' }}>{vpStr} VP</td>
+              <td style={{ padding: '4px 8px', fontWeight: 'bold', color: '#a855f7' }}>{decodeStrategyMask(mask)}</td>
+            </tr>
+          );
+        }
       }
     }
   }
@@ -58,6 +66,7 @@ const renderEvolutionTable = (history: any[]) => {
   const sortedHistory = [...history].sort((a,b) => b.generation - a.generation);
   
   const categoryKeys = [
+    'Players / 2 Players', 'Players / 3-4 Players', 'Players / 5-6 Players',
     'Location / Outside', 'Location / In Tokyo',
     'Health / 1-3 HP', 'Health / 4-6 HP', 'Health / 7-10 HP',
     'VP / 0-9 VP', 'VP / 10-14 VP', 'VP / 15-19 VP'
@@ -71,24 +80,34 @@ const renderEvolutionTable = (history: any[]) => {
     categoryKeys.forEach(k => { genStats[gen][k] = { total: 0, a: 0, h: 0, e: 0, p: 0, s: 0 }; });
 
     if (doc.avgDna) {
-      for (let inTokyo = 0; inTokyo < 2; inTokyo++) {
-        for (let hpGroup = 0; hpGroup < 3; hpGroup++) {
-          for (let vpGroup = 0; vpGroup < 3; vpGroup++) {
-            const index = inTokyo * 9 + hpGroup * 3 + vpGroup;
-            const stats = doc.avgDna[index];
-            if (!stats) continue;
-            
-            const addAvgStat = (catObj: any, s: any) => {
-              catObj.total += s.total;
-              catObj.a += s.a;
-              catObj.h += s.h;
-              catObj.e += s.e;
-              catObj.p += s.p;
-            };
+      const dnaLen = doc.avgDna.length;
+      for (let playerGroup = 0; playerGroup < (dnaLen === 54 ? 3 : 1); playerGroup++) {
+        for (let inTokyo = 0; inTokyo < 2; inTokyo++) {
+          for (let hpGroup = 0; hpGroup < 3; hpGroup++) {
+            for (let vpGroup = 0; vpGroup < 3; vpGroup++) {
+              let index = inTokyo * 9 + hpGroup * 3 + vpGroup;
+              if (dnaLen === 54) {
+                 index = playerGroup * 18 + inTokyo * 9 + hpGroup * 3 + vpGroup;
+              }
+              const stats = doc.avgDna[index];
+              if (!stats) continue;
+              
+              const addAvgStat = (catObj: any, s: any) => {
+                catObj.total += s.total;
+                catObj.a += s.a;
+                catObj.h += s.h;
+                catObj.e += s.e;
+                catObj.p += s.p;
+                if (s.s) catObj.s = (catObj.s || 0) + s.s;
+              };
 
-            addAvgStat(genStats[gen][inTokyo ? 'Location / In Tokyo' : 'Location / Outside'], stats);
-            addAvgStat(genStats[gen][hpGroup === 0 ? 'Health / 1-3 HP' : hpGroup === 1 ? 'Health / 4-6 HP' : 'Health / 7-10 HP'], stats);
-            addAvgStat(genStats[gen][vpGroup === 0 ? 'VP / 0-9 VP' : vpGroup === 1 ? 'VP / 10-14 VP' : 'VP / 15-19 VP'], stats);
+              if (dnaLen === 54) {
+                addAvgStat(genStats[gen][playerGroup === 0 ? 'Players / 2 Players' : playerGroup === 1 ? 'Players / 3-4 Players' : 'Players / 5-6 Players'], stats);
+              }
+              addAvgStat(genStats[gen][inTokyo ? 'Location / In Tokyo' : 'Location / Outside'], stats);
+              addAvgStat(genStats[gen][hpGroup === 0 ? 'Health / 1-3 HP' : hpGroup === 1 ? 'Health / 4-6 HP' : 'Health / 7-10 HP'], stats);
+              addAvgStat(genStats[gen][vpGroup === 0 ? 'VP / 0-9 VP' : vpGroup === 1 ? 'VP / 10-14 VP' : 'VP / 15-19 VP'], stats);
+            }
           }
         }
       }
@@ -442,6 +461,7 @@ function GeneticDetailView({ simId, onListenGeneticSim, onStopGeneticSim, onResu
             <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', fontSize: '13px' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid gray' }}>
+                  {bestBotDna && bestBotDna.length === 54 && <th style={{ padding: '8px' }}>Players</th>}
                   <th style={{ padding: '8px' }}>Location</th>
                   <th style={{ padding: '8px' }}>Health</th>
                   <th style={{ padding: '8px' }}>Victory Points</th>
