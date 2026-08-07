@@ -158,28 +158,84 @@ export const onGeneticSimulationUpdated = onDocumentWritten({
   const prevData = event.data?.before?.data();
   if (!data) return;
 
-  // Only trigger if it was just created, or if currentGeneration changed and it's still running
-  // We can use a trick: to prevent infinite loops from random updates, only proceed if status is running
-  // and we haven't already processed this generation.
-  // Actually, wait, if we process a generation, we increment currentGeneration, which triggers this function again!
-  // That's exactly the recursive loop we want. But we must be careful not to trigger if we just updated history but not generation.
   if (data.status !== 'running') return;
-  if (prevData && prevData.status === 'running' && prevData.currentGeneration === data.currentGeneration) {
-    // Already processed or some other field updated
+
+  const { currentGeneration, config, gameType } = data;
+  const gamesPerGen = config.gamesPerGen;
+  
+  if (currentGeneration > config.numGenerations) {
+    return db.collection('genetic_simulations').doc(event.params.simId).update({ status: 'finished' });
+  }
+
+  // Cap chunk size to keep execution under 30 seconds
+  const CHUNK_SIZE = Math.max(10, Math.min(1000, Math.floor(gamesPerGen / 10)));
+  
+  // If we've already finished the games for this generation, don't run more games.
+  // This can happen if the previous invocation updated gamesCompleted to gamesPerGen.
+  if (data.gamesCompleted >= gamesPerGen) {
+    // Only the invocation that hits exactly gamesPerGen should evolve.
+    // If it's already past it (which shouldn't happen), or if another field triggered it, we might double-evolve.
+    // We check prevData to ensure we only evolve once.
+    if (prevData && prevData.gamesCompleted >= gamesPerGen) {
+      return;
+    }
+    
+    // EVOLVE!
+    const pop = JSON.parse(data.population);
+    const sortedPop = [...pop].sort((a,b) => (b.wins / Math.max(1, b.gamesPlayed)) - (a.wins / Math.max(1, a.gamesPlayed)));
+    const best = sortedPop[0];
+    const newPop = evolvePopulation(pop, currentGeneration);
+
+    const top20Count = Math.max(1, Math.floor(sortedPop.length * 0.2));
+    const top20 = sortedPop.slice(0, top20Count);
+    
+    const avgDna = Array.from({ length: 54 }, () => ({ a: 0, h: 0, e: 0, p: 0, total: 0 }));
+    top20.forEach(bot => {
+      for (let i = 0; i < 54; i++) {
+        const mask = bot.dna[i];
+        let activeTraits = 0;
+        if ((mask & 1) > 0) activeTraits++;
+        if ((mask & 2) > 0) activeTraits++;
+        if ((mask & 4) > 0) activeTraits++;
+        if ((mask & 8) > 0) activeTraits++;
+        
+        if (activeTraits > 0) {
+          const weight = 1 / activeTraits;
+          if ((mask & 1) > 0) avgDna[i].a += weight;
+          if ((mask & 2) > 0) avgDna[i].h += weight;
+          if ((mask & 4) > 0) avgDna[i].e += weight;
+          if ((mask & 8) > 0) avgDna[i].p += weight;
+        }
+        avgDna[i].total++;
+      }
+    });
+
+    const newHistory = [...(data.history || []), {
+      generation: currentGeneration,
+      bestDna: best.dna,
+      avgDna: avgDna,
+      wins: best.wins,
+      gamesPlayed: best.gamesPlayed
+    }];
+
+    return db.collection('genetic_simulations').doc(event.params.simId).update({
+      currentGeneration: currentGeneration + 1,
+      gamesCompleted: 0,
+      population: JSON.stringify(newPop),
+      history: newHistory,
+      updatedAt: FieldValue.serverTimestamp()
+    });
+  }
+
+  // Ensure we don't trigger recursively from other field updates (like someone editing the doc)
+  // unless we actually need to process games.
+  if (prevData && prevData.gamesCompleted === data.gamesCompleted && prevData.currentGeneration === data.currentGeneration) {
     return;
   }
 
-  const { currentGeneration, config, gameType } = data;
-  
-  const simRef = db.collection('genetic_simulations').doc(event.params.simId);
+  console.log(`Simulating Genetic Chunk for ${event.params.simId} Gen ${currentGeneration}: ${data.gamesCompleted} / ${gamesPerGen}`);
 
-  if (currentGeneration > config.numGenerations) {
-    return simRef.update({ status: 'finished' });
-  }
-
-  const pop = JSON.parse(data.population);
-  const gamesPerGen = config.gamesPerGen;
-
+  let pop = JSON.parse(data.population);
   let reducer: any;
   let initialState: any;
   if (gameType === 'flips') {
@@ -190,89 +246,31 @@ export const onGeneticSimulationUpdated = onDocumentWritten({
     initialState = initialKotState;
   }
 
-  console.log(`Starting Genetic Sim ${event.params.simId} Gen ${currentGeneration} (${gamesPerGen} games)`);
-  
-  // Dynamically calculate a batch size so we get at least 10 progress updates per generation
-  // Cap it at max 500 to keep the UI updating smoothly and the event loop responsive
-  const BATCH_SIZE = Math.max(10, Math.min(500, Math.floor(gamesPerGen / 10)));
-  let gamesCompleted = 0;
-
-  while (gamesCompleted < gamesPerGen) {
-    const chunk = Math.min(BATCH_SIZE, gamesPerGen - gamesCompleted);
-    for (let i = 0; i < chunk; i++) {
-      const gamePlayersCount = Math.floor(Math.random() * 5) + 2; // 2 to 6
-      const pConfigs: any[] = [];
-      const selectedBots: any[] = [];
-      
-      for (let p = 0; p < gamePlayersCount; p++) {
-        const bot = pop[Math.floor(Math.random() * pop.length)];
-        selectedBots.push(bot);
-        pConfigs.push({ id: bot.id, botStrategy: getStrategyString(bot.dna) });
-      }
-      
-      coreRunSimulationBatch(reducer, initialState, pConfigs, 1, (res: any) => {
-        selectedBots.forEach(b => b.gamesPlayed++);
-        if (res[0].winnerId) {
-          const winnerBot = selectedBots.find(b => b.id === res[0].winnerId);
-          if (winnerBot) winnerBot.wins++;
-        }
-      });
+  const chunk = Math.min(CHUNK_SIZE, gamesPerGen - data.gamesCompleted);
+  for (let i = 0; i < chunk; i++) {
+    const gamePlayersCount = Math.floor(Math.random() * 5) + 2; // 2 to 6
+    const pConfigs: any[] = [];
+    const selectedBots: any[] = [];
+    
+    for (let p = 0; p < gamePlayersCount; p++) {
+      const bot = pop[Math.floor(Math.random() * pop.length)];
+      selectedBots.push(bot);
+      pConfigs.push({ id: bot.id, botStrategy: getStrategyString(bot.dna) });
     }
-
-    gamesCompleted += chunk;
     
-    // Update progress in Firestore so the UI sees it
-    await simRef.update({ gamesCompleted });
-    
-    // Yield to the event loop so the Firebase SDK can actually send the network request
-    await new Promise(r => setTimeout(r, 10));
+    coreRunSimulationBatch(reducer, initialState, pConfigs, 1, (res: any) => {
+      selectedBots.forEach(b => b.gamesPlayed++);
+      if (res[0].winnerId) {
+        const winnerBot = selectedBots.find(b => b.id === res[0].winnerId);
+        if (winnerBot) winnerBot.wins++;
+      }
+    });
   }
 
-  // Evolve!
-  const sortedPop = [...pop].sort((a,b) => (b.wins / Math.max(1, b.gamesPlayed)) - (a.wins / Math.max(1, a.gamesPlayed)));
-  const best = sortedPop[0];
-  const newPop = evolvePopulation(pop, currentGeneration);
-
-  // Calculate average DNA across the top 20% of the population to get a stable signal
-  const top20Count = Math.max(1, Math.floor(sortedPop.length * 0.2));
-  const top20 = sortedPop.slice(0, top20Count);
-  
-  // Create an array of 54 objects to store the trait sums
-  const avgDna = Array.from({ length: 54 }, () => ({ a: 0, h: 0, e: 0, p: 0, total: 0 }));
-  
-  top20.forEach(bot => {
-    for (let i = 0; i < 54; i++) {
-      const mask = bot.dna[i];
-      let activeTraits = 0;
-      if ((mask & 1) > 0) activeTraits++;
-      if ((mask & 2) > 0) activeTraits++;
-      if ((mask & 4) > 0) activeTraits++;
-      if ((mask & 8) > 0) activeTraits++;
-      
-      if (activeTraits > 0) {
-        const weight = 1 / activeTraits;
-        if ((mask & 1) > 0) avgDna[i].a += weight;
-        if ((mask & 2) > 0) avgDna[i].h += weight;
-        if ((mask & 4) > 0) avgDna[i].e += weight;
-        if ((mask & 8) > 0) avgDna[i].p += weight;
-      }
-      avgDna[i].total++;
-    }
-  });
-
-  const newHistory = [...(data.history || []), {
-    generation: currentGeneration,
-    bestDna: best.dna,
-    avgDna: avgDna,
-    wins: best.wins,
-    gamesPlayed: best.gamesPlayed
-  }];
-
-  await simRef.update({
-    currentGeneration: currentGeneration + 1,
-    gamesCompleted: 0,
-    population: JSON.stringify(newPop),
-    history: newHistory,
+  // Update progress AND the population's accumulated stats
+  return db.collection('genetic_simulations').doc(event.params.simId).update({
+    gamesCompleted: data.gamesCompleted + chunk,
+    population: JSON.stringify(pop),
     updatedAt: FieldValue.serverTimestamp()
   });
 });
