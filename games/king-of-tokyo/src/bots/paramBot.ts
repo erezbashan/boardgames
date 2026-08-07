@@ -7,7 +7,15 @@ export function getParamBotAction(state: KotState, playerId: string): KotAction 
 
   const topAction = state.pendingActions[0];
 
-  // We only override ASK_ROLL. Everything else (cards, yield) falls back to random bot.
+  // Disable card buying to reduce randomness and simplify the genetic search space
+  if (topAction?.type === 'ASK_BUY_CARD' && topAction.payload?.prompt?.playerId === playerId) {
+    return { type: 'RESPONSE_BUY_CARD', payload: { cardName: 'Done' } };
+  }
+  if (topAction?.type === 'ASK_RESOLVE_OPPORTUNIST' && topAction.payload?.prompt?.playerId === playerId) {
+    return { type: 'RESPONSE_RESOLVE_OPPORTUNIST', payload: { buy: false } };
+  }
+
+  // We only override ASK_ROLL. Everything else (yield) falls back to random bot.
   if (topAction?.type === 'ASK_ROLL' && topAction.payload?.prompt?.playerId === playerId) {
     if (state.rollCount === state.maxRolls) {
        return { type: 'RESPONSE_ROLL', payload: { roll: false } };

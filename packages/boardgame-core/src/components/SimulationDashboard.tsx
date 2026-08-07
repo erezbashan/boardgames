@@ -511,17 +511,7 @@ export const SimulationDashboard: React.FC<SimulationDashboardProps> = ({ gameNa
           {historyDocs.length > 0 && (
             <div style={{ marginTop: '20px', background: 'rgba(0,0,0,0.3)', padding: '20px', borderRadius: '8px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                <h3 style={{ color: '#4ade80', margin: 0 }}>🏆 Best Bot DNA</h3>
-                <select value={selectedGen || currentGen - 1} onChange={e => {
-                   const gen = parseInt(e.target.value);
-                   setSelectedGen(gen);
-                   const doc = historyDocs.find(d => d.generation === gen);
-                   if (doc) setBestBotDna(doc.bestDna);
-                }} style={{ background: 'rgba(0,0,0,0.4)', color: 'white', border: '1px solid gray', borderRadius: '4px', padding: '8px' }}>
-                   {historyDocs.map(d => (
-                     <option key={d.generation} value={d.generation}>Generation {d.generation}</option>
-                   ))}
-                </select>
+                <h3 style={{ color: '#4ade80', margin: 0 }}>🏆 Best Bot DNA (Current Gen)</h3>
               </div>
               <h4 style={{ margin: '0 0 10px 0' }}>Evolutionary Progress</h4>
               {renderEvolutionTable(historyDocs)}

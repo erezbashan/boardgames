@@ -248,7 +248,7 @@ export const onGeneticSimulationUpdated = onDocumentWritten({
 
   const chunk = Math.min(CHUNK_SIZE, gamesPerGen - data.gamesCompleted);
   for (let i = 0; i < chunk; i++) {
-    const gamePlayersCount = Math.floor(Math.random() * 5) + 2; // 2 to 6
+    const gamePlayersCount = 2; // Fixed to 2 players for simpler algorithm space and less luck
     const pConfigs: any[] = [];
     const selectedBots: any[] = [];
     
