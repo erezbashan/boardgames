@@ -185,7 +185,7 @@ export const onGeneticSimulationUpdated = onDocumentWritten({
     const top20Count = Math.max(1, Math.floor(sortedPop.length * 0.2));
     const top20 = sortedPop.slice(0, top20Count);
     
-    const avgDna = Array.from({ length: 18 }, () => ({ a: 0, h: 0, e: 0, p: 0, total: 0 }));
+    const avgDna = Array.from({ length: 18 }, () => ({ a: 0, h: 0, e: 0, p: 0, s: 0, total: 0 }));
     top20.forEach(bot => {
       for (let i = 0; i < 18; i++) {
         const mask = bot.dna[i];
@@ -194,6 +194,7 @@ export const onGeneticSimulationUpdated = onDocumentWritten({
         if ((mask & 2) > 0) activeTraits++;
         if ((mask & 4) > 0) activeTraits++;
         if ((mask & 8) > 0) activeTraits++;
+        if ((mask & 16) > 0) activeTraits++;
         
         if (activeTraits > 0) {
           const weight = 1 / activeTraits;
@@ -201,6 +202,7 @@ export const onGeneticSimulationUpdated = onDocumentWritten({
           if ((mask & 2) > 0) avgDna[i].h += weight;
           if ((mask & 4) > 0) avgDna[i].e += weight;
           if ((mask & 8) > 0) avgDna[i].p += weight;
+          if ((mask & 16) > 0) avgDna[i].s += weight;
         }
         avgDna[i].total++;
       }
@@ -244,7 +246,7 @@ export const onGeneticSimulationUpdated = onDocumentWritten({
 
   const chunk = Math.min(CHUNK_SIZE, gamesPerGen - data.gamesCompleted);
   for (let i = 0; i < chunk; i++) {
-    const gamePlayersCount = 2; // Fixed to 2 players for simpler algorithm space and less luck
+    const gamePlayersCount = Math.floor(Math.random() * 5) + 2;
     const pConfigs: any[] = [];
     const selectedBots: any[] = [];
     

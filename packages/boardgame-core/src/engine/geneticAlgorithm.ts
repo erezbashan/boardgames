@@ -13,7 +13,7 @@ export interface PopulationMember {
 export function generateRandomDNA(): DNA {
   const dna: DNA = [];
   for (let i = 0; i < 18; i++) {
-    dna.push(Math.floor(Math.random() * 15) + 1); // 1 to 15
+    dna.push(Math.floor(Math.random() * 31) + 1); // 1 to 31 (5 bits: Attack, Health, Energy, Points, StayTokyo)
   }
   return dna;
 }
@@ -39,7 +39,7 @@ export function crossoverAndMutate(parentA: DNA, parentB: DNA, mutationRate: num
     
     // Mutation
     if (Math.random() < mutationRate) {
-      gene = Math.floor(Math.random() * 15) + 1;
+      gene = Math.floor(Math.random() * 31) + 1;
     }
     child.push(gene);
   }

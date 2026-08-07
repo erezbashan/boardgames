@@ -68,7 +68,7 @@ const renderEvolutionTable = (history: any[]) => {
   sortedHistory.forEach(doc => {
     const gen = doc.generation;
     genStats[gen] = {};
-    categoryKeys.forEach(k => { genStats[gen][k] = { total: 0, a: 0, h: 0, e: 0, p: 0 }; });
+    categoryKeys.forEach(k => { genStats[gen][k] = { total: 0, a: 0, h: 0, e: 0, p: 0, s: 0 }; });
 
     if (doc.avgDna) {
       for (let inTokyo = 0; inTokyo < 2; inTokyo++) {
@@ -117,12 +117,14 @@ const renderEvolutionTable = (history: any[]) => {
                 const h = Math.round((stats.h / stats.total) * 100);
                 const e = Math.round((stats.e / stats.total) * 100);
                 const p = Math.round((stats.p / stats.total) * 100);
+                const s = Math.round(((stats.s || 0) / stats.total) * 100);
                 return (
                   <td key={doc.generation} style={{ padding: '8px', verticalAlign: 'top' }}>
                     <div style={{ color: '#ef4444' }}>ATK: {a}%</div>
                     <div style={{ color: '#ec4899' }}>HP: {h}%</div>
                     <div style={{ color: '#3b82f6' }}>NRG: {e}%</div>
                     <div style={{ color: '#eab308' }}>PTS: {p}%</div>
+                    <div style={{ color: '#a855f7' }}>STY: {s}%</div>
                   </td>
                 );
               })}

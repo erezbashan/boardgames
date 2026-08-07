@@ -1,5 +1,36 @@
-import type { KotAction, KotState } from '../engine/types';
+import type { KotAction, KotState, KotPlayer } from '../engine/types';
 import { getBotAction as getRandomBotAction } from './randomBot';
+import { CARD_REGISTRY } from '../engine/cards/registry';
+
+function getStateIndex(player: KotPlayer): number {
+  const inTokyo = player.location.startsWith('Tokyo') ? 1 : 0;
+  
+  let hpGroup = 0;
+  if (player.health <= 3) hpGroup = 0;
+  else if (player.health <= 6) hpGroup = 1;
+  else hpGroup = 2;
+
+  let vpGroup = 0;
+  if (player.vp <= 9) vpGroup = 0;
+  else if (player.vp <= 14) vpGroup = 1;
+  else vpGroup = 2;
+
+  return inTokyo * 9 + hpGroup * 3 + vpGroup;
+}
+
+function getStrategyMask(player: KotPlayer): number {
+  let strategyArray: number[] = [];
+  try {
+      if (player.botStrategy?.startsWith('param:')) {
+          strategyArray = JSON.parse(player.botStrategy.substring(6));
+      }
+  } catch (e) {}
+  
+  if (strategyArray.length === 18) {
+      return strategyArray[getStateIndex(player)];
+  }
+  return 15; // default
+}
 
 export function getParamBotAction(state: KotState, playerId: string): KotAction | null {
   const player = state.players[playerId];
@@ -7,45 +38,10 @@ export function getParamBotAction(state: KotState, playerId: string): KotAction 
 
   const topAction = state.pendingActions[0];
 
-  // Disable card buying to reduce randomness and simplify the genetic search space
-  if (topAction?.type === 'ASK_BUY_CARD' && topAction.payload?.prompt?.playerId === playerId) {
-    return { type: 'RESPONSE_BUY_CARD', payload: { cardName: 'Done' } };
-  }
-  if (topAction?.type === 'ASK_RESOLVE_OPPORTUNIST' && topAction.payload?.prompt?.playerId === playerId) {
-    return { type: 'RESPONSE_RESOLVE_OPPORTUNIST', payload: { buy: false } };
-  }
-
-  // We only override ASK_ROLL. Everything else (yield) falls back to random bot.
   if (topAction?.type === 'ASK_ROLL' && topAction.payload?.prompt?.playerId === playerId) {
-    // 1. Determine State Index (0-17)
-    const inTokyo = player.location.startsWith('Tokyo') ? 1 : 0;
-    
-    let hpGroup = 0;
-    if (player.health <= 3) hpGroup = 0;
-    else if (player.health <= 6) hpGroup = 1;
-    else hpGroup = 2;
+    const strategyMask = getStrategyMask(player);
 
-    let vpGroup = 0;
-    if (player.vp <= 9) vpGroup = 0;
-    else if (player.vp <= 14) vpGroup = 1;
-    else vpGroup = 2;
-
-    const stateIndex = inTokyo * 9 + hpGroup * 3 + vpGroup;
-
-    // 2. Extract strategy from botStrategy string (e.g. "param:[15, 3, 1, ...]")
-    let strategyArray: number[] = [];
-    try {
-        if (player.botStrategy?.startsWith('param:')) {
-            strategyArray = JSON.parse(player.botStrategy.substring(6));
-        }
-    } catch (e) {
-        // Fallback to empty
-    }
-    
-    // If malformed or missing, default to strategy 15 (target everything)
-    const strategyMask = (strategyArray.length === 18) ? strategyArray[stateIndex] : 15;
-
-    // 3. Decode Strategy Mask
+    // Decode Strategy Mask
     const targetAttack = (strategyMask & 1) > 0;
     const targetHealth = (strategyMask & 2) > 0;
     const targetEnergy = (strategyMask & 4) > 0;
@@ -99,6 +95,52 @@ export function getParamBotAction(state: KotState, playerId: string): KotAction 
     return { type: 'RESPONSE_ROLL', payload: { roll: true, keptDiceIds: keptIds } };
   }
 
-  // Fallback for non-roll actions (Market, Yielding Tokyo, Opportunist, etc)
+  // Handle Yield Tokyo using the 16 bit
+  if (topAction?.type === 'ASK_QUESTION' && topAction.playerId === playerId) {
+    if (topAction.payload.message && topAction.payload.message.includes('yield Tokyo')) {
+      const strategyMask = getStrategyMask(player);
+      const stayTokyo = (strategyMask & 16) > 0;
+      
+      const options = topAction.payload.options as string[];
+      if (stayTokyo && options.includes('No')) {
+        return { type: 'RESPONSE_QUESTION', payload: { response: 'No' } };
+      } else if (!stayTokyo && options.includes('Yes')) {
+        return { type: 'RESPONSE_QUESTION', payload: { response: 'Yes' } };
+      }
+    }
+  }
+
+  // Handle Market
+  if (topAction?.type === 'ASK_MARKET' && topAction.payload?.prompt?.playerId === playerId) {
+    const energy = player.energy;
+    const availableMarketCards = state.market
+        .map((cardId, index) => ({ cardId, index }))
+        .filter(c => c.cardId !== null && c.cardId !== undefined && c.cardId !== '');
+    
+    const affordableCards = availableMarketCards.filter(c => {
+        const cardDef = CARD_REGISTRY[c.cardId];
+        if (!cardDef) return false;
+        
+        // Don't buy Keep cards we already have
+        if (cardDef.type === 'Keep' && player.cards.includes(c.cardId)) return false;
+
+        let cost = cardDef.cost;
+        if (player.cards.includes('alien_metabolism') || player.cards.includes('alienMetabolism')) {
+            cost = Math.max(0, cost - 1);
+        }
+        return energy >= cost;
+    });
+
+    if (affordableCards.length > 0) {
+      // Pick a random affordable card to buy
+      const toBuy = affordableCards[Math.floor(Math.random() * affordableCards.length)];
+      return { type: 'RESPONSE_MARKET', payload: { action: 'BUY', cardId: toBuy.cardId, marketIndex: toBuy.index } };
+    }
+    
+    // Never Sweep
+    return { type: 'RESPONSE_MARKET', payload: { action: 'DONE' } };
+  }
+
+  // Fallback for non-roll actions (Questions, Opportunist, etc)
   return getRandomBotAction(state, playerId);
 }
