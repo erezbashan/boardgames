@@ -79,10 +79,10 @@ export function getSmartBotAction(state: KotState, playerId: string): KotAction 
     }
 
     if (topAction.type === 'ASK_ROLL') {
-       if (state.rollCount === state.maxRolls || (state.rollCount > 0 && Math.random() < 0.8)) {
+       if (state.rollCount > 0 && Math.random() < 0.8) {
           const inTokyo = player.location.startsWith('Tokyo');
           
-          const toKeep = state.rollCount === state.maxRolls ? [] : state.dice.filter(d => {
+          const toKeep = state.dice.filter(d => {
              if (d.value === 'Smash') return true; // Always keep smash to attack
              if (d.value === 'Energy') return Math.random() > 0.5;
              

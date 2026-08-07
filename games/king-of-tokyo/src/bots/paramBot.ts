@@ -17,10 +17,6 @@ export function getParamBotAction(state: KotState, playerId: string): KotAction 
 
   // We only override ASK_ROLL. Everything else (yield) falls back to random bot.
   if (topAction?.type === 'ASK_ROLL' && topAction.payload?.prompt?.playerId === playerId) {
-    if (state.rollCount === state.maxRolls) {
-       return { type: 'RESPONSE_ROLL', payload: { roll: false } };
-    }
-
     // 1. Determine State Index (0-17)
     const inTokyo = player.location.startsWith('Tokyo') ? 1 : 0;
     
