@@ -150,7 +150,10 @@ export const startGeneticEvolution = onCall(async (request) => {
   return { simId: simRef.id };
 });
 
-export const onGeneticSimulationUpdated = onDocumentWritten("genetic_simulations/{simId}", async (event) => {
+export const onGeneticSimulationUpdated = onDocumentWritten({
+  document: "genetic_simulations/{simId}",
+  timeoutSeconds: 540
+}, async (event) => {
   const data = event.data?.after.data();
   const prevData = event.data?.before?.data();
   if (!data) return;
