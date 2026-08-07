@@ -280,7 +280,7 @@ function HeadToHeadView({ reducer, initialState }: any) {
 
 function GeneticListView({ gameType, onStartGeneticSim, onListGeneticSims, onNavigateToSim }: any) {
   const [popSize, setPopSize] = useState(100);
-  const [gamesPerGen, setGamesPerGen] = useState(1000);
+  const [gamesPerGen, setGamesPerGen] = useState(20000);
   const [simList, setSimList] = useState<any[]>([]);
 
   useEffect(() => {

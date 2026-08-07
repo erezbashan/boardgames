@@ -248,11 +248,19 @@ export const onGeneticSimulationUpdated = onDocumentWritten({
     const pConfigs: any[] = [];
     const selectedBots: any[] = [];
     
+    // To reduce variance drastically, guarantee every bot plays exactly the same number of games.
+    // We sort the population by gamesPlayed, then randomize ties, and pick the top two.
+    const availableBots = [...pop].sort((a, b) => {
+       if (a.gamesPlayed !== b.gamesPlayed) return a.gamesPlayed - b.gamesPlayed;
+       return Math.random() - 0.5; // Randomize ties so they don't always play the same opponents
+    });
+    
     for (let p = 0; p < gamePlayersCount; p++) {
-      const bot = pop[Math.floor(Math.random() * pop.length)];
+      const bot = availableBots[p];
       selectedBots.push(bot);
       pConfigs.push({ id: bot.id, botStrategy: getStrategyString(bot.dna) });
     }
+
     
     coreRunSimulationBatch(reducer, initialState, pConfigs, 1, (res: any) => {
       selectedBots.forEach(b => b.gamesPlayed++);
