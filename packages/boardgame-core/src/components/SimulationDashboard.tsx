@@ -218,7 +218,7 @@ export const SimulationDashboard: React.FC<SimulationDashboardProps> = ({ gameNa
       const renderEvolutionTable = (history: any[]) => {
         if (!history || history.length === 0) return null;
         
-        const sortedHistory = [...history].sort((a,b) => a.generation - b.generation);
+        const sortedHistory = [...history].sort((a,b) => b.generation - a.generation);
         
         // Define all categories we want to track
         const categoryKeys = [
