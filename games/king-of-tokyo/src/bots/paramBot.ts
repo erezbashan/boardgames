@@ -21,15 +21,9 @@ export function getParamBotAction(state: KotState, playerId: string): KotAction 
        return { type: 'RESPONSE_ROLL', payload: { roll: false } };
     }
 
-    // 1. Determine State Index (0-53)
+    // 1. Determine State Index (0-17)
     const inTokyo = player.location.startsWith('Tokyo') ? 1 : 0;
     
-    const aliveCount = state.playerOrder.filter(id => state.players[id].health > 0).length;
-    let remGroup = 0;
-    if (aliveCount <= 2) remGroup = 0;
-    else if (aliveCount <= 4) remGroup = 1;
-    else remGroup = 2;
-
     let hpGroup = 0;
     if (player.health <= 3) hpGroup = 0;
     else if (player.health <= 6) hpGroup = 1;
@@ -40,7 +34,7 @@ export function getParamBotAction(state: KotState, playerId: string): KotAction 
     else if (player.vp <= 14) vpGroup = 1;
     else vpGroup = 2;
 
-    const stateIndex = inTokyo * 27 + remGroup * 9 + hpGroup * 3 + vpGroup;
+    const stateIndex = inTokyo * 9 + hpGroup * 3 + vpGroup;
 
     // 2. Extract strategy from botStrategy string (e.g. "param:[15, 3, 1, ...]")
     let strategyArray: number[] = [];
@@ -53,7 +47,7 @@ export function getParamBotAction(state: KotState, playerId: string): KotAction 
     }
     
     // If malformed or missing, default to strategy 15 (target everything)
-    const strategyMask = (strategyArray.length === 54) ? strategyArray[stateIndex] : 15;
+    const strategyMask = (strategyArray.length === 18) ? strategyArray[stateIndex] : 15;
 
     // 3. Decode Strategy Mask
     const targetAttack = (strategyMask & 1) > 0;

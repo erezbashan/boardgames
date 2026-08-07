@@ -146,6 +146,7 @@ function ActiveGameWrapper() {
 
 function SimulationWrapper() {
   const { gameType, simId } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
 
   const handleStartGeneticSim = async (config: any) => {
@@ -178,23 +179,50 @@ function SimulationWrapper() {
 
   const handleStopGeneticSim = async (id: string) => {
     const { doc, updateDoc } = await import('firebase/firestore');
-    await updateDoc(doc(db, 'genetic_simulations', id), { status: 'stopped' });
+    await updateDoc(doc(db, 'genetic_simulations', id), { status: 'paused' });
+  };
+
+  const handleResumeGeneticSim = async (id: string) => {
+    const { doc, updateDoc } = await import('firebase/firestore');
+    await updateDoc(doc(db, 'genetic_simulations', id), { status: 'running' });
+  };
+
+  const handleDeleteGeneticSim = async (id: string) => {
+    const { doc, deleteDoc } = await import('firebase/firestore');
+    await deleteDoc(doc(db, 'genetic_simulations', id));
   };
 
   const handleNavigateToSim = (id: string) => {
     if (id) {
-      navigate(`/simulation/${gameType}/${id}`);
+      navigate(`/simulation/genetic/${gameType}/${id}`);
     } else {
-      navigate(`/simulation/${gameType}`);
+      navigate(`/simulation/genetic/${gameType}`);
     }
   };
 
+  let viewType: 'head-to-head' | 'genetic-list' | 'genetic-detail' = 'head-to-head';
+  if (location.pathname.includes('/genetic')) {
+    viewType = simId ? 'genetic-detail' : 'genetic-list';
+  }
+
+  const commonProps = {
+    simId,
+    viewType,
+    onStartGeneticSim: handleStartGeneticSim,
+    onListenGeneticSim: handleListenGeneticSim,
+    onListGeneticSims: handleListGeneticSims,
+    onStopGeneticSim: handleStopGeneticSim,
+    onNavigateToSim: handleNavigateToSim,
+    onResumeGeneticSim: handleResumeGeneticSim,
+    onDeleteGeneticSim: handleDeleteGeneticSim
+  };
+
   if (gameType === 'flips') {
-    return <SimulationDashboard gameName="Flips" gameType="flips" simId={simId} reducer={flipsReducer as any} initialState={initialFlipsState} onStartGeneticSim={handleStartGeneticSim} onListenGeneticSim={handleListenGeneticSim} onListGeneticSims={handleListGeneticSims} onStopGeneticSim={handleStopGeneticSim} onNavigateToSim={handleNavigateToSim} />;
+    return <SimulationDashboard gameName="Flips" gameType="flips" reducer={flipsReducer as any} initialState={initialFlipsState} {...commonProps} />;
   }
   
   if (gameType === 'king-of-tokyo') {
-    return <SimulationDashboard gameName="King of Tokyo" gameType="king-of-tokyo" simId={simId} reducer={kingOfTokyoReducer as any} initialState={initialKotState} onStartGeneticSim={handleStartGeneticSim} onListenGeneticSim={handleListenGeneticSim} onListGeneticSims={handleListGeneticSims} onStopGeneticSim={handleStopGeneticSim} onNavigateToSim={handleNavigateToSim} />;
+    return <SimulationDashboard gameName="King of Tokyo" gameType="king-of-tokyo" reducer={kingOfTokyoReducer as any} initialState={initialKotState} {...commonProps} />;
   }
 
   return <div style={{ color: 'white', padding: '40px' }}>Unknown game type for simulation</div>;
@@ -206,8 +234,9 @@ function App() {
       <Route path="/" element={<GameSelector />} />
       <Route path="/:gameType" element={<GameLobbyWrapper />} />
       <Route path="/:gameType/:gameId" element={<ActiveGameWrapper />} />
-      <Route path="/simulation/:gameType" element={<SimulationWrapper />} />
-      <Route path="/simulation/:gameType/:simId" element={<SimulationWrapper />} />
+      <Route path="/simulation/head-to-head/:gameType" element={<SimulationWrapper />} />
+      <Route path="/simulation/genetic/:gameType" element={<SimulationWrapper />} />
+      <Route path="/simulation/genetic/:gameType/:simId" element={<SimulationWrapper />} />
     </Routes>
   );
 }

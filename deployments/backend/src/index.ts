@@ -162,10 +162,6 @@ export const onGeneticSimulationUpdated = onDocumentWritten({
 
   const { currentGeneration, config, gameType } = data;
   const gamesPerGen = config.gamesPerGen;
-  
-  if (currentGeneration > config.numGenerations) {
-    return db.collection('genetic_simulations').doc(event.params.simId).update({ status: 'finished' });
-  }
 
   // Cap chunk size to keep execution under 30 seconds
   const CHUNK_SIZE = Math.max(10, Math.min(1000, Math.floor(gamesPerGen / 10)));
@@ -189,9 +185,9 @@ export const onGeneticSimulationUpdated = onDocumentWritten({
     const top20Count = Math.max(1, Math.floor(sortedPop.length * 0.2));
     const top20 = sortedPop.slice(0, top20Count);
     
-    const avgDna = Array.from({ length: 54 }, () => ({ a: 0, h: 0, e: 0, p: 0, total: 0 }));
+    const avgDna = Array.from({ length: 18 }, () => ({ a: 0, h: 0, e: 0, p: 0, total: 0 }));
     top20.forEach(bot => {
-      for (let i = 0; i < 54; i++) {
+      for (let i = 0; i < 18; i++) {
         const mask = bot.dna[i];
         let activeTraits = 0;
         if ((mask & 1) > 0) activeTraits++;

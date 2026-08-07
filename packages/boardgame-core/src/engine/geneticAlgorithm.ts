@@ -1,7 +1,7 @@
 import { runSimulationBatch, PlayerConfig, SimulationResult } from './simulateGame';
 import { BaseGameState } from './types';
 
-export type DNA = number[]; // length 54, values 1 to 15
+export type DNA = number[]; // length 18, values 1 to 15
 
 export interface PopulationMember {
   id: string;
@@ -12,7 +12,7 @@ export interface PopulationMember {
 
 export function generateRandomDNA(): DNA {
   const dna: DNA = [];
-  for (let i = 0; i < 54; i++) {
+  for (let i = 0; i < 18; i++) {
     dna.push(Math.floor(Math.random() * 15) + 1); // 1 to 15
   }
   return dna;
@@ -33,7 +33,7 @@ export function createInitialPopulation(size: number = 750): PopulationMember[] 
 
 export function crossoverAndMutate(parentA: DNA, parentB: DNA, mutationRate: number = 0.05): DNA {
   const child: DNA = [];
-  for (let i = 0; i < 54; i++) {
+  for (let i = 0; i < 18; i++) {
     // 50/50 from parents
     let gene = Math.random() < 0.5 ? parentA[i] : parentB[i];
     
