@@ -7,16 +7,7 @@ export function getParamBotAction(state: KotState, playerId: string): KotAction 
 
   const topAction = state.pendingActions[0];
 
-  if (topAction?.type === 'ASK_YIELD_TOKYO' && topAction.payload?.prompt?.playerId === playerId) {
-     // If we have decent health, stay in Tokyo. Otherwise yield.
-     const stay = player.health >= 5;
-     const prompt = topAction.payload.prompt;
-     const optionLabel = stay ? 'Stay' : 'Yield';
-     const opt = prompt.options?.find((o: any) => o.label === optionLabel) || prompt.options?.[0];
-     if (opt) return opt.action;
-  }
-
-  // We only override ASK_ROLL and ASK_YIELD_TOKYO. Everything else (cards, market) falls back to random bot.
+  // We only override ASK_ROLL. Everything else (cards, yield) falls back to random bot.
   if (topAction?.type === 'ASK_ROLL' && topAction.payload?.prompt?.playerId === playerId) {
     if (state.rollCount === state.maxRolls) {
        return { type: 'RESPONSE_ROLL', payload: { roll: false } };

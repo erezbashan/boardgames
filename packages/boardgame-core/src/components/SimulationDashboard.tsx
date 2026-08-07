@@ -252,17 +252,45 @@ export const SimulationDashboard: React.FC<SimulationDashboardProps> = ({ gameNa
             }
           };
 
-          for (let inTokyo = 0; inTokyo < 2; inTokyo++) {
-            for (let remGroup = 0; remGroup < 3; remGroup++) {
-              for (let hpGroup = 0; hpGroup < 3; hpGroup++) {
-                for (let vpGroup = 0; vpGroup < 3; vpGroup++) {
-                  const index = inTokyo * 27 + remGroup * 9 + hpGroup * 3 + vpGroup;
-                  const mask = dna[index];
-                  
-                  addStat(genStats[gen][inTokyo ? 'Location / In Tokyo' : 'Location / Outside'], mask);
-                  addStat(genStats[gen][remGroup === 0 ? 'Players / 2 left' : remGroup === 1 ? 'Players / 3-4 left' : 'Players / 5-6 left'], mask);
-                  addStat(genStats[gen][hpGroup === 0 ? 'Health / 1-3 HP' : hpGroup === 1 ? 'Health / 4-6 HP' : 'Health / 7-10 HP'], mask);
-                  addStat(genStats[gen][vpGroup === 0 ? 'VP / 0-9 VP' : vpGroup === 1 ? 'VP / 10-14 VP' : 'VP / 15-19 VP'], mask);
+          if (doc.avgDna) {
+            // New way: Use precomputed population averages from backend
+            for (let inTokyo = 0; inTokyo < 2; inTokyo++) {
+              for (let remGroup = 0; remGroup < 3; remGroup++) {
+                for (let hpGroup = 0; hpGroup < 3; hpGroup++) {
+                  for (let vpGroup = 0; vpGroup < 3; vpGroup++) {
+                    const index = inTokyo * 27 + remGroup * 9 + hpGroup * 3 + vpGroup;
+                    const stats = doc.avgDna[index];
+                    
+                    const addAvgStat = (catObj: any, s: any) => {
+                      catObj.total += s.total;
+                      catObj.a += s.a;
+                      catObj.h += s.h;
+                      catObj.e += s.e;
+                      catObj.p += s.p;
+                    };
+
+                    addAvgStat(genStats[gen][inTokyo ? 'Location / In Tokyo' : 'Location / Outside'], stats);
+                    addAvgStat(genStats[gen][remGroup === 0 ? 'Players / 2 left' : remGroup === 1 ? 'Players / 3-4 left' : 'Players / 5-6 left'], stats);
+                    addAvgStat(genStats[gen][hpGroup === 0 ? 'Health / 1-3 HP' : hpGroup === 1 ? 'Health / 4-6 HP' : 'Health / 7-10 HP'], stats);
+                    addAvgStat(genStats[gen][vpGroup === 0 ? 'VP / 0-9 VP' : vpGroup === 1 ? 'VP / 10-14 VP' : 'VP / 15-19 VP'], stats);
+                  }
+                }
+              }
+            }
+          } else {
+            // Old way: fallback to single bestDna
+            for (let inTokyo = 0; inTokyo < 2; inTokyo++) {
+              for (let remGroup = 0; remGroup < 3; remGroup++) {
+                for (let hpGroup = 0; hpGroup < 3; hpGroup++) {
+                  for (let vpGroup = 0; vpGroup < 3; vpGroup++) {
+                    const index = inTokyo * 27 + remGroup * 9 + hpGroup * 3 + vpGroup;
+                    const mask = doc.bestDna[index];
+                    
+                    addStat(genStats[gen][inTokyo ? 'Location / In Tokyo' : 'Location / Outside'], mask);
+                    addStat(genStats[gen][remGroup === 0 ? 'Players / 2 left' : remGroup === 1 ? 'Players / 3-4 left' : 'Players / 5-6 left'], mask);
+                    addStat(genStats[gen][hpGroup === 0 ? 'Health / 1-3 HP' : hpGroup === 1 ? 'Health / 4-6 HP' : 'Health / 7-10 HP'], mask);
+                    addStat(genStats[gen][vpGroup === 0 ? 'VP / 0-9 VP' : vpGroup === 1 ? 'VP / 10-14 VP' : 'VP / 15-19 VP'], mask);
+                  }
                 }
               }
             }

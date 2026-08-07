@@ -229,12 +229,41 @@ export const onGeneticSimulationUpdated = onDocumentWritten({
   }
 
   // Evolve!
-  const best = [...pop].sort((a,b) => (b.wins / Math.max(1, b.gamesPlayed)) - (a.wins / Math.max(1, a.gamesPlayed)))[0];
+  const sortedPop = [...pop].sort((a,b) => (b.wins / Math.max(1, b.gamesPlayed)) - (a.wins / Math.max(1, a.gamesPlayed)));
+  const best = sortedPop[0];
   const newPop = evolvePopulation(pop, currentGeneration);
+
+  // Calculate average DNA across the top 20% of the population to get a stable signal
+  const top20Count = Math.max(1, Math.floor(sortedPop.length * 0.2));
+  const top20 = sortedPop.slice(0, top20Count);
+  
+  // Create an array of 54 objects to store the trait sums
+  const avgDna = Array.from({ length: 54 }, () => ({ a: 0, h: 0, e: 0, p: 0, total: 0 }));
+  
+  top20.forEach(bot => {
+    for (let i = 0; i < 54; i++) {
+      const mask = bot.dna[i];
+      let activeTraits = 0;
+      if ((mask & 1) > 0) activeTraits++;
+      if ((mask & 2) > 0) activeTraits++;
+      if ((mask & 4) > 0) activeTraits++;
+      if ((mask & 8) > 0) activeTraits++;
+      
+      if (activeTraits > 0) {
+        const weight = 1 / activeTraits;
+        if ((mask & 1) > 0) avgDna[i].a += weight;
+        if ((mask & 2) > 0) avgDna[i].h += weight;
+        if ((mask & 4) > 0) avgDna[i].e += weight;
+        if ((mask & 8) > 0) avgDna[i].p += weight;
+      }
+      avgDna[i].total++;
+    }
+  });
 
   const newHistory = [...(data.history || []), {
     generation: currentGeneration,
     bestDna: best.dna,
+    avgDna: avgDna,
     wins: best.wins,
     gamesPlayed: best.gamesPlayed
   }];
