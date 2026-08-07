@@ -31,7 +31,7 @@ export function createInitialPopulation(size: number = 750): PopulationMember[] 
   return pop;
 }
 
-export function crossoverAndMutate(parentA: DNA, parentB: DNA, mutationRate: number = 0.05): DNA {
+export function crossoverAndMutate(parentA: DNA, parentB: DNA, mutationRate: number = 0.02): DNA {
   const child: DNA = [];
   for (let i = 0; i < 54; i++) {
     // 50/50 from parents
@@ -78,7 +78,7 @@ export function evolvePopulation(oldPopulation: PopulationMember[], generationIn
     
     newPop.push({
       id: `bot_gen${generationIndex}_${newPop.length}`,
-      dna: crossoverAndMutate(parentA, parentB, 0.05),
+      dna: crossoverAndMutate(parentA, parentB, 0.02),
       wins: 0,
       gamesPlayed: 0
     });
