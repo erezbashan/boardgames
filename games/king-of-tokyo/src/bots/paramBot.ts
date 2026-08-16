@@ -2,7 +2,7 @@ import type { KotAction, KotState, KotPlayer } from '../engine/types';
 import { getBotAction as getRandomBotAction } from './randomBot';
 import { CARD_REGISTRY } from '../engine/cards/registry';
 
-function getStateIndex(player: KotPlayer, state: KotState): number {
+export function getStateIndex(player: KotPlayer, state: KotState): number {
   const inTokyo = player.location.startsWith('Tokyo') ? 1 : 0;
   
   let hpGroup = 0;

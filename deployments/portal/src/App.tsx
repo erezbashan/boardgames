@@ -150,8 +150,11 @@ function SimulationWrapper() {
   const navigate = useNavigate();
 
   const handleStartGeneticSim = async (config: any) => {
-    const startGeneticEvolution = httpsCallable(functions, 'startGeneticEvolution');
-    const result = await startGeneticEvolution(config);
+    // If it's a Q-learning route, we use the q-learning callable
+    const isQLearning = location.pathname.includes('/qlearning');
+    const funcName = isQLearning ? 'startQLearningEvolution' : 'startGeneticEvolution';
+    const startSim = httpsCallable(functions, funcName);
+    const result = await startSim({ ...config, gameType });
     return (result.data as any).simId;
   };
 
@@ -167,9 +170,14 @@ function SimulationWrapper() {
 
   const handleListGeneticSims = (gt: string, cb: (sims: any[]) => void) => {
     import('firebase/firestore').then(({ collection, query, where, onSnapshot, orderBy }) => {
-      const q = query(collection(db, 'genetic_simulations'), where('gameType', '==', gt), orderBy('createdAt', 'desc'));
+      const isQLearning = location.pathname.includes('/qlearning');
+      
+      let q = query(collection(db, 'genetic_simulations'), where('gameType', '==', gt), orderBy('createdAt', 'desc'));
+      
       const unsubscribe = onSnapshot(q, (snapshot) => {
-        const sims = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        let sims = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        if (isQLearning) sims = sims.filter((s: any) => s.method === 'q-learning');
+        else sims = sims.filter((s: any) => s.method !== 'q-learning');
         cb(sims);
       });
       return unsubscribe;
@@ -193,15 +201,17 @@ function SimulationWrapper() {
   };
 
   const handleNavigateToSim = (id: string) => {
+    const isQLearning = location.pathname.includes('/qlearning');
+    const pathBase = isQLearning ? '/simulation/qlearning' : '/simulation/genetic';
     if (id) {
-      navigate(`/simulation/genetic/${gameType}/${id}`);
+      navigate(`${pathBase}/${gameType}/${id}`);
     } else {
-      navigate(`/simulation/genetic/${gameType}`);
+      navigate(`${pathBase}/${gameType}`);
     }
   };
 
   let viewType: 'head-to-head' | 'genetic-list' | 'genetic-detail' = 'head-to-head';
-  if (location.pathname.includes('/genetic')) {
+  if (location.pathname.includes('/genetic') || location.pathname.includes('/qlearning')) {
     viewType = simId ? 'genetic-detail' : 'genetic-list';
   }
 
@@ -237,6 +247,8 @@ function App() {
       <Route path="/simulation/head-to-head/:gameType" element={<SimulationWrapper />} />
       <Route path="/simulation/genetic/:gameType" element={<SimulationWrapper />} />
       <Route path="/simulation/genetic/:gameType/:simId" element={<SimulationWrapper />} />
+      <Route path="/simulation/qlearning/:gameType" element={<SimulationWrapper />} />
+      <Route path="/simulation/qlearning/:gameType/:simId" element={<SimulationWrapper />} />
     </Routes>
   );
 }

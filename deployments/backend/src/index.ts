@@ -8,6 +8,7 @@ import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { flipsReducer, initialFlipsState, FlipsAction } from "@erez/flips/dist/engine/reducer";
 import { kingOfTokyoReducer, initialKotState } from "@erez/king-of-tokyo/dist/engine/reducer";
 import { createInitialPopulation, evolvePopulation, getStrategyString } from "@erez/boardgame-core/dist/engine/geneticAlgorithm";
+import { createInitialQTable, qTableToBestDna } from "@erez/boardgame-core/dist/engine/qLearningAlgorithm";
 import { runSimulationBatch as coreRunSimulationBatch } from "@erez/boardgame-core/dist/engine/simulateGame";
 
 admin.initializeApp();
@@ -279,6 +280,148 @@ export const onGeneticSimulationUpdated = onDocumentWritten({
   return db.collection('genetic_simulations').doc(event.params.simId).update({
     gamesCompleted: data.gamesCompleted + chunk,
     population: JSON.stringify(pop),
+    updatedAt: FieldValue.serverTimestamp()
+  });
+});
+
+export const startQLearningEvolution = onCall(async (request) => {
+  const { gamesPerGen, gameType } = request.data;
+  
+  const qTable = createInitialQTable();
+  
+  const simRef = db.collection('genetic_simulations').doc(); // We reuse the collection so the dashboard works
+  await simRef.set({
+    method: 'q-learning',
+    status: 'running',
+    gameType: gameType || 'king-of-tokyo',
+    config: {
+      popSize: 4, // 4 bots playing
+      numGenerations: 50, // 50 episodes to decay
+      gamesPerGen: gamesPerGen || 10000
+    },
+    currentGeneration: 1,
+    gamesCompleted: 0,
+    population: JSON.stringify(qTable), // We store the Q-table in the population field
+    epsilon: 1.0,
+    history: [],
+    createdAt: FieldValue.serverTimestamp()
+  });
+
+  return { simId: simRef.id };
+});
+
+export const onQLearningSimulationUpdated = onDocumentWritten({
+  document: "genetic_simulations/{simId}",
+  timeoutSeconds: 540
+}, async (event) => {
+  const data = event.data?.after.data();
+  const prevData = event.data?.before?.data();
+  if (!data || data.method !== 'q-learning' || data.status !== 'running') return;
+
+  const { currentGeneration, config, gameType } = data;
+  const gamesPerGen = config.gamesPerGen;
+  const CHUNK_SIZE = Math.max(10, Math.min(1000, Math.floor(gamesPerGen / 10)));
+  
+  if (data.gamesCompleted >= gamesPerGen) {
+    if (prevData && prevData.gamesCompleted >= gamesPerGen) return;
+    
+    // EVOLVE! (In Q-learning this means saving the generation state and decaying epsilon)
+    const qTable = JSON.parse(data.population);
+    const bestDna = qTableToBestDna(qTable);
+    
+    // We create a dummy avgDna from the Q-table to satisfy the dashboard UI
+    const avgDna = Array.from({ length: 54 }, (_, idx) => {
+      const row = qTable[idx];
+      const maxQ = Math.max(...row);
+      // Give a tiny weight to the best action just so the UI renders it
+      const res = { a: 0, h: 0, e: 0, p: 0, s: 0, total: 1 };
+      const bestA = row.indexOf(maxQ) + 1;
+      if ((bestA & 1) > 0) res.a = 1;
+      if ((bestA & 2) > 0) res.h = 1;
+      if ((bestA & 4) > 0) res.e = 1;
+      if ((bestA & 8) > 0) res.p = 1;
+      if ((bestA & 16) > 0) res.s = 1;
+      return res;
+    });
+
+    const newHistory = [...(data.history || []), {
+      generation: currentGeneration,
+      bestDna: bestDna,
+      avgDna: avgDna,
+      wins: 0,
+      gamesPlayed: gamesPerGen
+    }];
+
+    // Decay epsilon: from 1.0 down to 0.05
+    let newEpsilon = data.epsilon * 0.9;
+    if (newEpsilon < 0.05) newEpsilon = 0.05;
+
+    return db.collection('genetic_simulations').doc(event.params.simId).update({
+      currentGeneration: currentGeneration + 1,
+      gamesCompleted: 0,
+      epsilon: newEpsilon,
+      history: newHistory,
+      updatedAt: FieldValue.serverTimestamp()
+    });
+  }
+
+  if (prevData && prevData.gamesCompleted === data.gamesCompleted && prevData.currentGeneration === data.currentGeneration) {
+    return;
+  }
+
+  console.log(`Simulating Q-Learning Chunk Gen ${currentGeneration}: ${data.gamesCompleted} / ${gamesPerGen}`);
+
+  let qTable = JSON.parse(data.population);
+  let reducer: any;
+  let initialState: any;
+  if (gameType === 'flips') {
+    reducer = flipsReducer;
+    initialState = initialFlipsState;
+  } else {
+    reducer = kingOfTokyoReducer;
+    initialState = initialKotState;
+  }
+
+  const chunk = Math.min(CHUNK_SIZE, gamesPerGen - data.gamesCompleted);
+  const alpha = 0.05; // Learning rate
+  const epsilon = data.epsilon || 0.05;
+
+  for (let i = 0; i < chunk; i++) {
+    const gamePlayersCount = Math.floor(Math.random() * 5) + 2;
+    const pConfigs: any[] = [];
+    
+    for (let p = 0; p < gamePlayersCount; p++) {
+      pConfigs.push({ id: `bot_${p}`, botStrategy: `qlearn:${JSON.stringify({ qTable, epsilon })}` });
+    }
+
+    coreRunSimulationBatch(reducer, initialState, pConfigs, 1, (res: any) => {
+      const result = res[0];
+      const finalState = result.finalState;
+      if (!finalState || !finalState.players) return;
+
+      Object.keys(finalState.players).forEach(playerId => {
+        const player = finalState.players[playerId];
+        const history = player.qLearningHistory;
+        if (!history || history.length === 0) return;
+
+        // Reward: +1 for win, -1 for loss
+        const reward = (result.winnerId === playerId) ? 1.0 : -1.0;
+
+        // Monte Carlo Update: Q(s,a) = Q(s,a) + alpha * (R - Q(s,a))
+        history.forEach((step: {stateIdx: number, actionMask: number}) => {
+          const s = step.stateIdx;
+          const a = step.actionMask - 1; // 0-indexed in Q-table
+          if (qTable[s] && typeof qTable[s][a] === 'number') {
+            qTable[s][a] = qTable[s][a] + alpha * (reward - qTable[s][a]);
+          }
+        });
+      });
+    });
+  }
+
+  return db.collection('genetic_simulations').doc(event.params.simId).update({
+    gamesCompleted: data.gamesCompleted + chunk,
+    population: JSON.stringify(qTable),
     updatedAt: FieldValue.serverTimestamp()
   });
 });

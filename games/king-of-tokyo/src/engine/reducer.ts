@@ -159,6 +159,15 @@ export function kingOfTokyoReducer(state: KotState = initialKotState, action: Ko
               if (st.pendingActions[0].type.startsWith('ASK')) {
                 st.pendingActions.shift();
               }
+              
+              if ((botResponse as any).__qTransition) {
+                 if (!st.players[targetPlayerId].qLearningHistory) {
+                    st.players[targetPlayerId].qLearningHistory = [];
+                 }
+                 st.players[targetPlayerId].qLearningHistory!.push((botResponse as any).__qTransition);
+                 delete (botResponse as any).__qTransition;
+              }
+              
               st.pendingActions.unshift({ ...botResponse, playerId: targetPlayerId });
            }
        }

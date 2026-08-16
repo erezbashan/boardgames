@@ -13,3 +13,4 @@ export * from './components/TimelineBarWidget';
 export * from './engine/simulateGame';
 export * from './components/SimulationDashboard';
 export * from './engine/geneticAlgorithm';
+export * from './engine/qLearningAlgorithm';

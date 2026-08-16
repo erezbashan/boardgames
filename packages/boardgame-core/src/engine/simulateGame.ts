@@ -10,6 +10,7 @@ export interface SimulationResult {
   winnerStrategy: string | null;
   error?: string;
   totalTurns?: number;
+  finalState?: any;
 }
 
 export function runSimulationBatch(
@@ -58,7 +59,8 @@ export function runSimulationBatch(
     return {
       winnerId,
       winnerStrategy: winnerPlayer?.botStrategy || null,
-      totalTurns: loopCount
+      totalTurns: loopCount,
+      finalState: state
     };
   };
 

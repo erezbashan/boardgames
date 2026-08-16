@@ -31,6 +31,7 @@ export interface KotPlayer extends BasePlayer {
   cardState?: Record<string, any>;
   markers?: Record<string, number>;
   maxHealth?: number;
+  qLearningHistory?: {stateIdx: number, actionMask: number}[];
 }
 
 export interface PendingAction {
