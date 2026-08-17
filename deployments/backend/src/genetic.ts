@@ -106,7 +106,7 @@ export const onGeneticSimulationUpdated = onDocumentWritten({
   }
 
   // Ensure we don't trigger recursively from other field updates
-  if (prevData && prevData.gamesCompleted === data.gamesCompleted && prevData.currentGeneration === data.currentGeneration) {
+  if (prevData && prevData.gamesCompleted === data.gamesCompleted && prevData.currentGeneration === data.currentGeneration && prevData.status === data.status) {
     return;
   }
 
