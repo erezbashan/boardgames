@@ -1,3 +1,5 @@
+export const GlobalQTableCache = new Map<string, { qTable: number[][], epsilon: number }>();
+
 export function createInitialQTable(): number[][] {
   const table: number[][] = [];
   for (let i = 0; i < 54; i++) {

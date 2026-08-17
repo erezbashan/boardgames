@@ -3,6 +3,8 @@ import { getBotAction as getRandomBotAction } from './randomBot';
 import { CARD_REGISTRY } from '../engine/cards/registry';
 import { getStateIndex } from './paramBot';
 
+import { GlobalQTableCache } from '@erez/boardgame-core';
+
 export function getBotAction(state: KotState, playerId: string): PendingAction | null {
   const player = state.players[playerId];
   if (!player) return null;
@@ -10,16 +12,17 @@ export function getBotAction(state: KotState, playerId: string): PendingAction |
   const topAction = state.pendingActions[0];
   if (!topAction) return null;
 
-  // Parse Q-learning strategy
   let qTable: number[][] = [];
   let epsilon = 0.05;
-  try {
-      if (player.botStrategy?.startsWith('qlearn:')) {
-          const config = JSON.parse(player.botStrategy.substring(7));
-          qTable = config.qTable || [];
-          epsilon = typeof config.epsilon === 'number' ? config.epsilon : 0.05;
+
+  if (player.botStrategy?.startsWith('qlearn:')) {
+      const simId = player.botStrategy.substring(7);
+      const cache = GlobalQTableCache.get(simId);
+      if (cache) {
+          qTable = cache.qTable;
+          epsilon = cache.epsilon;
       }
-  } catch (e) {}
+  }
 
   const stateIdx = getStateIndex(player, state);
   
