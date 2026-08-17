@@ -56,14 +56,12 @@ export const onQLearningSimulationUpdated = onDocumentWritten({
     // Create dummy avgDna for UI
     const avgDna = Array.from({ length: 54 }, (_, idx) => {
       const row = qTable[idx];
-      const maxQ = Math.max(...row);
       const res = { a: 0, h: 0, e: 0, p: 0, s: 0, total: 1 };
-      const bestA = row.indexOf(maxQ) + 1;
-      if ((bestA & 1) > 0) res.a = 1;
-      if ((bestA & 2) > 0) res.h = 1;
-      if ((bestA & 4) > 0) res.e = 1;
-      if ((bestA & 8) > 0) res.p = 1;
-      if ((bestA & 16) > 0) res.s = 1;
+      if (row[0][1] > row[0][0]) res.a = 1;
+      if (row[1][1] > row[1][0]) res.h = 1;
+      if (row[2][1] > row[2][0]) res.e = 1;
+      if (row[3][1] > row[3][0]) res.p = 1;
+      if (row[4][1] > row[4][0]) res.s = 1;
       return res;
     });
 
@@ -137,9 +135,27 @@ export const onQLearningSimulationUpdated = onDocumentWritten({
 
         history.forEach((step: {stateIdx: number, actionMask: number}) => {
           const s = step.stateIdx;
-          const a = step.actionMask - 1; 
-          if (qTable[s] && typeof qTable[s][a] === 'number') {
-            qTable[s][a] = qTable[s][a] + alpha * (reward - qTable[s][a]);
+          const mask = step.actionMask;
+          if (qTable[s]) {
+             // Gene 0: Attack (bit 1)
+             const a0 = (mask & 1) > 0 ? 1 : 0;
+             qTable[s][0][a0] += alpha * (reward - qTable[s][0][a0]);
+
+             // Gene 1: Health (bit 2)
+             const a1 = (mask & 2) > 0 ? 1 : 0;
+             qTable[s][1][a1] += alpha * (reward - qTable[s][1][a1]);
+             
+             // Gene 2: Energy (bit 4)
+             const a2 = (mask & 4) > 0 ? 1 : 0;
+             qTable[s][2][a2] += alpha * (reward - qTable[s][2][a2]);
+
+             // Gene 3: Points (bit 8)
+             const a3 = (mask & 8) > 0 ? 1 : 0;
+             qTable[s][3][a3] += alpha * (reward - qTable[s][3][a3]);
+
+             // Gene 4: Stay (bit 16)
+             const a4 = (mask & 16) > 0 ? 1 : 0;
+             qTable[s][4][a4] += alpha * (reward - qTable[s][4][a4]);
           }
         });
       });

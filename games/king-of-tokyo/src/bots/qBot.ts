@@ -12,42 +12,62 @@ export function getBotAction(state: KotState, playerId: string): PendingAction |
   const topAction = state.pendingActions[0];
   if (!topAction) return null;
 
-  let qTable: number[][] = [];
+  let qTable: number[][][] = [];
   let epsilon = 0.05;
 
   if (player.botStrategy?.startsWith('qlearn:')) {
       const simId = player.botStrategy.substring(7);
       const cache = GlobalQTableCache.get(simId);
       if (cache) {
-          qTable = cache.qTable;
+          qTable = cache.qTable as number[][][];
           epsilon = cache.epsilon;
       }
   }
 
   const stateIdx = getStateIndex(player, state);
   
-  // Epsilon-greedy action selection
-  let actionMask = 15; // default
-  if (qTable.length === 54 && qTable[stateIdx]?.length === 31) {
+  // Epsilon-greedy action selection for each independent gene
+  let actionMask = 0; 
+  if (qTable.length === 54 && qTable[stateIdx]?.length === 5) {
+      const row = qTable[stateIdx];
+      
+      // Gene 0: Attack (bit 1)
       if (Math.random() < epsilon) {
-          // Explore: Pick random action mask from 1 to 31
-          actionMask = Math.floor(Math.random() * 31) + 1;
+          if (Math.random() < 0.5) actionMask |= 1;
       } else {
-          // Exploit: Pick best action mask (argmax)
-          const row = qTable[stateIdx];
-          let maxQ = -Infinity;
-          let bestA = 0;
-          for (let a = 0; a < row.length; a++) {
-              if (row[a] > maxQ) {
-                  maxQ = row[a];
-                  bestA = a;
-              }
-          }
-          actionMask = bestA + 1; // actions are 1-indexed (1 to 31)
+          if (row[0][1] > row[0][0]) actionMask |= 1;
+      }
+
+      // Gene 1: Health (bit 2)
+      if (Math.random() < epsilon) {
+          if (Math.random() < 0.5) actionMask |= 2;
+      } else {
+          if (row[1][1] > row[1][0]) actionMask |= 2;
+      }
+
+      // Gene 2: Energy (bit 4)
+      if (Math.random() < epsilon) {
+          if (Math.random() < 0.5) actionMask |= 4;
+      } else {
+          if (row[2][1] > row[2][0]) actionMask |= 4;
+      }
+
+      // Gene 3: Points (bit 8)
+      if (Math.random() < epsilon) {
+          if (Math.random() < 0.5) actionMask |= 8;
+      } else {
+          if (row[3][1] > row[3][0]) actionMask |= 8;
+      }
+
+      // Gene 4: Stay (bit 16)
+      if (Math.random() < epsilon) {
+          if (Math.random() < 0.5) actionMask |= 16;
+      } else {
+          if (row[4][1] > row[4][0]) actionMask |= 16;
       }
   } else {
       // Fallback if missing Q-table
-      actionMask = Math.floor(Math.random() * 31) + 1;
+      actionMask = Math.floor(Math.random() * 32); 
   }
 
   // The __qTransition property will be captured by the reducer
