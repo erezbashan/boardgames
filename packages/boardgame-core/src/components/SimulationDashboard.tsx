@@ -17,13 +17,19 @@ export interface SimulationDashboardProps {
   onNavigateToSim?: (simId: string) => void;
 }
 
-const decodeStrategyMask = (mask: number) => {
+const decodeStrategyMask = (mask: number, inTokyo: boolean) => {
   const targets = [];
   if ((mask & 1) > 0) targets.push('Attack');
   if ((mask & 2) > 0) targets.push('Health');
   if ((mask & 4) > 0) targets.push('Energy');
   if ((mask & 8) > 0) targets.push('Points');
-  return targets.length > 0 ? targets.join(' + ') : 'Nothing';
+  const base = targets.length > 0 ? targets.join(' + ') : 'Nothing';
+  
+  if (inTokyo) {
+    const stay = (mask & 16) > 0;
+    return `${base} | ${stay ? 'Stay' : 'Yield'}`;
+  }
+  return base;
 };
 
 const renderReadableDNA = (dna: number[]) => {
@@ -50,7 +56,7 @@ const renderReadableDNA = (dna: number[]) => {
               <td style={{ padding: '4px 8px' }}>{locStr}</td>
               <td style={{ padding: '4px 8px', color: hpGroup === 0 ? '#ef4444' : 'inherit' }}>{hpStr} HP</td>
               <td style={{ padding: '4px 8px', color: vpGroup === 2 ? '#4ade80' : 'inherit' }}>{vpStr} VP</td>
-              <td style={{ padding: '4px 8px', fontWeight: 'bold', color: '#a855f7' }}>{decodeStrategyMask(mask)}</td>
+              <td style={{ padding: '4px 8px', fontWeight: 'bold', color: '#a855f7' }}>{decodeStrategyMask(mask, inTokyo === 1)}</td>
             </tr>
           );
         }
@@ -303,6 +309,7 @@ function GeneticListView({ gameType, onStartGeneticSim, onListGeneticSims, onNav
   const [popSize, setPopSize] = useState(100);
   const [gamesPerGen, setGamesPerGen] = useState(20000);
   const [simList, setSimList] = useState<any[]>([]);
+  const isQLearning = window.location.pathname.includes('/qlearning');
 
   useEffect(() => {
     if (onListGeneticSims) {
@@ -328,10 +335,12 @@ function GeneticListView({ gameType, onStartGeneticSim, onListGeneticSims, onNav
       <div style={{ background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '12px', maxWidth: '800px', marginBottom: '30px' }}>
         <h3>Start New Evolution</h3>
         <div style={{ display: 'flex', gap: '20px', marginTop: '15px' }}>
-          <div>
-            <label style={{ display: 'block', fontSize: '12px', color: 'gray', marginBottom: '5px' }}>Population Size</label>
-            <input type="number" value={popSize} onChange={e => setPopSize(parseInt(e.target.value))} style={{ background: 'rgba(0,0,0,0.5)', color: 'white', border: '1px solid gray', padding: '8px', borderRadius: '4px', width: '120px' }} />
-          </div>
+          {!isQLearning && (
+            <div>
+              <label style={{ display: 'block', fontSize: '12px', color: 'gray', marginBottom: '5px' }}>Population Size</label>
+              <input type="number" value={popSize} onChange={e => setPopSize(parseInt(e.target.value))} style={{ background: 'rgba(0,0,0,0.5)', color: 'white', border: '1px solid gray', padding: '8px', borderRadius: '4px', width: '120px' }} />
+            </div>
+          )}
           <div>
             <label style={{ display: 'block', fontSize: '12px', color: 'gray', marginBottom: '5px' }}>Games per Generation</label>
             <input type="number" value={gamesPerGen} onChange={e => setGamesPerGen(parseInt(e.target.value))} style={{ background: 'rgba(0,0,0,0.5)', color: 'white', border: '1px solid gray', padding: '8px', borderRadius: '4px', width: '120px' }} />
@@ -367,7 +376,7 @@ function GeneticListView({ gameType, onStartGeneticSim, onListGeneticSims, onNav
                   <td style={{ padding: '10px', color: s.status === 'running' ? '#4ade80' : s.status === 'paused' ? '#eab308' : 'gray' }}>{s.status.toUpperCase()}</td>
                   <td style={{ padding: '10px' }}>{s.currentGeneration}</td>
                   <td style={{ padding: '10px', fontSize: '12px', color: 'gray' }}>
-                    Pop: {s.config?.popSize} | Games/Gen: {s.config?.gamesPerGen}
+                    {!isQLearning && `Pop: ${s.config?.popSize} | `}Games/Gen: {s.config?.gamesPerGen}
                   </td>
                   <td style={{ padding: '10px', fontSize: '12px', color: 'gray' }}>
                     {s.createdAt?.toDate ? s.createdAt.toDate().toLocaleString() : 'Just now'}
@@ -398,6 +407,7 @@ function GeneticDetailView({ simId, onListenGeneticSim, onStopGeneticSim, onResu
   const isPaused = data.status === 'paused';
   const historyDocs = data.history || [];
   const bestBotDna = historyDocs.length > 0 ? historyDocs[historyDocs.length - 1].bestDna : null;
+  const isQLearning = data.method === 'q-learning';
 
   return (
     <div style={{ marginTop: '20px', maxWidth: '1000px' }}>
@@ -411,7 +421,8 @@ function GeneticDetailView({ simId, onListenGeneticSim, onStopGeneticSim, onResu
             <h2 style={{ margin: '0 0 10px 0' }}>Simulation: {simId}</h2>
             <div style={{ display: 'flex', gap: '20px', color: 'gray', fontSize: '14px' }}>
               <span>Status: <span style={{ color: isRunning ? '#4ade80' : isPaused ? '#eab308' : 'gray' }}>{data.status.toUpperCase()}</span></span>
-              <span>Population: {data.config?.popSize}</span>
+              {!isQLearning && <span>Population: {data.config?.popSize}</span>}
+              {isQLearning && <span>Epsilon: {data.epsilon?.toFixed(3)}</span>}
               <span>Games/Gen: {data.config?.gamesPerGen}</span>
               <span>Created: {data.createdAt?.toDate ? data.createdAt.toDate().toLocaleString() : 'Just now'}</span>
             </div>
