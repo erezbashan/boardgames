@@ -42,7 +42,7 @@ export function runSimulationBatch(
       if (state.actionQueue && state.actionQueue.length > 0) {
         const action = state.actionQueue[0].action;
         state = { ...state, actionQueue: state.actionQueue.slice(1) };
-        state = reducer(state, action);
+        state = reducer(state, { ...action, __isSimulation: true });
       } else {
         // Queue is empty but game not finished. 
         return { winnerId: null, winnerStrategy: null, error: 'Queue empty before game finished' };

@@ -86,32 +86,47 @@ export function getBotAction(state: KotState, playerId: string): PendingAction |
       }
     });
 
-    return { type: 'RESPONSE_ROLL', payload: { keepIds }, __qTransition: transition } as any;
+    return { type: 'RESPONSE_ROLL', payload: { roll: true, keptDiceIds: keepIds }, __qTransition: transition } as any;
   }
 
   if (topAction?.type === 'ASK_MARKET' && topAction.playerId === playerId) {
-    const marketCards = state.market;
-    const affordableCards = marketCards.filter(cardId => {
-      const card = CARD_REGISTRY[cardId];
-      return card && player.energy >= card.cost;
+    const energy = player.energy;
+    const availableMarketCards = state.market
+        .map((cardId, index) => ({ cardId, index }))
+        .filter(c => c.cardId !== null && c.cardId !== undefined && c.cardId !== '');
+
+    const affordableCards = availableMarketCards.filter(c => {
+        const cardDef = CARD_REGISTRY[c.cardId];
+        if (!cardDef) return false;
+        
+        // Don't buy Keep cards we already have
+        if (cardDef.type === 'Keep' && player.cards.includes(c.cardId)) return false;
+
+        let cost = cardDef.cost;
+        if (player.cards.includes('alien_metabolism') || player.cards.includes('alienMetabolism')) {
+            cost = Math.max(0, cost - 1);
+        }
+        return energy >= cost;
     });
 
     if (affordableCards.length > 0) {
       if (Math.random() < 0.5) {
-         const cardToBuy = affordableCards[Math.floor(Math.random() * affordableCards.length)];
-         return { type: 'RESPONSE_MARKET', payload: { action: 'buy', cardId: cardToBuy }, __qTransition: transition } as any;
+         const toBuy = affordableCards[Math.floor(Math.random() * affordableCards.length)];
+         return { type: 'RESPONSE_MARKET', payload: { action: 'BUY', cardId: toBuy.cardId, marketIndex: toBuy.index }, __qTransition: transition } as any;
       }
     }
-    return { type: 'RESPONSE_MARKET', payload: { action: 'pass' }, __qTransition: transition } as any;
+    return { type: 'RESPONSE_MARKET', payload: { action: 'DONE' }, __qTransition: transition } as any;
   }
 
-  if (topAction?.type === 'ASK_QUESTION' && topAction.playerId === playerId) {
-    if (topAction.payload.message && topAction.payload.message.includes('yield Tokyo')) {
+  if (topAction?.type === 'ASK' && topAction.payload?.prompt?.playerId === playerId) {
+    if (topAction.payload.prompt.text && topAction.payload.prompt.text.includes('yield Tokyo')) {
       const stayTokyo = (actionMask & 16) > 0;
-      const options = topAction.payload.options as string[];
-      let selectedOption = stayTokyo ? options.find(o => o.toLowerCase().includes('stay')) : options.find(o => o.toLowerCase().includes('yield'));
-      if (!selectedOption) selectedOption = options[0];
-      return { type: 'RESPONSE_QUESTION', payload: { selectedOption }, __qTransition: transition } as any;
+      const options = topAction.payload.prompt.options as any[];
+      if (stayTokyo && options.some(o => o.label === 'Stay')) {
+        return { ...options.find(o => o.label === 'Stay').action, __qTransition: transition } as any;
+      } else if (!stayTokyo && options.some(o => o.label === 'Yield')) {
+        return { ...options.find(o => o.label === 'Yield').action, __qTransition: transition } as any;
+      }
     }
     
     // For other questions (like Mimic, etc.), just answer randomly for now

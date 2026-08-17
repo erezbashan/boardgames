@@ -105,16 +105,16 @@ export function getParamBotAction(state: KotState, playerId: string): KotAction 
   }
 
   // Handle Yield Tokyo using the 16 bit
-  if (topAction?.type === 'ASK_QUESTION' && topAction.playerId === playerId) {
-    if (topAction.payload.message && topAction.payload.message.includes('yield Tokyo')) {
+  if (topAction?.type === 'ASK' && topAction.payload?.prompt?.playerId === playerId) {
+    if (topAction.payload.prompt.text && topAction.payload.prompt.text.includes('yield Tokyo')) {
       const strategyMask = getStrategyMask(player, state);
       const stayTokyo = (strategyMask & 16) > 0;
       
-      const options = topAction.payload.options as string[];
-      if (stayTokyo && options.includes('No')) {
-        return { type: 'RESPONSE_QUESTION', payload: { response: 'No' } };
-      } else if (!stayTokyo && options.includes('Yes')) {
-        return { type: 'RESPONSE_QUESTION', payload: { response: 'Yes' } };
+      const options = topAction.payload.prompt.options as any[];
+      if (stayTokyo && options.some(o => o.label === 'Stay')) {
+        return options.find(o => o.label === 'Stay').action;
+      } else if (!stayTokyo && options.some(o => o.label === 'Yield')) {
+        return options.find(o => o.label === 'Yield').action;
       }
     }
   }

@@ -114,9 +114,14 @@ function triggerCards(state: KotState, action: PendingAction, hook: 'onPreEvent'
   return st;
 }
 
-export function kingOfTokyoReducer(state: KotState = initialKotState, action: KotAction & { gameId?: string }): KotState {
+export function kingOfTokyoReducer(state: KotState = initialKotState, action: KotAction & { gameId?: string, __isSimulation?: boolean }): KotState {
   const gamePrefix = action.gameId ? `[${action.gameId}]` : '';
-  state = JSON.parse(JSON.stringify(state)); // Deep clone state to prevent optimistic UI mutation leaks
+  
+  if (!action.__isSimulation) {
+    state = JSON.parse(JSON.stringify(state)); // Deep clone state to prevent optimistic UI mutation leaks
+  } else if (action.type === 'START_GAME' || action.type === 'JOIN_GAME') {
+    state = JSON.parse(JSON.stringify(state)); // Clone only on initialization for simulator
+  }
   if (action.type !== 'NOP') {
     // console.log(`kingOfTokyoReducer ${gamePrefix} INCOMING:`, action.type);
     // console.log(`kingOfTokyoReducer ${gamePrefix} PENDING:`, state.pendingActions?.map(a => a.type).join(', '));
