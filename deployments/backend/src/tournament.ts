@@ -14,7 +14,7 @@ export const listTournamentResults = onCall(async () => {
   return { files };
 });
 
-const CHUNK_SIZE = 100;
+const CHUNK_SIZE = 1000;
 
 export const startTournament = onCall(async (request) => {
   const { gameType, bots: inputBots, gamesPerPhase: inputGames, startingPlayers = 2, fallbacks = {} } = request.data;
