@@ -91,7 +91,37 @@ export function SimulationWrapper() {
     // Quick tournament specific overrides
     onStartTournament: async () => {
       const startSim = httpsCallable(functions, 'startTournament');
-      const result = await startSim({ gameType });
+      
+      let bots: any[] = [];
+      if (gameType === 'king-of-tokyo') {
+        const vpOptions = [0, 5, 10, 15, 20];
+        const enOptions = [0, 5, 10, 15, 20];
+        const hlOptions = [0, 2, 4, 6, 8, 10];
+        const ydOptions = [0, 2, 4, 6, 8, 10];
+        const atOptions = [1, 2, 3];
+
+        for (const vp of vpOptions) {
+          for (const en of enOptions) {
+            for (const hl of hlOptions) {
+              for (const at of atOptions) {
+                for (const yd of ydOptions) {
+                  const config = { vp, en, hl, at, yd };
+                  const id = `rule:${JSON.stringify(config)}`;
+                  bots.push({
+                    id,
+                    config
+                  });
+                }
+              }
+            }
+          }
+        }
+      } else {
+        // Fallback for other games, or we can just send an empty array if not supported
+        bots = [];
+      }
+
+      const result = await startSim({ gameType, bots });
       return (result.data as any).simId;
     },
     onListTournamentSims: (gt: string, cb: (sims: any[]) => void) => {

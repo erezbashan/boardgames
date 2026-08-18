@@ -1,8 +1,7 @@
 import { onCall } from "firebase-functions/v2/https";
 import { onDocumentWritten } from "firebase-functions/v2/firestore";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
-import { flipsReducer, initialFlipsState } from "@erez/flips/dist/engine/reducer";
-import { kingOfTokyoReducer, initialKotState } from "@erez/king-of-tokyo/dist/engine/reducer";
+import { getGame } from "@erez/boardgame-core";
 import { createInitialPopulation, evolvePopulation, getStrategyString } from "@erez/boardgame-core/dist/engine/geneticAlgorithm";
 import { runSimulationBatch as coreRunSimulationBatch } from "@erez/boardgame-core/dist/engine/simulateGame";
 
@@ -115,12 +114,14 @@ export const onGeneticSimulationUpdated = onDocumentWritten({
   let pop = JSON.parse(data.population);
   let reducer: any;
   let initialState: any;
-  if (gameType === 'flips') {
-    reducer = flipsReducer;
-    initialState = initialFlipsState;
-  } else {
-    reducer = kingOfTokyoReducer;
-    initialState = initialKotState;
+  let game;
+  try {
+    game = getGame(gameType);
+    reducer = game.reducer;
+    initialState = game.initialState;
+  } catch (err) {
+    console.error(`Game ${gameType} not found`);
+    return;
   }
 
   const chunk = Math.min(CHUNK_SIZE, gamesPerGen - data.gamesCompleted);

@@ -1,8 +1,7 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { onDocumentUpdated } from "firebase-functions/v2/firestore";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
-import { flipsReducer, initialFlipsState, FlipsAction } from "@erez/flips/dist/engine/reducer";
-import { kingOfTokyoReducer, initialKotState } from "@erez/king-of-tokyo/dist/engine/reducer";
+import { getGame } from "@erez/boardgame-core";
 
 export const createGame = onCall(async (request) => {
   const db = getFirestore();
@@ -16,11 +15,10 @@ export const createGame = onCall(async (request) => {
   if (doc.exists) return { gameId };
 
   let state;
-  if (gameType === 'flips') {
-    state = initialFlipsState;
-  } else if (gameType === 'king-of-tokyo') {
-    state = initialKotState;
-  } else {
+  try {
+    const game = getGame(gameType);
+    state = game.initialState;
+  } catch (err) {
     throw new HttpsError('invalid-argument', 'Unsupported game type');
   }
 
@@ -54,15 +52,13 @@ export const dispatchAction = onCall(async (request) => {
     const uid = request.auth?.uid;
     const actionWithPlayer = uid ? { ...action, playerId: uid } : action;
 
-    if (gameType === 'flips') {
-      if (!gameDoc.state) gameDoc.state = initialFlipsState;
-      newState = flipsReducer(gameDoc.state, actionWithPlayer);
-    } else if (gameType === 'king-of-tokyo') {
-      if (!gameDoc.state) gameDoc.state = initialKotState;
-      // Pass gameId into the action so the reducer can log it
+    try {
+      const game = getGame(gameType);
+      if (!gameDoc.state) gameDoc.state = game.initialState;
+      // We pass the gameId into the action for logging purposes
       const actionWithGameId = { ...actionWithPlayer, gameId };
-      newState = kingOfTokyoReducer(gameDoc.state, actionWithGameId as any);
-    } else {
+      newState = game.reducer(gameDoc.state, actionWithGameId);
+    } catch (err) {
       throw new HttpsError('invalid-argument', 'Unsupported game type');
     }
 
@@ -106,13 +102,12 @@ export const onGameUpdated = onDocumentUpdated("games/{gameId}", async (event) =
     curState.actionQueue = curState.actionQueue.slice(1);
 
     let newState;
-    if (data.gameType === 'flips') {
-      newState = flipsReducer(curState, actionToRun);
-    } else if (data.gameType === 'king-of-tokyo') {
+    try {
+      const game = getGame(data.gameType);
       const actionWithGameId = { ...actionToRun, gameId };
-      newState = kingOfTokyoReducer(curState, actionWithGameId);
-    } else {
-      return; // Add other game reducers here later
+      newState = game.reducer(curState, actionWithGameId);
+    } catch (err) {
+      return;
     }
 
     transaction.update(gameRef, { state: newState });

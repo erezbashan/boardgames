@@ -2,41 +2,25 @@ import { onCall } from 'firebase-functions/v2/https';
 import { onDocumentWritten } from 'firebase-functions/v2/firestore';
 import { getFirestore } from 'firebase-admin/firestore';
 import { runSimulationBatch as coreRunSimulationBatch } from "@erez/boardgame-core/dist/engine/simulateGame";
-import { kingOfTokyoReducer, initialKotState } from "@erez/king-of-tokyo/dist/engine/reducer";
+import { getGame } from "@erez/boardgame-core";
 
 const CHUNK_SIZE = 1000;
 
 export const startTournament = onCall(async (request) => {
-  const { gameType } = request.data;
+  const { gameType, bots: inputBots } = request.data;
   const db = getFirestore();
 
-  // Generate all 162 bots
-  const vpOptions = [10, 14, 18];
-  const enOptions = [5, 10];
-  const hlOptions = [4, 6, 8];
-  const atOptions = [1, 2, 3];
-  const ydOptions = [4, 6, 8];
-
-  const bots = [];
-  for (const vp of vpOptions) {
-    for (const en of enOptions) {
-      for (const hl of hlOptions) {
-        for (const at of atOptions) {
-          for (const yd of ydOptions) {
-            const config = { vp, en, hl, at, yd };
-            const id = `rule:${JSON.stringify(config)}`;
-            bots.push({
-              id,
-              config,
-              wins: 0,
-              gamesPlayed: 0,
-              eliminated: false
-            });
-          }
-        }
-      }
-    }
+  if (!inputBots || !Array.isArray(inputBots)) {
+    throw new Error('Bots array is required to start a tournament.');
   }
+
+  const bots = inputBots.map((b: any) => ({
+    id: b.id,
+    config: b.config,
+    wins: 0,
+    gamesPlayed: 0,
+    eliminated: false
+  }));
 
   const totalGamesInPhase = bots.length * 1000;
 
@@ -68,7 +52,7 @@ export const onTournamentSimulationUpdated = onDocumentWritten({
     return;
   }
 
-  const { phase, gamesCompletedInPhase, totalGamesInPhase } = data;
+  const { phase, gamesCompletedInPhase, totalGamesInPhase, gameType } = data;
   let bots = data.bots as any[];
 
   if (gamesCompletedInPhase >= totalGamesInPhase && totalGamesInPhase > 0) {
@@ -100,6 +84,14 @@ export const onTournamentSimulationUpdated = onDocumentWritten({
   const activeBots = bots.filter(b => !b.eliminated);
   if (activeBots.length === 0) return;
 
+  let game;
+  try {
+    game = getGame(gameType);
+  } catch (err) {
+    console.error(`Game ${gameType} not found in registry`);
+    return;
+  }
+
   const chunk = Math.min(CHUNK_SIZE, totalGamesInPhase - gamesCompletedInPhase);
   let gamesRun = 0;
 
@@ -111,7 +103,6 @@ export const onTournamentSimulationUpdated = onDocumentWritten({
     if (!bot) break;
 
     let oppStrategy = '';
-    let oppBot = null;
 
     if (phase === 1) {
       oppStrategy = (bot.gamesPlayed % 2 === 0) ? 'smart' : 'random';
@@ -120,23 +111,20 @@ export const onTournamentSimulationUpdated = onDocumentWritten({
       while (activeBots[oppIdx].id === bot.id && activeBots.length > 1) {
         oppIdx = Math.floor(Math.random() * activeBots.length);
       }
-      oppBot = activeBots[oppIdx];
-      oppStrategy = oppBot.id;
+      oppStrategy = activeBots[oppIdx].id;
     }
 
-    const pConfigs = [
-      { id: bot.id, botStrategy: bot.id },
-      { id: oppStrategy, botStrategy: oppStrategy }
-    ];
+    // Randomize turn order to prevent player 1 advantage
+    const isPlayer1 = Math.random() < 0.5;
+    const pConfigs = isPlayer1 
+      ? [{ id: bot.id, botStrategy: bot.id }, { id: oppStrategy, botStrategy: oppStrategy }]
+      : [{ id: oppStrategy, botStrategy: oppStrategy }, { id: bot.id, botStrategy: bot.id }];
 
-    coreRunSimulationBatch(kingOfTokyoReducer, initialKotState, pConfigs, 1, (res: any) => {
+    coreRunSimulationBatch(game.reducer, game.initialState, pConfigs, 1, (res: any) => {
       bot.gamesPlayed++;
-      if (oppBot) oppBot.gamesPlayed++;
       
       if (res[0].winnerId === bot.id) {
         bot.wins++;
-      } else if (oppBot && res[0].winnerId === oppBot.id) {
-        oppBot.wins++;
       }
     });
     gamesRun++;
