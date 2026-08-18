@@ -1,14 +1,13 @@
-import { onDocumentCreated, onDocumentWritten } from 'firebase-functions/v2/firestore';
+import { onCall } from 'firebase-functions/v2/https';
+import { onDocumentWritten } from 'firebase-functions/v2/firestore';
 import { getFirestore } from 'firebase-admin/firestore';
 import { runSimulationBatch as coreRunSimulationBatch } from "@erez/boardgame-core/dist/engine/simulateGame";
 import { kingOfTokyoReducer, initialKotState } from "@erez/king-of-tokyo/dist/engine/reducer";
 
 const CHUNK_SIZE = 1000;
 
-export const startTournament = onDocumentCreated('tournament_simulations/{simId}', async (event) => {
-  const data = event.data?.data();
-  if (!data || data.status !== 'running') return;
-
+export const startTournament = onCall(async (request) => {
+  const { gameType } = request.data;
   const db = getFirestore();
 
   // Generate all 162 bots
@@ -41,12 +40,18 @@ export const startTournament = onDocumentCreated('tournament_simulations/{simId}
 
   const totalGamesInPhase = bots.length * 1000;
 
-  return db.collection('tournament_simulations').doc(event.params.simId).update({
+  const simRef = db.collection('tournament_simulations').doc();
+  await simRef.set({
+    status: 'running',
+    gameType: gameType || 'king-of-tokyo',
     phase: 1,
     gamesCompletedInPhase: 0,
     totalGamesInPhase,
-    bots
+    bots,
+    createdAt: new Date()
   });
+
+  return { simId: simRef.id };
 });
 
 export const onTournamentSimulationUpdated = onDocumentWritten({

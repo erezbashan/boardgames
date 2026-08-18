@@ -9,6 +9,7 @@
   1. Rebuild the packages: `npm run build --workspaces`
   2. Clear Vite cache and restart: `rm -rf deployments/portal/node_modules/.vite && rm -rf node_modules/.vite && npm run dev --workspace=deployments/portal -- --force` (or tell the user to restart their own dev server with `--force`).
 - **Laser Focus**: When fixing a bug or adding a specific feature, do NOT change unrelated code or UI labels (e.g. changing button texts) unless specifically requested. Always keep the changes strictly scoped to the exact problem being solved.
+- **File Length & Responsibility**: If a source file becomes too long, actively split it into smaller files according to different functional responsibilities (e.g. splitting monolithic React files into multiple components or hooks).
 - **Card Architecture Strict Rule**: Any logic of a card MUST be limited entirely to the card's code file (e.g. `someCard.ts`). The generic game engine code (`reducer.ts`, `KotBoard.tsx`, etc.) MUST NOT contain any hardcoded references, variable checks, or logic tied to specific cards (e.g. no `includes('giant_brain')`). The engine should instead provide generic hooks, state properties, or contexts that cards can modify using their `onEvent` handlers.
 - **Communication Style**: 
   - Do not be overly complimentary or artificially enthusiastic.
