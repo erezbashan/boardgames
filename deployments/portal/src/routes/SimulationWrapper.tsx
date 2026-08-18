@@ -89,7 +89,7 @@ export function SimulationWrapper() {
     onDeleteGeneticSim: handleDeleteGeneticSim,
     
     // Quick tournament specific overrides
-    onStartTournament: async () => {
+    onStartTournament: async (config: any) => {
       const startSim = httpsCallable(functions, 'startTournament');
       
       let bots: any[] = [];
@@ -105,11 +105,11 @@ export function SimulationWrapper() {
             for (const hl of hlOptions) {
               for (const at of atOptions) {
                 for (const yd of ydOptions) {
-                  const config = { vp, en, hl, at, yd };
-                  const id = `rule:${JSON.stringify(config)}`;
+                  const botConfig = { vp, en, hl, at, yd };
+                  const id = `rule:${JSON.stringify(botConfig)}`;
                   bots.push({
                     id,
-                    config
+                    config: botConfig
                   });
                 }
               }
@@ -117,11 +117,10 @@ export function SimulationWrapper() {
           }
         }
       } else {
-        // Fallback for other games, or we can just send an empty array if not supported
         bots = [];
       }
 
-      const result = await startSim({ gameType, bots });
+      const result = await startSim({ gameType, bots, gamesPerPhase: config.gamesPerPhase || 100 });
       return (result.data as any).simId;
     },
     onListTournamentSims: (gt: string, cb: (sims: any[]) => void) => {

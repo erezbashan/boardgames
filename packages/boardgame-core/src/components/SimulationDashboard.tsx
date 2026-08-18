@@ -499,6 +499,7 @@ function GeneticDetailView({ simId, onListenGeneticSim, onStopGeneticSim, onResu
 
 function TournamentListView({ gameType, onStartTournament, onListTournamentSims, onNavigateToTournament }: any) {
   const [simList, setSimList] = useState<any[]>([]);
+  const [gamesPerPhase, setGamesPerPhase] = useState(100);
 
   useEffect(() => {
     if (onListTournamentSims) {
@@ -511,7 +512,7 @@ function TournamentListView({ gameType, onStartTournament, onListTournamentSims,
   const startTournament = async () => {
     if (onStartTournament && onNavigateToTournament) {
       try {
-        const id = await onStartTournament({ gameType });
+        const id = await onStartTournament({ gameType, gamesPerPhase });
         onNavigateToTournament(id);
       } catch (e) {
         console.error(e);
@@ -523,6 +524,12 @@ function TournamentListView({ gameType, onStartTournament, onListTournamentSims,
     <div style={{ marginTop: '20px' }}>
       <div style={{ background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '12px', maxWidth: '800px', marginBottom: '30px' }}>
         <h3>Start New Grid Search Tournament</h3>
+        <div style={{ display: 'flex', gap: '20px', marginTop: '15px' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '12px', color: 'gray', marginBottom: '5px' }}>Games per Phase</label>
+            <input type="number" value={gamesPerPhase} onChange={e => setGamesPerPhase(parseInt(e.target.value))} style={{ background: 'rgba(0,0,0,0.5)', color: 'white', border: '1px solid gray', padding: '8px', borderRadius: '4px', width: '120px' }} />
+          </div>
+        </div>
         <button 
           onClick={startTournament}
           style={{ marginTop: '20px', background: '#4ade80', color: 'black', padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}

@@ -7,7 +7,7 @@ import { getGame } from "@erez/boardgame-core";
 const CHUNK_SIZE = 1000;
 
 export const startTournament = onCall(async (request) => {
-  const { gameType, bots: inputBots } = request.data;
+  const { gameType, bots: inputBots, gamesPerPhase: inputGames } = request.data;
   const db = getFirestore();
 
   if (!inputBots || !Array.isArray(inputBots)) {
@@ -23,7 +23,8 @@ export const startTournament = onCall(async (request) => {
     phaseStats: {}
   }));
 
-  const totalGamesInPhase = bots.length * 1000;
+  const gamesPerPhase = inputGames || 100;
+  const totalGamesInPhase = bots.length * gamesPerPhase;
 
   const simRef = db.collection('tournament_simulations').doc();
   await simRef.set({
@@ -32,6 +33,7 @@ export const startTournament = onCall(async (request) => {
     phase: 1,
     gamesCompletedInPhase: 0,
     totalGamesInPhase,
+    gamesPerPhase,
     bots,
     createdAt: new Date()
   });
@@ -53,7 +55,7 @@ export const onTournamentSimulationUpdated = onDocumentWritten({
     return;
   }
 
-  const { phase, gamesCompletedInPhase, totalGamesInPhase, gameType } = data;
+  const { phase, gamesCompletedInPhase, totalGamesInPhase, gameType, gamesPerPhase = 1000 } = data;
   let bots = data.bots as any[];
 
   if (gamesCompletedInPhase >= totalGamesInPhase && totalGamesInPhase > 0) {
@@ -88,7 +90,7 @@ export const onTournamentSimulationUpdated = onDocumentWritten({
       });
     } else {
       const nextPhase = phase + 1;
-      const newTotalGames = (remainingBots.length * 1000) / 2; // internal matches
+      const newTotalGames = (remainingBots.length * gamesPerPhase) / 2; // internal matches
 
       return db.collection('tournament_simulations').doc(event.params.simId).update({
         phase: nextPhase,
@@ -117,7 +119,7 @@ export const onTournamentSimulationUpdated = onDocumentWritten({
     activeBots.sort((a, b) => a.gamesPlayed - b.gamesPlayed);
     let bot = activeBots[0];
     
-    if (bot.gamesPlayed >= 1000) break;
+    if (bot.gamesPlayed >= gamesPerPhase) break;
 
     let oppStrategy = '';
     let oppBot: any = null;
