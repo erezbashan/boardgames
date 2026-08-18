@@ -84,6 +84,15 @@ export function getRuleBotAction(state: KotState, playerId: string): KotAction |
       });
     }
 
+    // "Random on everything else": For any die not targeted by our strategy,
+    // there's a 50% chance we just decide to keep it anyway.
+    state.dice.forEach(d => {
+      if (!keptIds.includes(d.id) && Math.random() > 0.5) {
+        keptIds.push(d.id);
+        unlockedCount--;
+      }
+    });
+
     return { type: 'RESPONSE_ROLL', payload: { roll: true, keptDiceIds: keptIds } };
   }
 

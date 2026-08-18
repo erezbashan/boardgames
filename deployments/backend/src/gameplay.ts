@@ -33,7 +33,7 @@ export const createGame = onCall(async (request) => {
 
 export const dispatchAction = onCall(async (request) => {
   const db = getFirestore();
-  const { gameId, action, gameType } = request.data as { gameId: string, action: FlipsAction, gameType: string };
+  const { gameId, action, gameType } = request.data as { gameId: string, action: any, gameType: string };
   if (!gameId || !action || !gameType) {
     throw new HttpsError('invalid-argument', 'gameId, gameType, and action are required');
   }

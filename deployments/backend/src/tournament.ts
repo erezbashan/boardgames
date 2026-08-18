@@ -19,7 +19,8 @@ export const startTournament = onCall(async (request) => {
     config: b.config,
     wins: 0,
     gamesPlayed: 0,
-    eliminated: false
+    eliminated: false,
+    phaseStats: {}
   }));
 
   const totalGamesInPhase = bots.length * 1000;
@@ -56,28 +57,45 @@ export const onTournamentSimulationUpdated = onDocumentWritten({
   let bots = data.bots as any[];
 
   if (gamesCompletedInPhase >= totalGamesInPhase && totalGamesInPhase > 0) {
-    if (phase === 1) {
-      bots.sort((a, b) => b.wins - a.wins);
-      const numToKeep = Math.floor(bots.length / 2);
-      bots.forEach((bot, idx) => {
-        if (idx >= numToKeep) bot.eliminated = true;
-        if (!bot.eliminated) {
-          bot.wins = 0;
-          bot.gamesPlayed = 0;
-        }
-      });
+    const activeBots = bots.filter(b => !b.eliminated);
+    
+    // Save phase stats
+    activeBots.forEach(bot => {
+      const winRate = bot.gamesPlayed > 0 ? bot.wins / bot.gamesPlayed : 0;
+      if (!bot.phaseStats) bot.phaseStats = {};
+      bot.phaseStats[phase] = { wins: bot.wins, gamesPlayed: bot.gamesPlayed, winRate };
+    });
 
-      const remainingBots = bots.filter(b => !b.eliminated);
-      const newTotalGames = remainingBots.length * 1000;
+    // Sort by win rate descending
+    activeBots.sort((a, b) => b.phaseStats[phase].winRate - a.phaseStats[phase].winRate);
+    
+    // Eliminate bottom half
+    const numToKeep = Math.floor(activeBots.length / 2);
+    activeBots.forEach((bot, idx) => {
+      if (idx >= numToKeep) bot.eliminated = true;
+      if (!bot.eliminated) {
+        bot.wins = 0;
+        bot.gamesPlayed = 0;
+      }
+    });
+
+    const remainingBots = activeBots.filter(b => !b.eliminated);
+    
+    if (remainingBots.length <= 1) {
+      return db.collection('tournament_simulations').doc(event.params.simId).update({ 
+        status: 'completed',
+        bots 
+      });
+    } else {
+      const nextPhase = phase + 1;
+      const newTotalGames = (remainingBots.length * 1000) / 2; // internal matches
 
       return db.collection('tournament_simulations').doc(event.params.simId).update({
-        phase: 2,
+        phase: nextPhase,
         gamesCompletedInPhase: 0,
         totalGamesInPhase: newTotalGames,
         bots
       });
-    } else if (phase === 2) {
-      return db.collection('tournament_simulations').doc(event.params.simId).update({ status: 'completed' });
     }
   }
 
@@ -96,25 +114,23 @@ export const onTournamentSimulationUpdated = onDocumentWritten({
   let gamesRun = 0;
 
   for (let i = 0; i < chunk; i++) {
-    let bot;
-    for (const b of activeBots) {
-      if (b.gamesPlayed < 1000) { bot = b; break; }
-    }
-    if (!bot) break;
+    activeBots.sort((a, b) => a.gamesPlayed - b.gamesPlayed);
+    let bot = activeBots[0];
+    
+    if (bot.gamesPlayed >= 1000) break;
 
     let oppStrategy = '';
+    let oppBot: any = null;
 
     if (phase === 1) {
       oppStrategy = (bot.gamesPlayed % 2 === 0) ? 'smart' : 'random';
     } else {
-      let oppIdx = Math.floor(Math.random() * activeBots.length);
-      while (activeBots[oppIdx].id === bot.id && activeBots.length > 1) {
-        oppIdx = Math.floor(Math.random() * activeBots.length);
-      }
-      oppStrategy = activeBots[oppIdx].id;
+      const candidates = activeBots.slice(1, Math.min(6, activeBots.length));
+      oppBot = candidates[Math.floor(Math.random() * candidates.length)];
+      if (!oppBot) break;
+      oppStrategy = oppBot.id;
     }
 
-    // Randomize turn order to prevent player 1 advantage
     const isPlayer1 = Math.random() < 0.5;
     const pConfigs = isPlayer1 
       ? [{ id: bot.id, botStrategy: bot.id }, { id: oppStrategy, botStrategy: oppStrategy }]
@@ -122,9 +138,12 @@ export const onTournamentSimulationUpdated = onDocumentWritten({
 
     coreRunSimulationBatch(game.reducer, game.initialState, pConfigs, 1, (res: any) => {
       bot.gamesPlayed++;
+      if (oppBot) oppBot.gamesPlayed++;
       
       if (res[0].winnerId === bot.id) {
         bot.wins++;
+      } else if (oppBot && res[0].winnerId === oppBot.id) {
+        oppBot.wins++;
       }
     });
     gamesRun++;

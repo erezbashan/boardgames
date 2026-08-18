@@ -584,13 +584,40 @@ function TournamentDetailView({ simId, onListenTournamentSim, onStopTournament, 
   const sortedBots = [...bots].sort((a,b) => {
     if (a.eliminated && !b.eliminated) return 1;
     if (!a.eliminated && b.eliminated) return -1;
+    
+    // Sort active bots by current phase win rate if still running
     const rateA = a.gamesPlayed > 0 ? a.wins / a.gamesPlayed : 0;
     const rateB = b.gamesPlayed > 0 ? b.wins / b.gamesPlayed : 0;
+    
+    // If tournament is completed or we want to look at historical phases
+    if (data.status === 'completed' && a.phaseStats && b.phaseStats) {
+      const lastPhaseA = Math.max(...Object.keys(a.phaseStats).map(Number));
+      const lastPhaseB = Math.max(...Object.keys(b.phaseStats).map(Number));
+      if (lastPhaseA !== lastPhaseB) return lastPhaseB - lastPhaseA;
+      return b.phaseStats[lastPhaseA].winRate - a.phaseStats[lastPhaseA].winRate;
+    }
+    
     return rateB - rateA;
   });
 
+  // Calculate the max phase achieved
+  let maxPhase = 0;
+  bots.forEach((b: any) => {
+    if (b.phaseStats) {
+      Object.keys(b.phaseStats).forEach(p => {
+        const ph = parseInt(p);
+        if (ph > maxPhase) maxPhase = ph;
+      });
+    }
+  });
+
+  const phaseColumns: number[] = [];
+  for (let p = 1; p <= maxPhase; p++) {
+    phaseColumns.push(p);
+  }
+
   return (
-    <div style={{ marginTop: '20px', maxWidth: '1000px' }}>
+    <div style={{ marginTop: '20px', maxWidth: '1200px' }}>
       <button onClick={() => onNavigateToTournament && onNavigateToTournament('')} style={{ marginBottom: '20px', background: 'transparent', color: '#3b82f6', border: '1px solid #3b82f6', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer' }}>
         &larr; Back to List
       </button>
@@ -639,29 +666,41 @@ function TournamentDetailView({ simId, onListenTournamentSim, onStopTournament, 
       <div style={{ background: 'rgba(0,0,0,0.3)', padding: '20px', borderRadius: '8px' }}>
         <h3 style={{ color: '#4ade80', margin: '0 0 15px 0' }}>Leaderboard ({activeBots.length} Bots Remaining)</h3>
         
-        <div style={{ maxHeight: '600px', overflowY: 'auto', background: 'rgba(0,0,0,0.5)', padding: '10px', borderRadius: '8px' }}>
+        <div style={{ background: 'rgba(0,0,0,0.5)', padding: '10px', borderRadius: '8px' }}>
           <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', fontSize: '14px' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid gray' }}>
                 <th style={{ padding: '8px' }}>Rank</th>
                 <th style={{ padding: '8px' }}>Status</th>
-                <th style={{ padding: '8px' }}>Parameters (vp, en, hl, at, yd)</th>
-                <th style={{ padding: '8px' }}>Win Rate</th>
-                <th style={{ padding: '8px' }}>Games Played</th>
+                <th style={{ padding: '8px' }}>Parameters</th>
+                {phaseColumns.map(p => (
+                  <th key={p} style={{ padding: '8px' }}>P{p} %</th>
+                ))}
+                {(data.status !== 'completed') && (
+                  <th style={{ padding: '8px', color: '#a855f7' }}>Current P{data.phase} %</th>
+                )}
               </tr>
             </thead>
             <tbody>
               {sortedBots.map((b: any, i: number) => {
-                 const winRate = b.gamesPlayed > 0 ? (b.wins / b.gamesPlayed) * 100 : 0;
+                 const currentWinRate = b.gamesPlayed > 0 ? (b.wins / b.gamesPlayed) * 100 : 0;
                  return (
                   <tr key={b.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', opacity: b.eliminated ? 0.3 : 1 }}>
                     <td style={{ padding: '8px' }}>#{i + 1}</td>
                     <td style={{ padding: '8px', color: b.eliminated ? '#ef4444' : '#4ade80' }}>{b.eliminated ? 'Eliminated' : 'Active'}</td>
-                    <td style={{ padding: '8px', fontFamily: 'monospace' }}>
+                    <td style={{ padding: '8px', fontFamily: 'monospace', fontSize: '12px' }}>
                        VP:{b.config.vp} EN:{b.config.en} HL:{b.config.hl} AT:{b.config.at} YD:{b.config.yd}
                     </td>
-                    <td style={{ padding: '8px', fontWeight: 'bold' }}>{winRate.toFixed(1)}%</td>
-                    <td style={{ padding: '8px' }}>{b.gamesPlayed}</td>
+                    {phaseColumns.map(p => {
+                      const stat = b.phaseStats && b.phaseStats[p];
+                      if (!stat) return <td key={p} style={{ padding: '8px', color: 'gray' }}>-</td>;
+                      return <td key={p} style={{ padding: '8px' }}>{(stat.winRate * 100).toFixed(1)}%</td>;
+                    })}
+                    {(data.status !== 'completed') && (
+                      <td style={{ padding: '8px', fontWeight: 'bold', color: '#a855f7' }}>
+                        {!b.eliminated ? `${currentWinRate.toFixed(1)}% (${b.gamesPlayed})` : '-'}
+                      </td>
+                    )}
                   </tr>
                  );
               })}
