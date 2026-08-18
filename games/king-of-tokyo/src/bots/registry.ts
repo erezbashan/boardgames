@@ -23,7 +23,7 @@ export function getBotAction(state: KotState, playerId: string): PendingAction |
     return getQBotAction(state, playerId) as PendingAction;
   }
 
-  if (strategy.startsWith('rule:')) {
+  if (strategy.startsWith('rule:') || strategy.includes('VP:')) {
     return getRuleBotAction(state, playerId) as PendingAction;
   }
 
