@@ -245,20 +245,29 @@ function HeadToHeadView({ reducer, initialState }: any) {
               <div key={i} style={{ display: 'flex', gap: '10px', marginBottom: '10px', alignItems: 'center' }}>
                 <span style={{ width: '80px', color: 'gray' }}>Player {i + 1}:</span>
                 <>
-                  <input 
-                    list={`bot-configs-${i}`}
+                  <select 
                     value={p.botStrategy} 
                     onChange={e => {
+                      let val = e.target.value;
+                      if (val === '__prompt__') {
+                        const current = p.botStrategy && p.botStrategy !== 'random' && p.botStrategy !== 'smart' ? p.botStrategy : "VP:15 EN:0 HL:6 AT:3 YD:6";
+                        const input = window.prompt("Enter parameterized strategy (e.g. VP:15 EN:0 HL:6 AT:3 YD:6):", current);
+                        if (!input) return; // User cancelled
+                        val = input;
+                      }
                       const newConfigs = [...playerConfigs];
-                      newConfigs[i].botStrategy = e.target.value;
+                      newConfigs[i].botStrategy = val;
                       setPlayerConfigs(newConfigs);
                     }} 
                     style={{ background: 'rgba(0,0,0,0.4)', color: 'white', border: '1px solid gray', borderRadius: '4px', padding: '8px', width: '250px' }} 
-                  />
-                  <datalist id={`bot-configs-${i}`}>
+                  >
                     <option value="random">Random</option>
                     <option value="smart">Smart</option>
-                  </datalist>
+                    {p.botStrategy && p.botStrategy !== 'random' && p.botStrategy !== 'smart' && (
+                      <option value={p.botStrategy}>{p.botStrategy}</option>
+                    )}
+                    <option value="__prompt__">Parameterized...</option>
+                  </select>
                 </>
               </div>
             ))}

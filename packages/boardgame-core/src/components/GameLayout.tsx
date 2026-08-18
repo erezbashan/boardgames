@@ -175,16 +175,27 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
                   </span>
                   {status === 'Lobby' && p.isBot && (
                     <>
-                      <input 
-                        list={`bot-strategies-${p.id}`}
-                        style={{ marginLeft: '10px', background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '4px', padding: '2px 4px', fontSize: '10px', width: '180px' }}
+                      <select 
+                        style={{ marginLeft: '10px', background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '4px', padding: '2px 4px', fontSize: '10px' }}
                         value={p.botStrategy || 'random'}
-                        onChange={(e) => dispatch({ type: 'UPDATE_BOT_STRATEGY', payload: { playerId: p.id, botStrategy: e.target.value }})}
-                      />
-                      <datalist id={`bot-strategies-${p.id}`}>
+                        onChange={(e) => {
+                          let val = e.target.value;
+                          if (val === '__prompt__') {
+                            const current = p.botStrategy && p.botStrategy !== 'random' && p.botStrategy !== 'smart' ? p.botStrategy : "VP:15 EN:0 HL:6 AT:3 YD:6";
+                            const input = window.prompt("Enter parameterized strategy (e.g. VP:15 EN:0 HL:6 AT:3 YD:6):", current);
+                            if (!input) return; // User cancelled
+                            val = input;
+                          }
+                          dispatch({ type: 'UPDATE_BOT_STRATEGY', payload: { playerId: p.id, botStrategy: val }});
+                        }}
+                      >
                         <option value="random">Random</option>
                         <option value="smart">Smart</option>
-                      </datalist>
+                        {p.botStrategy && p.botStrategy !== 'random' && p.botStrategy !== 'smart' && (
+                          <option value={p.botStrategy}>{p.botStrategy}</option>
+                        )}
+                        <option value="__prompt__">Parameterized...</option>
+                      </select>
                     </>
                   )}
                   {isWinner && <span className="winner-banner">🏆 Winner</span>}
