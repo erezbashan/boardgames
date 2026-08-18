@@ -174,14 +174,18 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
                     {isMe && <span style={{ color: 'gray', fontSize: '0.8em' }}>(You)</span>}
                   </span>
                   {status === 'Lobby' && p.isBot && (
-                    <select 
-                      style={{ marginLeft: '10px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: '4px', padding: '2px 4px', fontSize: '10px' }}
-                      value={p.botStrategy || 'random'}
-                      onChange={(e) => dispatch({ type: 'UPDATE_BOT_STRATEGY', payload: { playerId: p.id, botStrategy: e.target.value }})}
-                    >
-                      <option value="random">Random</option>
-                      <option value="smart">Smart</option>
-                    </select>
+                    <>
+                      <input 
+                        list={`bot-strategies-${p.id}`}
+                        style={{ marginLeft: '10px', background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '4px', padding: '2px 4px', fontSize: '10px', width: '180px' }}
+                        value={p.botStrategy || 'random'}
+                        onChange={(e) => dispatch({ type: 'UPDATE_BOT_STRATEGY', payload: { playerId: p.id, botStrategy: e.target.value }})}
+                      />
+                      <datalist id={`bot-strategies-${p.id}`}>
+                        <option value="random">Random</option>
+                        <option value="smart">Smart</option>
+                      </datalist>
+                    </>
                   )}
                   {isWinner && <span className="winner-banner">🏆 Winner</span>}
                   {isPlaying && <span className="playing-banner">Playing</span>}

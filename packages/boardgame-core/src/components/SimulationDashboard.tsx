@@ -244,14 +244,22 @@ function HeadToHeadView({ reducer, initialState }: any) {
             {playerConfigs.map((p, i) => (
               <div key={i} style={{ display: 'flex', gap: '10px', marginBottom: '10px', alignItems: 'center' }}>
                 <span style={{ width: '80px', color: 'gray' }}>Player {i + 1}:</span>
-                <select value={p.botStrategy} onChange={e => {
-                  const newConfigs = [...playerConfigs];
-                  newConfigs[i].botStrategy = e.target.value;
-                  setPlayerConfigs(newConfigs);
-                }} style={{ background: 'rgba(0,0,0,0.4)', color: 'white', border: '1px solid gray', borderRadius: '4px', padding: '8px', width: '120px' }}>
-                  <option value="random">Random</option>
-                  <option value="smart">Smart</option>
-                </select>
+                <>
+                  <input 
+                    list={`bot-configs-${i}`}
+                    value={p.botStrategy} 
+                    onChange={e => {
+                      const newConfigs = [...playerConfigs];
+                      newConfigs[i].botStrategy = e.target.value;
+                      setPlayerConfigs(newConfigs);
+                    }} 
+                    style={{ background: 'rgba(0,0,0,0.4)', color: 'white', border: '1px solid gray', borderRadius: '4px', padding: '8px', width: '250px' }} 
+                  />
+                  <datalist id={`bot-configs-${i}`}>
+                    <option value="random">Random</option>
+                    <option value="smart">Smart</option>
+                  </datalist>
+                </>
               </div>
             ))}
           </div>
