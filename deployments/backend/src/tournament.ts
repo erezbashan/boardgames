@@ -4,7 +4,7 @@ import { getFirestore } from 'firebase-admin/firestore';
 import { runSimulationBatch as coreRunSimulationBatch } from "@erez/boardgame-core/dist/engine/simulateGame";
 import { getGame } from "@erez/boardgame-core";
 
-const CHUNK_SIZE = 1000;
+const CHUNK_SIZE = 100;
 
 export const startTournament = onCall(async (request) => {
   const { gameType, bots: inputBots, gamesPerPhase: inputGames } = request.data;
@@ -204,11 +204,11 @@ export const onTournamentSimulationUpdated = onDocumentWritten({
 
     coreRunSimulationBatch(game.reducer, game.initialState, pConfigs, 1, (res: any) => {
       bot.gamesPlayed++;
-      bot.totalCardsBought = (bot.totalCardsBought || 0) + (res[0].finalState?.players[bot.id]?.stats?.cardsBought || 0);
+      bot.totalCardsBought = (bot.totalCardsBought || 0) + (res[0].finalState?.players?.[bot.id]?.stats?.cardsBought || 0);
       
       if (oppBot) {
         oppBot.gamesPlayed++;
-        oppBot.totalCardsBought = (oppBot.totalCardsBought || 0) + (res[0].finalState?.players[oppBot.id]?.stats?.cardsBought || 0);
+        oppBot.totalCardsBought = (oppBot.totalCardsBought || 0) + (res[0].finalState?.players?.[oppBot.id]?.stats?.cardsBought || 0);
       }
       
       if (res[0].winnerId === bot.id) {
