@@ -81,7 +81,7 @@ export const startTournament = onCall(async (request) => {
     startingPlayers,
     fallbackStrings,
     fallbacksConfig: fallbacks,
-    bots,
+    bots: JSON.stringify(bots),
     createdAt: new Date()
   });
 
@@ -103,7 +103,12 @@ export const onTournamentSimulationUpdated = onDocumentWritten({
   }
 
   const { phase, gamesCompletedInPhase, totalGamesInPhase, gameType, gamesPerPhase = 1000 } = data;
-  let bots = data.bots as any[];
+  let bots = [];
+  if (typeof data.bots === 'string') {
+    bots = JSON.parse(data.bots);
+  } else {
+    bots = data.bots as any[];
+  }
 
   if (gamesCompletedInPhase >= totalGamesInPhase && totalGamesInPhase > 0) {
     const activeBots = bots.filter(b => !b.eliminated);
@@ -200,7 +205,7 @@ export const onTournamentSimulationUpdated = onDocumentWritten({
 
       return db.collection('tournament_simulations').doc(event.params.simId).update({ 
         status: 'completed',
-        bots 
+        bots: JSON.stringify(bots)
       });
     } else {
       const nextPhase = phase + 1;
@@ -210,7 +215,7 @@ export const onTournamentSimulationUpdated = onDocumentWritten({
         phase: nextPhase,
         gamesCompletedInPhase: 0,
         totalGamesInPhase: newTotalGames,
-        bots
+        bots: JSON.stringify(bots)
       });
     }
   }
@@ -311,6 +316,6 @@ export const onTournamentSimulationUpdated = onDocumentWritten({
 
   return db.collection('tournament_simulations').doc(event.params.simId).update({
     gamesCompletedInPhase: gamesCompletedInPhase + gamesRun,
-    bots
+    bots: JSON.stringify(bots)
   });
 });

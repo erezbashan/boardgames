@@ -653,7 +653,10 @@ function TournamentDetailView({ simId, onListenTournamentSim, onStopTournament, 
 
   const isRunning = data.status === 'running';
   const isPaused = data.status === 'paused';
-  const bots = data.bots || [];
+  let bots = data.bots || [];
+  if (typeof bots === 'string') {
+    try { bots = JSON.parse(bots); } catch(e) { bots = []; }
+  }
 
   const activeBots = bots.filter((b: any) => !b.eliminated);
   const sortedBots = [...bots].sort((a,b) => {
