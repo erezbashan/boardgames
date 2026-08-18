@@ -52,7 +52,7 @@ export function getRuleBotAction(state: KotState, playerId: string): KotAction |
 
   if (topAction?.type === 'ASK_ROLL' && topAction.payload?.prompt?.playerId === playerId) {
     const playPoints = player.vp >= config.vp;
-    const playEnergy = player.vp <= config.en;
+    const playEnergy = player.vp < config.en;
     const playHealth = player.health <= config.hl && !inTokyo;
 
     const sumActive = (playPoints ? 1 : 0) + (playEnergy ? 1 : 0) + (playHealth ? 1 : 0);
