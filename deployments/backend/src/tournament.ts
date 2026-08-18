@@ -41,6 +41,9 @@ export const startTournament = onCall(async (request) => {
   return { simId: simRef.id };
 });
 
+import * as fs from 'fs';
+import * as path from 'path';
+
 export const onTournamentSimulationUpdated = onDocumentWritten({
   document: "tournament_simulations/{simId}",
   timeoutSeconds: 540
@@ -84,6 +87,65 @@ export const onTournamentSimulationUpdated = onDocumentWritten({
     const remainingBots = activeBots.filter(b => !b.eliminated);
     
     if (remainingBots.length <= 1) {
+      try {
+        const resultsDir = path.join(__dirname, '../../../../results');
+        if (!fs.existsSync(resultsDir)) {
+          fs.mkdirSync(resultsDir, { recursive: true });
+        }
+        
+        let maxPhase = 0;
+        bots.forEach((b: any) => {
+          if (b.phaseStats) {
+            Object.keys(b.phaseStats).forEach(p => {
+              const ph = parseInt(p);
+              if (ph > maxPhase) maxPhase = ph;
+            });
+          }
+        });
+
+        // Re-sort all bots like frontend
+        const sortedBots = [...bots].sort((a,b) => {
+          if (a.eliminated && !b.eliminated) return 1;
+          if (!a.eliminated && b.eliminated) return -1;
+          if (a.phaseStats && b.phaseStats) {
+            const lastPhaseA = Math.max(...Object.keys(a.phaseStats).map(Number));
+            const lastPhaseB = Math.max(...Object.keys(b.phaseStats).map(Number));
+            if (lastPhaseA !== lastPhaseB) return lastPhaseB - lastPhaseA;
+            return b.phaseStats[lastPhaseA].winRate - a.phaseStats[lastPhaseA].winRate;
+          }
+          return 0;
+        });
+
+        const headers = ['Rank', 'Status', 'VP', 'EN', 'HL', 'AT', 'YD', 'WinRate', 'GamesPlayed'];
+        for (let p = 1; p <= maxPhase; p++) headers.push(`P${p}%`);
+        let csvContent = headers.join(',') + '\n';
+
+        sortedBots.forEach((b, i) => {
+          const currentWinRate = b.gamesPlayed > 0 ? (b.wins / b.gamesPlayed) * 100 : 0;
+          const row = [
+            i + 1,
+            b.eliminated ? 'Eliminated' : 'Active',
+            b.config?.vp || 0,
+            b.config?.en || 0,
+            b.config?.hl || 0,
+            b.config?.at || 0,
+            b.config?.yd || 0,
+            `${currentWinRate.toFixed(1)}%`,
+            b.gamesPlayed
+          ];
+          for (let p = 1; p <= maxPhase; p++) {
+            const stat = b.phaseStats && b.phaseStats[p];
+            row.push(stat ? `${(stat.winRate * 100).toFixed(1)}%` : '-');
+          }
+          csvContent += row.join(',') + '\n';
+        });
+
+        const fileName = `tournament_${event.params.simId}.csv`;
+        fs.writeFileSync(path.join(resultsDir, fileName), csvContent);
+      } catch (e) {
+        console.error('Failed to write CSV', e);
+      }
+
       return db.collection('tournament_simulations').doc(event.params.simId).update({ 
         status: 'completed',
         bots 
