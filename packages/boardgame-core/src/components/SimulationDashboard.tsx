@@ -7,7 +7,7 @@ export interface SimulationDashboardProps {
   reducer: (state: any, action: any) => any;
   initialState: any;
   simId?: string;
-  viewType?: 'head-to-head' | 'genetic-list' | 'genetic-detail';
+  viewType?: 'head-to-head' | 'genetic-list' | 'genetic-detail' | 'tournament-list' | 'tournament-detail';
   onStartGeneticSim?: (config: any) => Promise<string>;
   onListenGeneticSim?: (simId: string, cb: (data: any) => void) => () => void;
   onListGeneticSims?: (gameType: string, cb: (sims: any[]) => void) => () => void;
@@ -15,6 +15,13 @@ export interface SimulationDashboardProps {
   onResumeGeneticSim?: (simId: string) => Promise<void>;
   onDeleteGeneticSim?: (simId: string) => Promise<void>;
   onNavigateToSim?: (simId: string) => void;
+  onStartTournament?: (config: any) => Promise<string>;
+  onListenTournamentSim?: (simId: string, cb: (data: any) => void) => () => void;
+  onListTournamentSims?: (gameType: string, cb: (sims: any[]) => void) => () => void;
+  onStopTournament?: (simId: string) => Promise<void>;
+  onResumeTournament?: (simId: string) => Promise<void>;
+  onDeleteTournament?: (simId: string) => Promise<void>;
+  onNavigateToTournament?: (simId: string) => void;
 }
 
 const decodeStrategyMask = (mask: number, inTokyo: boolean) => {
@@ -490,6 +497,182 @@ function GeneticDetailView({ simId, onListenGeneticSim, onStopGeneticSim, onResu
   );
 }
 
+function TournamentListView({ gameType, onStartTournament, onListTournamentSims, onNavigateToTournament }: any) {
+  const [simList, setSimList] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (onListTournamentSims) {
+      return onListTournamentSims(gameType, (sims: any) => {
+        setSimList(sims);
+      });
+    }
+  }, [onListTournamentSims, gameType]);
+
+  const startTournament = async () => {
+    if (onStartTournament && onNavigateToTournament) {
+      try {
+        const id = await onStartTournament({ gameType });
+        onNavigateToTournament(id);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
+
+  return (
+    <div style={{ marginTop: '20px' }}>
+      <div style={{ background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '12px', maxWidth: '800px', marginBottom: '30px' }}>
+        <h3>Start New Grid Search Tournament</h3>
+        <button 
+          onClick={startTournament}
+          style={{ marginTop: '20px', background: '#4ade80', color: 'black', padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
+        >
+          Start Tournament
+        </button>
+      </div>
+
+      <div style={{ background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '12px', maxWidth: '1000px' }}>
+        <h3>Past & Ongoing Tournaments</h3>
+        {simList.length === 0 ? (
+          <p style={{ color: 'gray' }}>No tournaments found.</p>
+        ) : (
+          <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', marginTop: '15px' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid gray' }}>
+                <th style={{ padding: '10px' }}>ID</th>
+                <th style={{ padding: '10px' }}>Status</th>
+                <th style={{ padding: '10px' }}>Phase</th>
+                <th style={{ padding: '10px' }}>Created</th>
+              </tr>
+            </thead>
+            <tbody>
+              {simList.map(s => (
+                <tr key={s.id} onClick={() => onNavigateToTournament && onNavigateToTournament(s.id)} style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer' }}>
+                  <td style={{ padding: '10px', color: '#3b82f6', textDecoration: 'underline' }}>{s.id.substring(0, 8)}...</td>
+                  <td style={{ padding: '10px', color: s.status === 'running' ? '#4ade80' : s.status === 'paused' ? '#eab308' : 'gray' }}>{s.status.toUpperCase()}</td>
+                  <td style={{ padding: '10px' }}>{s.phase}</td>
+                  <td style={{ padding: '10px', fontSize: '12px', color: 'gray' }}>
+                    {s.createdAt?.toDate ? s.createdAt.toDate().toLocaleString() : 'Just now'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function TournamentDetailView({ simId, onListenTournamentSim, onStopTournament, onResumeTournament, onDeleteTournament, onNavigateToTournament }: any) {
+  const [data, setData] = useState<any>(null);
+
+  useEffect(() => {
+    if (!simId || !onListenTournamentSim) return;
+    return onListenTournamentSim(simId, (newData: any) => {
+      setData(newData);
+    });
+  }, [simId, onListenTournamentSim]);
+
+  if (!data) return <div style={{ color: 'white' }}>Loading tournament...</div>;
+
+  const isRunning = data.status === 'running';
+  const isPaused = data.status === 'paused';
+  const bots = data.bots || [];
+
+  const activeBots = bots.filter((b: any) => !b.eliminated);
+  const sortedBots = [...bots].sort((a,b) => {
+    if (a.eliminated && !b.eliminated) return 1;
+    if (!a.eliminated && b.eliminated) return -1;
+    const rateA = a.gamesPlayed > 0 ? a.wins / a.gamesPlayed : 0;
+    const rateB = b.gamesPlayed > 0 ? b.wins / b.gamesPlayed : 0;
+    return rateB - rateA;
+  });
+
+  return (
+    <div style={{ marginTop: '20px', maxWidth: '1000px' }}>
+      <button onClick={() => onNavigateToTournament && onNavigateToTournament('')} style={{ marginBottom: '20px', background: 'transparent', color: '#3b82f6', border: '1px solid #3b82f6', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer' }}>
+        &larr; Back to List
+      </button>
+
+      <div style={{ background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '12px', marginBottom: '20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <h2 style={{ margin: '0 0 10px 0' }}>Tournament: {simId}</h2>
+            <div style={{ display: 'flex', gap: '20px', color: 'gray', fontSize: '14px' }}>
+              <span>Status: <span style={{ color: isRunning ? '#4ade80' : isPaused ? '#eab308' : 'gray' }}>{data.status.toUpperCase()}</span></span>
+              <span>Phase: {data.phase} ({data.phase === 1 ? 'The Gauntlet' : 'The Crucible'})</span>
+              <span>Created: {data.createdAt?.toDate ? data.createdAt.toDate().toLocaleString() : 'Just now'}</span>
+            </div>
+          </div>
+          
+          <div style={{ display: 'flex', gap: '10px' }}>
+            {isRunning && (
+              <button onClick={() => onStopTournament && onStopTournament(simId)} style={{ background: '#eab308', color: 'black', padding: '8px 16px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>
+                Pause
+              </button>
+            )}
+            {isPaused && (
+              <button onClick={() => onResumeTournament && onResumeTournament(simId)} style={{ background: '#4ade80', color: 'black', padding: '8px 16px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>
+                Resume
+              </button>
+            )}
+            <button onClick={() => onDeleteTournament && onDeleteTournament(simId).then(() => onNavigateToTournament(''))} style={{ background: '#ef4444', color: 'white', padding: '8px 16px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>
+              Delete
+            </button>
+          </div>
+        </div>
+
+        {(isRunning || isPaused) && (
+          <div style={{ marginTop: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: '#4ade80' }}>Running Phase {data.phase}...</span>
+              <span>{data.gamesCompletedInPhase} / {data.totalGamesInPhase}</span>
+            </div>
+            <div style={{ width: '100%', height: '10px', background: 'rgba(0,0,0,0.4)', borderRadius: '5px', overflow: 'hidden', marginTop: '10px' }}>
+              <div style={{ width: `${(data.gamesCompletedInPhase / (data.totalGamesInPhase || 1)) * 100}%`, height: '100%', background: '#a855f7', transition: 'width 0.1s' }} />
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div style={{ background: 'rgba(0,0,0,0.3)', padding: '20px', borderRadius: '8px' }}>
+        <h3 style={{ color: '#4ade80', margin: '0 0 15px 0' }}>Leaderboard ({activeBots.length} Bots Remaining)</h3>
+        
+        <div style={{ maxHeight: '600px', overflowY: 'auto', background: 'rgba(0,0,0,0.5)', padding: '10px', borderRadius: '8px' }}>
+          <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', fontSize: '14px' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid gray' }}>
+                <th style={{ padding: '8px' }}>Rank</th>
+                <th style={{ padding: '8px' }}>Status</th>
+                <th style={{ padding: '8px' }}>Parameters (vp, en, hl, at, yd)</th>
+                <th style={{ padding: '8px' }}>Win Rate</th>
+                <th style={{ padding: '8px' }}>Games Played</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sortedBots.map((b: any, i: number) => {
+                 const winRate = b.gamesPlayed > 0 ? (b.wins / b.gamesPlayed) * 100 : 0;
+                 return (
+                  <tr key={b.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', opacity: b.eliminated ? 0.3 : 1 }}>
+                    <td style={{ padding: '8px' }}>#{i + 1}</td>
+                    <td style={{ padding: '8px', color: b.eliminated ? '#ef4444' : '#4ade80' }}>{b.eliminated ? 'Eliminated' : 'Active'}</td>
+                    <td style={{ padding: '8px', fontFamily: 'monospace' }}>
+                       VP:{b.config.vp} EN:{b.config.en} HL:{b.config.hl} AT:{b.config.at} YD:{b.config.yd}
+                    </td>
+                    <td style={{ padding: '8px', fontWeight: 'bold' }}>{winRate.toFixed(1)}%</td>
+                    <td style={{ padding: '8px' }}>{b.gamesPlayed}</td>
+                  </tr>
+                 );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export const SimulationDashboard: React.FC<SimulationDashboardProps> = (props) => {
   const { gameName, viewType } = props;
 
@@ -500,6 +683,8 @@ export const SimulationDashboard: React.FC<SimulationDashboardProps> = (props) =
       {viewType === 'head-to-head' && <HeadToHeadView {...props} />}
       {viewType === 'genetic-list' && <GeneticListView {...props} />}
       {viewType === 'genetic-detail' && <GeneticDetailView {...props} />}
+      {viewType === 'tournament-list' && <TournamentListView {...props} />}
+      {viewType === 'tournament-detail' && <TournamentDetailView {...props} />}
     </div>
   );
 };

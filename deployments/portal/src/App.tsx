@@ -210,9 +210,11 @@ function SimulationWrapper() {
     }
   };
 
-  let viewType: 'head-to-head' | 'genetic-list' | 'genetic-detail' = 'head-to-head';
+  let viewType: 'head-to-head' | 'genetic-list' | 'genetic-detail' | 'tournament-list' | 'tournament-detail' = 'head-to-head';
   if (location.pathname.includes('/genetic') || location.pathname.includes('/qlearning')) {
     viewType = simId ? 'genetic-detail' : 'genetic-list';
+  } else if (location.pathname.includes('/tournament')) {
+    viewType = simId ? 'tournament-detail' : 'tournament-list';
   }
 
   const commonProps = {
@@ -224,7 +226,50 @@ function SimulationWrapper() {
     onStopGeneticSim: handleStopGeneticSim,
     onNavigateToSim: handleNavigateToSim,
     onResumeGeneticSim: handleResumeGeneticSim,
-    onDeleteGeneticSim: handleDeleteGeneticSim
+    onDeleteGeneticSim: handleDeleteGeneticSim,
+    
+    // Quick tournament specific overrides
+    onStartTournament: async () => {
+      const startSim = httpsCallable(functions, 'startTournament');
+      const result = await startSim({ gameType });
+      return (result.data as any).simId;
+    },
+    onListTournamentSims: (gt: string, cb: (sims: any[]) => void) => {
+      import('firebase/firestore').then(({ collection, query, where, onSnapshot, orderBy }) => {
+        let q = query(collection(db, 'tournament_simulations'), where('gameType', '==', gt), orderBy('createdAt', 'desc'));
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+          let sims = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          cb(sims);
+        });
+        return unsubscribe;
+      });
+      return () => {};
+    },
+    onListenTournamentSim: (id: string, cb: (data: any) => void) => {
+      import('firebase/firestore').then(({ doc, onSnapshot }) => {
+        const unsubscribe = onSnapshot(doc(db, 'tournament_simulations', id), (snapshot) => {
+          cb(snapshot.data());
+        });
+        return unsubscribe;
+      });
+      return () => {};
+    },
+    onNavigateToTournament: (id: string) => {
+      if (id) navigate(`/simulation/tournament/${gameType}/${id}`);
+      else navigate(`/simulation/tournament/${gameType}`);
+    },
+    onStopTournament: async (id: string) => {
+      const { doc, updateDoc } = await import('firebase/firestore');
+      await updateDoc(doc(db, 'tournament_simulations', id), { status: 'paused' });
+    },
+    onResumeTournament: async (id: string) => {
+      const { doc, updateDoc } = await import('firebase/firestore');
+      await updateDoc(doc(db, 'tournament_simulations', id), { status: 'running' });
+    },
+    onDeleteTournament: async (id: string) => {
+      const { doc, deleteDoc } = await import('firebase/firestore');
+      await deleteDoc(doc(db, 'tournament_simulations', id));
+    }
   };
 
   if (gameType === 'flips') {
@@ -249,6 +294,8 @@ function App() {
       <Route path="/simulation/genetic/:gameType/:simId" element={<SimulationWrapper />} />
       <Route path="/simulation/qlearning/:gameType" element={<SimulationWrapper />} />
       <Route path="/simulation/qlearning/:gameType/:simId" element={<SimulationWrapper />} />
+      <Route path="/simulation/tournament/:gameType" element={<SimulationWrapper />} />
+      <Route path="/simulation/tournament/:gameType/:simId" element={<SimulationWrapper />} />
     </Routes>
   );
 }

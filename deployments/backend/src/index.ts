@@ -12,3 +12,4 @@ db.settings({ ignoreUndefinedProperties: true });
 export * from './gameplay';
 export * from './genetic';
 export * from './qlearning';
+export * from './tournament';
