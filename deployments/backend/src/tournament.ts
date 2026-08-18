@@ -116,12 +116,13 @@ export const onTournamentSimulationUpdated = onDocumentWritten({
           return 0;
         });
 
-        const headers = ['Rank', 'Status', 'VP', 'EN', 'HL', 'AT', 'YD', 'WinRate', 'GamesPlayed'];
+        const headers = ['Rank', 'Status', 'VP', 'EN', 'HL', 'AT', 'YD', 'WinRate', 'GamesPlayed', 'AvgCardsBought'];
         for (let p = 1; p <= maxPhase; p++) headers.push(`P${p}%`);
         let csvContent = headers.join(',') + '\n';
 
         sortedBots.forEach((b, i) => {
           const currentWinRate = b.gamesPlayed > 0 ? (b.wins / b.gamesPlayed) * 100 : 0;
+          const avgCards = b.gamesPlayed > 0 ? ((b.totalCardsBought || 0) / b.gamesPlayed).toFixed(2) : '0.00';
           const row = [
             i + 1,
             b.eliminated ? 'Eliminated' : 'Active',
@@ -131,7 +132,8 @@ export const onTournamentSimulationUpdated = onDocumentWritten({
             b.config?.at || 0,
             b.config?.yd || 0,
             `${currentWinRate.toFixed(1)}%`,
-            b.gamesPlayed
+            b.gamesPlayed,
+            avgCards
           ];
           for (let p = 1; p <= maxPhase; p++) {
             const stat = b.phaseStats && b.phaseStats[p];
@@ -202,7 +204,12 @@ export const onTournamentSimulationUpdated = onDocumentWritten({
 
     coreRunSimulationBatch(game.reducer, game.initialState, pConfigs, 1, (res: any) => {
       bot.gamesPlayed++;
-      if (oppBot) oppBot.gamesPlayed++;
+      bot.totalCardsBought = (bot.totalCardsBought || 0) + (res[0].players[bot.id].stats?.cardsBought || 0);
+      
+      if (oppBot) {
+        oppBot.gamesPlayed++;
+        oppBot.totalCardsBought = (oppBot.totalCardsBought || 0) + (res[0].players[oppBot.id].stats?.cardsBought || 0);
+      }
       
       if (res[0].winnerId === bot.id) {
         bot.wins++;
