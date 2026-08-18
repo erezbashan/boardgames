@@ -88,7 +88,7 @@ export const onTournamentSimulationUpdated = onDocumentWritten({
     
     if (remainingBots.length <= 1) {
       try {
-        const resultsDir = path.join(__dirname, '../../../../results');
+        const resultsDir = path.join(__dirname, '../../../results');
         if (!fs.existsSync(resultsDir)) {
           fs.mkdirSync(resultsDir, { recursive: true });
         }

@@ -17,6 +17,25 @@ export function parseRuleConfig(botStrategy: string): RuleBotConfig | null {
     } catch (e) {
       return null;
     }
+  } else if (botStrategy.includes('VP:')) {
+    try {
+      const matchVP = botStrategy.match(/VP:\s*(\d+)/i);
+      const matchEN = botStrategy.match(/EN:\s*(\d+)/i);
+      const matchHL = botStrategy.match(/HL:\s*(\d+)/i);
+      const matchAT = botStrategy.match(/AT:\s*(\d+)/i);
+      const matchYD = botStrategy.match(/YD:\s*(\d+)/i);
+      if (matchVP && matchEN && matchHL && matchAT && matchYD) {
+        return {
+          vp: parseInt(matchVP[1], 10),
+          en: parseInt(matchEN[1], 10),
+          hl: parseInt(matchHL[1], 10),
+          at: parseInt(matchAT[1], 10),
+          yd: parseInt(matchYD[1], 10)
+        };
+      }
+    } catch (e) {
+      return null;
+    }
   }
   return null;
 }
