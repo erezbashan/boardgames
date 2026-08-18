@@ -535,7 +535,7 @@ function TournamentListView({ gameType, onStartTournament, onListTournamentSims,
         <div style={{ display: 'flex', gap: '20px', marginTop: '15px' }}>
           <div>
             <label style={{ display: 'block', fontSize: '12px', color: 'gray', marginBottom: '5px' }}>Games per Phase</label>
-            <input type="number" value={gamesPerPhase} onChange={e => setGamesPerPhase(parseInt(e.target.value))} style={{ background: 'rgba(0,0,0,0.5)', color: 'white', border: '1px solid gray', padding: '8px', borderRadius: '4px', width: '120px' }} />
+            <input type="number" value={gamesPerPhase || ''} onChange={e => setGamesPerPhase(parseInt(e.target.value) || 0)} style={{ background: 'rgba(0,0,0,0.5)', color: 'white', border: '1px solid gray', padding: '8px', borderRadius: '4px', width: '120px' }} />
           </div>
         </div>
         <button 
