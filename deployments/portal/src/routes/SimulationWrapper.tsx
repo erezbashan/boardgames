@@ -120,7 +120,13 @@ export function SimulationWrapper() {
         bots = [];
       }
 
-      const result = await startSim({ gameType, bots, gamesPerPhase: config.gamesPerPhase || 100 });
+      const result = await startSim({ 
+        gameType, 
+        bots, 
+        gamesPerPhase: config.gamesPerPhase || 100,
+        startingPlayers: config.startingPlayers || 2,
+        fallbacks: config.fallbacks || {}
+      });
       return (result.data as any).simId;
     },
     onListTournamentSims: (gt: string, cb: (sims: any[]) => void) => {
@@ -158,6 +164,11 @@ export function SimulationWrapper() {
     onDeleteTournament: async (id: string) => {
       const { doc, deleteDoc } = await import('firebase/firestore');
       await deleteDoc(doc(db, 'tournament_simulations', id));
+    },
+    onListTournamentResults: async () => {
+      const listResults = httpsCallable(functions, 'listTournamentResults');
+      const res = await listResults();
+      return (res.data as any).files || [];
     }
   };
 

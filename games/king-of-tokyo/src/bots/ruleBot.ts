@@ -10,20 +10,32 @@ interface RuleBotConfig {
   yd: number; // Yield Tokyo if my health <= yd
 }
 
-export function parseRuleConfig(botStrategy: string): RuleBotConfig | null {
-  if (botStrategy.startsWith('rule:')) {
+export function parseRuleConfig(botStrategy: string, playersLeft: number = 2): RuleBotConfig | null {
+  let targetSegment = botStrategy;
+  if (botStrategy.includes('|')) {
+    const segments = botStrategy.split('|').map(s => s.trim());
+    targetSegment = segments[0]; // default to first
+    for (const segment of segments) {
+      if (segment.startsWith(`${playersLeft}P:`)) {
+        targetSegment = segment.substring(segment.indexOf(':') + 1).trim();
+        break;
+      }
+    }
+  }
+
+  if (targetSegment.startsWith('rule:')) {
     try {
-      return JSON.parse(botStrategy.substring(5));
+      return JSON.parse(targetSegment.substring(5));
     } catch (e) {
       return null;
     }
-  } else if (botStrategy.includes('VP:')) {
+  } else if (targetSegment.includes('VP:')) {
     try {
-      const matchVP = botStrategy.match(/VP:\s*(\d+)/i);
-      const matchEN = botStrategy.match(/EN:\s*(\d+)/i);
-      const matchHL = botStrategy.match(/HL:\s*(\d+)/i);
-      const matchAT = botStrategy.match(/AT:\s*(\d+)/i);
-      const matchYD = botStrategy.match(/YD:\s*(\d+)/i);
+      const matchVP = targetSegment.match(/VP:\s*(\d+)/i);
+      const matchEN = targetSegment.match(/EN:\s*(\d+)/i);
+      const matchHL = targetSegment.match(/HL:\s*(\d+)/i);
+      const matchAT = targetSegment.match(/AT:\s*(\d+)/i);
+      const matchYD = targetSegment.match(/YD:\s*(\d+)/i);
       if (matchVP && matchEN && matchHL && matchAT && matchYD) {
         return {
           vp: parseInt(matchVP[1], 10),
@@ -44,8 +56,10 @@ export function getRuleBotAction(state: KotState, playerId: string): KotAction |
   const player = state.players[playerId];
   if (!player) return null;
 
+  const playersLeft = Object.values(state.players).filter(p => p.health > 0).length;
+
   const topAction = state.pendingActions[0];
-  const config = parseRuleConfig(player.botStrategy || '');
+  const config = parseRuleConfig(player.botStrategy || '', playersLeft);
   if (!config) return getRandomBotAction(state, playerId);
 
   const inTokyo = player.location.startsWith('Tokyo');

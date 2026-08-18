@@ -22,6 +22,7 @@ export interface SimulationDashboardProps {
   onResumeTournament?: (simId: string) => Promise<void>;
   onDeleteTournament?: (simId: string) => Promise<void>;
   onNavigateToTournament?: (simId: string) => void;
+  onListTournamentResults?: () => Promise<string[]>;
 }
 
 const decodeStrategyMask = (mask: number, inTokyo: boolean) => {
@@ -514,9 +515,12 @@ function GeneticDetailView({ simId, onListenGeneticSim, onStopGeneticSim, onResu
   );
 }
 
-function TournamentListView({ gameType, onStartTournament, onListTournamentSims, onNavigateToTournament }: any) {
+function TournamentListView({ gameType, onStartTournament, onListTournamentSims, onNavigateToTournament, onListTournamentResults }: any) {
   const [simList, setSimList] = useState<any[]>([]);
   const [gamesPerPhase, setGamesPerPhase] = useState(100);
+  const [startingPlayers, setStartingPlayers] = useState(2);
+  const [fallbacks, setFallbacks] = useState<Record<number, { file: string, topX: number }>>({});
+  const [availableCsvs, setAvailableCsvs] = useState<string[]>([]);
 
   useEffect(() => {
     if (onListTournamentSims) {
@@ -526,15 +530,50 @@ function TournamentListView({ gameType, onStartTournament, onListTournamentSims,
     }
   }, [onListTournamentSims, gameType]);
 
+  useEffect(() => {
+    if (onListTournamentResults) {
+      onListTournamentResults().then((files: string[]) => setAvailableCsvs(files));
+    }
+  }, [onListTournamentResults]);
+
   const startTournament = async () => {
     if (onStartTournament && onNavigateToTournament) {
       try {
-        const id = await onStartTournament({ gameType, gamesPerPhase });
+        const id = await onStartTournament({ gameType, gamesPerPhase, startingPlayers, fallbacks });
         onNavigateToTournament(id);
       } catch (e) {
         console.error(e);
       }
     }
+  };
+
+  const renderFallbackInputs = () => {
+    const inputs = [];
+    for (let m = 2; m < startingPlayers; m++) {
+      inputs.push(
+        <div key={m} style={{ marginTop: '10px', background: 'rgba(0,0,0,0.2)', padding: '10px', borderRadius: '4px' }}>
+          <h4 style={{ margin: '0 0 10px 0' }}>{m}-Player Fallback</h4>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <select 
+              value={fallbacks[m]?.file || ''}
+              onChange={e => setFallbacks(prev => ({ ...prev, [m]: { ...prev[m], file: e.target.value } }))}
+              style={{ background: 'rgba(0,0,0,0.5)', color: 'white', padding: '8px', flexGrow: 1 }}
+            >
+              <option value="">Select a CSV...</option>
+              {availableCsvs.map(f => <option key={f} value={f}>{f}</option>)}
+            </select>
+            <input 
+              type="number" 
+              placeholder="Top X"
+              value={fallbacks[m]?.topX || ''} 
+              onChange={e => setFallbacks(prev => ({ ...prev, [m]: { ...prev[m], topX: parseInt(e.target.value) || 5 } }))}
+              style={{ background: 'rgba(0,0,0,0.5)', color: 'white', width: '80px', padding: '8px' }}
+            />
+          </div>
+        </div>
+      );
+    }
+    return inputs;
   };
 
   return (
@@ -543,10 +582,22 @@ function TournamentListView({ gameType, onStartTournament, onListTournamentSims,
         <h3>Start New Grid Search Tournament</h3>
         <div style={{ display: 'flex', gap: '20px', marginTop: '15px' }}>
           <div>
+            <label style={{ display: 'block', fontSize: '12px', color: 'gray', marginBottom: '5px' }}>Starting Players</label>
+            <input type="number" min="2" max="6" value={startingPlayers} onChange={e => setStartingPlayers(parseInt(e.target.value) || 2)} style={{ background: 'rgba(0,0,0,0.5)', color: 'white', border: '1px solid gray', padding: '8px', borderRadius: '4px', width: '120px' }} />
+          </div>
+          <div>
             <label style={{ display: 'block', fontSize: '12px', color: 'gray', marginBottom: '5px' }}>Games per Phase</label>
             <input type="number" value={gamesPerPhase || ''} onChange={e => setGamesPerPhase(parseInt(e.target.value) || 0)} style={{ background: 'rgba(0,0,0,0.5)', color: 'white', border: '1px solid gray', padding: '8px', borderRadius: '4px', width: '120px' }} />
           </div>
         </div>
+
+        {startingPlayers > 2 && (
+          <div style={{ marginTop: '20px' }}>
+            <label style={{ display: 'block', fontSize: '12px', color: 'gray', marginBottom: '5px' }}>Dynamic Fallback Strategies</label>
+            {renderFallbackInputs()}
+          </div>
+        )}
+
         <button 
           onClick={startTournament}
           style={{ marginTop: '20px', background: '#4ade80', color: 'black', padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
