@@ -282,11 +282,7 @@ export const onTournamentSimulationUpdated = onDocumentWritten({
     allIds.sort(() => Math.random() - 0.5);
     
     for (const id of allIds) {
-      // Ensure unique IDs in pConfigs if multiple random/smart bots exist
-      let suffix = '';
-      if (id === 'smart' || id === 'random') {
-         suffix = '_' + Math.floor(Math.random() * 1000);
-      }
+      const suffix = '_' + Math.floor(Math.random() * 100000);
       pConfigs.push({ id: id + suffix, botStrategy: getBotStrategyString(id), originalId: id });
     }
 
