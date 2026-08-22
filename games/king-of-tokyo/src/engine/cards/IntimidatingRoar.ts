@@ -9,21 +9,16 @@ export const IntimidatingRoar: CardImplementation = {
   type: 'Keep',
   description: 'The monsters in Tokyo must yield if you damage them.',
   verified: true,
-  onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
-    if (action.type === 'ASK') {
-      const prompt = action.payload?.prompt;
-      if (prompt && prompt.options && prompt.options.length > 0) {
-        const firstOption = prompt.options[0].action;
-        if (firstOption && firstOption.type === 'RESPONSE_YIELD') {
-          const attackerId = firstOption.payload?.attackerId;
-          if (attackerId === pId) {
-             const index = st.pendingActions.findIndex(a => a === action);
-             if (index !== -1) {
-                st.pendingActions.splice(index, 1);
-                st.pendingActions.unshift(firstOption);
-                addLog(st, action, `${st.players[prompt.playerId].name} is forced to yield Tokyo due to Intimidating Roar!`);
-             }
-          }
+  onPostEvent: (st: KotState, action: PendingAction, pId: string) => {
+    if (action.type === 'TAKE_DAMAGE' && action.payload.attackerId === pId && action.payload._actualDamageTaken > 0) {
+      if (st.players[pId].location !== 'Outside') return st;
+      if (st.pendingActions.length > 0 && st.pendingActions[0].type === 'ASK') {
+        const askAction = st.pendingActions[0];
+        const firstOption = askAction.payload?.prompt?.options?.[0]?.action;
+        if (firstOption && firstOption.type === 'RESPONSE_YIELD' && firstOption.payload?.attackerId === pId) {
+           st.pendingActions.shift();
+           st.pendingActions.unshift(firstOption);
+           addLog(st, action, `${st.players[askAction.payload.prompt.playerId].name} is forced to yield Tokyo due to Intimidating Roar!`);
         }
       }
     }
