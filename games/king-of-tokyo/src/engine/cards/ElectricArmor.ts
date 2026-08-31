@@ -13,17 +13,25 @@ export const ElectricArmor: CardImplementation = {
       if (!action.payload._electricArmorPrompted) {
         action.payload._electricArmorPrompted = true;
         
+        const maxSpend = Math.min(action.payload.amount, st.players[pId].energy);
+        const options = [];
+        
+        for (let i = maxSpend; i >= 1; i--) {
+           options.push({ 
+             label: `Spend ${i}⚡ (Reduce by ${i})`, 
+             action: { type: 'RESPONSE_ELECTRIC_ARMOR', playerId: pId, payload: { originalAction: action, spendAmount: i } } 
+           });
+        }
+        options.push({ label: 'No', action: { type: 'RESPONSE_ELECTRIC_ARMOR_NO', playerId: pId, payload: { originalAction: action } } });
+
         st.pendingActions.unshift({
           type: 'ASK',
           playerId: pId,
           payload: {
             prompt: {
               playerId: pId,
-              text: `Electric Armor: Spend 1⚡ to reduce damage by 1? (Taking ${action.payload.amount})`,
-              options: [
-                { label: 'Yes', action: { type: 'RESPONSE_ELECTRIC_ARMOR', playerId: pId, payload: { originalAction: action } } },
-                { label: 'No', action: { type: 'RESPONSE_ELECTRIC_ARMOR_NO', playerId: pId, payload: { originalAction: action } } }
-              ]
+              text: `Electric Armor: Spend ⚡ to reduce damage? (Taking ${action.payload.amount})`,
+              options: options
             }
           }
         });
@@ -35,11 +43,12 @@ export const ElectricArmor: CardImplementation = {
 
     if (action.type === 'RESPONSE_ELECTRIC_ARMOR' && action.playerId === pId) {
       const orig = action.payload.originalAction;
+      const spendAmount = action.payload.spendAmount || 1;
       st.pendingActions.unshift(
-        { ...orig, payload: { ...orig.payload, amount: orig.payload.amount - 1 }, affectedByCards: [{cardId: 'electric_armor', playerId: pId}] }
+        { ...orig, payload: { ...orig.payload, amount: orig.payload.amount - spendAmount }, affectedByCards: [{cardId: 'electric_armor', playerId: pId}] }
       );
       st.pendingActions.unshift(
-        { type: 'ENERGY', playerId: pId, payload: { amount: -1 }, affectedByCards: [{cardId: 'electric_armor', playerId: pId}] }
+        { type: 'ENERGY', playerId: pId, payload: { amount: -spendAmount }, affectedByCards: [{cardId: 'electric_armor', playerId: pId}] }
       );
     }
 
