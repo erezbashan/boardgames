@@ -9,7 +9,8 @@
     "train:bots": "ts-node scripts/retrograde_trainer.ts"
   },
   "dependencies": {
-    "@erez/boardgame-core": "*"
+    "@erez/boardgame-core": "*",
+    "ts-node": "^10.9.2"
   },
   "devDependencies": {
     "typescript": "^5.0.0"

@@ -5,5 +5,8 @@
     "packages/*",
     "games/*",
     "deployments/*"
-  ]
+  ],
+  "dependencies": {
+    "puppeteer": "^25.9.0"
+  }
 }
