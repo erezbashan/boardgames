@@ -13,9 +13,15 @@ export const Metamorph: CardImplementation = {
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     // Only prompt when it's literally the END_TURN action being processed
     if (action.type === 'END_TURN' && pId === st.playerOrder[st.currentPlayerIndex]) {
-       const keepCards = st.players[pId].cards.filter(cId => cId !== 'metamorph');
-       if (keepCards.length > 0) {
-          st.pendingActions.unshift({ type: 'METAMORPH_PROMPT', playerId: pId });
+       if (!action.payload?._metamorphPrompted) {
+          const index = st.pendingActions.findIndex(a => a === action);
+          if (index !== -1) {
+             st.pendingActions[index] = { ...action, payload: { ...action.payload, _metamorphPrompted: true } };
+          }
+          const keepCards = st.players[pId].cards.filter(cId => cId !== 'metamorph');
+          if (keepCards.length > 0) {
+             st.pendingActions.unshift({ type: 'METAMORPH_PROMPT', playerId: pId });
+          }
        }
     }
     
