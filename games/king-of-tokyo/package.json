@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "train:bots": "ts-node scripts/retrograde_trainer.ts"
   },
   "dependencies": {
     "@erez/boardgame-core": "*"

@@ -1,3 +1,4 @@
+import { getBucketBotAction } from './BucketBot';
 import { KotState, PendingAction } from '../engine/types';
 import { getBotAction as getRandomBotAction } from './randomBot';
 import { getSmartBotAction } from './smartBot';
@@ -21,6 +22,10 @@ export function getBotAction(state: KotState, playerId: string): PendingAction |
 
   if (strategy.startsWith('qlearn:')) {
     return getQBotAction(state, playerId) as PendingAction;
+  }
+
+  if (strategy === 'bucket') {
+    return getBucketBotAction(state, playerId) as PendingAction;
   }
 
   if (strategy.startsWith('rule:') || strategy.includes('VP:')) {
