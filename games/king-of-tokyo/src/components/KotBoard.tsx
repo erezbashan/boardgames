@@ -412,7 +412,9 @@ export const KotBoard: React.FC = () => {
               while (standardMarket.length < 3) {
                  standardMarket.push({ cardId: '', index: standardMarket.length, isExtra: false, source: 'market', overrideCost: undefined });
               }
-              const extraMarket = (gameState.turnContext?.marketExtraCards || []).map((extra: any, i: number) => ({ cardId: extra.cardId, index: i, isExtra: true, source: extra.source, overrideCost: extra.cost }));
+              const extraMarket = (gameState.turnContext?.marketExtraCards || [])
+                .filter((extra: any) => extra.source !== "deck" || isMyTurn)
+                .map((extra: any, i: number) => ({ cardId: extra.cardId, index: i, isExtra: true, source: extra.source, overrideCost: extra.cost }));
               const allMarketCards = [...standardMarket, ...extraMarket];
 
               return allMarketCards.map(({ cardId, index, isExtra, source, overrideCost }, i) => {
