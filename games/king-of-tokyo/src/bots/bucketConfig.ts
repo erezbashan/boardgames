@@ -2,57 +2,57 @@ export const bucketConfig: Record<string, any> = {
   "VP:16-19|OVP:16-19|HLT:1-4|OHLT:1-4|TOK:true": {
     "VPS": true,
     "ATT": true,
-    "HLT": true,
+    "HLT": false,
     "ENR": true,
-    "YLD": false
+    "YLD": true
   },
   "VP:16-19|OVP:16-19|HLT:1-4|OHLT:1-4|TOK:false": {
-    "VPS": true,
-    "ATT": true,
+    "VPS": false,
+    "ATT": false,
     "HLT": false,
     "ENR": false,
-    "YLD": true
+    "YLD": false
   },
   "VP:16-19|OVP:16-19|HLT:1-4|OHLT:5-7|TOK:true": {
     "VPS": false,
     "ATT": false,
-    "HLT": true,
-    "ENR": true,
+    "HLT": false,
+    "ENR": false,
     "YLD": true
   },
   "VP:16-19|OVP:16-19|HLT:1-4|OHLT:5-7|TOK:false": {
-    "VPS": true,
-    "ATT": true,
-    "HLT": false,
-    "ENR": false,
-    "YLD": false
-  },
-  "VP:16-19|OVP:16-19|HLT:1-4|OHLT:8+|TOK:true": {
     "VPS": false,
     "ATT": false,
-    "HLT": true,
+    "HLT": false,
     "ENR": true,
     "YLD": true
   },
-  "VP:16-19|OVP:16-19|HLT:1-4|OHLT:8+|TOK:false": {
-    "VPS": false,
+  "VP:16-19|OVP:16-19|HLT:1-4|OHLT:8+|TOK:true": {
+    "VPS": true,
     "ATT": false,
-    "HLT": false,
+    "HLT": true,
     "ENR": true,
+    "YLD": false
+  },
+  "VP:16-19|OVP:16-19|HLT:1-4|OHLT:8+|TOK:false": {
+    "VPS": true,
+    "ATT": false,
+    "HLT": true,
+    "ENR": false,
     "YLD": false
   },
   "VP:16-19|OVP:16-19|HLT:5-7|OHLT:1-4|TOK:true": {
+    "VPS": false,
+    "ATT": false,
+    "HLT": false,
+    "ENR": false,
+    "YLD": false
+  },
+  "VP:16-19|OVP:16-19|HLT:5-7|OHLT:1-4|TOK:false": {
     "VPS": true,
     "ATT": false,
     "HLT": false,
     "ENR": true,
-    "YLD": true
-  },
-  "VP:16-19|OVP:16-19|HLT:5-7|OHLT:1-4|TOK:false": {
-    "VPS": true,
-    "ATT": true,
-    "HLT": true,
-    "ENR": false,
     "YLD": false
   },
   "VP:16-19|OVP:16-19|HLT:5-7|OHLT:5-7|TOK:true": {
@@ -60,38 +60,38 @@ export const bucketConfig: Record<string, any> = {
     "ATT": true,
     "HLT": false,
     "ENR": false,
-    "YLD": false
+    "YLD": true
   },
   "VP:16-19|OVP:16-19|HLT:5-7|OHLT:5-7|TOK:false": {
     "VPS": true,
-    "ATT": true,
+    "ATT": false,
     "HLT": true,
-    "ENR": true,
+    "ENR": false,
     "YLD": false
   },
   "VP:16-19|OVP:16-19|HLT:5-7|OHLT:8+|TOK:true": {
-    "VPS": false,
+    "VPS": true,
     "ATT": true,
-    "HLT": true,
+    "HLT": false,
     "ENR": true,
-    "YLD": true
+    "YLD": false
   },
   "VP:16-19|OVP:16-19|HLT:5-7|OHLT:8+|TOK:false": {
     "VPS": true,
     "ATT": true,
-    "HLT": true,
+    "HLT": false,
     "ENR": true,
-    "YLD": true
+    "YLD": false
   },
   "VP:16-19|OVP:16-19|HLT:8+|OHLT:1-4|TOK:true": {
     "VPS": true,
     "ATT": true,
     "HLT": true,
-    "ENR": false,
+    "ENR": true,
     "YLD": true
   },
   "VP:16-19|OVP:16-19|HLT:8+|OHLT:1-4|TOK:false": {
-    "VPS": false,
+    "VPS": true,
     "ATT": false,
     "HLT": false,
     "ENR": true,
@@ -100,110 +100,110 @@ export const bucketConfig: Record<string, any> = {
   "VP:16-19|OVP:16-19|HLT:8+|OHLT:5-7|TOK:true": {
     "VPS": false,
     "ATT": true,
-    "HLT": false,
-    "ENR": false,
-    "YLD": false
-  },
-  "VP:16-19|OVP:16-19|HLT:8+|OHLT:5-7|TOK:false": {
-    "VPS": true,
-    "ATT": true,
     "HLT": true,
-    "ENR": true,
+    "ENR": false,
     "YLD": true
   },
-  "VP:16-19|OVP:16-19|HLT:8+|OHLT:8+|TOK:true": {
+  "VP:16-19|OVP:16-19|HLT:8+|OHLT:5-7|TOK:false": {
     "VPS": false,
     "ATT": true,
     "HLT": false,
-    "ENR": false,
-    "YLD": true
+    "ENR": true,
+    "YLD": false
   },
-  "VP:16-19|OVP:16-19|HLT:8+|OHLT:8+|TOK:false": {
+  "VP:16-19|OVP:16-19|HLT:8+|OHLT:8+|TOK:true": {
     "VPS": true,
     "ATT": true,
+    "HLT": true,
+    "ENR": false,
+    "YLD": false
+  },
+  "VP:16-19|OVP:16-19|HLT:8+|OHLT:8+|TOK:false": {
+    "VPS": false,
+    "ATT": false,
     "HLT": false,
     "ENR": false,
-    "YLD": true
+    "YLD": false
   },
   "VP:16-19|OVP:10-15|HLT:1-4|OHLT:1-4|TOK:true": {
     "VPS": true,
     "ATT": true,
     "HLT": false,
-    "ENR": false,
-    "YLD": true
+    "ENR": true,
+    "YLD": false
   },
   "VP:16-19|OVP:10-15|HLT:1-4|OHLT:1-4|TOK:false": {
-    "VPS": false,
-    "ATT": false,
-    "HLT": false,
-    "ENR": true,
-    "YLD": true
-  },
-  "VP:16-19|OVP:10-15|HLT:1-4|OHLT:5-7|TOK:true": {
-    "VPS": false,
+    "VPS": true,
     "ATT": true,
     "HLT": true,
-    "ENR": false,
+    "ENR": true,
+    "YLD": false
+  },
+  "VP:16-19|OVP:10-15|HLT:1-4|OHLT:5-7|TOK:true": {
+    "VPS": true,
+    "ATT": true,
+    "HLT": false,
+    "ENR": true,
     "YLD": false
   },
   "VP:16-19|OVP:10-15|HLT:1-4|OHLT:5-7|TOK:false": {
-    "VPS": false,
-    "ATT": true,
+    "VPS": true,
+    "ATT": false,
     "HLT": true,
     "ENR": true,
     "YLD": true
   },
   "VP:16-19|OVP:10-15|HLT:1-4|OHLT:8+|TOK:true": {
-    "VPS": true,
-    "ATT": true,
-    "HLT": false,
-    "ENR": true,
-    "YLD": false
+    "VPS": false,
+    "ATT": false,
+    "HLT": true,
+    "ENR": false,
+    "YLD": true
   },
   "VP:16-19|OVP:10-15|HLT:1-4|OHLT:8+|TOK:false": {
     "VPS": false,
     "ATT": false,
-    "HLT": false,
-    "ENR": true,
+    "HLT": true,
+    "ENR": false,
     "YLD": true
   },
   "VP:16-19|OVP:10-15|HLT:5-7|OHLT:1-4|TOK:true": {
-    "VPS": true,
-    "ATT": true,
+    "VPS": false,
+    "ATT": false,
     "HLT": false,
     "ENR": false,
-    "YLD": false
+    "YLD": true
   },
   "VP:16-19|OVP:10-15|HLT:5-7|OHLT:1-4|TOK:false": {
-    "VPS": true,
+    "VPS": false,
     "ATT": true,
     "HLT": true,
-    "ENR": false,
-    "YLD": false
+    "ENR": true,
+    "YLD": true
   },
   "VP:16-19|OVP:10-15|HLT:5-7|OHLT:5-7|TOK:true": {
     "VPS": false,
     "ATT": false,
-    "HLT": true,
+    "HLT": false,
     "ENR": true,
     "YLD": false
   },
   "VP:16-19|OVP:10-15|HLT:5-7|OHLT:5-7|TOK:false": {
     "VPS": false,
-    "ATT": true,
-    "HLT": false,
-    "ENR": true,
-    "YLD": false
-  },
-  "VP:16-19|OVP:10-15|HLT:5-7|OHLT:8+|TOK:true": {
-    "VPS": true,
     "ATT": false,
     "HLT": true,
     "ENR": false,
     "YLD": true
   },
-  "VP:16-19|OVP:10-15|HLT:5-7|OHLT:8+|TOK:false": {
+  "VP:16-19|OVP:10-15|HLT:5-7|OHLT:8+|TOK:true": {
     "VPS": true,
+    "ATT": true,
+    "HLT": false,
+    "ENR": true,
+    "YLD": true
+  },
+  "VP:16-19|OVP:10-15|HLT:5-7|OHLT:8+|TOK:false": {
+    "VPS": false,
     "ATT": true,
     "HLT": false,
     "ENR": false,
@@ -212,20 +212,20 @@ export const bucketConfig: Record<string, any> = {
   "VP:16-19|OVP:10-15|HLT:8+|OHLT:1-4|TOK:true": {
     "VPS": true,
     "ATT": false,
-    "HLT": true,
+    "HLT": false,
     "ENR": false,
     "YLD": false
   },
   "VP:16-19|OVP:10-15|HLT:8+|OHLT:1-4|TOK:false": {
-    "VPS": true,
+    "VPS": false,
     "ATT": false,
-    "HLT": true,
+    "HLT": false,
     "ENR": true,
     "YLD": false
   },
   "VP:16-19|OVP:10-15|HLT:8+|OHLT:5-7|TOK:true": {
-    "VPS": false,
-    "ATT": true,
+    "VPS": true,
+    "ATT": false,
     "HLT": true,
     "ENR": false,
     "YLD": true
@@ -238,136 +238,136 @@ export const bucketConfig: Record<string, any> = {
     "YLD": false
   },
   "VP:16-19|OVP:10-15|HLT:8+|OHLT:8+|TOK:true": {
-    "VPS": true,
-    "ATT": false,
-    "HLT": true,
-    "ENR": false,
+    "VPS": false,
+    "ATT": true,
+    "HLT": false,
+    "ENR": true,
     "YLD": false
   },
   "VP:16-19|OVP:10-15|HLT:8+|OHLT:8+|TOK:false": {
-    "VPS": false,
+    "VPS": true,
     "ATT": false,
-    "HLT": true,
+    "HLT": false,
     "ENR": false,
-    "YLD": true
+    "YLD": false
   },
   "VP:16-19|OVP:0-9|HLT:1-4|OHLT:1-4|TOK:true": {
     "VPS": true,
-    "ATT": false,
+    "ATT": true,
     "HLT": true,
-    "ENR": true,
-    "YLD": true
+    "ENR": false,
+    "YLD": false
   },
   "VP:16-19|OVP:0-9|HLT:1-4|OHLT:1-4|TOK:false": {
     "VPS": false,
     "ATT": true,
-    "HLT": true,
+    "HLT": false,
     "ENR": true,
     "YLD": false
   },
   "VP:16-19|OVP:0-9|HLT:1-4|OHLT:5-7|TOK:true": {
-    "VPS": false,
-    "ATT": false,
-    "HLT": true,
-    "ENR": true,
+    "VPS": true,
+    "ATT": true,
+    "HLT": false,
+    "ENR": false,
     "YLD": false
   },
   "VP:16-19|OVP:0-9|HLT:1-4|OHLT:5-7|TOK:false": {
-    "VPS": false,
+    "VPS": true,
     "ATT": false,
-    "HLT": true,
+    "HLT": false,
     "ENR": false,
     "YLD": false
   },
   "VP:16-19|OVP:0-9|HLT:1-4|OHLT:8+|TOK:true": {
-    "VPS": true,
-    "ATT": false,
-    "HLT": true,
+    "VPS": false,
+    "ATT": true,
+    "HLT": false,
     "ENR": false,
     "YLD": true
   },
   "VP:16-19|OVP:0-9|HLT:1-4|OHLT:8+|TOK:false": {
-    "VPS": true,
+    "VPS": false,
     "ATT": false,
-    "HLT": true,
+    "HLT": false,
     "ENR": false,
     "YLD": false
   },
   "VP:16-19|OVP:0-9|HLT:5-7|OHLT:1-4|TOK:true": {
     "VPS": false,
-    "ATT": false,
+    "ATT": true,
     "HLT": false,
-    "ENR": true,
-    "YLD": false
+    "ENR": false,
+    "YLD": true
   },
   "VP:16-19|OVP:0-9|HLT:5-7|OHLT:1-4|TOK:false": {
     "VPS": true,
     "ATT": true,
     "HLT": false,
     "ENR": false,
-    "YLD": true
+    "YLD": false
   },
   "VP:16-19|OVP:0-9|HLT:5-7|OHLT:5-7|TOK:true": {
-    "VPS": true,
+    "VPS": false,
+    "ATT": true,
+    "HLT": true,
+    "ENR": false,
+    "YLD": false
+  },
+  "VP:16-19|OVP:0-9|HLT:5-7|OHLT:5-7|TOK:false": {
+    "VPS": false,
     "ATT": false,
+    "HLT": false,
+    "ENR": true,
+    "YLD": false
+  },
+  "VP:16-19|OVP:0-9|HLT:5-7|OHLT:8+|TOK:true": {
+    "VPS": false,
+    "ATT": false,
+    "HLT": false,
+    "ENR": false,
+    "YLD": true
+  },
+  "VP:16-19|OVP:0-9|HLT:5-7|OHLT:8+|TOK:false": {
+    "VPS": true,
+    "ATT": true,
     "HLT": true,
     "ENR": true,
     "YLD": true
   },
-  "VP:16-19|OVP:0-9|HLT:5-7|OHLT:5-7|TOK:false": {
-    "VPS": true,
-    "ATT": false,
-    "HLT": false,
-    "ENR": true,
-    "YLD": true
-  },
-  "VP:16-19|OVP:0-9|HLT:5-7|OHLT:8+|TOK:true": {
+  "VP:16-19|OVP:0-9|HLT:8+|OHLT:1-4|TOK:true": {
     "VPS": false,
     "ATT": true,
     "HLT": true,
     "ENR": true,
-    "YLD": false
-  },
-  "VP:16-19|OVP:0-9|HLT:5-7|OHLT:8+|TOK:false": {
-    "VPS": false,
-    "ATT": false,
-    "HLT": false,
-    "ENR": false,
-    "YLD": true
-  },
-  "VP:16-19|OVP:0-9|HLT:8+|OHLT:1-4|TOK:true": {
-    "VPS": true,
-    "ATT": false,
-    "HLT": true,
-    "ENR": false,
     "YLD": false
   },
   "VP:16-19|OVP:0-9|HLT:8+|OHLT:1-4|TOK:false": {
     "VPS": true,
     "ATT": true,
-    "HLT": true,
+    "HLT": false,
     "ENR": false,
-    "YLD": true
+    "YLD": false
   },
   "VP:16-19|OVP:0-9|HLT:8+|OHLT:5-7|TOK:true": {
     "VPS": false,
-    "ATT": true,
-    "HLT": true,
+    "ATT": false,
+    "HLT": false,
     "ENR": true,
     "YLD": false
   },
   "VP:16-19|OVP:0-9|HLT:8+|OHLT:5-7|TOK:false": {
     "VPS": false,
-    "ATT": true,
-    "HLT": false,
+    "ATT": false,
+    "HLT": true,
     "ENR": true,
-    "YLD": false
+    "YLD": true
   },
   "VP:16-19|OVP:0-9|HLT:8+|OHLT:8+|TOK:true": {
-    "VPS": false,
+    "VPS": true,
     "ATT": false,
-    "HLT": false,
-    "ENR": true,
+    "HLT": true,
+    "ENR": false,
     "YLD": true
   },
   "VP:16-19|OVP:0-9|HLT:8+|OHLT:8+|TOK:false": {
@@ -375,53 +375,53 @@ export const bucketConfig: Record<string, any> = {
     "ATT": true,
     "HLT": false,
     "ENR": true,
-    "YLD": true
+    "YLD": false
   },
   "VP:10-15|OVP:16-19|HLT:1-4|OHLT:1-4|TOK:true": {
-    "VPS": true,
-    "ATT": true,
-    "HLT": true,
-    "ENR": false,
-    "YLD": true
-  },
-  "VP:10-15|OVP:16-19|HLT:1-4|OHLT:1-4|TOK:false": {
-    "VPS": true,
-    "ATT": true,
-    "HLT": false,
-    "ENR": false,
-    "YLD": true
-  },
-  "VP:10-15|OVP:16-19|HLT:1-4|OHLT:5-7|TOK:true": {
-    "VPS": true,
-    "ATT": true,
-    "HLT": true,
-    "ENR": false,
-    "YLD": true
-  },
-  "VP:10-15|OVP:16-19|HLT:1-4|OHLT:5-7|TOK:false": {
-    "VPS": true,
-    "ATT": true,
+    "VPS": false,
+    "ATT": false,
     "HLT": true,
     "ENR": false,
     "YLD": false
   },
-  "VP:10-15|OVP:16-19|HLT:1-4|OHLT:8+|TOK:true": {
+  "VP:10-15|OVP:16-19|HLT:1-4|OHLT:1-4|TOK:false": {
+    "VPS": false,
+    "ATT": true,
+    "HLT": true,
+    "ENR": true,
+    "YLD": false
+  },
+  "VP:10-15|OVP:16-19|HLT:1-4|OHLT:5-7|TOK:true": {
+    "VPS": true,
+    "ATT": false,
+    "HLT": false,
+    "ENR": true,
+    "YLD": false
+  },
+  "VP:10-15|OVP:16-19|HLT:1-4|OHLT:5-7|TOK:false": {
     "VPS": false,
     "ATT": false,
-    "HLT": true,
+    "HLT": false,
+    "ENR": false,
+    "YLD": true
+  },
+  "VP:10-15|OVP:16-19|HLT:1-4|OHLT:8+|TOK:true": {
+    "VPS": true,
+    "ATT": true,
+    "HLT": false,
     "ENR": true,
     "YLD": true
   },
   "VP:10-15|OVP:16-19|HLT:1-4|OHLT:8+|TOK:false": {
     "VPS": true,
-    "ATT": false,
-    "HLT": false,
-    "ENR": false,
+    "ATT": true,
+    "HLT": true,
+    "ENR": true,
     "YLD": false
   },
   "VP:10-15|OVP:16-19|HLT:5-7|OHLT:1-4|TOK:true": {
-    "VPS": false,
-    "ATT": false,
+    "VPS": true,
+    "ATT": true,
     "HLT": false,
     "ENR": true,
     "YLD": true
@@ -429,44 +429,44 @@ export const bucketConfig: Record<string, any> = {
   "VP:10-15|OVP:16-19|HLT:5-7|OHLT:1-4|TOK:false": {
     "VPS": false,
     "ATT": false,
-    "HLT": false,
-    "ENR": true,
+    "HLT": true,
+    "ENR": false,
     "YLD": true
   },
   "VP:10-15|OVP:16-19|HLT:5-7|OHLT:5-7|TOK:true": {
     "VPS": true,
     "ATT": true,
-    "HLT": true,
+    "HLT": false,
     "ENR": true,
     "YLD": false
   },
   "VP:10-15|OVP:16-19|HLT:5-7|OHLT:5-7|TOK:false": {
     "VPS": false,
-    "ATT": true,
+    "ATT": false,
     "HLT": false,
     "ENR": true,
-    "YLD": false
+    "YLD": true
   },
   "VP:10-15|OVP:16-19|HLT:5-7|OHLT:8+|TOK:true": {
-    "VPS": true,
+    "VPS": false,
     "ATT": false,
     "HLT": true,
     "ENR": true,
     "YLD": true
   },
   "VP:10-15|OVP:16-19|HLT:5-7|OHLT:8+|TOK:false": {
-    "VPS": true,
-    "ATT": true,
-    "HLT": true,
-    "ENR": false,
-    "YLD": true
-  },
-  "VP:10-15|OVP:16-19|HLT:8+|OHLT:1-4|TOK:true": {
-    "VPS": true,
+    "VPS": false,
     "ATT": true,
     "HLT": true,
     "ENR": true,
-    "YLD": true
+    "YLD": false
+  },
+  "VP:10-15|OVP:16-19|HLT:8+|OHLT:1-4|TOK:true": {
+    "VPS": true,
+    "ATT": false,
+    "HLT": true,
+    "ENR": true,
+    "YLD": false
   },
   "VP:10-15|OVP:16-19|HLT:8+|OHLT:1-4|TOK:false": {
     "VPS": true,
@@ -477,13 +477,13 @@ export const bucketConfig: Record<string, any> = {
   },
   "VP:10-15|OVP:16-19|HLT:8+|OHLT:5-7|TOK:true": {
     "VPS": false,
-    "ATT": false,
+    "ATT": true,
     "HLT": true,
-    "ENR": false,
+    "ENR": true,
     "YLD": false
   },
   "VP:10-15|OVP:16-19|HLT:8+|OHLT:5-7|TOK:false": {
-    "VPS": false,
+    "VPS": true,
     "ATT": true,
     "HLT": false,
     "ENR": false,
@@ -491,31 +491,31 @@ export const bucketConfig: Record<string, any> = {
   },
   "VP:10-15|OVP:16-19|HLT:8+|OHLT:8+|TOK:true": {
     "VPS": true,
-    "ATT": false,
+    "ATT": true,
     "HLT": false,
     "ENR": false,
     "YLD": true
   },
   "VP:10-15|OVP:16-19|HLT:8+|OHLT:8+|TOK:false": {
-    "VPS": true,
-    "ATT": false,
+    "VPS": false,
+    "ATT": true,
     "HLT": true,
-    "ENR": true,
+    "ENR": false,
     "YLD": false
   },
   "VP:10-15|OVP:10-15|HLT:1-4|OHLT:1-4|TOK:true": {
     "VPS": false,
-    "ATT": false,
-    "HLT": false,
+    "ATT": true,
+    "HLT": true,
     "ENR": false,
     "YLD": true
   },
   "VP:10-15|OVP:10-15|HLT:1-4|OHLT:1-4|TOK:false": {
     "VPS": true,
-    "ATT": true,
-    "HLT": false,
-    "ENR": true,
-    "YLD": false
+    "ATT": false,
+    "HLT": true,
+    "ENR": false,
+    "YLD": true
   },
   "VP:10-15|OVP:10-15|HLT:1-4|OHLT:5-7|TOK:true": {
     "VPS": true,
@@ -525,23 +525,23 @@ export const bucketConfig: Record<string, any> = {
     "YLD": false
   },
   "VP:10-15|OVP:10-15|HLT:1-4|OHLT:5-7|TOK:false": {
-    "VPS": true,
-    "ATT": false,
-    "HLT": false,
-    "ENR": false,
-    "YLD": false
-  },
-  "VP:10-15|OVP:10-15|HLT:1-4|OHLT:8+|TOK:true": {
-    "VPS": true,
-    "ATT": false,
+    "VPS": false,
+    "ATT": true,
     "HLT": false,
     "ENR": true,
     "YLD": true
   },
-  "VP:10-15|OVP:10-15|HLT:1-4|OHLT:8+|TOK:false": {
+  "VP:10-15|OVP:10-15|HLT:1-4|OHLT:8+|TOK:true": {
     "VPS": true,
-    "ATT": false,
+    "ATT": true,
     "HLT": true,
+    "ENR": false,
+    "YLD": true
+  },
+  "VP:10-15|OVP:10-15|HLT:1-4|OHLT:8+|TOK:false": {
+    "VPS": false,
+    "ATT": true,
+    "HLT": false,
     "ENR": true,
     "YLD": false
   },
@@ -555,71 +555,71 @@ export const bucketConfig: Record<string, any> = {
   "VP:10-15|OVP:10-15|HLT:5-7|OHLT:1-4|TOK:false": {
     "VPS": true,
     "ATT": false,
-    "HLT": false,
+    "HLT": true,
     "ENR": true,
-    "YLD": false
+    "YLD": true
   },
   "VP:10-15|OVP:10-15|HLT:5-7|OHLT:5-7|TOK:true": {
     "VPS": false,
-    "ATT": true,
+    "ATT": false,
     "HLT": true,
-    "ENR": false,
+    "ENR": true,
     "YLD": false
   },
   "VP:10-15|OVP:10-15|HLT:5-7|OHLT:5-7|TOK:false": {
     "VPS": true,
     "ATT": true,
-    "HLT": false,
-    "ENR": true,
+    "HLT": true,
+    "ENR": false,
     "YLD": true
   },
   "VP:10-15|OVP:10-15|HLT:5-7|OHLT:8+|TOK:true": {
-    "VPS": false,
-    "ATT": true,
+    "VPS": true,
+    "ATT": false,
     "HLT": false,
     "ENR": true,
     "YLD": false
   },
   "VP:10-15|OVP:10-15|HLT:5-7|OHLT:8+|TOK:false": {
-    "VPS": false,
+    "VPS": true,
     "ATT": true,
-    "HLT": true,
-    "ENR": false,
+    "HLT": false,
+    "ENR": true,
     "YLD": false
   },
   "VP:10-15|OVP:10-15|HLT:8+|OHLT:1-4|TOK:true": {
+    "VPS": true,
+    "ATT": true,
+    "HLT": false,
+    "ENR": true,
+    "YLD": true
+  },
+  "VP:10-15|OVP:10-15|HLT:8+|OHLT:1-4|TOK:false": {
     "VPS": false,
     "ATT": true,
     "HLT": false,
     "ENR": true,
     "YLD": false
   },
-  "VP:10-15|OVP:10-15|HLT:8+|OHLT:1-4|TOK:false": {
+  "VP:10-15|OVP:10-15|HLT:8+|OHLT:5-7|TOK:true": {
+    "VPS": false,
+    "ATT": true,
+    "HLT": true,
+    "ENR": false,
+    "YLD": false
+  },
+  "VP:10-15|OVP:10-15|HLT:8+|OHLT:5-7|TOK:false": {
     "VPS": false,
     "ATT": false,
-    "HLT": false,
+    "HLT": true,
     "ENR": false,
-    "YLD": true
+    "YLD": false
   },
-  "VP:10-15|OVP:10-15|HLT:8+|OHLT:5-7|TOK:true": {
-    "VPS": true,
+  "VP:10-15|OVP:10-15|HLT:8+|OHLT:8+|TOK:true": {
+    "VPS": false,
     "ATT": true,
     "HLT": false,
     "ENR": false,
-    "YLD": true
-  },
-  "VP:10-15|OVP:10-15|HLT:8+|OHLT:5-7|TOK:false": {
-    "VPS": true,
-    "ATT": false,
-    "HLT": true,
-    "ENR": false,
-    "YLD": true
-  },
-  "VP:10-15|OVP:10-15|HLT:8+|OHLT:8+|TOK:true": {
-    "VPS": true,
-    "ATT": false,
-    "HLT": true,
-    "ENR": true,
     "YLD": true
   },
   "VP:10-15|OVP:10-15|HLT:8+|OHLT:8+|TOK:false": {
@@ -627,172 +627,172 @@ export const bucketConfig: Record<string, any> = {
     "ATT": true,
     "HLT": false,
     "ENR": true,
-    "YLD": true
+    "YLD": false
   },
   "VP:10-15|OVP:0-9|HLT:1-4|OHLT:1-4|TOK:true": {
     "VPS": true,
     "ATT": true,
-    "HLT": false,
-    "ENR": true,
-    "YLD": true
+    "HLT": true,
+    "ENR": false,
+    "YLD": false
   },
   "VP:10-15|OVP:0-9|HLT:1-4|OHLT:1-4|TOK:false": {
-    "VPS": true,
-    "ATT": false,
-    "HLT": false,
+    "VPS": false,
+    "ATT": true,
+    "HLT": true,
     "ENR": false,
     "YLD": false
   },
   "VP:10-15|OVP:0-9|HLT:1-4|OHLT:5-7|TOK:true": {
-    "VPS": true,
+    "VPS": false,
+    "ATT": true,
+    "HLT": true,
+    "ENR": true,
+    "YLD": true
+  },
+  "VP:10-15|OVP:0-9|HLT:1-4|OHLT:5-7|TOK:false": {
+    "VPS": false,
     "ATT": true,
     "HLT": false,
     "ENR": false,
-    "YLD": false
-  },
-  "VP:10-15|OVP:0-9|HLT:1-4|OHLT:5-7|TOK:false": {
-    "VPS": true,
-    "ATT": false,
-    "HLT": false,
-    "ENR": true,
     "YLD": false
   },
   "VP:10-15|OVP:0-9|HLT:1-4|OHLT:8+|TOK:true": {
-    "VPS": true,
-    "ATT": true,
-    "HLT": false,
-    "ENR": false,
+    "VPS": false,
+    "ATT": false,
+    "HLT": true,
+    "ENR": true,
     "YLD": false
   },
   "VP:10-15|OVP:0-9|HLT:1-4|OHLT:8+|TOK:false": {
-    "VPS": false,
-    "ATT": false,
+    "VPS": true,
+    "ATT": true,
     "HLT": false,
     "ENR": false,
     "YLD": true
   },
   "VP:10-15|OVP:0-9|HLT:5-7|OHLT:1-4|TOK:true": {
-    "VPS": false,
+    "VPS": true,
     "ATT": true,
     "HLT": true,
-    "ENR": true,
+    "ENR": false,
     "YLD": true
   },
   "VP:10-15|OVP:0-9|HLT:5-7|OHLT:1-4|TOK:false": {
-    "VPS": true,
+    "VPS": false,
     "ATT": true,
     "HLT": true,
-    "ENR": true,
-    "YLD": false
+    "ENR": false,
+    "YLD": true
   },
   "VP:10-15|OVP:0-9|HLT:5-7|OHLT:5-7|TOK:true": {
-    "VPS": false,
+    "VPS": true,
     "ATT": false,
     "HLT": false,
     "ENR": true,
-    "YLD": true
+    "YLD": false
   },
   "VP:10-15|OVP:0-9|HLT:5-7|OHLT:5-7|TOK:false": {
     "VPS": true,
-    "ATT": true,
+    "ATT": false,
     "HLT": false,
     "ENR": false,
     "YLD": false
   },
   "VP:10-15|OVP:0-9|HLT:5-7|OHLT:8+|TOK:true": {
-    "VPS": false,
-    "ATT": false,
+    "VPS": true,
+    "ATT": true,
     "HLT": true,
-    "ENR": true,
+    "ENR": false,
     "YLD": false
   },
   "VP:10-15|OVP:0-9|HLT:5-7|OHLT:8+|TOK:false": {
     "VPS": false,
-    "ATT": true,
-    "HLT": false,
-    "ENR": false,
-    "YLD": false
-  },
-  "VP:10-15|OVP:0-9|HLT:8+|OHLT:1-4|TOK:true": {
-    "VPS": true,
     "ATT": false,
     "HLT": true,
     "ENR": false,
     "YLD": true
   },
-  "VP:10-15|OVP:0-9|HLT:8+|OHLT:1-4|TOK:false": {
+  "VP:10-15|OVP:0-9|HLT:8+|OHLT:1-4|TOK:true": {
     "VPS": false,
     "ATT": true,
+    "HLT": false,
+    "ENR": false,
+    "YLD": true
+  },
+  "VP:10-15|OVP:0-9|HLT:8+|OHLT:1-4|TOK:false": {
+    "VPS": true,
+    "ATT": false,
     "HLT": true,
     "ENR": false,
     "YLD": true
   },
   "VP:10-15|OVP:0-9|HLT:8+|OHLT:5-7|TOK:true": {
     "VPS": false,
-    "ATT": true,
+    "ATT": false,
     "HLT": false,
-    "ENR": false,
-    "YLD": false
+    "ENR": true,
+    "YLD": true
   },
   "VP:10-15|OVP:0-9|HLT:8+|OHLT:5-7|TOK:false": {
-    "VPS": true,
-    "ATT": false,
+    "VPS": false,
+    "ATT": true,
     "HLT": true,
-    "ENR": true,
+    "ENR": false,
     "YLD": false
   },
   "VP:10-15|OVP:0-9|HLT:8+|OHLT:8+|TOK:true": {
     "VPS": true,
+    "ATT": false,
+    "HLT": false,
+    "ENR": true,
+    "YLD": true
+  },
+  "VP:10-15|OVP:0-9|HLT:8+|OHLT:8+|TOK:false": {
+    "VPS": false,
     "ATT": true,
-    "HLT": true,
+    "HLT": false,
     "ENR": true,
     "YLD": false
   },
-  "VP:10-15|OVP:0-9|HLT:8+|OHLT:8+|TOK:false": {
+  "VP:0-9|OVP:16-19|HLT:1-4|OHLT:1-4|TOK:true": {
     "VPS": true,
     "ATT": true,
     "HLT": false,
     "ENR": false,
     "YLD": true
   },
-  "VP:0-9|OVP:16-19|HLT:1-4|OHLT:1-4|TOK:true": {
-    "VPS": false,
-    "ATT": true,
-    "HLT": true,
-    "ENR": true,
-    "YLD": false
-  },
   "VP:0-9|OVP:16-19|HLT:1-4|OHLT:1-4|TOK:false": {
-    "VPS": true,
+    "VPS": false,
     "ATT": false,
-    "HLT": true,
+    "HLT": false,
     "ENR": false,
-    "YLD": false
+    "YLD": true
   },
   "VP:0-9|OVP:16-19|HLT:1-4|OHLT:5-7|TOK:true": {
     "VPS": false,
     "ATT": false,
-    "HLT": true,
-    "ENR": true,
-    "YLD": true
+    "HLT": false,
+    "ENR": false,
+    "YLD": false
   },
   "VP:0-9|OVP:16-19|HLT:1-4|OHLT:5-7|TOK:false": {
-    "VPS": false,
-    "ATT": true,
+    "VPS": true,
+    "ATT": false,
     "HLT": false,
     "ENR": true,
-    "YLD": true
+    "YLD": false
   },
   "VP:0-9|OVP:16-19|HLT:1-4|OHLT:8+|TOK:true": {
     "VPS": true,
     "ATT": true,
-    "HLT": true,
-    "ENR": true,
+    "HLT": false,
+    "ENR": false,
     "YLD": true
   },
   "VP:0-9|OVP:16-19|HLT:1-4|OHLT:8+|TOK:false": {
-    "VPS": false,
-    "ATT": false,
+    "VPS": true,
+    "ATT": true,
     "HLT": true,
     "ENR": false,
     "YLD": false
@@ -800,225 +800,225 @@ export const bucketConfig: Record<string, any> = {
   "VP:0-9|OVP:16-19|HLT:5-7|OHLT:1-4|TOK:true": {
     "VPS": true,
     "ATT": false,
+    "HLT": false,
+    "ENR": true,
+    "YLD": true
+  },
+  "VP:0-9|OVP:16-19|HLT:5-7|OHLT:1-4|TOK:false": {
+    "VPS": false,
+    "ATT": false,
     "HLT": true,
     "ENR": false,
     "YLD": false
   },
-  "VP:0-9|OVP:16-19|HLT:5-7|OHLT:1-4|TOK:false": {
-    "VPS": true,
-    "ATT": true,
-    "HLT": false,
-    "ENR": true,
-    "YLD": false
-  },
   "VP:0-9|OVP:16-19|HLT:5-7|OHLT:5-7|TOK:true": {
     "VPS": false,
-    "ATT": true,
+    "ATT": false,
     "HLT": true,
     "ENR": true,
-    "YLD": false
+    "YLD": true
   },
   "VP:0-9|OVP:16-19|HLT:5-7|OHLT:5-7|TOK:false": {
     "VPS": true,
-    "ATT": true,
+    "ATT": false,
     "HLT": true,
     "ENR": true,
-    "YLD": false
+    "YLD": true
   },
   "VP:0-9|OVP:16-19|HLT:5-7|OHLT:8+|TOK:true": {
-    "VPS": true,
-    "ATT": true,
+    "VPS": false,
+    "ATT": false,
     "HLT": false,
-    "ENR": true,
+    "ENR": false,
     "YLD": false
   },
   "VP:0-9|OVP:16-19|HLT:5-7|OHLT:8+|TOK:false": {
     "VPS": false,
     "ATT": true,
     "HLT": true,
-    "ENR": true,
-    "YLD": false
-  },
-  "VP:0-9|OVP:16-19|HLT:8+|OHLT:1-4|TOK:true": {
-    "VPS": true,
-    "ATT": false,
-    "HLT": false,
     "ENR": false,
     "YLD": false
   },
-  "VP:0-9|OVP:16-19|HLT:8+|OHLT:1-4|TOK:false": {
-    "VPS": true,
+  "VP:0-9|OVP:16-19|HLT:8+|OHLT:1-4|TOK:true": {
+    "VPS": false,
     "ATT": true,
     "HLT": false,
     "ENR": false,
     "YLD": true
   },
-  "VP:0-9|OVP:16-19|HLT:8+|OHLT:5-7|TOK:true": {
+  "VP:0-9|OVP:16-19|HLT:8+|OHLT:1-4|TOK:false": {
     "VPS": false,
+    "ATT": false,
+    "HLT": true,
+    "ENR": true,
+    "YLD": false
+  },
+  "VP:0-9|OVP:16-19|HLT:8+|OHLT:5-7|TOK:true": {
+    "VPS": true,
     "ATT": false,
     "HLT": false,
     "ENR": true,
     "YLD": false
   },
   "VP:0-9|OVP:16-19|HLT:8+|OHLT:5-7|TOK:false": {
-    "VPS": false,
-    "ATT": true,
-    "HLT": false,
-    "ENR": true,
-    "YLD": true
+    "VPS": true,
+    "ATT": false,
+    "HLT": true,
+    "ENR": false,
+    "YLD": false
   },
   "VP:0-9|OVP:16-19|HLT:8+|OHLT:8+|TOK:true": {
     "VPS": true,
-    "ATT": false,
-    "HLT": false,
-    "ENR": false,
+    "ATT": true,
+    "HLT": true,
+    "ENR": true,
     "YLD": true
   },
   "VP:0-9|OVP:16-19|HLT:8+|OHLT:8+|TOK:false": {
-    "VPS": true,
-    "ATT": true,
-    "HLT": true,
+    "VPS": false,
+    "ATT": false,
+    "HLT": false,
     "ENR": false,
     "YLD": false
   },
   "VP:0-9|OVP:10-15|HLT:1-4|OHLT:1-4|TOK:true": {
     "VPS": false,
-    "ATT": true,
+    "ATT": false,
     "HLT": false,
-    "ENR": false,
+    "ENR": true,
     "YLD": true
   },
   "VP:0-9|OVP:10-15|HLT:1-4|OHLT:1-4|TOK:false": {
     "VPS": false,
     "ATT": false,
     "HLT": true,
-    "ENR": true,
-    "YLD": true
+    "ENR": false,
+    "YLD": false
   },
   "VP:0-9|OVP:10-15|HLT:1-4|OHLT:5-7|TOK:true": {
     "VPS": false,
     "ATT": true,
     "HLT": false,
     "ENR": false,
-    "YLD": true
+    "YLD": false
   },
   "VP:0-9|OVP:10-15|HLT:1-4|OHLT:5-7|TOK:false": {
     "VPS": true,
     "ATT": false,
-    "HLT": false,
-    "ENR": true,
+    "HLT": true,
+    "ENR": false,
     "YLD": false
   },
   "VP:0-9|OVP:10-15|HLT:1-4|OHLT:8+|TOK:true": {
     "VPS": false,
-    "ATT": true,
-    "HLT": false,
-    "ENR": false,
-    "YLD": true
-  },
-  "VP:0-9|OVP:10-15|HLT:1-4|OHLT:8+|TOK:false": {
-    "VPS": true,
-    "ATT": true,
-    "HLT": false,
-    "ENR": false,
-    "YLD": false
-  },
-  "VP:0-9|OVP:10-15|HLT:5-7|OHLT:1-4|TOK:true": {
-    "VPS": false,
-    "ATT": true,
-    "HLT": false,
-    "ENR": false,
-    "YLD": false
-  },
-  "VP:0-9|OVP:10-15|HLT:5-7|OHLT:1-4|TOK:false": {
-    "VPS": false,
-    "ATT": true,
+    "ATT": false,
     "HLT": false,
     "ENR": true,
     "YLD": true
   },
-  "VP:0-9|OVP:10-15|HLT:5-7|OHLT:5-7|TOK:true": {
-    "VPS": false,
-    "ATT": true,
+  "VP:0-9|OVP:10-15|HLT:1-4|OHLT:8+|TOK:false": {
+    "VPS": true,
+    "ATT": false,
     "HLT": false,
+    "ENR": false,
+    "YLD": true
+  },
+  "VP:0-9|OVP:10-15|HLT:5-7|OHLT:1-4|TOK:true": {
+    "VPS": true,
+    "ATT": false,
+    "HLT": false,
+    "ENR": true,
+    "YLD": false
+  },
+  "VP:0-9|OVP:10-15|HLT:5-7|OHLT:1-4|TOK:false": {
+    "VPS": true,
+    "ATT": false,
+    "HLT": false,
+    "ENR": true,
+    "YLD": false
+  },
+  "VP:0-9|OVP:10-15|HLT:5-7|OHLT:5-7|TOK:true": {
+    "VPS": true,
+    "ATT": false,
+    "HLT": true,
     "ENR": false,
     "YLD": false
   },
   "VP:0-9|OVP:10-15|HLT:5-7|OHLT:5-7|TOK:false": {
-    "VPS": false,
-    "ATT": false,
+    "VPS": true,
+    "ATT": true,
     "HLT": true,
-    "ENR": false,
+    "ENR": true,
     "YLD": false
   },
   "VP:0-9|OVP:10-15|HLT:5-7|OHLT:8+|TOK:true": {
     "VPS": false,
     "ATT": true,
-    "HLT": true,
-    "ENR": true,
-    "YLD": false
+    "HLT": false,
+    "ENR": false,
+    "YLD": true
   },
   "VP:0-9|OVP:10-15|HLT:5-7|OHLT:8+|TOK:false": {
-    "VPS": false,
-    "ATT": false,
+    "VPS": true,
+    "ATT": true,
     "HLT": false,
     "ENR": false,
     "YLD": false
   },
   "VP:0-9|OVP:10-15|HLT:8+|OHLT:1-4|TOK:true": {
-    "VPS": true,
-    "ATT": false,
-    "HLT": true,
-    "ENR": true,
-    "YLD": true
-  },
-  "VP:0-9|OVP:10-15|HLT:8+|OHLT:1-4|TOK:false": {
-    "VPS": true,
-    "ATT": true,
-    "HLT": true,
-    "ENR": true,
-    "YLD": false
-  },
-  "VP:0-9|OVP:10-15|HLT:8+|OHLT:5-7|TOK:true": {
-    "VPS": true,
+    "VPS": false,
     "ATT": false,
     "HLT": false,
     "ENR": false,
     "YLD": false
   },
-  "VP:0-9|OVP:10-15|HLT:8+|OHLT:5-7|TOK:false": {
+  "VP:0-9|OVP:10-15|HLT:8+|OHLT:1-4|TOK:false": {
     "VPS": false,
     "ATT": false,
-    "HLT": true,
+    "HLT": false,
     "ENR": false,
-    "YLD": true
+    "YLD": false
   },
-  "VP:0-9|OVP:10-15|HLT:8+|OHLT:8+|TOK:true": {
+  "VP:0-9|OVP:10-15|HLT:8+|OHLT:5-7|TOK:true": {
     "VPS": true,
     "ATT": true,
-    "HLT": true,
+    "HLT": false,
     "ENR": true,
+    "YLD": true
+  },
+  "VP:0-9|OVP:10-15|HLT:8+|OHLT:5-7|TOK:false": {
+    "VPS": false,
+    "ATT": true,
+    "HLT": false,
+    "ENR": false,
     "YLD": false
+  },
+  "VP:0-9|OVP:10-15|HLT:8+|OHLT:8+|TOK:true": {
+    "VPS": false,
+    "ATT": false,
+    "HLT": false,
+    "ENR": true,
+    "YLD": true
   },
   "VP:0-9|OVP:10-15|HLT:8+|OHLT:8+|TOK:false": {
     "VPS": true,
     "ATT": true,
     "HLT": false,
     "ENR": true,
-    "YLD": false
+    "YLD": true
   },
   "VP:0-9|OVP:0-9|HLT:1-4|OHLT:1-4|TOK:true": {
     "VPS": true,
-    "ATT": true,
-    "HLT": true,
+    "ATT": false,
+    "HLT": false,
     "ENR": true,
-    "YLD": false
+    "YLD": true
   },
   "VP:0-9|OVP:0-9|HLT:1-4|OHLT:1-4|TOK:false": {
     "VPS": true,
-    "ATT": true,
-    "HLT": false,
-    "ENR": true,
+    "ATT": false,
+    "HLT": true,
+    "ENR": false,
     "YLD": true
   },
   "VP:0-9|OVP:0-9|HLT:1-4|OHLT:5-7|TOK:true": {
@@ -1026,110 +1026,110 @@ export const bucketConfig: Record<string, any> = {
     "ATT": false,
     "HLT": true,
     "ENR": true,
-    "YLD": true
+    "YLD": false
   },
   "VP:0-9|OVP:0-9|HLT:1-4|OHLT:5-7|TOK:false": {
-    "VPS": true,
+    "VPS": false,
     "ATT": false,
     "HLT": true,
     "ENR": false,
     "YLD": false
   },
   "VP:0-9|OVP:0-9|HLT:1-4|OHLT:8+|TOK:true": {
-    "VPS": true,
-    "ATT": true,
+    "VPS": false,
+    "ATT": false,
     "HLT": true,
-    "ENR": true,
-    "YLD": true
+    "ENR": false,
+    "YLD": false
   },
   "VP:0-9|OVP:0-9|HLT:1-4|OHLT:8+|TOK:false": {
     "VPS": false,
-    "ATT": true,
-    "HLT": false,
-    "ENR": true,
+    "ATT": false,
+    "HLT": true,
+    "ENR": false,
     "YLD": false
   },
   "VP:0-9|OVP:0-9|HLT:5-7|OHLT:1-4|TOK:true": {
     "VPS": true,
     "ATT": true,
     "HLT": true,
-    "ENR": false,
+    "ENR": true,
     "YLD": false
   },
   "VP:0-9|OVP:0-9|HLT:5-7|OHLT:1-4|TOK:false": {
     "VPS": false,
     "ATT": false,
-    "HLT": true,
+    "HLT": false,
     "ENR": true,
     "YLD": false
   },
   "VP:0-9|OVP:0-9|HLT:5-7|OHLT:5-7|TOK:true": {
-    "VPS": true,
-    "ATT": false,
-    "HLT": false,
-    "ENR": false,
-    "YLD": true
-  },
-  "VP:0-9|OVP:0-9|HLT:5-7|OHLT:5-7|TOK:false": {
-    "VPS": true,
-    "ATT": false,
-    "HLT": false,
-    "ENR": true,
-    "YLD": false
-  },
-  "VP:0-9|OVP:0-9|HLT:5-7|OHLT:8+|TOK:true": {
-    "VPS": true,
-    "ATT": true,
-    "HLT": true,
-    "ENR": true,
-    "YLD": false
-  },
-  "VP:0-9|OVP:0-9|HLT:5-7|OHLT:8+|TOK:false": {
     "VPS": false,
     "ATT": false,
     "HLT": false,
     "ENR": false,
+    "YLD": false
+  },
+  "VP:0-9|OVP:0-9|HLT:5-7|OHLT:5-7|TOK:false": {
+    "VPS": false,
+    "ATT": true,
+    "HLT": true,
+    "ENR": false,
     "YLD": true
+  },
+  "VP:0-9|OVP:0-9|HLT:5-7|OHLT:8+|TOK:true": {
+    "VPS": true,
+    "ATT": false,
+    "HLT": true,
+    "ENR": false,
+    "YLD": false
+  },
+  "VP:0-9|OVP:0-9|HLT:5-7|OHLT:8+|TOK:false": {
+    "VPS": true,
+    "ATT": false,
+    "HLT": true,
+    "ENR": false,
+    "YLD": false
   },
   "VP:0-9|OVP:0-9|HLT:8+|OHLT:1-4|TOK:true": {
     "VPS": false,
     "ATT": false,
     "HLT": true,
     "ENR": true,
-    "YLD": true
-  },
-  "VP:0-9|OVP:0-9|HLT:8+|OHLT:1-4|TOK:false": {
-    "VPS": true,
-    "ATT": true,
-    "HLT": false,
-    "ENR": false,
     "YLD": false
   },
-  "VP:0-9|OVP:0-9|HLT:8+|OHLT:5-7|TOK:true": {
-    "VPS": true,
-    "ATT": true,
+  "VP:0-9|OVP:0-9|HLT:8+|OHLT:1-4|TOK:false": {
+    "VPS": false,
+    "ATT": false,
     "HLT": true,
+    "ENR": false,
+    "YLD": true
+  },
+  "VP:0-9|OVP:0-9|HLT:8+|OHLT:5-7|TOK:true": {
+    "VPS": false,
+    "ATT": true,
+    "HLT": false,
     "ENR": false,
     "YLD": false
   },
   "VP:0-9|OVP:0-9|HLT:8+|OHLT:5-7|TOK:false": {
-    "VPS": false,
-    "ATT": true,
-    "HLT": true,
-    "ENR": true,
-    "YLD": false
-  },
-  "VP:0-9|OVP:0-9|HLT:8+|OHLT:8+|TOK:true": {
-    "VPS": false,
+    "VPS": true,
     "ATT": false,
-    "HLT": false,
+    "HLT": true,
     "ENR": false,
     "YLD": true
   },
-  "VP:0-9|OVP:0-9|HLT:8+|OHLT:8+|TOK:false": {
+  "VP:0-9|OVP:0-9|HLT:8+|OHLT:8+|TOK:true": {
     "VPS": true,
     "ATT": false,
-    "HLT": false,
+    "HLT": true,
+    "ENR": false,
+    "YLD": false
+  },
+  "VP:0-9|OVP:0-9|HLT:8+|OHLT:8+|TOK:false": {
+    "VPS": false,
+    "ATT": false,
+    "HLT": true,
     "ENR": false,
     "YLD": false
   }
