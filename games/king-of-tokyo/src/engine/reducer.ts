@@ -1,4 +1,4 @@
-import { baseReducer } from '@erez/boardgame-core';
+import { baseReducer, BACKEND_TICK_DELAY_MS } from '@erez/boardgame-core';
 import { KotState, KotAction, initialKotState, PendingAction } from './types';
 import { ACTION_HANDLERS } from './actions';
 import { CARD_REGISTRY } from './cards/registry';
@@ -38,7 +38,7 @@ function handleNextAction(state: KotState): KotState {
      const isBot = st.players[promptPlayerId]?.isBot;
 
      if (isBot) {
-        st.actionQueue = [...(st.actionQueue || []), { delayMs: 1500, action: { type: 'PLAY_BOT' } }];
+        st.actionQueue = [...(st.actionQueue || []), { delayMs: BACKEND_TICK_DELAY_MS, action: { type: 'PLAY_BOT' } }];
      }
      return st; // wait for response
   }
@@ -51,7 +51,7 @@ function handleNextAction(state: KotState): KotState {
     
     if (st.logs.length > initialLogCount) {
       // We schedule a TICK to let client animate/see the state
-      st.actionQueue = [...(st.actionQueue || []), { delayMs: 1500, action: { type: 'NOP' } }];
+      st.actionQueue = [...(st.actionQueue || []), { delayMs: BACKEND_TICK_DELAY_MS, action: { type: 'NOP' } }];
       return st;
     } else {
       return handleNextAction(st);

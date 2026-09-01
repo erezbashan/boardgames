@@ -4,6 +4,7 @@ import { signInAnonymously } from 'firebase/auth';
 import { doc, onSnapshot, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import type { BaseGameState } from '@erez/boardgame-core';
+import { BACKEND_TICK_DELAY_MS } from '@erez/boardgame-core';
 
 export function useMultiplayerGame<State extends BaseGameState, Action extends { type: string }>(gameId: string, gameType: string, username: string) {
   const [gameState, setGameState] = useState<State | null>(null);
@@ -58,8 +59,10 @@ export function useMultiplayerGame<State extends BaseGameState, Action extends {
     if (!gameState) return;
     if (gameState.actionQueue && gameState.actionQueue.length > 0) {
       // Backend is supposed to process this actionQueue.
-      // Maximum intended delay is typically 1500ms. If we wait 4000ms and no state update arrives,
+      // Maximum intended delay is typically BACKEND_TICK_DELAY_MS.
+      // If we wait 3 * BACKEND_TICK_DELAY_MS and no state update arrives,
       // it means the Cloud Function crashed or timed out.
+      const watchdogTimeout = Math.max(3000, 3 * BACKEND_TICK_DELAY_MS);
       const timer = setTimeout(() => {
         console.warn("Backend watchdog: actionQueue is stuck. Poking the game document...");
         const docRef = doc(db, 'games', gameId);
@@ -68,9 +71,9 @@ export function useMultiplayerGame<State extends BaseGameState, Action extends {
         }).catch(err => {
           console.error("Failed to poke game", err);
         });
-      }, 4000);
+      }, watchdogTimeout);
 
-      return () => clearTimeout(timer); // If state updates normally before 4s, timer is cleared.
+      return () => clearTimeout(timer); // If state updates normally before timeout, timer is cleared.
     }
   }, [gameState, gameId]);
 
