@@ -10,9 +10,11 @@ export function handleResponseRoll(st: KotState, action: PendingAction, pId: str
        const keptStr = st.dice.filter(d => keptIds.includes(d.id)).map(d => emojiMap[d.value] || d.value).join(' ');
        const rerollCount = st.dice.length - keptIds.length;
        if (st.rollCount === st.maxRolls) {
-          addLog(st, action, `${st.players[pId].name} rolled ${st.dice.length} dice...`);
+          const sLog = (action.payload as any).strategyLog ? ` ${(action.payload as any).strategyLog}` : '';
+          addLog(st, action, `${st.players[pId].name} rolled ${st.dice.length} dice...${sLog}`);
        } else {
-          addLog(st, action, `${st.players[pId].name} kept [ ${keptStr} ] and rerolled ${rerollCount} dice...`);
+          const sLog = (action.payload as any).strategyLog ? ` ${(action.payload as any).strategyLog}` : '';
+          addLog(st, action, `${st.players[pId].name} kept [ ${keptStr} ] and rerolled ${rerollCount} dice...${sLog}`);
        }
     }
 

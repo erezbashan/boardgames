@@ -124,7 +124,9 @@ export function getBucketBotAction(state: KotState, playerId: string): KotAction
             });
         }
 
-        return { type: 'RESPONSE_ROLL', payload: { roll: true, keptDiceIds: keptIds } };
+        const stratNames = Object.keys(strategy).filter(k => strategy[k]).join(', ');
+        const stratLog = stratNames ? `[${stratNames}]` : '[Random]';
+        return { type: 'RESPONSE_ROLL', payload: { roll: true, keptDiceIds: keptIds, strategyLog: stratLog } as any };
     }
 
     if (topAction?.type === 'ASK' && topAction.payload?.prompt?.playerId === playerId) {
