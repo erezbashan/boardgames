@@ -181,7 +181,7 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
                         onChange={(e) => {
                           let val = e.target.value;
                           if (val === '__prompt__') {
-                            const current = p.botStrategy && p.botStrategy !== 'random' && p.botStrategy !== 'smart' ? p.botStrategy : "VP:15 EN:0 HL:6 AT:3 YD:6";
+                            const current = p.botStrategy && p.botStrategy !== 'random' && p.botStrategy !== 'smart' && p.botStrategy !== 'bucket' ? p.botStrategy : "VP:15 EN:0 HL:6 AT:3 YD:6";
                             const input = window.prompt("Enter parameterized strategy (e.g. VP:15 EN:0 HL:6 AT:3 YD:6):", current);
                             if (!input) return; // User cancelled
                             val = input;
@@ -191,7 +191,8 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
                       >
                         <option value="random">Random</option>
                         <option value="smart">Smart</option>
-                        {p.botStrategy && p.botStrategy !== 'random' && p.botStrategy !== 'smart' && (
+                        <option value="bucket">Bucket (Trained)</option>
+                        {p.botStrategy && p.botStrategy !== 'random' && p.botStrategy !== 'smart' && p.botStrategy !== 'bucket' && (
                           <option value={p.botStrategy}>{p.botStrategy}</option>
                         )}
                         <option value="__prompt__">Parameterized...</option>
