@@ -47,7 +47,10 @@ export function getStateBucketKey(state: KotState, playerId: string): string {
     const ohlBucket = getOtherHealthBucket(otherMinHealth);
     const inTokyo = player.location.startsWith('Tokyo');
     
-    return `VP:${vpBucket}|OVP:${ovpBucket}|HLT:${hlBucket}|OHLT:${ohlBucket}|TOK:${inTokyo}`;
+    const playersLeft = Object.values(state.players).filter(p => p.health > 0).length;
+    const baseKey = `VP:${vpBucket}|OVP:${ovpBucket}|HLT:${hlBucket}|OHLT:${ohlBucket}|TOK:${inTokyo}`;
+    
+    return playersLeft === 2 ? baseKey : `P:${playersLeft}|${baseKey}`;
 }
 
 export function getBucketBotAction(state: KotState, playerId: string): KotAction | null {

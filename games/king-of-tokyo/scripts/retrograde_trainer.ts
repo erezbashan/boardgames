@@ -9,6 +9,7 @@ function createBucketState(myVp: number, myHealth: number, otherVp: number, othe
     
     let state = reducer(initialState, { type: 'JOIN_GAME', payload: { playerId: 'P1', name: 'P1', isBot: true, botStrategy: 'bucket' } });
     state = reducer(state, { type: 'JOIN_GAME', payload: { playerId: 'P2', name: 'P2', isBot: true, botStrategy: 'bucket' } });
+    state = reducer(state, { type: 'JOIN_GAME', payload: { playerId: 'P3', name: 'P3', isBot: true, botStrategy: 'bucket' } });
     state = reducer(state, { type: 'START_GAME', payload: {} });
 
     state.players['P1'].vp = myVp;
@@ -65,7 +66,7 @@ async function train() {
                         const hlKey = myHealth[1] === 4 ? '1-4' : myHealth[1] === 7 ? '5-7' : '8+';
                         const ohlKey = otherHealth[1] === 4 ? '1-4' : otherHealth[1] === 7 ? '5-7' : '8+';
                         
-                        const bucketKey = `VP:${vpKey}|OVP:${ovpKey}|HLT:${hlKey}|OHLT:${ohlKey}|TOK:${inTokyo}`;
+                        const bucketKey = `P:3|VP:${vpKey}|OVP:${ovpKey}|HLT:${hlKey}|OHLT:${ohlKey}|TOK:${inTokyo}`;
                         
                         if (bucketConfig[bucketKey]) {
                             continue;
@@ -82,7 +83,7 @@ async function train() {
 
                             let p1Wins = 0;
                             // small sim count just to test script viability
-                            const NUM_SIMS = 100;
+                            const NUM_SIMS = 1000;
                             
                             for (let i = 0; i < NUM_SIMS; i++) {
                                 const rMyVp = Math.floor(Math.random() * (myVp[1] - myVp[0] + 1)) + myVp[0];
