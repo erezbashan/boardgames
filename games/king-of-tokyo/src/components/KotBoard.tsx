@@ -612,7 +612,9 @@ export const KotBoard: React.FC = () => {
             {p.cards.map((cId, i) => {
                const isHighlighted = highlightedCards.some(hc => hc.cardId === cId && hc.playerId === p.id);
                let displayStr = CARD_REGISTRY[cId]?.name || cId;
-               if (cId === 'smoke_cloud' && p.cardState?.smokeCloudCharges !== undefined) {
+               if (CARD_REGISTRY[cId]?.getLabel) {
+                  displayStr = CARD_REGISTRY[cId].getLabel(state, p.id);
+               } else if (cId === 'smoke_cloud' && p.cardState?.smokeCloudCharges !== undefined) {
                   displayStr += ` (${p.cardState.smokeCloudCharges})`;
                }
                return (
