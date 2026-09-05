@@ -40,15 +40,16 @@ for (const vps of [true, false]) {
     }
 }
 
+const NUM_SIMS = 50000;
 async function train() {
     const CONFIG_PATH = path.join(__dirname, '../src/bots/bucketConfig.ts');
     let bucketConfig: any = {};
-    (global as any).__BUCKET_CONFIG_OVERRIDE = bucketConfig;
     if (fs.existsSync(CONFIG_PATH)) {
         const raw = fs.readFileSync(CONFIG_PATH, 'utf8');
-        const match = raw.match(/export const bucketConfig.*?=\s*({.*});/s);
+        const match = raw.match(/export const bucketConfig[\\s\\S]*?=\\s*({[\\s\\S]*});/);
         if (match) bucketConfig = JSON.parse(match[1]);
     }
+    (global as any).__BUCKET_CONFIG_OVERRIDE = bucketConfig;
 
     const vpOrder = [[16, 19], [10, 15], [0, 9]];
     const otherVpOrder = [[16, 19], [10, 15], [0, 9]];
@@ -74,16 +75,14 @@ async function train() {
 
                         console.log(`Solving bucket: ${bucketKey}`);
 
-                        let bestStrategy = null;
-                        let bestWinRate = -1;
-
+                        let results: any[] = [];
                         for (const strat of STRATEGY_COMBINATIONS) {
                             bucketConfig[bucketKey] = strat;
                             fs.writeFileSync(CONFIG_PATH, `export const bucketConfig: Record<string, any> = ${JSON.stringify(bucketConfig, null, 2)};`);
 
                             let p1Wins = 0;
                             // small sim count just to test script viability
-                            const NUM_SIMS = 50000;
+                            
                             
                             for (let i = 0; i < NUM_SIMS; i++) {
                                 const rMyVp = Math.floor(Math.random() * (myVp[1] - myVp[0] + 1)) + myVp[0];
@@ -110,14 +109,24 @@ async function train() {
                             }
 
                             const winRate = p1Wins / NUM_SIMS;
-                            if (winRate > bestWinRate) {
-                                bestWinRate = winRate;
-                                bestStrategy = strat;
-                            }
+                            results.push({ strat, winRate });
                         }
 
-                        console.log(`  -> Best Strategy: ${JSON.stringify(bestStrategy)} (Win Rate: ${(bestWinRate * 100).toFixed(1)}%)`);
-                        bucketConfig[bucketKey] = bestStrategy;
+                        results.sort((a, b) => b.winRate - a.winRate);
+                        const best = results[0];
+                        const runnerUp = results[1];
+                        const marginOfError = 1.96 * Math.sqrt(0.25 / NUM_SIMS);
+                        const isSignificant = (best.winRate - runnerUp.winRate) > marginOfError;
+
+                        console.log(`  -> Best Strategy: ${JSON.stringify(best.strat)} (Win Rate: ${(best.winRate * 100).toFixed(2)}%)`);
+                        console.log(`  -> Runner Up 1: ${JSON.stringify(runnerUp.strat)} (Win Rate: ${(runnerUp.winRate * 100).toFixed(2)}%)`);
+                        console.log(`  -> Runner Up 2: ${JSON.stringify(results[2].strat)} (Win Rate: ${(results[2].winRate * 100).toFixed(2)}%)`);
+                        
+                        if (!isSignificant) {
+                            console.log(`  -> ⚠️ WARNING: Winning strategy is NOT statistically significant. (Gap: ${((best.winRate - runnerUp.winRate) * 100).toFixed(2)}%, MOE: ${(marginOfError * 100).toFixed(2)}%)`);
+                        }
+                        
+                        bucketConfig[bucketKey] = best.strat;
                         fs.writeFileSync(CONFIG_PATH, `export const bucketConfig: Record<string, any> = ${JSON.stringify(bucketConfig, null, 2)};`);
                         bucketsSolved++;
                         
