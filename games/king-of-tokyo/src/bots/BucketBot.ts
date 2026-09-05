@@ -61,7 +61,11 @@ export function getBucketBotAction(state: KotState, playerId: string): KotAction
     const bucketKey = getStateBucketKey(state, playerId);
     
     // Default strategy if not found in config
-    const strategy = bucketConfig[bucketKey] || { VPS: true, ATT: true, HLT: player.health < 8, ENR: true, YLD: player.health <= 4 };
+    let config = bucketConfig;
+    if (typeof (global as any).__BUCKET_CONFIG_OVERRIDE !== 'undefined') {
+        config = (global as any).__BUCKET_CONFIG_OVERRIDE;
+    }
+    const strategy = config[bucketKey] || { VPS: true, ATT: true, HLT: player.health < 8, ENR: true, YLD: player.health <= 4 };
 
     const inTokyo = player.location.startsWith('Tokyo');
 

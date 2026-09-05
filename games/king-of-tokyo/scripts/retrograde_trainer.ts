@@ -44,6 +44,7 @@ for (const vps of [true, false]) {
 async function train() {
     const CONFIG_PATH = path.join(__dirname, '../src/bots/bucketConfig.ts');
     let bucketConfig: any = {};
+    (global as any).__BUCKET_CONFIG_OVERRIDE = bucketConfig;
     if (fs.existsSync(CONFIG_PATH)) {
         const raw = fs.readFileSync(CONFIG_PATH, 'utf8');
         const match = raw.match(/export const bucketConfig.*?=\s*({.*});/s);
