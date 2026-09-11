@@ -163,8 +163,14 @@ export function getBucketBotAction(state: KotState, playerId: string): KotAction
 
     if (topAction?.type === 'ASK' && topAction.payload?.prompt?.playerId === playerId) {
         if (topAction.payload.prompt.text && topAction.payload.prompt.text.includes('yield Tokyo')) {
-            // USER HACK: If in Tokyo, and have 18 points or more, never yield.
-            if (player.vp >= 18) {
+            // USER HACK: If in Tokyo, and have 18 points or more, and your turn is next, never yield.
+            const aliveOrder = state.playerOrder.filter(p => state.players[p].health > 0);
+            const myIdx = aliveOrder.indexOf(playerId);
+            let activeIdx = aliveOrder.indexOf(state.playerOrder[state.currentPlayerIndex]);
+            if (activeIdx === -1) activeIdx = myIdx;
+            const turnsToMe = (myIdx - activeIdx + aliveOrder.length) % aliveOrder.length;
+            
+            if (player.vp >= 18 && turnsToMe === 1) {
                 const options = topAction.payload.prompt.options as any[];
                 if (options.some(o => o.label === 'Stay')) {
                     return options.find(o => o.label === 'Stay').action;
