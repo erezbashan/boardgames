@@ -22,7 +22,7 @@ export function useGameController(dispatch: (action: BaseAction) => void, gameSt
       : `Bot ${Math.floor(Math.random() * 1000)}`;
       
     const botId = 'bot-' + Math.random().toString(36).substring(2, 6);
-    dispatch({ type: 'JOIN_GAME', payload: { playerId: botId, name: botName, isBot: true, botStrategy: 'random' } });
+    dispatch({ type: 'JOIN_GAME', payload: { playerId: botId, name: botName, isBot: true, botStrategy: 'bucket' } });
   };
 
   const handleSendMessage = (msg: string, senderName: string, senderColor?: string) => {

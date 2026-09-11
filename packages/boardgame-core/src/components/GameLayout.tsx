@@ -173,32 +173,7 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
                     {p.isBot && <span title={`Bot Strategy: ${p.botStrategy || 'random'}`}>🤖</span>} 
                     {isMe && <span style={{ color: 'gray', fontSize: '0.8em' }}>(You)</span>}
                   </span>
-                  {status === 'Lobby' && p.isBot && (
-                    <>
-                      <select 
-                        style={{ marginLeft: '10px', background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '4px', padding: '2px 4px', fontSize: '10px' }}
-                        value={p.botStrategy || 'random'}
-                        onChange={(e) => {
-                          let val = e.target.value;
-                          if (val === '__prompt__') {
-                            const current = p.botStrategy && p.botStrategy !== 'random' && p.botStrategy !== 'smart' && p.botStrategy !== 'bucket' ? p.botStrategy : "VP:15 EN:0 HL:6 AT:3 YD:6";
-                            const input = window.prompt("Enter parameterized strategy (e.g. VP:15 EN:0 HL:6 AT:3 YD:6):", current);
-                            if (!input) return; // User cancelled
-                            val = input;
-                          }
-                          dispatch({ type: 'UPDATE_BOT_STRATEGY', payload: { playerId: p.id, botStrategy: val }});
-                        }}
-                      >
-                        <option value="random">Random</option>
-                        <option value="smart">Smart</option>
-                        <option value="bucket">Bucket (Trained)</option>
-                        {p.botStrategy && p.botStrategy !== 'random' && p.botStrategy !== 'smart' && p.botStrategy !== 'bucket' && (
-                          <option value={p.botStrategy}>{p.botStrategy}</option>
-                        )}
-                        <option value="__prompt__">Parameterized...</option>
-                      </select>
-                    </>
-                  )}
+                  
                   {isWinner && <span className="winner-banner">🏆 Winner</span>}
                   {isPlaying && <span className="playing-banner">Playing</span>}
                   {status === 'Lobby' && !isMe && (
