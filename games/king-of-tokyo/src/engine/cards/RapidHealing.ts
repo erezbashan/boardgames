@@ -66,7 +66,8 @@ export const RapidHealing: CardImplementation = {
              // Re-insert original action so they can do it again if needed!
              const nextAction = { ...action.payload.originalAction };
              delete nextAction.skipPreEvent;
-             st.pendingActions.push(nextAction);
+             // UNSHIFT so it happens immediately after the HEALTH action!
+             st.pendingActions.splice(1, 0, nextAction);
           }
        } else {
           if (action.payload.originalAction.type !== 'START_TURN') {
