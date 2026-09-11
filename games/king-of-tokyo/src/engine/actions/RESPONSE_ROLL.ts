@@ -11,7 +11,7 @@ export function handleResponseRoll(st: KotState, action: PendingAction, pId: str
        const rerollCount = st.dice.length - keptIds.length;
        if (st.rollCount === st.maxRolls) {
           // const sLog = (action.payload as any).strategyLog ? ` ${(action.payload as any).strategyLog}` : '';
-          addLog(st, action, `${st.players[pId].name} rolled ${st.dice.length} dice...`);
+          // addLog(st, action, `${st.players[pId].name} rolled ${st.dice.length} dice...`);
        } else {
           // addLog(st, action, `${st.players[pId].name} kept [ ${keptStr} ] and rerolled ${rerollCount} dice...`);
        }
