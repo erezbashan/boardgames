@@ -10,8 +10,10 @@ export const Unstoppable: CardImplementation = {
   verified: true,
   onPreEvent: (st: KotState, action: PendingAction, pId: string) => {
     if (action.type === 'HEALTH' && action.playerId === pId) {
-      // By adding Unstoppable to affectedByCards, HEALTH.ts will consider it isFromCard and allow healing!
-      action.affectedByCards = [...(action.affectedByCards || []), { cardId: 'unstoppable', playerId: pId }];
+      // Only trigger if they are actually in Tokyo, otherwise they can heal normally and we don't want to spam the log
+      if (st.players[pId].location.startsWith('Tokyo')) {
+        action.affectedByCards = [...(action.affectedByCards || []), { cardId: 'unstoppable', playerId: pId }];
+      }
     }
     return st;
   }
