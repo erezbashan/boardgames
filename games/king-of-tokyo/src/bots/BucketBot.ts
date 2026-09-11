@@ -1,7 +1,7 @@
 import type { KotAction, KotState } from '../engine/types';
 import { getBotAction as getRandomBotAction } from './randomBot';
 import { CARD_REGISTRY } from '../engine/cards/registry';
-import { bucketConfig } from './bucketConfig';
+import { diceConfig, yieldConfig } from './bucketConfig';
 
 function getMyVPsBucket(vps: number): string {
     if (vps <= 9) return '0-9';
@@ -53,23 +53,52 @@ export function getStateBucketKey(state: KotState, playerId: string): string {
     return playersLeft === 2 ? baseKey : `P:${playersLeft}|${baseKey}`;
 }
 
+export function getYieldBucketKey(state: KotState, playerId: string): string {
+    const player = state.players[playerId];
+    
+    let otherMaxVPs = 0;
+    let otherMinHealth = 10;
+    
+    for (const pId of Object.keys(state.players)) {
+        if (pId !== playerId && state.players[pId].health > 0) {
+            const p = state.players[pId];
+            if (p.vp > otherMaxVPs) otherMaxVPs = p.vp;
+            if (p.health < otherMinHealth) otherMinHealth = p.health;
+        }
+    }
+    
+    const vpBucket = getMyVPsBucket(player.vp);
+    const ovpBucket = getOtherVPsBucket(otherMaxVPs);
+    const hlBucket = getMyHealthBucket(player.health);
+    const ohlBucket = getOtherHealthBucket(otherMinHealth);
+    
+    const aliveOrder = state.playerOrder.filter(p => state.players[p].health > 0);
+    const myIdx = aliveOrder.indexOf(playerId);
+    let activeIdx = aliveOrder.indexOf(state.playerOrder[state.currentPlayerIndex]);
+    if (activeIdx === -1) activeIdx = myIdx; // fallback
+    
+    const turnsToMe = (myIdx - activeIdx + aliveOrder.length) % aliveOrder.length;
+    const playersLeft = aliveOrder.length;
+    
+    const baseKey = `VP:${vpBucket}|OVP:${ovpBucket}|HLT:${hlBucket}|OHLT:${ohlBucket}|TurnsToMe:${turnsToMe}`;
+    return playersLeft === 2 ? baseKey : `P:${playersLeft}|${baseKey}`;
+}
+
 export function getBucketBotAction(state: KotState, playerId: string): KotAction | null {
     const player = state.players[playerId];
     if (!player) return null;
 
     const topAction = state.pendingActions[0];
-    const bucketKey = getStateBucketKey(state, playerId);
-    
-    // Default strategy if not found in config
-    let config = bucketConfig;
-    if (typeof (global as any).__BUCKET_CONFIG_OVERRIDE !== 'undefined') {
-        config = (global as any).__BUCKET_CONFIG_OVERRIDE;
-    }
-    const strategy = config[bucketKey] || { VPS: true, ATT: true, HLT: player.health < 8, ENR: true, YLD: player.health <= 4 };
-
     const inTokyo = player.location.startsWith('Tokyo');
 
     if (topAction?.type === 'ASK_ROLL' && topAction.payload?.prompt?.playerId === playerId) {
+        const bucketKey = getStateBucketKey(state, playerId);
+        let config = diceConfig;
+        if (typeof (global as any).__DICE_CONFIG_OVERRIDE !== 'undefined') {
+            config = (global as any).__DICE_CONFIG_OVERRIDE;
+        }
+        const strategy = config[bucketKey] || { VPS: true, ATT: true, HLT: player.health < 8, ENR: true };
+
         const keptIds: string[] = [];
         let unlockedCount = state.dice.length;
         const rerollsLeft = (state.maxRolls || 3) - (state.rollCount || 0);
@@ -101,7 +130,6 @@ export function getBucketBotAction(state: KotState, playerId: string): KotAction
             }
         });
 
-        // Keep points if playing points
         if (strategy.VPS) {
             const counts: Record<string, number> = { '1': 0, '2': 0, '3': 0 };
             state.dice.forEach(d => {
@@ -135,10 +163,25 @@ export function getBucketBotAction(state: KotState, playerId: string): KotAction
 
     if (topAction?.type === 'ASK' && topAction.payload?.prompt?.playerId === playerId) {
         if (topAction.payload.prompt.text && topAction.payload.prompt.text.includes('yield Tokyo')) {
+            // USER HACK: If in Tokyo, and have 18 points or more, never yield.
+            if (player.vp >= 18) {
+                const options = topAction.payload.prompt.options as any[];
+                if (options.some(o => o.label === 'Stay')) {
+                    return options.find(o => o.label === 'Stay').action;
+                }
+            }
+
+            const yBucketKey = getYieldBucketKey(state, playerId);
+            let yConfig = yieldConfig;
+            if (typeof (global as any).__YIELD_CONFIG_OVERRIDE !== 'undefined') {
+                yConfig = (global as any).__YIELD_CONFIG_OVERRIDE;
+            }
+            const yStrategy = yConfig[yBucketKey] || { YLD: player.health <= 4 };
+
             const options = topAction.payload.prompt.options as any[];
-            if (!strategy.YLD && options.some(o => o.label === 'Stay')) {
+            if (!yStrategy.YLD && options.some(o => o.label === 'Stay')) {
                 return options.find(o => o.label === 'Stay').action;
-            } else if (strategy.YLD && options.some(o => o.label === 'Yield')) {
+            } else if (yStrategy.YLD && options.some(o => o.label === 'Yield')) {
                 return options.find(o => o.label === 'Yield').action;
             }
         }
@@ -161,7 +204,6 @@ export function getBucketBotAction(state: KotState, playerId: string): KotAction
             return energy >= cost;
         });
 
-        // Sort descending by cost
         affordableCards.sort((a, b) => {
             const costA = CARD_REGISTRY[a.cardId]?.cost || 0;
             const costB = CARD_REGISTRY[b.cardId]?.cost || 0;
