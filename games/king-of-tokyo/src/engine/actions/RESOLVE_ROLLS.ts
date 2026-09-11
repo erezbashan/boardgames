@@ -19,20 +19,7 @@ export function handleResolveRolls(st: KotState, action: PendingAction, pId: str
   if (outcomeMap['3'] >= 3) diceActions.push({ type: 'VP', payload: { amount: 3 + (outcomeMap['3'] - 3) }, playerId: pId });
   if (outcomeMap['Energy']) diceActions.push({ type: 'ENERGY', payload: { amount: outcomeMap['Energy'] }, playerId: pId });
   if (outcomeMap['Heart']) diceActions.push({ type: 'HEALTH', payload: { amount: outcomeMap['Heart'] }, playerId: pId });
-  if (outcomeMap['Smash']) {
-     diceActions.push({ type: 'ATTACK', payload: { damage: outcomeMap['Smash'] }, playerId: pId });
-  } else {
-     const tokyoCityOccupied = st.playerOrder.some(id => st.players[id].location === 'TokyoCity' && st.players[id].health > 0);
-     const tokyoBayOccupied = st.playerOrder.some(id => st.players[id].location === 'TokyoBay' && st.players[id].health > 0);
-     const totalTokyoSlots = isTokyoBayActive(st) ? 2 : 1;
-     let occupiedSlots = 0;
-     if (tokyoCityOccupied) occupiedSlots++;
-     if (tokyoBayOccupied) occupiedSlots++;
-
-     if (occupiedSlots < totalTokyoSlots && st.players[pId].location === 'Outside') {
-        diceActions.push({ type: 'ENTER_TOKYO', playerId: pId });
-     }
-  }
+  if (outcomeMap['Smash']) diceActions.push({ type: 'ATTACK', payload: { damage: outcomeMap['Smash'] }, playerId: pId });
 
   st.pendingActions = [...diceActions, ...st.pendingActions];
 }
