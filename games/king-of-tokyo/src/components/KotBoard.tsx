@@ -114,6 +114,7 @@ const renderSettings = (settings: any, dispatch: any, status: string, setSelecte
         <select
           value={currentSettings.gameSpeed || 'Normal'}
           onChange={e => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...currentSettings, gameSpeed: e.target.value } })}
+          disabled={status !== 'Lobby'}
           className="modern-input"
           style={{ width: '120px', display: 'inline-block' }}
         >
@@ -736,20 +737,7 @@ export const KotBoard: React.FC = () => {
   return (
     <>
 
-      {status === 'Playing' && (
-        <div style={{ position: 'fixed', top: '15px', left: '200px', zIndex: 100, display: 'flex', gap: '5px', alignItems: 'center' }}>
-             <span style={{ fontSize: '14px', color: 'white', textShadow: '1px 1px 2px black' }}>Bot Speed:</span>
-             <select
-               value={gameState.settings.gameSpeed || 'Normal'}
-               onChange={e => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...gameState.settings, gameSpeed: e.target.value } })}
-               style={{ background: '#1e293b', color: 'white', border: '1px solid #60a5fa', borderRadius: '4px', padding: '2px 5px' }}
-             >
-                <option value="Slow">Slow</option>
-                <option value="Normal">Normal</option>
-                <option value="Fast">Fast</option>
-             </select>
-        </div>
-      )}
+
 
       <GameLayout
         gameName="King of Tokyo"

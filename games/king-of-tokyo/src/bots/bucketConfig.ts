@@ -4132,6 +4132,12 @@ export const diceConfig: Record<string, any> = {
     "ATT": true,
     "HLT": true,
     "ENR": true
+  },
+  "P:6|VP:0-9|OVP:16-19|HLT:1-4|OHLT:8+|TOK:false": {
+    "VPS": true,
+    "ATT": false,
+    "HLT": true,
+    "ENR": false
   }
 };
 export const yieldConfig: Record<string, any> = {
