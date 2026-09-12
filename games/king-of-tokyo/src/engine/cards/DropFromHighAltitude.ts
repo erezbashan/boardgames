@@ -7,7 +7,7 @@ export const DropFromHighAltitude: CardImplementation = {
   name: 'Drop from High Altitude',
   cost: 5,
   type: 'Discard',
-  description: '+ 2⭐ and take control of Tokyo. If someone is already there, they still take no damage.',
+  description: 'Gain 2⭐ and instantly take control of Tokyo. All monsters currently in Tokyo MUST yield to you.',
   verified: true,
   onBuy: (st: KotState, action: PendingAction, pId: string) => {
     st.pendingActions.unshift({ type: 'VP', payload: { amount: 2 }, playerId: pId });
