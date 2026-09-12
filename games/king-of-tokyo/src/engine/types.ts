@@ -52,6 +52,8 @@ export interface KotState extends BaseGameState<KotPlayer> {
     cardsPerType: number;
     startingEnergy: number;
     activeCards: string[];
+    gameSpeed?: 'Fast' | 'Normal' | 'Slow';
+    secondEditionTokyoRule?: boolean;
   };
   deck: string[];
   market: string[];
@@ -70,7 +72,9 @@ export const initialKotState: KotState = {
     maxVp: 20,
     cardsPerType: 1,
     startingEnergy: 0,
-    activeCards: Object.keys(CARD_REGISTRY)
+    activeCards: Object.keys(CARD_REGISTRY),
+    gameSpeed: 'Normal',
+    secondEditionTokyoRule: false
   },
   deck: [],
   market: [],

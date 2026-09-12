@@ -1,11 +1,20 @@
-import { baseReducer, BACKEND_TICK_DELAY_MS } from '@erez/boardgame-core';
+import { baseReducer, getTickDelay(st) } from '@erez/boardgame-core';
 import { KotState, KotAction, initialKotState, PendingAction } from './types';
 import { ACTION_HANDLERS } from './actions';
 import { CARD_REGISTRY } from './cards/registry';
 import { MARKER_REGISTRY } from './markers/registry';
 import { getBotAction } from '../bots/registry';
 
-function doAction(state: KotState, action: PendingAction): KotState {
+
+function getTickDelay(st: KotState): number {
+   const aliveHumans = st.playerOrder.filter(id => st.players[id] && st.players[id].health > 0 && !st.players[id].isBot).length;
+   if (aliveHumans === 0) return 1;
+   
+   if (st.settings?.gameSpeed === 'Fast') return 750;
+   if (st.settings?.gameSpeed === 'Slow') return 3000;
+   return 1500;
+}
+\nfunction doAction(state: KotState, action: PendingAction): KotState {
   let st = { ...state };
   if (!st.players) return st;
 
@@ -38,7 +47,7 @@ function handleNextAction(state: KotState): KotState {
      const isBot = st.players[promptPlayerId]?.isBot;
 
      if (isBot) {
-        st.actionQueue = [...(st.actionQueue || []), { delayMs: BACKEND_TICK_DELAY_MS, action: { type: 'PLAY_BOT' } }];
+        st.actionQueue = [...(st.actionQueue || []), { delayMs: getTickDelay(st), action: { type: 'PLAY_BOT' } }];
      }
      return st; // wait for response
   }
@@ -51,7 +60,7 @@ function handleNextAction(state: KotState): KotState {
     
     if (st.logs.length > initialLogCount) {
       // We schedule a TICK to let client animate/see the state
-      st.actionQueue = [...(st.actionQueue || []), { delayMs: BACKEND_TICK_DELAY_MS, action: { type: 'NOP' } }];
+      st.actionQueue = [...(st.actionQueue || []), { delayMs: getTickDelay(st), action: { type: 'NOP' } }];
       return st;
     } else {
       return handleNextAction(st);

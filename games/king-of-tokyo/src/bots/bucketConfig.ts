@@ -4120,6 +4120,18 @@ export const diceConfig: Record<string, any> = {
     "ATT": true,
     "HLT": true,
     "ENR": false
+  },
+  "P:6|VP:0-9|OVP:16-19|HLT:1-4|OHLT:5-7|TOK:false": {
+    "VPS": true,
+    "ATT": false,
+    "HLT": true,
+    "ENR": true
+  },
+  "P:6|VP:0-9|OVP:16-19|HLT:1-4|OHLT:8+|TOK:true": {
+    "VPS": false,
+    "ATT": true,
+    "HLT": true,
+    "ENR": true
   }
 };
 export const yieldConfig: Record<string, any> = {
@@ -6852,5 +6864,14 @@ export const yieldConfig: Record<string, any> = {
   },
   "P:6|VP:0-9|OVP:16-19|HLT:1-4|OHLT:5-7|TurnsToMe:5": {
     "YLD": false
+  },
+  "P:6|VP:0-9|OVP:16-19|HLT:1-4|OHLT:8+|TurnsToMe:1": {
+    "YLD": false
+  },
+  "P:6|VP:0-9|OVP:16-19|HLT:1-4|OHLT:8+|TurnsToMe:2": {
+    "YLD": true
+  },
+  "P:6|VP:0-9|OVP:16-19|HLT:1-4|OHLT:8+|TurnsToMe:3": {
+    "YLD": true
   }
 };

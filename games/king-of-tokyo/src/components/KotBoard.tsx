@@ -106,6 +106,33 @@ const renderSettings = (settings: any, dispatch: any, status: string, setSelecte
   return (
     <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
       
+      
+      <div style={{ display: 'flex', justifyContent: 'space-between', width: '300px', alignItems: 'center' }}>
+        <label style={{ fontSize: '18px' }}>Game Speed:</label>
+        <select
+          value={currentSettings.gameSpeed || 'Normal'}
+          onChange={e => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...currentSettings, gameSpeed: e.target.value } })}
+          className="modern-input"
+          style={{ width: '120px', display: 'inline-block' }}
+        >
+           <option value="Slow">Slow</option>
+           <option value="Normal">Normal</option>
+           <option value="Fast">Fast</option>
+        </select>
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', width: '300px', alignItems: 'center', marginBottom: '15px' }}>
+        <label style={{ fontSize: '18px' }} title="If checked, you must enter Tokyo when it's empty even if you didn't attack (2nd Edition rules).">
+           2nd Ed. Tokyo Rule:
+        </label>
+        <input 
+          type="checkbox"
+          checked={!!currentSettings.secondEditionTokyoRule}
+          onChange={e => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...currentSettings, secondEditionTokyoRule: e.target.checked } })}
+          style={{ width: '20px', height: '20px' }}
+        />
+      </div>
+
       <div style={{ display: 'flex', justifyContent: 'space-between', width: '300px', alignItems: 'center' }}>
         <label style={{ fontSize: '18px' }}>Max/Initial Health:</label>
         <input 
