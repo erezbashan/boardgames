@@ -8,7 +8,7 @@ import { getAnalytics } from "firebase/analytics";
 const firebaseConfig = {
   apiKey: "AIzaSyCPLSCY3R0gK7xyYlLrImm0FSVWl_a3qbI",
   authDomain: "board-games-20e3d.firebaseapp.com",
-  projectId: "board-games-20e3d",
+  projectId: import.meta.env.DEV ? "demo-project" : "board-games-20e3d",
   storageBucket: "board-games-20e3d.firebasestorage.app",
   messagingSenderId: "613589470783",
   appId: "1:613589470783:web:c26e86f9fd0b6d56f2b28a",
