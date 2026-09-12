@@ -100,7 +100,9 @@ const renderSettings = (settings: any, dispatch: any, status: string, setSelecte
     maxVp: settings?.maxVp || 20,
     cardsPerType: settings?.cardsPerType || 1,
     startingEnergy: settings?.startingEnergy || 0,
-    activeCards: settings?.activeCards || []
+    activeCards: settings?.activeCards || [],
+    gameSpeed: settings?.gameSpeed || 'Normal',
+    secondEditionTokyoRule: settings?.secondEditionTokyoRule || false
   };
 
   return (
