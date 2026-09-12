@@ -1,4 +1,4 @@
-import { baseReducer, getTickDelay(st) } from '@erez/boardgame-core';
+import { baseReducer } from '@erez/boardgame-core';
 import { KotState, KotAction, initialKotState, PendingAction } from './types';
 import { ACTION_HANDLERS } from './actions';
 import { CARD_REGISTRY } from './cards/registry';
