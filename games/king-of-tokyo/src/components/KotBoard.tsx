@@ -114,7 +114,6 @@ const renderSettings = (settings: any, dispatch: any, status: string, setSelecte
         <select
           value={currentSettings.gameSpeed || 'Normal'}
           onChange={e => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...currentSettings, gameSpeed: e.target.value } })}
-          disabled={status !== 'Lobby'}
           className="modern-input"
           style={{ width: '120px', display: 'inline-block' }}
         >
@@ -133,7 +132,7 @@ const renderSettings = (settings: any, dispatch: any, status: string, setSelecte
           checked={!!currentSettings.secondEditionTokyoRule}
           onChange={e => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...currentSettings, secondEditionTokyoRule: e.target.checked } })}
           disabled={status !== 'Lobby'}
-          style={{ width: '20px', height: '20px' }}
+          style={{ width: '20px', height: '20px', opacity: status !== 'Lobby' ? 0.5 : 1, cursor: status !== 'Lobby' ? 'not-allowed' : 'pointer' }}
         />
       </div>
 
@@ -145,7 +144,7 @@ const renderSettings = (settings: any, dispatch: any, status: string, setSelecte
           onChange={e => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...currentSettings, maxHealth: parseInt(e.target.value) || 10 } })}
           disabled={status !== 'Lobby'}
           className="modern-input"
-          style={{ width: '80px', display: 'inline-block' }}
+          style={{ width: '80px', display: 'inline-block', opacity: status !== 'Lobby' ? 0.5 : 1, cursor: status !== 'Lobby' ? 'not-allowed' : 'auto' }}
         />
       </div>
 
@@ -157,7 +156,7 @@ const renderSettings = (settings: any, dispatch: any, status: string, setSelecte
           onChange={e => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...currentSettings, maxVp: parseInt(e.target.value) || 20 } })}
           disabled={status !== 'Lobby'}
           className="modern-input"
-          style={{ width: '80px', display: 'inline-block' }}
+          style={{ width: '80px', display: 'inline-block', opacity: status !== 'Lobby' ? 0.5 : 1, cursor: status !== 'Lobby' ? 'not-allowed' : 'auto' }}
         />
       </div>
 
@@ -169,7 +168,7 @@ const renderSettings = (settings: any, dispatch: any, status: string, setSelecte
           onChange={e => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...currentSettings, startingEnergy: parseInt(e.target.value) || 0 } })}
           disabled={status !== 'Lobby'}
           className="modern-input"
-          style={{ width: '80px', display: 'inline-block' }}
+          style={{ width: '80px', display: 'inline-block', opacity: status !== 'Lobby' ? 0.5 : 1, cursor: status !== 'Lobby' ? 'not-allowed' : 'auto' }}
         />
       </div>
 
@@ -181,7 +180,7 @@ const renderSettings = (settings: any, dispatch: any, status: string, setSelecte
           onChange={e => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...currentSettings, cardsPerType: parseInt(e.target.value) || 1 } })}
           disabled={status !== 'Lobby'}
           className="modern-input"
-          style={{ width: '80px', display: 'inline-block' }}
+          style={{ width: '80px', display: 'inline-block', opacity: status !== 'Lobby' ? 0.5 : 1, cursor: status !== 'Lobby' ? 'not-allowed' : 'auto' }}
         />
       </div>
 
@@ -223,13 +222,13 @@ const renderSettings = (settings: any, dispatch: any, status: string, setSelecte
                       type="checkbox" 
                       checked={!!isActive} 
                       disabled={status !== 'Lobby'}
+                      style={{ opacity: status !== 'Lobby' ? 0.5 : 1, cursor: status !== 'Lobby' ? 'not-allowed' : 'pointer', marginRight: '8px' }}
                       onChange={(e) => {
                         const newActive = e.target.checked 
                           ? [...currentSettings.activeCards, id]
                           : currentSettings.activeCards.filter((c: string) => c !== id);
                         dispatch({ type: 'UPDATE_SETTINGS', payload: { ...currentSettings, activeCards: newActive } });
                       }}
-                      style={{ marginRight: '8px' }}
                     />
                   )}
                   <span 
