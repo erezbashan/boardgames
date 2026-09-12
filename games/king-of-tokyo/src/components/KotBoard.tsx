@@ -124,13 +124,14 @@ const renderSettings = (settings: any, dispatch: any, status: string, setSelecte
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', width: '300px', alignItems: 'center', marginBottom: '15px' }}>
-        <label style={{ fontSize: '18px' }} title="If checked, you must enter Tokyo when it's empty even if you didn't attack (2nd Edition rules).">
-           2nd Ed. Tokyo Rule:
+        <label style={{ fontSize: '18px' }}>
+           Enter Tokyo if empty even without attack:
         </label>
         <input 
           type="checkbox"
           checked={!!currentSettings.secondEditionTokyoRule}
           onChange={e => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...currentSettings, secondEditionTokyoRule: e.target.checked } })}
+          disabled={status !== 'Lobby'}
           style={{ width: '20px', height: '20px' }}
         />
       </div>
@@ -734,6 +735,22 @@ export const KotBoard: React.FC = () => {
 
   return (
     <>
+
+      {status === 'Playing' && (
+        <div style={{ position: 'fixed', top: '15px', left: '200px', zIndex: 100, display: 'flex', gap: '5px', alignItems: 'center' }}>
+             <span style={{ fontSize: '14px', color: 'white', textShadow: '1px 1px 2px black' }}>Bot Speed:</span>
+             <select
+               value={gameState.settings.gameSpeed || 'Normal'}
+               onChange={e => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...gameState.settings, gameSpeed: e.target.value } })}
+               style={{ background: '#1e293b', color: 'white', border: '1px solid #60a5fa', borderRadius: '4px', padding: '2px 5px' }}
+             >
+                <option value="Slow">Slow</option>
+                <option value="Normal">Normal</option>
+                <option value="Fast">Fast</option>
+             </select>
+        </div>
+      )}
+
       <GameLayout
         gameName="King of Tokyo"
         helpText={`Roll dice up to 3 times. Reach ${settings?.maxVp || 20} VP or be the last monster standing!`}
