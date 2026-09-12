@@ -6873,5 +6873,8 @@ export const yieldConfig: Record<string, any> = {
   },
   "P:6|VP:0-9|OVP:16-19|HLT:1-4|OHLT:8+|TurnsToMe:3": {
     "YLD": true
+  },
+  "P:6|VP:0-9|OVP:16-19|HLT:1-4|OHLT:8+|TurnsToMe:4": {
+    "YLD": false
   }
 };

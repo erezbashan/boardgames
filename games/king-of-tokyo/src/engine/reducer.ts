@@ -14,7 +14,8 @@ function getTickDelay(st: KotState): number {
    if (st.settings?.gameSpeed === 'Slow') return 3000;
    return 1500;
 }
-\nfunction doAction(state: KotState, action: PendingAction): KotState {
+
+function doAction(state: KotState, action: PendingAction): KotState {
   let st = { ...state };
   if (!st.players) return st;
 
