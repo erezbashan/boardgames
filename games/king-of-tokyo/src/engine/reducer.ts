@@ -153,11 +153,13 @@ export function kingOfTokyoReducer(state: KotState = initialKotState, action: Ko
   else if (action.type === 'UPDATE_SETTINGS') {
     st.settings = action.payload;
     // Also apply startingEnergy to all current players in the lobby
-    st.playerOrder.forEach(pId => {
-      if (st.players[pId]) {
-        st.players[pId].energy = st.settings.startingEnergy || 0;
-      }
-    });
+    if (st.status === 'Lobby') {
+      st.playerOrder.forEach(pId => {
+        if (st.players[pId]) {
+          st.players[pId].energy = st.settings.startingEnergy || 0;
+        }
+      });
+    }
     return st; // Return immediately to avoid pushing to pendingActions
   }
   else if (action.type === 'PLAY_BOT') {
