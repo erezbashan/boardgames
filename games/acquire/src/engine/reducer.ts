@@ -8,7 +8,7 @@ import {
   buyStock, 
   endTurn, 
   chooseMergeSurvivor, 
-  resolveMergeStocks 
+  resolveMergeStocks, getPlayerFinancials, canEndGame 
 } from './engine';
 import { getBotAction } from './bots/registry';
 
@@ -105,6 +105,21 @@ export function acquireReducer(state: AcquireState, action: AcquireAction & { __
       }
       break;
     }
+  }
+
+  
+  // Check global end game conditions immediately after action completes
+  if (newState.status === 'Playing' && canEndGame(newState)) {
+    const leader = Object.values(newState.players).reduce((prev, current) => {
+      return (getPlayerFinancials(newState, prev.id).netWorth > getPlayerFinancials(newState, current.id).netWorth) ? prev : current;
+    });
+    newState = {
+      ...newState,
+      phase: 'GameOver',
+      status: 'Finished',
+      winnerId: leader.id,
+      logs: [...newState.logs, `Game Over! The game ends immediately as conditions are met. ${leader.name} wins with a net worth of ${getPlayerFinancials(newState, leader.id).netWorth.toLocaleString()}!`]
+    };
   }
 
   // Skip delay in simulations

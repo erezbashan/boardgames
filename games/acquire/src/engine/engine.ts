@@ -717,7 +717,7 @@ export function isTileUnplayable(state: AcquireState, tile: Tile): boolean {
   return safeCorps.length >= 2;
 }
 
-function canEndGame(state: AcquireState): boolean {
+export function canEndGame(state: AcquireState): boolean {
   const activeCorps = Object.values(state.corporations).filter(c => c.isActive);
   if (activeCorps.length === 0) return false;
   
@@ -736,11 +736,11 @@ export function endTurn(state: AcquireState): AcquireState {
       return (getPlayerFinancials(newState, prev.id).netWorth > getPlayerFinancials(newState, current.id).netWorth) ? prev : current;
     });
     
-    if (leader.id === cp.id) {
-      newState.phase = 'GameOver';
-      newState.logs.push(`Game Over! ${cp.name} ends the game and wins with a net worth of $${getPlayerFinancials(newState, cp.id).netWorth.toLocaleString()}!`);
-      return newState;
-    }
+    newState.phase = 'GameOver';
+    newState.status = 'Finished';
+    newState.winnerId = leader.id;
+    newState.logs.push(`Game Over! The game ends because conditions are met. ${leader.name} wins with a net worth of ${getPlayerFinancials(newState, leader.id).netWorth.toLocaleString()}!`);
+    return newState;
   }
 
   // Draw tile
@@ -753,10 +753,8 @@ export function endTurn(state: AcquireState): AcquireState {
       ...cp,
       tiles: [...cp.tiles, drawnTile]
     };
-    newState.logs.push(`---`);
-  } else {
-    newState.logs.push(`---`);
-  }
+      } else {
+      }
   
   let nextPlayerIndex = (newState.currentPlayerIndex + 1) % newState.playerOrder.length;
 

@@ -42,29 +42,7 @@ export function AcquireBoard() {
   }, [state?.phase, state?.pendingMerge?.currentDefunctIndex]);
 
   
-  const renderSettings = () => {
-    const gameSpeed = state.settings?.gameSpeed || 'Normal';
-    return (
-      <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', width: '300px', alignItems: 'center' }}>
-          <label style={{ fontSize: '18px' }}>Speed of Play:</label>
-          <select
-            value={gameSpeed}
-            onChange={e => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...state.settings, gameSpeed: e.target.value } } as any)}
-            disabled={state.status !== 'Lobby'}
-            className="modern-input"
-            style={{ width: '120px', display: 'inline-block', opacity: state.status !== 'Lobby' ? 0.5 : 1, cursor: state.status !== 'Lobby' ? 'not-allowed' : 'pointer' }}
-          >
-            <option value="Slow">Slow</option>
-            <option value="Normal">Normal</option>
-            <option value="Fast">Fast</option>
-            <option value="Ultra">Ultra</option>
-          </select>
-        </div>
-      </div>
-    );
-  };
-
+  
   const renderLogMessage = (msg: string, defaultRenderer: (m: string) => React.ReactNode) => {
     if (msg.includes("'s Turn ---")) {
       return (
@@ -175,8 +153,8 @@ export function AcquireBoard() {
                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                  padding: '2px', 
                  borderRadius: '4px', 
-                 background: isGold ? 'linear-gradient(135deg, rgba(255,215,0,0.2), rgba(0,0,0,0.4))' : isSilver ? 'linear-gradient(135deg, rgba(192,192,192,0.2), rgba(0,0,0,0.4))' : 'rgba(0,0,0,0.3)',
-                 border: isGold ? '1.5px solid #FFD700' : isSilver ? '1.5px solid #C0C0C0' : `1px solid var(--corp-${cName.toLowerCase()})`,
+                 background: isGold ? 'linear-gradient(135deg, rgba(255,215,0,0.4), rgba(0,0,0,0.6))' : isSilver ? 'linear-gradient(135deg, rgba(192,192,192,0.4), rgba(0,0,0,0.6))' : 'rgba(0,0,0,0.3)',
+                 border: `1.5px solid var(--corp-${cName.toLowerCase()})`,
                  boxShadow: isGold ? '0 0 8px rgba(255,215,0,0.4)' : isSilver ? '0 0 8px rgba(192,192,192,0.4)' : 'none',
                  color: `var(--corp-${cName.toLowerCase()})`,
                  fontSize: '11px',
@@ -208,7 +186,6 @@ export function AcquireBoard() {
       renderGameSpecificPlayerDetails={renderPlayerDetails}
       renderGameSpecificStats={() => <AcquireStats gameState={state} />}
       renderLogMessage={renderLogMessage}
-      settings={renderSettings()}
     >
       <div className="game-container" style={{ padding: '0px', display: 'flex', flexDirection: 'row', gap: '20px', height: '100%' }}>
         <div className="board glass" style={{ flex: '2', minWidth: '0', position: 'relative' }}>
@@ -259,7 +236,7 @@ export function AcquireBoard() {
                 return (
                   <div 
                     key={cIdx} 
-                    className={`board-cell ${renderedCell ? renderedCell.toLowerCase() : ''} ${isInHand ? 'in-hand' : ''} ${isPlayable ? 'playable' : ''} ${isPulsing ? 'my-turn-pulse' : ''}`}
+                    className={`board-cell ${renderedCell ? renderedCell.toLowerCase() : ''} ${isInHand ? 'in-hand' : ''} ${isPlayable ? 'playable' : ''} ${isPulsing ? 'my-turn-pulse' : ''} ${state.turnContext?.lastPlacedTile === cellId ? 'just-placed' : ''}`}
                     style={{ 
                        opacity: isDefunct ? 0.6 : 1, 
                        filter: isDefunct ? 'grayscale(0.3)' : 'none',
@@ -290,7 +267,7 @@ export function AcquireBoard() {
           })}
           {/* Modals directly from original game */}
         {state.phase === 'FoundCorporation' && state.pendingFounding?.playerId === playerId && showMergerModal && (
-          <Modal isOpen={true} title="Found a Corporation" hideClose={true}>
+          <Modal isOpen={true} title="Found a Corporation" hideClose={true} inline={true}>
             <div style={{ textAlign: 'center' }}>
               <p style={{ marginBottom: '1.5rem' }}>Choose a corporation to found:</p>
               <div className="corp-options">
@@ -327,7 +304,7 @@ export function AcquireBoard() {
         )}
 
         {state.phase === 'ChooseMergeSurvivor' && state.pendingSurvivorChoice?.playerId === playerId && showMergerModal && (
-          <Modal isOpen={true} title="Choose Surviving Corporation" hideClose={true}>
+          <Modal isOpen={true} title="Choose Surviving Corporation" hideClose={true} inline={true}>
             <div style={{ textAlign: 'center' }}>
               <p>A merger occurred! Choose which corporation will survive:</p>
               <div className="corp-buttons" style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
@@ -349,7 +326,7 @@ export function AcquireBoard() {
         )}
 
         {isMyTurn && state.phase === 'MergeResolution' && pm && dCorp && aCorp && showMergerModal && (
-          <Modal isOpen={true} title="Resolve Merge Stocks" hideClose={true}>
+          <Modal isOpen={true} title="Resolve Merge Stocks" hideClose={true} inline={true}>
             <div style={{ textAlign: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px', margin: '20px 0' }}>
                 <div className={`board-cell ${dCorp.toLowerCase()}`} style={{ width: '100px', height: '70px', flex: 'none', borderRadius: '8px', opacity: 0.8 }}>

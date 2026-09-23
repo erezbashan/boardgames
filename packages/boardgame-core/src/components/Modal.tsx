@@ -8,9 +8,10 @@ export interface ModalProps {
   hideClose?: boolean;
   children: React.ReactNode;
   width?: string;
+  inline?: boolean;
 }
 
-export const Modal: React.FC<ModalProps> = ({ isOpen, title, onClose, children, width, hideClose }) => {
+export const Modal: React.FC<ModalProps> = ({ isOpen, title, onClose, children, width, hideClose, inline }) => {
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && onClose) onClose();
@@ -22,7 +23,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, title, onClose, children, 
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={() => onClose && onClose()}>
+    <div className="modal-overlay" onClick={() => onClose && onClose()} style={inline ? { position: 'absolute', zIndex: 50, borderRadius: '12px' } : {}}>
       <div className="modal-content" style={{ maxWidth: width || '600px' }} onClick={e => e.stopPropagation()}>
         <div className="modal-header">
           <h2 className="modal-title">{title}</h2>
