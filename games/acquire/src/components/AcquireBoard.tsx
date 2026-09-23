@@ -145,6 +145,13 @@ export function AcquireBoard() {
       renderGameSpecificPlayerDetails={renderPlayerDetails}
       renderLogMessage={renderLogMessage}
     >
+      <pre style={{ position: 'fixed', top: 0, left: 0, zIndex: 9999, background: 'black', color: 'lime', padding: '10px', fontSize: '10px' }}>
+        DEBUG INFO:
+        playerId: {playerId}
+        me: {JSON.stringify(me, null, 2)}
+        playerOrder: {JSON.stringify(state.playerOrder)}
+        isMyTurn: {JSON.stringify(isMyTurn)}
+      </pre>
       <div className="game-container" style={{ padding: '0px', display: 'flex', flexDirection: 'row', gap: '20px', height: '100%' }}>
         <div className="board glass" style={{ flex: '2', minWidth: '0' }}>
           {Array.from({length: 9}).map((_, rIdx) => {
