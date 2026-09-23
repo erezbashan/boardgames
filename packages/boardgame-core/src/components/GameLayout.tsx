@@ -125,27 +125,20 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
           <div className="game-bottom-area" style={{ flex: bottomAreaRatio }}>
             <div className="game-log-wrapper">
               {(() => {
-                let recentLogsStartIndex = 0;
-                const myPlayerName = playersMap[myPlayerId]?.name;
-                if (myPlayerName) {
-                  for (let i = logs.length - 1; i >= 0; i--) {
-                    if (logs[i].includes(`${myPlayerName}'s Turn ---`)) {
-                      recentLogsStartIndex = i;
+                                let recentLogsStartIndex = 0;
+                let turnsFound = 0;
+                for (let i = logs.length - 1; i >= 0; i--) {
+                  if (logs[i].includes(`'s Turn ---`)) {
+                    turnsFound++;
+                    recentLogsStartIndex = i;
+                    if (turnsFound === 2) {
                       break;
                     }
                   }
-                  let isMyTurnNow = (playerOrder[currentPlayerIndex] === myPlayerId);
-                  if (isMyTurnNow) {
-                     for (let i = recentLogsStartIndex - 1; i >= 0; i--) {
-                        if (logs[i].includes(`${myPlayerName}'s Turn ---`)) {
-                           recentLogsStartIndex = i;
-                           break;
-                        }
-                     }
-                  }
                 }
+                
                 if (logs.length - recentLogsStartIndex < 5) {
-                   recentLogsStartIndex = Math.max(0, logs.length - 5);
+                   recentLogsStartIndex = Math.max(0, logs.length - 10);
                 }
                 const renderedAllLogs = logs.map((l: string, index: number) => <span key={`msg-${index}`}>{renderLogMessage ? renderLogMessage(l, (m) => colorizeLog(m, players)) : colorizeLog(l, players)}</span>);
                 const renderedRecentLogs = renderedAllLogs.slice(recentLogsStartIndex);
@@ -208,7 +201,7 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
               <select 
                 className="modern-input"
                 style={{ width: '150px' }}
-                disabled={status !== 'Lobby'}
+                
                 value={gameState.settings?.gameSpeed || 'Normal'}
                 onChange={e => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...gameState.settings, gameSpeed: e.target.value } })}
               >
@@ -218,7 +211,7 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
                 <option value="Ultra">Ultra</option>
               </select>
             </div>
-            {status !== 'Lobby' && <p style={{ color: 'gray', fontSize: '12px', marginTop: '5px' }}>Settings can only be changed in the Lobby.</p>}
+            
           </div>
 
           {/* Game Specific Settings */}

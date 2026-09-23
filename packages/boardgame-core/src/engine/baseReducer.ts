@@ -117,7 +117,6 @@ export function baseReducer<T extends BaseGameState>(state: T, action: BaseActio
       };
     }
     case 'UPDATE_SETTINGS': {
-      if (state.status !== 'Lobby') return state;
       return { ...state, settings: { ...(state.settings || {}), ...action.payload } };
     }
     default:

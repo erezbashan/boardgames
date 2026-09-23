@@ -646,6 +646,19 @@ export function fillCorporation(board: Record<number, BoardCell[]>, row: number,
   return { board: newBoard, count };
 }
 
+
+function getRankings(state: AcquireState, corpName: Corporation) {
+  const stockHolders = Object.values(state.players).map(p => ({ id: p.id, count: p.stocks[corpName] || 0 })).filter(p => p.count > 0).sort((a, b) => b.count - a.count);
+  if (stockHolders.length === 0) return { first: [] as string[], second: [] as string[] };
+  const firstCount = stockHolders[0].count;
+  const first = stockHolders.filter(s => s.count === firstCount).map(s => s.id);
+  if (first.length > 1) return { first, second: [] };
+  if (stockHolders.length === 1) return { first, second: [] };
+  const secondCount = stockHolders[1].count;
+  const second = stockHolders.filter(s => s.count === secondCount).map(s => s.id);
+  return { first, second };
+}
+
 export function buyStock(state: AcquireState, playerId: string, corpName: Corporation): AcquireState {
   if (state.phase !== 'BuyStocks' || state.playerOrder[state.currentPlayerIndex] !== playerId) return state;
   if (state.sharesBoughtThisTurn >= 3) return state;
@@ -657,6 +670,7 @@ export function buyStock(state: AcquireState, playerId: string, corpName: Corpor
   if (!player) return state;
   if (player.money < corp.stockPrice) return state;
 
+  const beforeRanks = getRankings(state, corpName);
   const newState = { ...state };
   newState.corporations = { ...newState.corporations };
   newState.corporations[corpName] = { ...corp, availableStocks: corp.availableStocks - 1 };
@@ -682,6 +696,13 @@ export function buyStock(state: AcquireState, playerId: string, corpName: Corpor
     newState.logs = [...newState.logs, `${player.name} bought 1 share of ${corpName}`];
   }
 
+  const afterRanks = getRankings(newState, corpName);
+  if (beforeRanks.first.join(',') !== afterRanks.first.join(',') || beforeRanks.second.join(',') !== afterRanks.second.join(',')) {
+    const msg = player.name + ' shakes up the ' + corpName + ' shareholder rankings!';
+    newState.logs.push(msg);
+    newState.turnContext = { ...newState.turnContext, rankChange: { corp: corpName, triggerPlayerId: playerId } };
+  }
+  
   if (shouldAutoEndTurn(newState)) {
     return endTurn(newState);
   }
@@ -784,6 +805,8 @@ export function endTurn(state: AcquireState): AcquireState {
       return {
         ...newState,
         currentPlayerIndex: nextPlayerIndex,
+        status: 'Finished',
+        winnerId: leader.id,
         phase: 'GameOver',
         sharesBoughtThisTurn: 0
       };

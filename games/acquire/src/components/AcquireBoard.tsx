@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { GameLayout, useGameContext, AnimatedValue } from '@erez/boardgame-core';
+import { AcquireStats } from './AcquireStats';
 import { AcquireState, AcquireAction, AcquirePlayer, Corporation } from '../engine/types';
 import { getPlayerFinancials, getStockPrice } from '../engine/engine';
 import './AcquireBoard.css';
@@ -29,6 +30,16 @@ export function AcquireBoard() {
   if (state.phase === 'MergeResolution' && state.pendingMerge) activeId = state.playerOrder[state.pendingMerge.playerResolutionIndex];
   
   const isMyTurn = activeId === playerId;
+
+  const [showMergerModal, setShowMergerModal] = React.useState(false);
+  React.useEffect(() => {
+    if (state?.phase === 'MergeResolution' || state?.phase === 'ChooseMergeSurvivor' || state?.phase === 'FoundCorporation') {
+      const timer = setTimeout(() => setShowMergerModal(true), 1500);
+      return () => clearTimeout(timer);
+    } else {
+      setShowMergerModal(false);
+    }
+  }, [state?.phase, state?.pendingMerge?.currentDefunctIndex]);
 
   
   const renderSettings = () => {
@@ -160,7 +171,7 @@ export function AcquireBoard() {
              const isGold = icon === '🥇';
              const isSilver = icon === '🥈';
              return (
-               <div key={cName} style={{ 
+               <div key={cName} className={state.turnContext?.rankChange?.corp === cName && (isGold || isSilver) ? 'rank-change-pop' : ''} style={{ 
                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                  padding: '2px', 
                  borderRadius: '4px', 
@@ -195,6 +206,7 @@ export function AcquireBoard() {
       helpText="Acquire is a classic board game of strategy and finance. Players form, merge, and expand hotel chains while strategically buying stock to maximize their wealth."
       helpUrl="https://www.ultraboardgames.com/acquire/game-rules.php"
       renderGameSpecificPlayerDetails={renderPlayerDetails}
+      renderGameSpecificStats={() => <AcquireStats gameState={state} />}
       renderLogMessage={renderLogMessage}
       settings={renderSettings()}
     >
@@ -277,7 +289,7 @@ export function AcquireBoard() {
             );
           })}
           {/* Modals directly from original game */}
-        {state.phase === 'FoundCorporation' && state.pendingFounding?.playerId === playerId && (
+        {state.phase === 'FoundCorporation' && state.pendingFounding?.playerId === playerId && showMergerModal && (
           <div className="modal-backdrop" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.4)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
             <div className="modal-content glass" style={{ padding: '2rem', minWidth: '300px', textAlign: 'center' }}>
               <h3>Found a Corporation</h3>
@@ -315,7 +327,7 @@ export function AcquireBoard() {
           </div>
         )}
 
-        {state.phase === 'ChooseMergeSurvivor' && state.pendingSurvivorChoice?.playerId === playerId && (
+        {state.phase === 'ChooseMergeSurvivor' && state.pendingSurvivorChoice?.playerId === playerId && showMergerModal && (
           <div className="modal-backdrop" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.4)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
             <div className="modal-content glass" style={{ padding: '2rem', minWidth: '300px', textAlign: 'center' }}>
               <h3>Choose Surviving Corporation</h3>
@@ -338,7 +350,7 @@ export function AcquireBoard() {
           </div>
         )}
 
-        {isMyTurn && state.phase === 'MergeResolution' && pm && dCorp && aCorp && (
+        {isMyTurn && state.phase === 'MergeResolution' && pm && dCorp && aCorp && showMergerModal && (
           <div className="modal-backdrop" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
             <div className="merge-panel" style={{ backgroundColor: '#1e293b', padding: '30px', border: '2px solid var(--accent)', minWidth: '400px', borderRadius: '12px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
               <h4 style={{ margin: '0 0 10px 0', textAlign: 'center' }}>Resolve Merge Stocks</h4>
@@ -402,6 +414,7 @@ export function AcquireBoard() {
                     </tbody>
                   </table>
                   <button 
+                    className="btn primary"
                     style={{ marginTop: '10px' }}
                     onClick={() => {
                       dispatch({ type: 'RESOLVE_MERGE_STOCKS', payload: { playerId, sell: sellCount, trade: tradeCount, keep: keepCount } });
@@ -411,7 +424,7 @@ export function AcquireBoard() {
                   </button>
                 </div>
               ) : (
-                <button onClick={() => dispatch({ type: 'RESOLVE_MERGE_STOCKS', payload: { playerId, sell: 0, trade: 0, keep: 0 } })}>Continue</button>
+                <button className="btn primary" onClick={() => dispatch({ type: 'RESOLVE_MERGE_STOCKS', payload: { playerId, sell: 0, trade: 0, keep: 0 } })}>Continue</button>
               )}
             </div>
           </div>
@@ -487,14 +500,14 @@ export function AcquireBoard() {
                     </span>
                     <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                         <button 
-                          className="action-required-buy"
+                          className={isMyTurn && state.phase === 'BuyStocks' && me!.money >= cState.stockPrice && state.sharesBoughtThisTurn < 3 && cState.availableStocks > 0 ? "action-required-buy" : ""}
                           disabled={!(isMyTurn && state.phase === 'BuyStocks' && me!.money >= cState.stockPrice && state.sharesBoughtThisTurn < 3 && cState.availableStocks > 0)}
                           onClick={() => dispatch({ type: 'BUY_STOCK', payload: { playerId, corpName: cName } })}
                           style={{ 
                              padding: '2px 6px', 
                              fontSize: '11px', 
                              minWidth: '40px',
-                             visibility: (state.phase === 'BuyStocks' || state.phase === 'PlayTile') ? 'visible' : 'hidden'
+                             visibility: (isMyTurn && state.phase === 'BuyStocks' && cState.isActive) ? 'visible' : 'hidden'
                           }}
                         >
                           Buy

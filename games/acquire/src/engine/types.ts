@@ -59,6 +59,7 @@ export interface AcquireState extends BaseGameState<AcquirePlayer> {
   phase: AcquirePhase;
   sharesBoughtThisTurn: number; // Max 3
   history: { turn: number, netWorths: Record<string, number> }[];
+  turnContext?: any;
   
   // Pending state for merges
   pendingMerge?: {

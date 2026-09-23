@@ -130,9 +130,8 @@ const renderSettings = (settings: any, dispatch: any, status: string, setSelecte
         <select
           value={currentSettings.gameSpeed}
           onChange={e => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...currentSettings, gameSpeed: e.target.value } })}
-          disabled={status !== 'Lobby'}
           className="modern-input"
-          style={{ width: '120px', display: 'inline-block', opacity: status !== 'Lobby' ? 0.5 : 1, cursor: status !== 'Lobby' ? 'not-allowed' : 'pointer' }}
+          style={{ width: '120px', display: 'inline-block', opacity: 1, cursor: 'pointer' }}
         >
           <option value="Slow">Slow</option>
           <option value="Normal">Normal</option>
