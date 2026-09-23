@@ -439,22 +439,30 @@ export function AcquireBoard() {
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <strong className={`corp-name ${cName.toLowerCase()}`} style={{ cursor: 'pointer', textDecoration: cState.isActive ? 'underline' : 'none', fontSize: '0.85rem' }} onClick={() => { if(cState.isActive) setSelectedCorp(cName); }}>
-                      {cState.isSafe && '🛡️ '}{cName}
+                      {cState.isSafe && '🛡️ '}{cName} <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 'normal' }}>({cState.size})</span>
                     </strong>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', color: '#cbd5e1' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '40px 1fr 45px', alignItems: 'center', fontSize: '0.75rem', color: '#cbd5e1', minHeight: '22px' }}>
                     <span>{cState.isActive ? `$${cState.stockPrice.toLocaleString()}` : '-'}</span>
-                    <span><span key={cState.availableStocks} className="animate-pop" style={{ color: `var(--corp-${cName.toLowerCase()})`, fontWeight: 'bold' }}>{cState.availableStocks}</span> left</span>
-                      {isMyTurn && state.phase === 'BuyStocks' && me!.money >= cState.stockPrice && state.sharesBoughtThisTurn < 3 && cState.availableStocks > 0 && (
+                    <span style={{ textAlign: 'center' }}>
+                      <AnimatedValue value={cState.availableStocks} positiveColor={`var(--corp-${cName.toLowerCase()})`} negativeColor={`var(--corp-${cName.toLowerCase()})`} suffix=" left" />
+                    </span>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                         <button 
                           className="action-required-buy"
+                          disabled={!(isMyTurn && state.phase === 'BuyStocks' && me!.money >= cState.stockPrice && state.sharesBoughtThisTurn < 3 && cState.availableStocks > 0)}
                           onClick={() => dispatch({ type: 'BUY_STOCK', payload: { playerId, corpName: cName } })}
-                          style={{ padding: '4px 8px', fontSize: '12px' }}
+                          style={{ 
+                             padding: '2px 6px', 
+                             fontSize: '11px', 
+                             minWidth: '40px',
+                             visibility: (state.phase === 'BuyStocks' || state.phase === 'PlayTile') ? 'visible' : 'hidden'
+                          }}
                         >
                           Buy
                         </button>
-                      )}
                     </div>
+                  </div>
                 </div>
               ))}
             </div>
