@@ -200,7 +200,7 @@ export function AcquireBoard() {
                       }
                     }}
                   >
-                    <span className="cell-label" style={{ zIndex: 1, position: 'relative' }}>{rIdx + 1}{String.fromCharCode(65 + cIdx)}</span>
+                    <span className="cell-label" style={{ zIndex: 1, position: 'absolute', top: '2px', left: '4px', fontSize: '0.65rem', opacity: 0.6 }}>{rIdx + 1}{String.fromCharCode(65 + cIdx)}</span>
                     {renderedCell && renderedCell !== 'Unincorporated' && <span className="cell-corp">{renderedCell}</span>}
                     {isInHand && tileIcon && (
                       <div className="tile-icon-bg" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '2rem', opacity: 0.25, zIndex: 0 }}>
