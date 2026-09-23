@@ -144,7 +144,7 @@ export function AcquireBoard() {
                }}>
                  <div>{cName[0]}</div>
                  <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
-                   {count}{icon && <span style={{ fontSize: '10px' }}>{icon}</span>}
+                   <AnimatedValue value={count} positiveColor={`var(--corp-${cName.toLowerCase()})`} negativeColor={`var(--corp-${cName.toLowerCase()})`} />{icon && <span style={{ fontSize: '10px' }}>{icon}</span>}
                  </div>
                </div>
              )
@@ -412,15 +412,19 @@ export function AcquireBoard() {
           <div className="glass" style={{ padding: '10px', borderRadius: '12px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
               <h3 style={{ margin: 0 }}>Shares</h3>
-              {state.phase === 'BuyStocks' && isMyTurn && (
                  <button 
                    className="end-turn-btn action-required-buy" 
                    onClick={() => dispatch({ type: 'END_TURN', payload: { playerId } })}
-                   style={{ padding: '4px 8px', fontSize: '12px', width: 'auto', margin: 0 }}
+                   style={{ 
+                     padding: '4px 8px', 
+                     fontSize: '12px', 
+                     width: 'auto', 
+                     margin: 0,
+                     visibility: (state.phase === 'BuyStocks' && isMyTurn) ? 'visible' : 'hidden'
+                   }}
                  >
                    End ({state.sharesBoughtThisTurn}/3)
                  </button>
-              )}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
               {(Object.entries(state.corporations) as [Corporation, any][]).sort((a, b) => {
