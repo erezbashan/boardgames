@@ -105,7 +105,7 @@ export function AcquireBoard() {
            <span>Cash: ${fin.cash.toLocaleString()}</span>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px', marginTop: '5px', textAlign: 'center' }}>
-          {(Object.keys(state.corporations) as Corporation[]).map(cName => {
+          {(['Tower', 'Luxor', 'American', 'Worldwide', 'Festival', 'Imperial', 'Continental'] as Corporation[]).map(cName => {
              const count = p.stocks[cName] || 0;
              
              let icon = null;
@@ -135,13 +135,13 @@ export function AcquireBoard() {
                  background: 'rgba(0,0,0,0.3)',
                  border: `1px solid var(--corp-${cName.toLowerCase()})`,
                  color: `var(--corp-${cName.toLowerCase()})`,
-                 fontSize: '10px',
+                 fontSize: '11px',
                  fontWeight: 'bold',
                  lineHeight: 1.1
                }}>
-                 <div>{cName.substring(0,3)}</div>
+                 <div>{cName[0]}</div>
                  <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
-                   {count}{icon && <span style={{ fontSize: '9px' }}>{icon}</span>}
+                   {count}{icon && <span style={{ fontSize: '10px' }}>{icon}</span>}
                  </div>
                </div>
              )
