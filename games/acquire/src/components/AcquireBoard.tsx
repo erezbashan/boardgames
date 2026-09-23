@@ -219,8 +219,8 @@ export function AcquireBoard() {
         {/* Action Controls / Buy Market Below Board */}
         <div style={{ flex: 1, overflowY: 'auto' }}>
           <div className="glass" style={{ padding: '15px', borderRadius: '12px' }}>
-            <h3 style={{ marginTop: 0 }}>Market</h3>
-            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            <h3 style={{ marginTop: 0, marginBottom: '15px' }}>Market</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {(Object.entries(state.corporations) as [Corporation, any][]).sort((a, b) => {
                 const corpOrder = ['Tower', 'Luxor', 'American', 'Worldwide', 'Festival', 'Imperial', 'Continental'];
                 return corpOrder.indexOf(a[0]) - corpOrder.indexOf(b[0]);
@@ -229,31 +229,32 @@ export function AcquireBoard() {
                   background: 'rgba(0,0,0,0.3)', 
                   border: `1px solid var(--corp-${cName.toLowerCase()})`, 
                   borderRadius: '8px', 
-                  padding: '10px', 
-                  flex: '1 1 120px',
+                  padding: '12px', 
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '5px',
-                  opacity: cState.isActive ? 1 : 0.5
+                  gap: '8px',
+                  opacity: cState.isActive ? 1 : 0.4
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <strong className={`corp-name ${cName.toLowerCase()}`} style={{ cursor: 'pointer', textDecoration: 'underline' }} onClick={() => setSelectedCorp(cName)}>
+                    <strong className={`corp-name ${cName.toLowerCase()}`} style={{ cursor: 'pointer', textDecoration: cState.isActive ? 'underline' : 'none' }} onClick={() => { if(cState.isActive) setSelectedCorp(cName); }}>
                       {cState.isSafe && '🛡️ '}{cName}
                     </strong>
-                    <span>{cState.isActive ? cState.availableStocks : '-'} left</span>
+                    {cState.isActive && <span>{cState.availableStocks} left</span>}
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span>{cState.isActive ? `$${cState.stockPrice.toLocaleString()}` : '-'}</span>
-                    {isMyTurn && state.phase === 'BuyStocks' && me!.money >= cState.stockPrice && state.sharesBoughtThisTurn < 3 && cState.availableStocks > 0 && cState.isActive && (
-                      <button 
-                        className="action-required-buy"
-                        onClick={() => dispatch({ type: 'BUY_STOCK', payload: { playerId, corpName: cName } })}
-                        style={{ padding: '4px 8px', fontSize: '12px' }}
-                      >
-                        Buy
-                      </button>
-                    )}
-                  </div>
+                  {cState.isActive && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span>${cState.stockPrice.toLocaleString()}</span>
+                      {isMyTurn && state.phase === 'BuyStocks' && me!.money >= cState.stockPrice && state.sharesBoughtThisTurn < 3 && cState.availableStocks > 0 && (
+                        <button 
+                          className="action-required-buy"
+                          onClick={() => dispatch({ type: 'BUY_STOCK', payload: { playerId, corpName: cName } })}
+                          style={{ padding: '4px 8px', fontSize: '12px' }}
+                        >
+                          Buy
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
