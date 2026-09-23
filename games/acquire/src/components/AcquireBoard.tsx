@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { GameLayout, useGameContext } from '@erez/boardgame-core';
+import { GameLayout, useGameContext, AnimatedValue } from '@erez/boardgame-core';
 import { AcquireState, AcquireAction, AcquirePlayer, Corporation } from '../engine/types';
 import { getPlayerFinancials, getStockPrice } from '../engine/engine';
 import './AcquireBoard.css';
@@ -165,7 +165,7 @@ export function AcquireBoard() {
       renderLogMessage={renderLogMessage}
     >
       <div className="game-container" style={{ padding: '0px', display: 'flex', flexDirection: 'row', gap: '20px', height: '100%' }}>
-        <div className="board glass" style={{ flex: '2', minWidth: '0' }}>
+        <div className="board glass" style={{ flex: '2', minWidth: '0', position: 'relative' }}>
           {Array.from({length: 9}).map((_, rIdx) => {
             const row = state.board[rIdx];
             return (
@@ -242,67 +242,9 @@ export function AcquireBoard() {
             </div>
             );
           })}
-        </div>
-
-        {/* Action Controls / Buy Market Below Board */}
-        <div style={{ width: '220px', flex: 'none' }}>
-          <div className="glass" style={{ padding: '10px', borderRadius: '12px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-              <h3 style={{ margin: 0 }}>Shares</h3>
-              {state.phase === 'BuyStocks' && isMyTurn && (
-                 <button 
-                   className="end-turn-btn action-required-buy" 
-                   onClick={() => dispatch({ type: 'END_TURN', payload: { playerId } })}
-                   style={{ padding: '4px 8px', fontSize: '12px', width: 'auto', margin: 0 }}
-                 >
-                   End ({state.sharesBoughtThisTurn}/3)
-                 </button>
-              )}
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              {(Object.entries(state.corporations) as [Corporation, any][]).sort((a, b) => {
-                const corpOrder = ['Tower', 'Luxor', 'American', 'Worldwide', 'Festival', 'Imperial', 'Continental'];
-                return corpOrder.indexOf(a[0]) - corpOrder.indexOf(b[0]);
-              }).map(([cName, cState]) => (
-                <div key={cName} style={{ 
-                  background: 'rgba(0,0,0,0.3)', 
-                  border: `1px solid var(--corp-${cName.toLowerCase()})`, 
-                  borderRadius: '6px', 
-                  padding: '3px 6px', 
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '2px',
-                  opacity: cState.isActive ? 1 : 0.4
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <strong className={`corp-name ${cName.toLowerCase()}`} style={{ cursor: 'pointer', textDecoration: cState.isActive ? 'underline' : 'none', fontSize: '0.85rem' }} onClick={() => { if(cState.isActive) setSelectedCorp(cName); }}>
-                      {cState.isSafe && '🛡️ '}{cName}
-                    </strong>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', color: '#cbd5e1' }}>
-                    <span>{cState.isActive ? `$${cState.stockPrice.toLocaleString()}` : '-'}</span>
-                    <span><span key={cState.availableStocks} className="animate-pop" style={{ color: `var(--corp-${cName.toLowerCase()})`, fontWeight: 'bold' }}>{cState.availableStocks}</span> left</span>
-                      {isMyTurn && state.phase === 'BuyStocks' && me!.money >= cState.stockPrice && state.sharesBoughtThisTurn < 3 && cState.availableStocks > 0 && (
-                        <button 
-                          className="action-required-buy"
-                          onClick={() => dispatch({ type: 'BUY_STOCK', payload: { playerId, corpName: cName } })}
-                          style={{ padding: '4px 8px', fontSize: '12px' }}
-                        >
-                          Buy
-                        </button>
-                      )}
-                    </div>
-                </div>
-              ))}
-            </div>
-            
-
-          </div>
-        </div>
-
-        {/* Modals directly from original game */}
+          {/* Modals directly from original game */}
         {state.phase === 'FoundCorporation' && state.pendingFounding?.playerId === playerId && (
-          <div className="modal-backdrop" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
+          <div className="modal-backdrop" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.4)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
             <div className="modal-content glass" style={{ padding: '2rem', minWidth: '300px', textAlign: 'center' }}>
               <h3>Found a Corporation</h3>
               <p style={{ marginBottom: '1.5rem' }}>Choose a corporation to found:</p>
@@ -340,7 +282,7 @@ export function AcquireBoard() {
         )}
 
         {state.phase === 'ChooseMergeSurvivor' && state.pendingSurvivorChoice?.playerId === playerId && (
-          <div className="modal-backdrop" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
+          <div className="modal-backdrop" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.4)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
             <div className="modal-content glass" style={{ padding: '2rem', minWidth: '300px', textAlign: 'center' }}>
               <h3>Choose Surviving Corporation</h3>
               <p>A merger occurred! Choose which corporation will survive:</p>
@@ -363,7 +305,7 @@ export function AcquireBoard() {
         )}
 
         {isMyTurn && state.phase === 'MergeResolution' && pm && dCorp && aCorp && (
-          <div className="modal-backdrop" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.85)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
+          <div className="modal-backdrop" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
             <div className="merge-panel" style={{ backgroundColor: '#1e293b', padding: '30px', border: '2px solid var(--accent)', minWidth: '400px', borderRadius: '12px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
               <h4 style={{ margin: '0 0 10px 0', textAlign: 'center' }}>Resolve Merge Stocks</h4>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px', margin: '20px 0' }}>
@@ -442,7 +384,7 @@ export function AcquireBoard() {
         )}
 
         {selectedCorp && (
-          <div className="modal-backdrop" onClick={() => setSelectedCorp(null)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
+          <div className="modal-backdrop" onClick={() => setSelectedCorp(null)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.4)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
             <div className="modal-content glass" onClick={e => e.stopPropagation()} style={{ padding: '2rem', minWidth: '300px' }}>
               <h3 className={`corp-name ${selectedCorp.toLowerCase()}`} style={{ marginBottom: '1rem', display: 'inline-block' }}>{selectedCorp} Details</h3>
               <table style={{ width: '100%', textAlign: 'left', borderSpacing: '0 10px' }}>
@@ -464,7 +406,65 @@ export function AcquireBoard() {
           </div>
         )}
       </div>
-    </GameLayout>
+        </div>
+
+        {/* Action Controls / Buy Market Below Board */}
+        <div style={{ width: '220px', flex: 'none' }}>
+          <div className="glass" style={{ padding: '10px', borderRadius: '12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <h3 style={{ margin: 0 }}>Shares</h3>
+              {state.phase === 'BuyStocks' && isMyTurn && (
+                 <button 
+                   className="end-turn-btn action-required-buy" 
+                   onClick={() => dispatch({ type: 'END_TURN', payload: { playerId } })}
+                   style={{ padding: '4px 8px', fontSize: '12px', width: 'auto', margin: 0 }}
+                 >
+                   End ({state.sharesBoughtThisTurn}/3)
+                 </button>
+              )}
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              {(Object.entries(state.corporations) as [Corporation, any][]).sort((a, b) => {
+                const corpOrder = ['Tower', 'Luxor', 'American', 'Worldwide', 'Festival', 'Imperial', 'Continental'];
+                return corpOrder.indexOf(a[0]) - corpOrder.indexOf(b[0]);
+              }).map(([cName, cState]) => (
+                <div key={cName} style={{ 
+                  background: 'rgba(0,0,0,0.3)', 
+                  border: `1px solid var(--corp-${cName.toLowerCase()})`, 
+                  borderRadius: '6px', 
+                  padding: '3px 6px', 
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '2px',
+                  opacity: cState.isActive ? 1 : 0.4
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <strong className={`corp-name ${cName.toLowerCase()}`} style={{ cursor: 'pointer', textDecoration: cState.isActive ? 'underline' : 'none', fontSize: '0.85rem' }} onClick={() => { if(cState.isActive) setSelectedCorp(cName); }}>
+                      {cState.isSafe && '🛡️ '}{cName}
+                    </strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', color: '#cbd5e1' }}>
+                    <span>{cState.isActive ? `$${cState.stockPrice.toLocaleString()}` : '-'}</span>
+                    <span><span key={cState.availableStocks} className="animate-pop" style={{ color: `var(--corp-${cName.toLowerCase()})`, fontWeight: 'bold' }}>{cState.availableStocks}</span> left</span>
+                      {isMyTurn && state.phase === 'BuyStocks' && me!.money >= cState.stockPrice && state.sharesBoughtThisTurn < 3 && cState.availableStocks > 0 && (
+                        <button 
+                          className="action-required-buy"
+                          onClick={() => dispatch({ type: 'BUY_STOCK', payload: { playerId, corpName: cName } })}
+                          style={{ padding: '4px 8px', fontSize: '12px' }}
+                        >
+                          Buy
+                        </button>
+                      )}
+                    </div>
+                </div>
+              ))}
+            </div>
+            
+
+          </div>
+        </div>
+
+        </GameLayout>
   );
 }
 
