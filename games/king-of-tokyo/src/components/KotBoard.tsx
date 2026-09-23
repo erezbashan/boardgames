@@ -261,6 +261,11 @@ export const KotBoard: React.FC = () => {
 
   const [highlightedCards, setHighlightedCards] = React.useState<{cardId: string, playerId: string}[]>([]);
   const [isPromptModalOpen, setIsPromptModalOpen] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsSubmitting(false);
+  }, [gameState]);
   const prevLogsLength = React.useRef(gameState.logs?.length || 0);
 
   React.useEffect(() => {
@@ -298,12 +303,14 @@ export const KotBoard: React.FC = () => {
   const maxRolls = gameState.maxRolls || 3;
 
   const handleRoll = () => {
-    if (!isMyTurn || status !== 'Playing' || rollCount === 0 || topAction?.type !== 'ASK_ROLL') return;
+    if (!isMyTurn || status !== 'Playing' || rollCount === 0 || topAction?.type !== 'ASK_ROLL' || isSubmitting) return;
+    setIsSubmitting(true);
     dispatch({ type: 'RESPONSE_ROLL', payload: { roll: true, keptDiceIds } });
   };
 
   const handleResolve = () => {
-    if (!isMyTurn || status !== 'Playing' || topAction?.type !== 'ASK_ROLL' || rollCount === 0) return;
+    if (!isMyTurn || status !== 'Playing' || topAction?.type !== 'ASK_ROLL' || rollCount === 0 || isSubmitting) return;
+    setIsSubmitting(true);
     dispatch({ type: 'RESPONSE_ROLL', payload: { roll: false } });
   };
 
@@ -335,15 +342,17 @@ export const KotBoard: React.FC = () => {
       const content = (
         <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', height: '100%', maxHeight: '80vh' }}>
           <h3 style={{ margin: '0 0 15px 0', flexShrink: 0, textAlign: 'center' }}>{prompt.text}</h3>
-          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap', overflowY: 'auto', paddingRight: '5px' }}>
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap', overflowY: 'auto', paddingRight: '10px' }}>
             {prompt.options.map((opt: any, i: number) => (
               <button 
                 key={i} 
+                disabled={isSubmitting}
                 className="btn primary" 
-                style={{ width: '100%', maxWidth: '300px', minHeight: '50px', height: 'auto', fontSize: '16px', padding: '10px' }} 
+                style={{ width: '100%', minHeight: '50px', height: 'auto', fontSize: '14px', padding: '10px', opacity: isSubmitting ? 0.5 : 1 }} 
                 onClick={() => {
-                   setIsPromptModalOpen(false);
-                   dispatch(opt.action as KotAction);
+                  setIsSubmitting(true);
+                  dispatch(opt.action as KotAction);
+                  setIsPromptModalOpen(false);
                 }}
               >
                 {opt.label}
@@ -370,7 +379,7 @@ export const KotBoard: React.FC = () => {
             ) : (
                <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '10px', flexWrap: 'wrap', overflowY: 'auto', paddingRight: '10px', paddingBottom: '10px' }}>
                  {prompt.options.map((opt: any, i: number) => (
-                   <button key={i} className="btn primary" style={{ width: '160px', minHeight: '60px', height: 'auto', fontSize: '16px', padding: '10px' }} onClick={() => dispatch(opt.action as KotAction)}>
+                   <button key={i} disabled={isSubmitting} className="btn primary" style={{ width: '160px', minHeight: '60px', height: 'auto', fontSize: '16px', padding: '10px', opacity: isSubmitting ? 0.5 : 1 }} onClick={() => { setIsSubmitting(true); dispatch(opt.action as KotAction); }}>
                      {opt.label}
                    </button>
                  ))}
@@ -394,20 +403,20 @@ export const KotBoard: React.FC = () => {
         <div style={{ height: '130px', display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'flex-end' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center', justifyContent: 'flex-start' }}>
             {rollCount > 0 && (
-              <button className="btn primary" onClick={handleRoll} style={{ width: '160px', height: '60px', fontSize: '20px' }}>
+              <button disabled={isSubmitting} className="btn primary" onClick={handleRoll} style={{ width: '160px', height: '60px', fontSize: '20px', opacity: isSubmitting ? 0.5 : 1 }}>
                  Roll ({rollCount})
               </button>
             )}
             
             {/* Render any dynamic options injected by the backend via ASK_ROLL */}
             {prompt?.options?.map((opt: any, i: number) => (
-              <button key={i} className="btn primary" onClick={() => dispatch(opt.action as KotAction)} style={{ width: '160px', minHeight: '40px', height: 'auto', fontSize: '14px', padding: '5px' }}>
+              <button key={i} disabled={isSubmitting} className="btn primary" onClick={() => { setIsSubmitting(true); dispatch(opt.action as KotAction); }} style={{ width: '160px', minHeight: '40px', height: 'auto', fontSize: '14px', padding: '5px', opacity: isSubmitting ? 0.5 : 1 }}>
                 {opt.label}
               </button>
             ))}
 
             {rollCount < maxRolls && rollCount > 0 && (
-              <button className="btn" onClick={handleResolve} style={{ width: '160px', height: '60px', fontSize: '20px', background: '#10b981', color: 'white', border: 'none' }}>
+              <button disabled={isSubmitting} className="btn" onClick={handleResolve} style={{ width: '160px', height: '60px', fontSize: '20px', background: '#10b981', color: 'white', border: 'none', opacity: isSubmitting ? 0.5 : 1 }}>
                 Done
               </button>
             )}
@@ -498,8 +507,8 @@ export const KotBoard: React.FC = () => {
                     
                     {isMyTurn && prompt?.text === 'Buy Phase' && (
                       <button 
-                        disabled={!canBuy}
-                        onClick={(e) => { e.stopPropagation(); dispatch({ type: 'RESPONSE_MARKET', payload: { action: 'BUY', cardId, marketIndex: isExtra ? -1 : index, source } }); }}
+                        disabled={!canBuy || isSubmitting}
+                        onClick={(e) => { e.stopPropagation(); setIsSubmitting(true); dispatch({ type: 'RESPONSE_MARKET', payload: { action: 'BUY', cardId, marketIndex: isExtra ? -1 : index, source } }); }}
                         style={{ 
                           padding: '12px 10px', width: '100%', fontSize: '16px', fontWeight: 'bold', borderRadius: '6px',
                           background: canBuy ? '#3b82f6' : 'rgba(255,255,255,0.1)', 

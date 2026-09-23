@@ -1,3 +1,4 @@
+import { BOT_NAMES } from './types';
 import type { BaseGameState, BaseAction } from './types';
 import { PLAYER_COLORS } from './types';
 
@@ -19,7 +20,20 @@ export function baseReducer<T extends BaseGameState>(state: T, action: BaseActio
   switch (action.type) {
     case 'JOIN_GAME': {
       if (state.status !== 'Lobby') return state;
-      const { playerId, name, isBot, botStrategy } = action.payload;
+      let { playerId, name, isBot, botStrategy } = action.payload;
+      const existingNames = Object.values(state.players).map((p: any) => p.name);
+      if (existingNames.includes(name)) {
+          if (isBot) {
+              const available = BOT_NAMES.filter(n => !existingNames.includes(n));
+              if (available.length > 0) {
+                  name = available[Math.floor(Math.random() * available.length)];
+              } else {
+                  let c = 2; while (existingNames.includes(name + " " + c)) c++; name = name + " " + c;
+              }
+          } else {
+              let c = 2; while (existingNames.includes(name + " " + c)) c++; name = name + " " + c;
+          }
+      }
       if (state.players[playerId]) return state; // Already joined
       
       const newPlayerOrder = [...state.playerOrder, playerId];

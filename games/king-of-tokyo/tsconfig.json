@@ -1,5 +1,5 @@
 {
-  "compilerOptions": {
+  "compilerOptions": { "resolveJsonModule": true,
     "target": "ES2020",
     "module": "CommonJS",
     "moduleResolution": "node",

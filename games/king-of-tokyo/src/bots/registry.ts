@@ -1,37 +1,16 @@
+import { KotState } from '../engine/types';
 import { getBucketBotAction } from './BucketBot';
-import { KotState, PendingAction } from '../engine/types';
-import { getBotAction as getRandomBotAction } from './randomBot';
-import { getSmartBotAction } from './smartBot';
-import { getParamBotAction } from './paramBot';
-import { getBotAction as getQBotAction } from './qBot';
-import { getRuleBotAction } from './ruleBot';
+import { getExactBotAction } from './ExactBot';
+import { getActionFromRandomBot } from './randomBot';
 
-export function getBotAction(state: KotState, playerId: string): PendingAction | null {
-  const player = state.players[playerId];
-  if (!player) return null;
+export function getBotAction(state: KotState, playerId: string): any {
+    const player = state.players[playerId];
+    if (!player || !player.isBot) return null;
 
-  const strategy = player.botStrategy || 'random';
-
-  if (strategy === 'smart') {
-    return getSmartBotAction(state, playerId) as PendingAction;
-  }
-  
-  if (strategy.startsWith('param:')) {
-    return getParamBotAction(state, playerId) as PendingAction;
-  }
-
-  if (strategy.startsWith('qlearn:')) {
-    return getQBotAction(state, playerId) as PendingAction;
-  }
-
-  if (strategy === 'bucket') {
-    return getBucketBotAction(state, playerId) as PendingAction;
-  }
-
-  if (strategy.startsWith('rule:') || strategy.includes('VP:')) {
-    return getRuleBotAction(state, playerId) as PendingAction;
-  }
-
-  // Default to random
-  return getRandomBotAction(state, playerId) as PendingAction;
+    switch (player.botStrategy) {
+        case 'bucket': return getBucketBotAction(state, playerId);
+        case 'exact': return getExactBotAction(state, playerId);
+        case 'random': return getActionFromRandomBot(state, playerId);
+        default: return getBucketBotAction(state, playerId);
+    }
 }

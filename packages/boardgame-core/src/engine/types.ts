@@ -48,6 +48,6 @@ export type BaseAction =
   | { type: 'UPDATE_BOT_STRATEGY', payload: { playerId: string, botStrategy: string } }
   | { type: 'SEND_CHAT_MESSAGE', payload: { sender: string, text: string, color?: string } };
 
-export const BOT_NAMES = ["Alice", "Bob", "Charlie", "David", "Eve"];
+export const BOT_NAMES = ["Alice", "Bob", "Charlie", "David", "Eve", "Frank", "Grace", "Heidi", "Ivan", "Judy", "Mallory", "Oscar", "Peggy", "Romeo", "Sybil", "Trent", "Victor", "Walter"];
 export const PLAYER_COLORS = ['#3b82f6', '#ef4444', '#eab308', '#a855f7', '#ec4899', '#f97316'];
 export const BACKEND_TICK_DELAY_MS = 1500;
