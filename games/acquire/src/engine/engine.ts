@@ -790,6 +790,7 @@ export function endTurn(state: AcquireState): AcquireState {
     }
   }
 
+  newState.logs.push(`--- 💼 ${np.name}'s Turn ---`);
   return {
     ...newState,
     currentPlayerIndex: nextPlayerIndex,

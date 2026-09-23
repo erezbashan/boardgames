@@ -127,6 +127,7 @@ export function AcquireBoard() {
                return <div key={cName} style={{ minHeight: '30px' }}></div>;
              }
 
+             const isActive = state.corporations[cName]?.isActive;
              return (
                <div key={cName} style={{ 
                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
@@ -137,7 +138,9 @@ export function AcquireBoard() {
                  color: `var(--corp-${cName.toLowerCase()})`,
                  fontSize: '11px',
                  fontWeight: 'bold',
-                 lineHeight: 1.1
+                 lineHeight: 1.1,
+                 opacity: isActive ? 1 : 0.4,
+                 filter: isActive ? 'none' : 'grayscale(80%)'
                }}>
                  <div>{cName[0]}</div>
                  <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
@@ -265,21 +268,20 @@ export function AcquireBoard() {
                   background: 'rgba(0,0,0,0.3)', 
                   border: `1px solid var(--corp-${cName.toLowerCase()})`, 
                   borderRadius: '6px', 
-                  padding: '6px 8px', 
+                  padding: '3px 6px', 
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '4px',
+                  gap: '2px',
                   opacity: cState.isActive ? 1 : 0.4
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <strong className={`corp-name ${cName.toLowerCase()}`} style={{ cursor: 'pointer', textDecoration: cState.isActive ? 'underline' : 'none' }} onClick={() => { if(cState.isActive) setSelectedCorp(cName); }}>
+                    <strong className={`corp-name ${cName.toLowerCase()}`} style={{ cursor: 'pointer', textDecoration: cState.isActive ? 'underline' : 'none', fontSize: '0.85rem' }} onClick={() => { if(cState.isActive) setSelectedCorp(cName); }}>
                       {cState.isSafe && '🛡️ '}{cName}
                     </strong>
                   </div>
-                  {cState.isActive && (
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.9rem', color: '#cbd5e1' }}>
-                      <span>${cState.stockPrice.toLocaleString()}</span>
-                      <span>{cState.availableStocks} left</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', color: '#cbd5e1' }}>
+                    <span>{cState.isActive ? `$${cState.stockPrice.toLocaleString()}` : '-'}</span>
+                    <span><span key={cState.availableStocks} className="animate-pop" style={{ color: `var(--corp-${cName.toLowerCase()})`, fontWeight: 'bold' }}>{cState.availableStocks}</span> left</span>
                       {isMyTurn && state.phase === 'BuyStocks' && me!.money >= cState.stockPrice && state.sharesBoughtThisTurn < 3 && cState.availableStocks > 0 && (
                         <button 
                           className="action-required-buy"
@@ -290,7 +292,6 @@ export function AcquireBoard() {
                         </button>
                       )}
                     </div>
-                  )}
                 </div>
               ))}
             </div>
