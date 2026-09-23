@@ -380,3 +380,24 @@ header h2 { margin: 0; }
   --corp-imperial: #ec4899;
   --corp-continental: #06b6d4;
 }
+
+.animate-pop {
+  display: inline-block;
+  animation: pop-value 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes pop-value {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.6); color: white; text-shadow: 0 0 8px currentColor; }
+  100% { transform: scale(1); }
+}
+
+.animate-board-cell {
+  animation: pop-cell 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes pop-cell {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); z-index: 10; box-shadow: 0 0 15px currentColor; }
+  100% { transform: scale(1); z-index: 1; box-shadow: none; }
+}

@@ -362,8 +362,8 @@ export function AcquireBoard() {
         )}
 
         {isMyTurn && state.phase === 'MergeResolution' && pm && dCorp && aCorp && (
-          <div className="modal-backdrop" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
-            <div className="merge-panel glass" style={{ padding: '1rem', border: '2px solid var(--accent)', minWidth: '350px' }}>
+          <div className="modal-backdrop" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.85)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
+            <div className="merge-panel" style={{ backgroundColor: '#1e293b', padding: '1rem', border: '2px solid var(--accent)', minWidth: '350px', borderRadius: '12px' }}>
               <h4 style={{ margin: '0 0 10px 0', textAlign: 'center' }}>Resolve Merge Stocks</h4>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px', margin: '20px 0' }}>
                 <div className={`board-cell ${dCorp.toLowerCase()}`} style={{ width: '100px', height: '70px', flex: 'none', borderRadius: '8px', opacity: 0.8 }}>
