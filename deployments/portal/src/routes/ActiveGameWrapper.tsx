@@ -4,6 +4,8 @@ import { FlipsBoard } from '@erez/flips';
 import type { FlipsState, FlipsAction } from '@erez/flips';
 import { KotBoard } from '@erez/king-of-tokyo';
 import type { KotState, KotAction } from '@erez/king-of-tokyo';
+import { AcquireBoard } from '@erez/acquire';
+import type { AcquireState, AcquireAction } from '@erez/acquire';
 import { useMultiplayerGame } from '../hooks/useMultiplayerGame';
 
 function ActiveFlipsGame({ gameId, username }: { gameId: string, username: string }) {
@@ -53,6 +55,28 @@ function ActiveKotGame({ gameId, username }: { gameId: string, username: string 
   );
 }
 
+
+function ActiveAcquireGame({ gameId, username }: { gameId: string, username: string }) {
+  const { gameState, myPlayerId, dispatchToBackend, error } = useMultiplayerGame<AcquireState, AcquireAction>(gameId, 'acquire', username);
+  const navigate = useNavigate();
+
+  if (error) return <div style={{ color: 'white', padding: '40px' }}>Error: {error}</div>;
+  if (!gameState || !myPlayerId) return <div style={{ color: 'white', padding: '40px' }}>Loading game from Firebase...</div>;
+
+  const value = {
+    gameState,
+    myPlayerId,
+    dispatch: dispatchToBackend as any,
+    onLeaveGame: () => navigate('/acquire')
+  };
+
+  return (
+    <GameProvider value={value}>
+      <AcquireBoard />
+    </GameProvider>
+  );
+}
+
 export function ActiveGameWrapper() {
   const { gameType, gameId } = useParams();
   const location = useLocation();
@@ -65,6 +89,10 @@ export function ActiveGameWrapper() {
   
   if (gameType === 'king-of-tokyo') {
     return <ActiveKotGame gameId={gameId!} username={username} />;
+  }
+
+  if (gameType === 'acquire') {
+    return <ActiveAcquireGame gameId={gameId!} username={username} />;
   }
 
   return (

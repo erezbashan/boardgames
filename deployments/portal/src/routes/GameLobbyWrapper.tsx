@@ -49,7 +49,7 @@ export function GameLobbyWrapper() {
     navigate(`/${gameType}/${gameId}`, { state: { username } });
   };
 
-  const formattedTitle = gameType === 'king-of-tokyo' ? 'King of Tokyo' : 'Flips';
+  const formattedTitle = gameType === 'king-of-tokyo' ? 'King of Tokyo' : gameType === 'acquire' ? 'Acquire' : 'Flips';
 
   return (
     <Lobby 

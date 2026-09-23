@@ -13,6 +13,7 @@
     "@erez/boardgame-core": "*",
     "@erez/flips": "*",
     "@erez/king-of-tokyo": "*",
+    "@erez/acquire": "*",
     "firebase": "^11.0.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",

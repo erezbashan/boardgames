@@ -59,7 +59,8 @@ export const dispatchAction = onCall(async (request) => {
       const actionWithGameId = { ...actionWithPlayer, gameId };
       newState = game.reducer(gameDoc.state, actionWithGameId);
     } catch (err) {
-      throw new HttpsError('invalid-argument', 'Unsupported game type');
+      console.error("Reducer error:", err);
+      throw new HttpsError('invalid-argument', 'Unsupported game type or reducer error: ' + (err as any).message);
     }
 
     transaction.update(gameRef, { state: newState });
