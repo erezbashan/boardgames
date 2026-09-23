@@ -216,9 +216,9 @@ export function AcquireBoard() {
         </div>
 
         {/* Action Controls / Buy Market Below Board */}
-        <div style={{ flex: 1, overflowY: 'auto' }}>
+        <div style={{ width: '220px', flex: 'none', overflowY: 'auto' }}>
           <div className="glass" style={{ padding: '15px', borderRadius: '12px' }}>
-            <h3 style={{ marginTop: 0, marginBottom: '15px' }}>Market</h3>
+            <h3 style={{ marginTop: 0, marginBottom: '15px' }}>Shares</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {(Object.entries(state.corporations) as [Corporation, any][]).sort((a, b) => {
                 const corpOrder = ['Tower', 'Luxor', 'American', 'Worldwide', 'Festival', 'Imperial', 'Continental'];
@@ -238,11 +238,11 @@ export function AcquireBoard() {
                     <strong className={`corp-name ${cName.toLowerCase()}`} style={{ cursor: 'pointer', textDecoration: cState.isActive ? 'underline' : 'none' }} onClick={() => { if(cState.isActive) setSelectedCorp(cName); }}>
                       {cState.isSafe && '🛡️ '}{cName}
                     </strong>
-                    {cState.isActive && <span>{cState.availableStocks} left</span>}
                   </div>
                   {cState.isActive && (
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.9rem', color: '#cbd5e1' }}>
                       <span>${cState.stockPrice.toLocaleString()}</span>
+                      <span>{cState.availableStocks} left</span>
                       {isMyTurn && state.phase === 'BuyStocks' && me!.money >= cState.stockPrice && state.sharesBoughtThisTurn < 3 && cState.availableStocks > 0 && (
                         <button 
                           className="action-required-buy"

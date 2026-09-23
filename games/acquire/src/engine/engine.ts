@@ -95,7 +95,7 @@ export function startGame(state: AcquireState): AcquireState {
     players: Object.fromEntries(updatedPlayers.map(p => [p.id, p])),
     availableTiles: newTiles,
     playerOrder: updatedPlayers.map(p => p.id),
-    logs: [...state.logs, 'Game started!']
+    logs: [...state.logs, 'Game started!', `--- 💼 ${updatedPlayers[0].name}'s Turn ---`]
   };
 }
 

@@ -27,6 +27,10 @@ export interface GamePrompt {
   options: { label: string; action: any; color?: string }[];
 }
 
+export interface SharedSettings {
+  gameSpeed?: 'Slow' | 'Normal' | 'Fast' | 'Instant';
+}
+
 export interface BaseGameState<TPlayer extends BasePlayer = BasePlayer> {
   status: GameStatus;
   players: Record<string, TPlayer>;
@@ -37,6 +41,7 @@ export interface BaseGameState<TPlayer extends BasePlayer = BasePlayer> {
   logs: string[];
   actionQueue?: ScheduledAction[];
   prompt?: GamePrompt;
+  settings?: SharedSettings & any;
 }
 
 export type BaseAction = 
@@ -46,7 +51,8 @@ export type BaseAction =
   | { type: 'LEAVE_GAME', payload: { playerId: string } }
   | { type: 'REMOVE_PLAYER', payload: { playerId: string } }
   | { type: 'UPDATE_BOT_STRATEGY', payload: { playerId: string, botStrategy: string } }
-  | { type: 'SEND_CHAT_MESSAGE', payload: { sender: string, text: string, color?: string } };
+  | { type: 'SEND_CHAT_MESSAGE', payload: { sender: string, text: string, color?: string } }
+  | { type: 'UPDATE_SETTINGS', payload: any };
 
 export const BOT_NAMES = ["Alice", "Bob", "Charlie", "David", "Eve", "Frank", "Grace", "Heidi", "Ivan", "Judy", "Mallory", "Oscar", "Peggy", "Romeo", "Sybil", "Trent", "Victor", "Walter"];
 export const PLAYER_COLORS = ['#3b82f6', '#ef4444', '#eab308', '#a855f7', '#ec4899', '#f97316'];

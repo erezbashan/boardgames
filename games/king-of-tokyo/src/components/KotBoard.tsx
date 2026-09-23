@@ -109,19 +109,7 @@ const renderSettings = (settings: any, dispatch: any, status: string, setSelecte
     <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
       
       
-      <div style={{ display: 'flex', justifyContent: 'space-between', width: '300px', alignItems: 'center' }}>
-        <label style={{ fontSize: '18px' }}>Game Speed:</label>
-        <select
-          value={currentSettings.gameSpeed || 'Normal'}
-          onChange={e => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...currentSettings, gameSpeed: e.target.value } })}
-          className="modern-input"
-          style={{ width: '120px', display: 'inline-block' }}
-        >
-           <option value="Slow">Slow</option>
-           <option value="Normal">Normal</option>
-           <option value="Fast">Fast</option>
-        </select>
-      </div>
+
 
       <div style={{ display: 'flex', justifyContent: 'space-between', width: '300px', alignItems: 'center', marginBottom: '15px' }}>
         <label style={{ fontSize: '18px' }}>
