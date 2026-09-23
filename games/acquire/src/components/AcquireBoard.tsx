@@ -180,11 +180,20 @@ export function AcquireBoard() {
                   }
                 }
                 
+                const isPulsing = isInHand && isMyTurn && state.phase === 'PlayTile';
                 return (
                   <div 
                     key={cIdx} 
-                    className={`board-cell ${renderedCell ? renderedCell.toLowerCase() : ''} ${isInHand ? 'in-hand' : ''} ${isPlayable ? 'playable' : ''}`}
-                    style={{ opacity: isDefunct ? 0.6 : 1, filter: isDefunct ? 'grayscale(0.3)' : 'none' }}
+                    className={`board-cell ${renderedCell ? renderedCell.toLowerCase() : ''} ${isInHand ? 'in-hand' : ''} ${isPlayable ? 'playable' : ''} ${isPulsing ? 'my-turn-pulse' : ''}`}
+                    style={{ 
+                       opacity: isDefunct ? 0.6 : 1, 
+                       filter: isDefunct ? 'grayscale(0.3)' : 'none',
+                       ...(isInHand ? { 
+                          borderColor: me?.color, 
+                          color: me?.color, 
+                          '--pulse-color': me?.color 
+                       } : {})
+                    } as any}
                     onClick={() => {
                       if (isPlayable && tileIcon !== '🚫' && isMyTurn && state.phase === 'PlayTile') {
                         dispatch({ type: 'PLAY_TILE', payload: { playerId, tileId: cellId as any } });

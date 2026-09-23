@@ -144,11 +144,12 @@ header h2 { margin: 0; }
 }
 
 .board-cell.in-hand {
-  border: 2px solid #fbbf24 !important;
-  background: rgba(251, 191, 36, 0.3) !important;
-  box-shadow: 0 0 12px rgba(251, 191, 36, 0.6) !important;
-  color: #fbbf24 !important;
-  font-weight: bold;
+  /* Dynamic color via inline styles in React */
+  border-width: 2px;
+  border-style: solid;
+  background-color: transparent !important;
+  font-weight: normal;
+  opacity: 0.8;
 }
 
 .board-cell.playable {
@@ -171,16 +172,19 @@ header h2 { margin: 0; }
 }
 
 .board-cell.in-hand:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.1) !important;
   transform: scale(1.05);
   z-index: 10;
+  opacity: 1;
 }
 
 
 .board-cell.unincorporated {
-  background: var(--corp-unincorporated);
-  color: white;
-  border-color: rgba(255,255,255,0.2);
+  background: #cbd5e1 !important;
+  color: #0f172a !important;
+  border: 1px solid #94a3b8 !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  font-weight: 800;
 }
 
 /* Sidebar */
@@ -353,4 +357,16 @@ header h2 { margin: 0; }
   left: 50%;
   font-size: 16px;
   animation: bounce 1s infinite;
+}
+
+.my-turn-pulse {
+  animation: pulse-my-turn 2s infinite;
+  opacity: 1 !important;
+  font-weight: bold !important;
+}
+
+@keyframes pulse-my-turn {
+  0% { box-shadow: 0 0 0 0 var(--pulse-color, rgba(255,255,255,0.7)); }
+  70% { box-shadow: 0 0 0 10px rgba(255,255,255,0); }
+  100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
 }
