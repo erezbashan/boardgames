@@ -52,7 +52,7 @@ export interface KotState extends BaseGameState<KotPlayer> {
     cardsPerType: number;
     startingEnergy: number;
     activeCards: string[];
-    gameSpeed?: 'Fast' | 'Normal' | 'Slow';
+    gameSpeed?: 'Fast' | 'Normal' | 'Slow' | 'Ultra';
     secondEditionTokyoRule?: boolean;
   };
   deck: string[];

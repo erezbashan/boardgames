@@ -23,7 +23,36 @@ export function AcquireBoard() {
 
   if (!state) return <div className="loading">Loading...</div>;
 
-  const isMyTurn = state.playerOrder[state.currentPlayerIndex] === playerId;
+    let activeId = state.playerOrder[state.currentPlayerIndex];
+  if (state.phase === 'FoundCorporation' && state.pendingFounding) activeId = state.pendingFounding.playerId;
+  if (state.phase === 'ChooseMergeSurvivor' && state.pendingSurvivorChoice) activeId = state.pendingSurvivorChoice.playerId;
+  if (state.phase === 'MergeResolution' && state.pendingMerge) activeId = state.playerOrder[state.pendingMerge.playerResolutionIndex];
+  
+  const isMyTurn = activeId === playerId;
+
+  
+  const renderSettings = () => {
+    const gameSpeed = state.settings?.gameSpeed || 'Normal';
+    return (
+      <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', width: '300px', alignItems: 'center' }}>
+          <label style={{ fontSize: '18px' }}>Speed of Play:</label>
+          <select
+            value={gameSpeed}
+            onChange={e => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...state.settings, gameSpeed: e.target.value } } as any)}
+            disabled={state.status !== 'Lobby'}
+            className="modern-input"
+            style={{ width: '120px', display: 'inline-block', opacity: state.status !== 'Lobby' ? 0.5 : 1, cursor: state.status !== 'Lobby' ? 'not-allowed' : 'pointer' }}
+          >
+            <option value="Slow">Slow</option>
+            <option value="Normal">Normal</option>
+            <option value="Fast">Fast</option>
+            <option value="Ultra">Ultra</option>
+          </select>
+        </div>
+      </div>
+    );
+  };
 
   const renderLogMessage = (msg: string, defaultRenderer: (m: string) => React.ReactNode) => {
     if (msg.includes("'s Turn ---")) {
@@ -101,7 +130,7 @@ export function AcquireBoard() {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', fontSize: '13px', marginTop: '5px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-           <span>NW: <strong style={{ color: '#fbbf24' }}>${fin.netWorth.toLocaleString()}</strong></span>
+           <span>Net Worth: <strong style={{ color: '#fbbf24' }}>${fin.netWorth.toLocaleString()}</strong></span>
            <span>Cash: ${fin.cash.toLocaleString()}</span>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px', marginTop: '5px', textAlign: 'center' }}>
@@ -128,13 +157,16 @@ export function AcquireBoard() {
              }
 
              const isActive = state.corporations[cName]?.isActive;
+             const isGold = icon === '🥇';
+             const isSilver = icon === '🥈';
              return (
                <div key={cName} style={{ 
                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                  padding: '2px', 
                  borderRadius: '4px', 
-                 background: 'rgba(0,0,0,0.3)',
-                 border: `1px solid var(--corp-${cName.toLowerCase()})`,
+                 background: isGold ? 'linear-gradient(135deg, rgba(255,215,0,0.2), rgba(0,0,0,0.4))' : isSilver ? 'linear-gradient(135deg, rgba(192,192,192,0.2), rgba(0,0,0,0.4))' : 'rgba(0,0,0,0.3)',
+                 border: isGold ? '1.5px solid #FFD700' : isSilver ? '1.5px solid #C0C0C0' : `1px solid var(--corp-${cName.toLowerCase()})`,
+                 boxShadow: isGold ? '0 0 8px rgba(255,215,0,0.4)' : isSilver ? '0 0 8px rgba(192,192,192,0.4)' : 'none',
                  color: `var(--corp-${cName.toLowerCase()})`,
                  fontSize: '11px',
                  fontWeight: 'bold',
@@ -159,10 +191,12 @@ export function AcquireBoard() {
   return (
     <GameLayout
       gameName="Acquire"
+      bottomAreaRatio={25}
       helpText="Acquire is a classic board game of strategy and finance. Players form, merge, and expand hotel chains while strategically buying stock to maximize their wealth."
       helpUrl="https://www.ultraboardgames.com/acquire/game-rules.php"
       renderGameSpecificPlayerDetails={renderPlayerDetails}
       renderLogMessage={renderLogMessage}
+      settings={renderSettings()}
     >
       <div className="game-container" style={{ padding: '0px', display: 'flex', flexDirection: 'row', gap: '20px', height: '100%' }}>
         <div className="board glass" style={{ flex: '2', minWidth: '0', position: 'relative' }}>

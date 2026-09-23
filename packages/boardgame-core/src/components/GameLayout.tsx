@@ -34,6 +34,7 @@ export const colorizeLog = (logText: string, players: any[] = []) => {
 };
 
 export interface GameLayoutProps {
+  bottomAreaRatio?: number;
   gameName: string;
   
   // Content Slots
@@ -47,6 +48,7 @@ export interface GameLayoutProps {
 }
 
 export const GameLayout: React.FC<GameLayoutProps> = ({
+  bottomAreaRatio = 45,
   gameName,
   helpText,
   helpUrl,
@@ -116,11 +118,11 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
       <div className="game-main-area">
         {/* LEFT PANE */}
         <div className="game-left-pane">
-          <div className="game-stage-area" style={{ overflowY: status === 'Lobby' ? 'auto' : 'hidden' }}>
+          <div className="game-stage-area" style={{ flex: 100 - bottomAreaRatio, overflowY: status === 'Lobby' ? 'auto' : 'hidden' }}>
             {status === 'Lobby' && settings}
             {status !== 'Lobby' && children}
           </div>
-          <div className="game-bottom-area">
+          <div className="game-bottom-area" style={{ flex: bottomAreaRatio }}>
             <div className="game-log-wrapper">
               {(() => {
                 let recentLogsStartIndex = 0;
@@ -213,7 +215,7 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
                 <option value="Slow">Slow</option>
                 <option value="Normal">Normal</option>
                 <option value="Fast">Fast</option>
-                <option value="Instant">Instant</option>
+                <option value="Ultra">Ultra</option>
               </select>
             </div>
             {status !== 'Lobby' && <p style={{ color: 'gray', fontSize: '12px', marginTop: '5px' }}>Settings can only be changed in the Lobby.</p>}

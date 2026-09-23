@@ -21,6 +21,13 @@ export const initialAcquireState: AcquireState = {
   history: []
 };
 
+function getTickDelay(state: AcquireState): number {
+  if (state.settings?.gameSpeed === 'Fast') return 750;
+  if (state.settings?.gameSpeed === 'Slow') return 3000;
+  if (state.settings?.gameSpeed === 'Ultra') return 1;
+  return 1500;
+}
+
 function getActivePlayerId(state: AcquireState): string | null {
   if (state.status !== 'Playing') return null;
   if (state.phase === 'FoundCorporation' && state.pendingFounding) return state.pendingFounding.playerId;
@@ -44,7 +51,7 @@ function scheduleBotIfNeeded(state: AcquireState): AcquireState {
   
   return {
     ...state,
-    actionQueue: [...(state.actionQueue || []), { delayMs: 1500, action: { type: 'PLAY_BOT' } }]
+    actionQueue: [...(state.actionQueue || []), { delayMs: getTickDelay(state), action: { type: 'PLAY_BOT' } }]
   };
 }
 

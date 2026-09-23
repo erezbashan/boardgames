@@ -116,6 +116,10 @@ export function baseReducer<T extends BaseGameState>(state: T, action: BaseActio
         chatMessages: [...state.chatMessages, action.payload]
       };
     }
+    case 'UPDATE_SETTINGS': {
+      if (state.status !== 'Lobby') return state;
+      return { ...state, settings: { ...(state.settings || {}), ...action.payload } };
+    }
     default:
       return state;
   }

@@ -12,6 +12,7 @@ function getTickDelay(st: KotState): number {
    
    if (st.settings?.gameSpeed === 'Fast') return 750;
    if (st.settings?.gameSpeed === 'Slow') return 3000;
+   if (st.settings?.gameSpeed === 'Ultra') return 1;
    return 1500;
 }
 

@@ -209,7 +209,7 @@ export function playTile(state: AcquireState, playerId: string, tileId: TileId):
     const defunctCorps = sortedCorps.slice(1);
 
     const newPlayersM = { ...newState.players };
-    newPlayersM[playerId] = { ...newPlayersM[playerId], stats: { ...newPlayersM[playerId].stats, mergesCaused: newPlayersM[playerId].stats.mergesCaused + 1 } };
+    newPlayersM[playerId] = { ...newPlayersM[playerId], stats: { ...newPlayersM[playerId].stats, mergesCaused: (newPlayersM[playerId].stats?.mergesCaused || 0) + 1 } };
     newState.players = newPlayersM;
 
     return applyMerger(newState, tile, survivorName, defunctCorps);
@@ -253,7 +253,7 @@ export function chooseMergeSurvivor(state: AcquireState, playerId: string, survi
   });
 
   const newPlayersM = { ...state.players };
-  newPlayersM[playerId] = { ...newPlayersM[playerId], stats: { ...newPlayersM[playerId].stats, mergesCaused: newPlayersM[playerId].stats.mergesCaused + 1 } };
+  newPlayersM[playerId] = { ...newPlayersM[playerId], stats: { ...newPlayersM[playerId].stats, mergesCaused: (newPlayersM[playerId].stats?.mergesCaused || 0) + 1 } };
   const newState = { ...state, players: newPlayersM };
 
   return applyMerger(newState, tile, survivorName, defunctCorps);
@@ -321,7 +321,7 @@ function applyMerger(state: AcquireState, tile: Tile, survivorName: Corporation,
             newPlayers[h.id] = { 
               ...newPlayers[h.id], 
               money: newPlayers[h.id].money + totalPayout,
-              stats: { ...newPlayers[h.id].stats, firstBonuses: newPlayers[h.id].stats.firstBonuses + 1, secondBonuses: newPlayers[h.id].stats.secondBonuses + 1 }
+              stats: { ...newPlayers[h.id].stats, firstBonuses: (newPlayers[h.id].stats?.firstBonuses || 0) + 1, secondBonuses: (newPlayers[h.id].stats?.secondBonuses || 0) + 1 }
             };
             newState.logs.push(`${newPlayers[h.id].name} gets bonus for ${dCorp} ($${totalPayout.toLocaleString()})`);
           }
@@ -332,7 +332,7 @@ function applyMerger(state: AcquireState, tile: Tile, survivorName: Corporation,
             newPlayers[h.id] = { 
               ...newPlayers[h.id], 
               money: newPlayers[h.id].money + majorityPayout,
-              stats: { ...newPlayers[h.id].stats, firstBonuses: newPlayers[h.id].stats.firstBonuses + 1 }
+              stats: { ...newPlayers[h.id].stats, firstBonuses: (newPlayers[h.id].stats?.firstBonuses || 0) + 1 }
             };
             newState.logs.push(`${newPlayers[h.id].name} gets bonus for ${dCorp} ($${majorityPayout.toLocaleString()})`);
           }
@@ -344,7 +344,7 @@ function applyMerger(state: AcquireState, tile: Tile, survivorName: Corporation,
               newPlayers[h.id] = { 
                 ...newPlayers[h.id], 
                 money: newPlayers[h.id].money + minorityPayout,
-                stats: { ...newPlayers[h.id].stats, secondBonuses: newPlayers[h.id].stats.secondBonuses + 1 }
+                stats: { ...newPlayers[h.id].stats, secondBonuses: (newPlayers[h.id].stats?.secondBonuses || 0) + 1 }
               };
               newState.logs.push(`${newPlayers[h.id].name} gets bonus for ${dCorp} ($${minorityPayout.toLocaleString()})`);
             }
@@ -532,7 +532,7 @@ export function foundCorporation(state: AcquireState, playerId: string, corpName
       ...newPlayers[playerId],
       stocks: {
         ...newPlayers[playerId].stocks,
-        [corpName]: newPlayers[playerId].stocks[corpName] + 1
+        [corpName]: (newPlayers[playerId].stocks[corpName] || 0) + 1
       },
       stats: {
         ...newPlayers[playerId].stats,
@@ -665,11 +665,11 @@ export function buyStock(state: AcquireState, playerId: string, corpName: Corpor
   newPlayers[playerId] = {
     ...player,
     money: player.money - corp.stockPrice,
-    stocks: { ...player.stocks, [corpName]: player.stocks[corpName] + 1 },
-    stats: { ...player.stats, sharesBought: player.stats.sharesBought + 1 }
+    stocks: { ...player.stocks, [corpName]: (player.stocks[corpName] || 0) + 1 },
+    stats: { ...player.stats, sharesBought: (player.stats?.sharesBought || 0) + 1 }
   };
   newState.players = newPlayers;
-  newState.sharesBoughtThisTurn += 1;
+  newState.sharesBoughtThisTurn = (newState.sharesBoughtThisTurn || 0) + 1;
   const lastLog = newState.logs.length > 0 ? newState.logs[newState.logs.length - 1] : '';
   const multiBuyMatch = lastLog.match(new RegExp(`^${player.name} bought (\\d+) shares? of ${corpName}\\.?$`));
 
