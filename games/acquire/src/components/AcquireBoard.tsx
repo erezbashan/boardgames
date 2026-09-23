@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { GameLayout, useGameContext, AnimatedValue } from '@erez/boardgame-core';
+import { GameLayout, useGameContext, AnimatedValue, Modal } from '@erez/boardgame-core';
 import { AcquireStats } from './AcquireStats';
 import { AcquireState, AcquireAction, AcquirePlayer, Corporation } from '../engine/types';
 import { getPlayerFinancials, getStockPrice } from '../engine/engine';
@@ -290,9 +290,8 @@ export function AcquireBoard() {
           })}
           {/* Modals directly from original game */}
         {state.phase === 'FoundCorporation' && state.pendingFounding?.playerId === playerId && showMergerModal && (
-          <div className="modal-backdrop" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.4)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
-            <div className="modal-content glass" style={{ padding: '2rem', minWidth: '300px', textAlign: 'center' }}>
-              <h3>Found a Corporation</h3>
+          <Modal isOpen={true} title="Found a Corporation" hideClose={true}>
+            <div style={{ textAlign: 'center' }}>
               <p style={{ marginBottom: '1.5rem' }}>Choose a corporation to found:</p>
               <div className="corp-options">
                 {(() => {
@@ -322,15 +321,14 @@ export function AcquireBoard() {
                       </div>
                     ));
                 })()}
-              </div>
+                            </div>
             </div>
-          </div>
+          </Modal>
         )}
 
         {state.phase === 'ChooseMergeSurvivor' && state.pendingSurvivorChoice?.playerId === playerId && showMergerModal && (
-          <div className="modal-backdrop" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.4)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
-            <div className="modal-content glass" style={{ padding: '2rem', minWidth: '300px', textAlign: 'center' }}>
-              <h3>Choose Surviving Corporation</h3>
+          <Modal isOpen={true} title="Choose Surviving Corporation" hideClose={true}>
+            <div style={{ textAlign: 'center' }}>
               <p>A merger occurred! Choose which corporation will survive:</p>
               <div className="corp-buttons" style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
                 {state.pendingSurvivorChoice.tiedCorps.map(corp => {
@@ -345,15 +343,14 @@ export function AcquireBoard() {
                     </button>
                   );
                 })}
-              </div>
+                            </div>
             </div>
-          </div>
+          </Modal>
         )}
 
         {isMyTurn && state.phase === 'MergeResolution' && pm && dCorp && aCorp && showMergerModal && (
-          <div className="modal-backdrop" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
-            <div className="merge-panel" style={{ backgroundColor: '#1e293b', padding: '30px', border: '2px solid var(--accent)', minWidth: '400px', borderRadius: '12px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
-              <h4 style={{ margin: '0 0 10px 0', textAlign: 'center' }}>Resolve Merge Stocks</h4>
+          <Modal isOpen={true} title="Resolve Merge Stocks" hideClose={true}>
+            <div style={{ textAlign: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px', margin: '20px 0' }}>
                 <div className={`board-cell ${dCorp.toLowerCase()}`} style={{ width: '100px', height: '70px', flex: 'none', borderRadius: '8px', opacity: 0.8 }}>
                   <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '1px', opacity: 0.8 }}>Defunct</div>
@@ -427,13 +424,12 @@ export function AcquireBoard() {
                 <button className="btn primary" onClick={() => dispatch({ type: 'RESOLVE_MERGE_STOCKS', payload: { playerId, sell: 0, trade: 0, keep: 0 } })}>Continue</button>
               )}
             </div>
-          </div>
+          </Modal>
         )}
 
         {selectedCorp && (
-          <div className="modal-backdrop" onClick={() => setSelectedCorp(null)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.4)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
-            <div className="modal-content glass" onClick={e => e.stopPropagation()} style={{ padding: '2rem', minWidth: '300px' }}>
-              <h3 className={`corp-name ${selectedCorp.toLowerCase()}`} style={{ marginBottom: '1rem', display: 'inline-block' }}>{selectedCorp} Details</h3>
+          <Modal isOpen={true} title={`${selectedCorp} Details`} onClose={() => setSelectedCorp(null)}>
+            <div>
               <table style={{ width: '100%', textAlign: 'left', borderSpacing: '0 10px' }}>
                 <tbody>
                   <tr><th>Status</th><td>{state.corporations[selectedCorp].isActive ? 'Active' : 'Inactive'}</td></tr>
@@ -448,9 +444,9 @@ export function AcquireBoard() {
                   )}
                 </tbody>
               </table>
-              <button onClick={() => setSelectedCorp(null)} style={{ marginTop: '1.5rem', width: '100%' }}>Close</button>
+              <button className="btn primary" onClick={() => setSelectedCorp(null)} style={{ marginTop: '1.5rem', width: '100%' }}>Close</button>
             </div>
-          </div>
+          </Modal>
         )}
       </div>
 

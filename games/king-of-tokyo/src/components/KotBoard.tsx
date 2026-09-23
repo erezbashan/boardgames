@@ -563,11 +563,7 @@ export const KotBoard: React.FC = () => {
 
           {/* Bottom Right: Dice */}
           <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', padding: '10px', overflow: 'hidden' }}>
-            {status === 'Finished' && (
-              <div style={{ padding: '15px 40px', background: gameState.winnerId === myPlayerId ? '#22c55e' : 'rgba(255,255,255,0.1)', color: 'white', borderRadius: '12px', marginBottom: '30px', textAlign: 'center', fontSize: '32px', fontWeight: 'bold' }}>
-                {gameState.winnerId === myPlayerId ? "🏆 You Won!" : `Winner: ${gameState.winnerId && players[gameState.winnerId] ? players[gameState.winnerId].name : 'Unknown'}`}
-              </div>
-            )}
+            
 
             <div style={{ display: 'flex', gap: '10px', marginTop: '10px', flexWrap: 'nowrap', justifyContent: 'center', width: '100%', maxWidth: '500px' }}>
               {dice.map((d, index) => {
