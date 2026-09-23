@@ -370,3 +370,13 @@ header h2 { margin: 0; }
   70% { box-shadow: 0 0 0 10px rgba(255,255,255,0); }
   100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
 }
+
+:root {
+  --corp-tower: #facc15;
+  --corp-luxor: #ef4444;
+  --corp-american: #3b82f6;
+  --corp-worldwide: #a855f7;
+  --corp-festival: #22c55e;
+  --corp-imperial: #ec4899;
+  --corp-continental: #06b6d4;
+}
