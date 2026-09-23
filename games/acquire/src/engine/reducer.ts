@@ -10,6 +10,7 @@ import {
   chooseMergeSurvivor, 
   resolveMergeStocks 
 } from './engine';
+import { getBotAction } from './bots/registry';
 
 export const initialAcquireState: AcquireState = {
   ...(baseInitialState as unknown as AcquireState),
@@ -20,7 +21,34 @@ export const initialAcquireState: AcquireState = {
   history: []
 };
 
-export function acquireReducer(state: AcquireState, action: AcquireAction): AcquireState {
+function getActivePlayerId(state: AcquireState): string | null {
+  if (state.status !== 'Playing') return null;
+  if (state.phase === 'FoundCorporation' && state.pendingFounding) return state.pendingFounding.playerId;
+  if (state.phase === 'ChooseMergeSurvivor' && state.pendingSurvivorChoice) return state.pendingSurvivorChoice.playerId;
+  if (state.phase === 'MergeResolution' && state.pendingMerge) return state.playerOrder[state.pendingMerge.playerResolutionIndex];
+  return state.playerOrder[state.currentPlayerIndex];
+}
+
+function scheduleBotIfNeeded(state: AcquireState): AcquireState {
+  if (state.status !== 'Playing') return state;
+  const activeId = getActivePlayerId(state);
+  if (!activeId) return state;
+  
+  const player = state.players[activeId];
+  if (!player || !player.isBot) return state;
+  
+  // Don't schedule if already queued
+  if (state.actionQueue && state.actionQueue.some(a => (a.action as any).type === 'PLAY_BOT')) {
+    return state;
+  }
+  
+  return {
+    ...state,
+    actionQueue: [...(state.actionQueue || []), { delayMs: 1500, action: { type: 'PLAY_BOT' } }]
+  };
+}
+
+export function acquireReducer(state: AcquireState, action: AcquireAction & { __isSimulation?: boolean }): AcquireState {
   let newState = baseReducer(state, action) as AcquireState;
   
   if (newState !== state) {
@@ -48,16 +76,34 @@ export function acquireReducer(state: AcquireState, action: AcquireAction): Acqu
       newState = startGame(newState);
     }
     
-    return newState;
+    return scheduleBotIfNeeded(newState);
   }
 
+  // Handle core actions
+  let finalState = state;
   switch (action.type) {
-    case 'PLAY_TILE': return playTile(state, action.payload.playerId, action.payload.tileId);
-    case 'FOUND_CORPORATION': return foundCorporation(state, action.payload.playerId, action.payload.corpName);
-    case 'BUY_STOCK': return buyStock(state, action.payload.playerId, action.payload.corpName);
-    case 'END_TURN': return endTurn(state);
-    case 'CHOOSE_MERGE_SURVIVOR': return chooseMergeSurvivor(state, action.payload.playerId, action.payload.survivorName);
-    case 'RESOLVE_MERGE_STOCKS': return resolveMergeStocks(state, action.payload.playerId, action.payload.sell, action.payload.trade, action.payload.keep);
-    default: return state;
+    case 'PLAY_TILE': finalState = playTile(state, action.payload.playerId, action.payload.tileId); break;
+    case 'FOUND_CORPORATION': finalState = foundCorporation(state, action.payload.playerId, action.payload.corpName); break;
+    case 'BUY_STOCK': finalState = buyStock(state, action.payload.playerId, action.payload.corpName); break;
+    case 'END_TURN': finalState = endTurn(state); break;
+    case 'CHOOSE_MERGE_SURVIVOR': finalState = chooseMergeSurvivor(state, action.payload.playerId, action.payload.survivorName); break;
+    case 'RESOLVE_MERGE_STOCKS': finalState = resolveMergeStocks(state, action.payload.playerId, action.payload.sell, action.payload.trade, action.payload.keep); break;
+    case 'PLAY_BOT' as any: {
+      const botId = getActivePlayerId(state);
+      if (botId && state.players[botId]?.isBot) {
+         const botAction = getBotAction(state, botId);
+         if (botAction) {
+             finalState = acquireReducer(state, { ...botAction, __isSimulation: action.__isSimulation });
+         }
+      }
+      break;
+    }
   }
+
+  // Skip delay in simulations
+  if (action.__isSimulation && finalState.actionQueue) {
+    finalState.actionQueue = finalState.actionQueue.map(a => ({ ...a, delayMs: 0 }));
+  }
+
+  return scheduleBotIfNeeded(finalState);
 }

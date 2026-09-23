@@ -121,16 +121,6 @@ export function AcquireBoard() {
              );
           })}
         </div>
-        {pId === playerId && p.tiles && p.tiles.length > 0 && (
-          <div style={{ marginTop: '10px', background: 'rgba(0,0,0,0.2)', padding: '5px', borderRadius: '4px' }}>
-            <div style={{ fontSize: '11px', color: 'gray', marginBottom: '5px' }}>Your Tiles:</div>
-            <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-              {p.tiles.map(t => (
-                 <span key={t.id} style={{ background: '#3b82f6', color: 'white', padding: '2px 6px', borderRadius: '4px', fontSize: '12px' }}>{t.id}</span>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     );
   };
@@ -145,13 +135,6 @@ export function AcquireBoard() {
       renderGameSpecificPlayerDetails={renderPlayerDetails}
       renderLogMessage={renderLogMessage}
     >
-      <pre style={{ position: 'fixed', top: 0, left: 0, zIndex: 9999, background: 'black', color: 'lime', padding: '10px', fontSize: '10px' }}>
-        DEBUG INFO:
-        playerId: {playerId}
-        me: {JSON.stringify(me, null, 2)}
-        playerOrder: {JSON.stringify(state.playerOrder)}
-        isMyTurn: {JSON.stringify(isMyTurn)}
-      </pre>
       <div className="game-container" style={{ padding: '0px', display: 'flex', flexDirection: 'row', gap: '20px', height: '100%' }}>
         <div className="board glass" style={{ flex: '2', minWidth: '0' }}>
           {Array.from({length: 9}).map((_, rIdx) => {
