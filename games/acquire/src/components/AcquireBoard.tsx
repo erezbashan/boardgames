@@ -406,7 +406,6 @@ export function AcquireBoard() {
           </div>
         )}
       </div>
-        </div>
 
         {/* Action Controls / Buy Market Below Board */}
         <div style={{ width: '220px', flex: 'none' }}>
@@ -463,7 +462,7 @@ export function AcquireBoard() {
 
           </div>
         </div>
-
+      </div>
         </GameLayout>
   );
 }
