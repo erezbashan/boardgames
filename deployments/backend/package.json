@@ -16,7 +16,11 @@
   },
   "dependencies": {
     "firebase-admin": "^11.11.0",
-    "firebase-functions": "^6.0.0"
+    "firebase-functions": "^6.0.0",
+    "@erez/boardgame-core": "file:./boardgame-core.tgz",
+    "@erez/flips": "file:./flips.tgz",
+    "@erez/king-of-tokyo": "file:./king-of-tokyo.tgz",
+    "@erez/acquire": "file:./acquire.tgz"
   },
   "devDependencies": {
     "typescript": "^5.0.0"
