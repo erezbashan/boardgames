@@ -22,6 +22,3 @@ registerGame('splendor', { reducer: splendorReducer, initialState: initialSplend
 
 // Export everything from the modular files
 export * from './gameplay';
-export * from './genetic';
-export * from './qlearning';
-export * from './tournament';
