@@ -380,6 +380,7 @@ export function resolveMergeStocks(state: AcquireState, playerId: string, sellCo
   const aCorp = pm.acquirer;
   const player = state.players[playerId];
   if (!player) return state;
+  const beforeRanks = getRankings(state, aCorp);
   const currentStocks = player.stocks[dCorp] || 0;
   if (sellCount + tradeCount + keepCount !== currentStocks) return state; // Invalid numbers
 
@@ -415,6 +416,48 @@ export function resolveMergeStocks(state: AcquireState, playerId: string, sellCo
   };
   
   newState.logs = [...newState.logs, `${player.name} resolved ${dCorp}: Sold ${sellCount}, Traded ${finalTradedDefunct} for ${finalTradedAcquirerStocks} ${aCorp}, Kept ${keepCount}.`];
+
+  if (finalTradedAcquirerStocks > 0) {
+    const afterRanks = getRankings(newState, aCorp);
+    const startRanks = beforeRanks;
+
+    if (startRanks.first.join(',') !== afterRanks.first.join(',') || startRanks.second.join(',') !== afterRanks.second.join(',')) {
+      const isFirst = afterRanks.first.includes(playerId);
+      const isSharedFirst = isFirst && afterRanks.first.length > 1;
+      const isSecond = afterRanks.second.includes(playerId);
+      
+      let msg = '';
+      
+      if (isFirst && !isSharedFirst) {
+        const deposed = startRanks.first.filter((id: string) => id !== playerId).map((id: string) => newState.players[id].name);
+        if (deposed.length > 0) {
+          msg = `${player.name} deposed ${deposed.join(' and ')} to take sole 1st place in ${aCorp}!`;
+        } else {
+          msg = `${player.name} took sole 1st place in ${aCorp}!`;
+        }
+      } else if (isFirst) {
+        const tiedWith = afterRanks.first.filter((id: string) => id !== playerId).map((id: string) => newState.players[id].name);
+        msg = `${player.name} tied with ${tiedWith.join(' and ')} for 1st place in ${aCorp}!`;
+      } else if (isSecond) {
+        const tiedWith = afterRanks.second.filter((id: string) => id !== playerId).map((id: string) => newState.players[id].name);
+        if (tiedWith.length > 0) {
+          msg = `${player.name} tied with ${tiedWith.join(' and ')} for 2nd place in ${aCorp}!`;
+        } else {
+          const deposed = startRanks.second.filter((id: string) => id !== playerId).map((id: string) => newState.players[id].name);
+          if (deposed.length > 0) {
+             msg = `${player.name} deposed ${deposed.join(' and ')} to take 2nd place in ${aCorp}!`;
+          } else {
+             msg = `${player.name} moved up to 2nd place in ${aCorp}!`;
+          }
+        }
+      }
+      
+      if (msg) {
+        newState.logs.push(msg);
+        newState.turnContext = { ...newState.turnContext, rankChange: { corp: aCorp, triggerPlayerId: playerId } };
+      }
+    }
+  }
   
   // Advance to next player
   newState.pendingMerge = {
