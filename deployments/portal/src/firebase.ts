@@ -20,8 +20,8 @@ const db = getFirestore(app);
 const functions = getFunctions(app);
 const auth = getAuth(app);
 
-// Use local emulators for development
-if (true) {
+// Use local emulators for development only
+if (import.meta.env.DEV || window.location.hostname === 'localhost') {
   connectFirestoreEmulator(db, 'localhost', 8080);
   connectFunctionsEmulator(functions, 'localhost', 5001);
   connectAuthEmulator(auth, 'http://localhost:9099');
