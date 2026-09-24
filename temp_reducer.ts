@@ -68,22 +68,6 @@ function calculatePayment(player: SplendorPlayer, card: Card): GemInventory | nu
   return payment;
 }
 
-
-function scheduleBotIfNeeded(state: SplendorGameState): SplendorGameState {
-  if (state.status !== 'Playing') return state;
-  const currentPlayerId = state.playerOrder[state.currentPlayerIndex];
-  const player = state.players[currentPlayerId];
-  if (!player || !player.isBot) return state;
-
-  if (state.actionQueue && state.actionQueue.some(a => (a.action as any).type === 'PLAY_BOT')) {
-    return state;
-  }
-  return {
-    ...state,
-    actionQueue: [...(state.actionQueue || []), { delayMs: 1500, action: { type: 'PLAY_BOT' } as any }]
-  };
-}
-
 function advanceTurnOrCheckNobles(state: SplendorGameState, playerId: string): SplendorGameState {
   const player = state.players[playerId];
   
@@ -121,7 +105,7 @@ function advanceTurnOrCheckNobles(state: SplendorGameState, playerId: string): S
       nobles: state.nobles.filter(n => n.id !== noble.id),
       logs: [...state.logs, `${player.name} was visited by a Noble!`]
     };
-    return scheduleBotIfNeeded(finishTurn(newState, playerId));
+    return finishTurn(newState, playerId);
   } else if (eligibleNobles.length > 1) {
     // Need to choose
     return {
@@ -131,7 +115,7 @@ function advanceTurnOrCheckNobles(state: SplendorGameState, playerId: string): S
     };
   }
 
-  return scheduleBotIfNeeded(finishTurn(state, playerId));
+  return finishTurn(state, playerId);
 }
 
 function finishTurn(state: SplendorGameState, playerId: string): SplendorGameState {
@@ -169,7 +153,7 @@ function finishTurn(state: SplendorGameState, playerId: string): SplendorGameSta
     currentPlayerIndex: nextIndex,
     turnState: 'take_tokens',
     isFinalRound,
-    logs: [...state.logs, `--- ${state.players[state.playerOrder[nextIndex]].name}'s Turn ---`]
+    logs: [...state.logs, `It is now ${state.players[state.playerOrder[nextIndex]].name}'s turn.`]
   };
 }
 
@@ -241,8 +225,8 @@ export function splendorReducer(state: SplendorGameState, action: SplendorAction
       };
 
       initializedState = replenishBoard(initializedState);
-      initializedState.logs = [...initializedState.logs, "Game started!", `--- ${initializedState.players[initializedState.playerOrder[0]].name}\'s Turn ---`];
-      return scheduleBotIfNeeded(initializedState);
+      initializedState.logs = [...initializedState.logs, "Game started!"];
+      return initializedState;
     }
 
     case 'TAKE_GEMS': {
@@ -287,10 +271,10 @@ export function splendorReducer(state: SplendorGameState, action: SplendorAction
           ...state.players,
           [playerId]: { ...player, gems: newPlayerGems }
         },
-        logs: [...state.logs, `${player.name} took ${Object.entries(requested).filter(([_, v]) => v > 0).map(([k, v]) => `${v} ${k}`).join(', ')}.`]
+        logs: [...state.logs, `${player.name} took gems.`]
       };
 
-      return scheduleBotIfNeeded(advanceTurnOrCheckNobles(newState, playerId));
+      return advanceTurnOrCheckNobles(newState, playerId);
     }
 
     case 'DISCARD_GEMS': {
@@ -327,7 +311,7 @@ export function splendorReducer(state: SplendorGameState, action: SplendorAction
       };
 
       // Proceed to noble check / finish turn
-      return scheduleBotIfNeeded(advanceTurnOrCheckNobles(newState, playerId));
+      return advanceTurnOrCheckNobles(newState, playerId);
     }
 
     case 'RESERVE_CARD_BOARD': {
@@ -370,7 +354,7 @@ export function splendorReducer(state: SplendorGameState, action: SplendorAction
       };
 
       newState = replenishBoard(newState);
-      return scheduleBotIfNeeded(advanceTurnOrCheckNobles(newState, playerId));
+      return advanceTurnOrCheckNobles(newState, playerId);
     }
 
     case 'RESERVE_CARD_DECK': {
@@ -407,7 +391,7 @@ export function splendorReducer(state: SplendorGameState, action: SplendorAction
         logs
       };
 
-      return scheduleBotIfNeeded(advanceTurnOrCheckNobles(newState, playerId));
+      return advanceTurnOrCheckNobles(newState, playerId);
     }
 
     case 'PURCHASE_CARD_BOARD': {
@@ -453,7 +437,7 @@ export function splendorReducer(state: SplendorGameState, action: SplendorAction
       };
 
       newState = replenishBoard(newState);
-      return scheduleBotIfNeeded(advanceTurnOrCheckNobles(newState, playerId));
+      return advanceTurnOrCheckNobles(newState, playerId);
     }
 
     case 'PURCHASE_RESERVED_CARD': {
@@ -495,7 +479,7 @@ export function splendorReducer(state: SplendorGameState, action: SplendorAction
         logs: [...state.logs, `${player.name} purchased a reserved card for ${card.points} points.`]
       };
 
-      return scheduleBotIfNeeded(advanceTurnOrCheckNobles(newState, playerId));
+      return advanceTurnOrCheckNobles(newState, playerId);
     }
 
     case 'CHOOSE_NOBLE': {
@@ -523,87 +507,7 @@ export function splendorReducer(state: SplendorGameState, action: SplendorAction
         logs: [...state.logs, `${player.name} chose to be visited by a Noble!`]
       };
 
-      return scheduleBotIfNeeded(finishTurn(newState, playerId));
-    }
-
-    
-    case 'PLAY_BOT': {
-      if (state.status !== 'Playing') return state;
-      const playerId = state.playerOrder[state.currentPlayerIndex];
-      const player = state.players[playerId];
-      if (!player || !player.isBot) return state;
-
-      if (state.turnState === 'choose_noble') {
-        const nobleId = state.eligibleNoblesForCurrentPlayer[0].id;
-        return splendorReducer(state, { type: 'CHOOSE_NOBLE', payload: { nobleId } } as any);
-      }
-
-      if (state.turnState === 'discard_tokens') {
-        const toDiscard: Partial<GemInventory> = {};
-        let count = state.pendingDiscardCount;
-        const tempGems = { ...player.gems };
-        while (count > 0) {
-          const available = BaseGemTypes.filter(g => tempGems[g] > 0);
-          if (available.length === 0) break;
-          const g = available[Math.floor(Math.random() * available.length)];
-          tempGems[g]--;
-          toDiscard[g] = (toDiscard[g] || 0) + 1;
-          count--;
-        }
-        return splendorReducer(state, { type: 'DISCARD_GEMS', payload: { gems: toDiscard } } as any);
-      }
-
-      for (const card of player.reservedCards) {
-        if (calculatePayment(player, card)) {
-          return splendorReducer(state, { type: 'PURCHASE_RESERVED_CARD', payload: { cardId: card.id } } as any);
-        }
-      }
-
-      for (const tier of ['tier3', 'tier2', 'tier1'] as const) {
-        for (const card of state.board[tier]) {
-          if (card && calculatePayment(player, card)) {
-            const tierNum = tier === 'tier1' ? 1 : tier === 'tier2' ? 2 : 3;
-            return splendorReducer(state, { type: 'PURCHASE_CARD_BOARD', payload: { tier: tierNum, cardId: card.id } } as any);
-          }
-        }
-      }
-
-      if (Math.random() < 0.1 && player.reservedCards.length < 3) {
-        if (state.decks.tier1.length > 0) {
-          return splendorReducer(state, { type: 'RESERVE_CARD_DECK', payload: { tier: 1 } } as any);
-        }
-      }
-
-      if (Math.random() < 0.33) {
-        const availableDouble = BaseGemTypes.filter(g => state.bank[g] >= 4);
-        if (availableDouble.length > 0) {
-          const g = availableDouble[Math.floor(Math.random() * availableDouble.length)];
-          return splendorReducer(state, { type: 'TAKE_GEMS', payload: { gems: { [g]: 2 } } } as any);
-        }
-      }
-
-      const availableTypes = BaseGemTypes.filter(g => state.bank[g] > 0);
-      const toTake: Partial<GemInventory> = {};
-      const numToTake = Math.min(3, availableTypes.length);
-      
-      for (let i = availableTypes.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [availableTypes[i], availableTypes[j]] = [availableTypes[j], availableTypes[i]];
-      }
-
-      for (let i = 0; i < numToTake; i++) {
-        toTake[availableTypes[i]] = 1;
-      }
-
-      if (numToTake > 0) {
-         return splendorReducer(state, { type: 'TAKE_GEMS', payload: { gems: toTake } } as any);
-      } else {
-         let newState: SplendorGameState = {
-           ...state,
-           logs: [...state.logs, `${player.name} passed their turn (nothing to do).`]
-         };
-         return scheduleBotIfNeeded(finishTurn(newState, playerId));
-      }
+      return finishTurn(newState, playerId);
     }
 
     default:

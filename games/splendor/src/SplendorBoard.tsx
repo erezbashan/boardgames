@@ -84,10 +84,10 @@ export const SplendorBoard: React.FC = () => {
     if (!card) return <div className="splendor-card-empty" />;
     
     return (
-      <div className="splendor-card" style={{ backgroundColor: GEM_COLORS[card.bonus] }}>
+      <div className="splendor-card">
         <div className="splendor-card-header">
           <div className="splendor-card-points">{card.points > 0 ? card.points : ''}</div>
-          <div className="splendor-card-bonus" />
+          <div className="splendor-card-bonus" style={{ backgroundColor: GEM_COLORS[card.bonus] }} title={`Provides 1 ${card.bonus}`} />
         </div>
         
         <div className="splendor-card-costs">
@@ -112,8 +112,70 @@ export const SplendorBoard: React.FC = () => {
     );
   };
 
+  const renderPlayerDetails = (pid: string) => {
+    const player = gameState.players[pid];
+    if (!player) return null;
+    const bonuses: Record<string, number> = { diamond: 0, sapphire: 0, emerald: 0, ruby: 0, onyx: 0 };
+    player.cards.forEach(c => bonuses[c.bonus]++);
+
+    return (
+      <div className="splendor-player-details">
+        <div style={{ fontWeight: 'bold', fontSize: '1.25rem', color: '#fbbf24' }}>{player.score} pts</div>
+        
+        <div>
+          
+          <div className="splendor-stat-tokens">
+            {(Object.keys(player.gems) as GemType[]).map(g => player.gems[g] > 0 && (
+              <div key={g} className="splendor-stat-token" title="Current Token" style={{ backgroundColor: GEM_COLORS[g], color: g === 'diamond' || g === 'gold' ? 'black' : 'white' }}>
+                {player.gems[g]}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          
+          <div className="splendor-stat-tokens">
+            {BaseGemTypes.map(g => bonuses[g] > 0 && (
+              <div key={g} className="splendor-stat-bonus" title="Permanent Card Gem" style={{ backgroundColor: GEM_COLORS[g], color: g === 'diamond' ? 'black' : 'white' }}>
+                {bonuses[g]}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {player.reservedCards.length > 0 && (
+          <div style={{ marginTop: '0.25rem' }}>
+            <div style={{ fontSize: "0.75rem", color: "#9ca3af" }}>⏳</div>
+            <div className="splendor-reserved-cards">
+              {player.reservedCards.map((c, i) => <div key={i}>{renderCard(c, c.tier, true)}</div>)}
+            </div>
+          </div>
+        )}
+        
+        {turnState === 'choose_noble' && isMyTurn && pid === myPlayerId && (
+          <div className="splendor-noble-choice">
+            <div className="splendor-noble-choice-title">Choose Noble:</div>
+            <div className="splendor-noble-choice-btns">
+              {gameState.eligibleNoblesForCurrentPlayer.map(n => (
+                <button key={n.id} onClick={() => dispatch({ type: 'CHOOSE_NOBLE', payload: { nobleId: n.id } })} className="splendor-noble-btn">
+                  {n.points} pts
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
-    <GameLayout gameName="Splendor" helpText="Collect gems to buy cards and gain points." helpUrl="">
+    <GameLayout 
+      gameName="Splendor" 
+      helpText="Collect gems to buy cards and gain points." 
+      helpUrl=""
+      renderGameSpecificPlayerDetails={renderPlayerDetails}
+    >
       {gameState.status === 'Lobby' ? (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'white', fontSize: '1.25rem' }}>
           Waiting for the host to start the game...
@@ -121,8 +183,27 @@ export const SplendorBoard: React.FC = () => {
       ) : (
       <div className="splendor-board">
         
-        <div className="splendor-top-area">
+        <div className="splendor-left-col">
           <div className="splendor-panel">
+            <h3 className="splendor-panel-title">Nobles</h3>
+            <div className="splendor-nobles">
+              {gameState.nobles.map(n => (
+                <div key={n.id} className="splendor-noble">
+                  <div style={{ fontWeight: 'bold' }}>{n.points} pts</div>
+                  <div className="splendor-noble-reqs">
+                    {BaseGemTypes.map(g => n.requirements[g] ? (
+                      <div key={g} className="splendor-noble-req">
+                        <div className="splendor-mini-token" style={{ backgroundColor: GEM_COLORS[g] }} />
+                        <span>{n.requirements[g]}</span>
+                      </div>
+                    ) : null)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="splendor-panel splendor-bank-panel">
             <h3 className="splendor-panel-title">Bank</h3>
             <div className="splendor-bank-tokens">
               {(Object.keys(gameState.bank) as GemType[]).map(gem => (
@@ -133,7 +214,7 @@ export const SplendorBoard: React.FC = () => {
                   style={{ 
                     backgroundColor: GEM_COLORS[gem], 
                     color: gem === 'diamond' || gem === 'gold' ? 'black' : 'white', 
-                    border: selectedGems[gem] ? '3px solid white' : 'none' 
+                    border: selectedGems[gem] ? '3px solid white' : '2px solid rgba(0,0,0,0.2)' 
                   }}
                 >
                   {gameState.bank[gem]}
@@ -148,26 +229,10 @@ export const SplendorBoard: React.FC = () => {
               </div>
             )}
             {turnState === 'discard_tokens' && isMyTurn && (
-              <div style={{ marginTop: '0.5rem', color: '#f87171', fontWeight: 'bold' }}>
+              <div style={{ marginTop: '0.5rem', color: '#fca5a5', fontWeight: 'bold' }}>
                 Discard {gameState.pendingDiscardCount} tokens...
               </div>
             )}
-          </div>
-
-          <div className="splendor-panel">
-            <h3 className="splendor-panel-title">Nobles</h3>
-            <div className="splendor-nobles">
-              {gameState.nobles.map(n => (
-                <div key={n.id} className="splendor-noble">
-                  <div style={{ fontWeight: 'bold' }}>{n.points}</div>
-                  <div className="splendor-noble-reqs">
-                    {BaseGemTypes.map(g => n.requirements[g] ? (
-                      <div key={g} className="splendor-mini-token" style={{ backgroundColor: GEM_COLORS[g] }} />
-                    ) : null)}
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
 
@@ -188,74 +253,8 @@ export const SplendorBoard: React.FC = () => {
             </div>
           ))}
         </div>
-
-        <div className="splendor-players-grid">
-          {gameState.playerOrder.map(pid => {
-            const player = gameState.players[pid];
-            if (!player) return null;
-            const bonuses: Record<string, number> = { diamond: 0, sapphire: 0, emerald: 0, ruby: 0, onyx: 0 };
-            player.cards.forEach(c => bonuses[c.bonus]++);
-
-            return (
-              <div key={pid} className={`splendor-player-card ${pid === gameState.playerOrder[gameState.currentPlayerIndex] ? 'active' : ''}`}>
-                <div className="splendor-player-header">
-                  <h3 className="splendor-player-name">
-                    <span className="splendor-mini-token" style={{ backgroundColor: player.color }} />
-                    {player.name}
-                  </h3>
-                  <div className="splendor-player-score">{player.score} pts</div>
-                </div>
-                
-                <div className="splendor-player-stats">
-                  <div className="splendor-stat-group">
-                    <div className="splendor-stat-title">Tokens</div>
-                    <div className="splendor-stat-tokens">
-                      {(Object.keys(player.gems) as GemType[]).map(g => player.gems[g] > 0 && (
-                        <div key={g} className="splendor-stat-token" style={{ backgroundColor: GEM_COLORS[g], color: g === 'diamond' || g === 'gold' ? 'black' : 'white' }}>
-                          {player.gems[g]}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="splendor-stat-group">
-                    <div className="splendor-stat-title">Bonuses</div>
-                    <div className="splendor-stat-tokens">
-                      {BaseGemTypes.map(g => bonuses[g] > 0 && (
-                        <div key={g} className="splendor-stat-bonus" style={{ backgroundColor: GEM_COLORS[g] }}>
-                          {bonuses[g]}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {player.reservedCards.length > 0 && (
-                  <div className="splendor-reserved-group">
-                    <div className="splendor-stat-title">Reserved</div>
-                    <div className="splendor-reserved-cards">
-                      {player.reservedCards.map((c, i) => <div key={i}>{renderCard(c, c.tier, true)}</div>)}
-                    </div>
-                  </div>
-                )}
-                
-                {turnState === 'choose_noble' && isMyTurn && pid === myPlayerId && (
-                  <div className="splendor-noble-choice">
-                    <div className="splendor-noble-choice-title">Choose a Noble to visit you:</div>
-                    <div className="splendor-noble-choice-btns">
-                      {gameState.eligibleNoblesForCurrentPlayer.map(n => (
-                        <button key={n.id} onClick={() => dispatch({ type: 'CHOOSE_NOBLE', payload: { nobleId: n.id } })} className="splendor-noble-btn">
-                          {n.points} pts
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
       </div>
       )}
     </GameLayout>
   );
-};
+}

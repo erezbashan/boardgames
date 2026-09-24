@@ -56,4 +56,5 @@ export type SplendorAction =
   | { type: 'RESERVE_CARD_DECK'; payload: { tier: 1 | 2 | 3 } }
   | { type: 'PURCHASE_CARD_BOARD'; payload: { tier: 1 | 2 | 3; cardId: string; autoPay?: boolean } }
   | { type: 'PURCHASE_RESERVED_CARD'; payload: { cardId: string; autoPay?: boolean } }
-  | { type: 'CHOOSE_NOBLE'; payload: { nobleId: string } };
+  | { type: 'CHOOSE_NOBLE'; payload: { nobleId: string } }
+  | { type: 'PLAY_BOT' };
