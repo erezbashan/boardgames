@@ -760,6 +760,10 @@ export function buyStock(state: AcquireState, playerId: string, corpName: Corpor
     }
   }
 
+  if (shouldAutoEndTurn(newState)) {
+    return endTurn(newState);
+  }
+
   return newState;
 }
 
