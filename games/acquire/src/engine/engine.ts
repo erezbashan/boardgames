@@ -60,7 +60,6 @@ export function createInitialGameState(id: string): AcquireState {
     availableTiles: createInitialTiles(),
     phase: 'PlayTile',
     sharesBoughtThisTurn: 0,
-    turnContext: { ...newState.turnContext, rankChange: undefined, lastPlacedTile: undefined },
     playerOrder: [],
     logs: ['Game created. Waiting for players...'],
     history: []
@@ -817,7 +816,8 @@ export function endTurn(state: AcquireState): AcquireState {
     ...newState,
     currentPlayerIndex: nextPlayerIndex,
     phase: 'PlayTile',
-    sharesBoughtThisTurn: 0
+    sharesBoughtThisTurn: 0,
+    turnContext: { ...newState.turnContext, rankChange: undefined, lastPlacedTile: undefined }
   };
 }
 
