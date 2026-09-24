@@ -81,6 +81,25 @@ export function acquireReducer(state: AcquireState, action: AcquireAction & { __
     
     if (action.type === 'START_GAME') {
       newState = startGame(newState);
+    } else if (action.type === 'NEW_GAME') {
+      const freshGame = createInitialGameState('');
+      newState = {
+        ...newState,
+        ...freshGame,
+        players: newState.players, // already stripped of bots by baseReducer
+        playerOrder: newState.playerOrder,
+        history: [],
+      };
+      
+      for (const id in newState.players) {
+        newState.players[id] = {
+          ...newState.players[id],
+          money: 6000,
+          tiles: [],
+          stocks: { Tower: 0, Luxor: 0, American: 0, Worldwide: 0, Festival: 0, Imperial: 0, Continental: 0 },
+          stats: { chainsFounded: 0, mergesCaused: 0, firstBonuses: 0, secondBonuses: 0, sharesBought: 0 }
+        };
+      }
     }
     
     return scheduleBotIfNeeded(newState);

@@ -686,6 +686,12 @@ export function buyStock(state: AcquireState, playerId: string, corpName: Corpor
   newState.players = newPlayers;
   newState.sharesBoughtThisTurn = (newState.sharesBoughtThisTurn || 0) + 1;
   
+  newState.turnContext = { ...newState.turnContext };
+  if (!newState.turnContext.startOfTurnRanks) newState.turnContext.startOfTurnRanks = {};
+  if (!newState.turnContext.startOfTurnRanks[corpName]) {
+    newState.turnContext.startOfTurnRanks[corpName] = beforeRanks;
+  }
+  
   let newLogs = [...newState.logs];
   let foundBuyLog = false;
   
@@ -694,7 +700,7 @@ export function buyStock(state: AcquireState, playerId: string, corpName: Corpor
     if (log.includes('Turn ---')) break;
     
     if (log.includes(player.name) && log.includes(corpName) && 
-       (log.includes('took 1st place') || log.includes('sole 1st place') || log.includes('moved up to 2nd place') || log.includes('shakes up'))) {
+       (log.includes('place in') || log.includes('tied with') || log.includes('deposed') || log.includes('shakes up'))) {
       newLogs.splice(i, 1);
       continue;
     }
@@ -715,27 +721,43 @@ export function buyStock(state: AcquireState, playerId: string, corpName: Corpor
   newState.logs = newLogs;
 
   const afterRanks = getRankings(newState, corpName);
-  if (beforeRanks.first.join(',') !== afterRanks.first.join(',') || beforeRanks.second.join(',') !== afterRanks.second.join(',')) {
-    let msg = player.name + ' shakes up the ' + corpName + ' shareholder rankings!';
-    
+  const startRanks = newState.turnContext.startOfTurnRanks[corpName];
+
+  if (startRanks.first.join(',') !== afterRanks.first.join(',') || startRanks.second.join(',') !== afterRanks.second.join(',')) {
     const isFirst = afterRanks.first.includes(playerId);
     const isSharedFirst = isFirst && afterRanks.first.length > 1;
     const isSecond = afterRanks.second.includes(playerId);
-
+    
+    let msg = '';
+    
     if (isFirst && !isSharedFirst) {
-      msg = player.name + ' took sole 1st place in ' + corpName + '!';
+      const deposed = startRanks.first.filter((id: string) => id !== playerId).map((id: string) => newState.players[id].name);
+      if (deposed.length > 0) {
+        msg = `${player.name} deposed ${deposed.join(' and ')} to take sole 1st place in ${corpName}!`;
+      } else {
+        msg = `${player.name} took sole 1st place in ${corpName}!`;
+      }
     } else if (isFirst) {
-      msg = player.name + ' took 1st place in ' + corpName + '!';
+      const tiedWith = afterRanks.first.filter((id: string) => id !== playerId).map((id: string) => newState.players[id].name);
+      msg = `${player.name} tied with ${tiedWith.join(' and ')} for 1st place in ${corpName}!`;
     } else if (isSecond) {
-      msg = player.name + ' moved up to 2nd place in ' + corpName + '!';
+      const tiedWith = afterRanks.second.filter((id: string) => id !== playerId).map((id: string) => newState.players[id].name);
+      if (tiedWith.length > 0) {
+        msg = `${player.name} tied with ${tiedWith.join(' and ')} for 2nd place in ${corpName}!`;
+      } else {
+        const deposed = startRanks.second.filter((id: string) => id !== playerId).map((id: string) => newState.players[id].name);
+        if (deposed.length > 0) {
+           msg = `${player.name} deposed ${deposed.join(' and ')} to take 2nd place in ${corpName}!`;
+        } else {
+           msg = `${player.name} moved up to 2nd place in ${corpName}!`;
+        }
+      }
     }
-
-    newState.logs.push(msg);
-    newState.turnContext = { ...newState.turnContext, rankChange: { corp: corpName, triggerPlayerId: playerId } };
-  }
-  
-  if (shouldAutoEndTurn(newState)) {
-    return endTurn(newState);
+    
+    if (msg) {
+      newState.logs.push(msg);
+      newState.turnContext = { ...newState.turnContext, rankChange: { corp: corpName, triggerPlayerId: playerId } };
+    }
   }
 
   return newState;
