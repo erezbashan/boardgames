@@ -165,7 +165,7 @@ export const SplendorBoard: React.FC = () => {
     return (
       <div className="splendor-player-details" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ fontWeight: 'bold', fontSize: '1.25rem', color: '#fbbf24' }}>{player.score} pts</div>
+          <div style={{ fontWeight: 'bold', fontSize: '1.25rem', color: player.score >= 15 ? '#22c55e' : '#fbbf24', textShadow: player.score >= 15 ? '0 0 10px #22c55e' : 'none' }}>{player.score} pts {player.score >= 15 && '👑'}</div>
           {gameState.playerOrder[0] === pid && (
             <div style={{ backgroundColor: '#fbbf24', color: 'black', padding: '2px 6px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
               <span>🏅</span> 1st Player
@@ -284,7 +284,7 @@ export const SplendorBoard: React.FC = () => {
           Waiting for the host to start the game...
         </div>
       ) : (
-      <div className="splendor-board">
+      <div className="splendor-board">{gameState.isFinalRound && (<div style={{ position: "absolute", top: 0, left: 0, right: 0, background: "#ef4444", color: "white", textAlign: "center", padding: "4px", fontWeight: "bold", zIndex: 10, letterSpacing: "2px", animation: "pulseAffordable 2s infinite" }}>🚨 FINAL ROUND 🚨</div>)}
         
         <div className="splendor-left-col">
           <div className="splendor-panel">
