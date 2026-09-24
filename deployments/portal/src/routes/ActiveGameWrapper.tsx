@@ -6,6 +6,8 @@ import { KotBoard } from '@erez/king-of-tokyo';
 import type { KotState, KotAction } from '@erez/king-of-tokyo';
 import { AcquireBoard } from '@erez/acquire';
 import type { AcquireState, AcquireAction } from '@erez/acquire';
+import { SplendorBoard } from '@erez/splendor';
+import type { SplendorGameState, SplendorAction } from '@erez/splendor';
 import { useMultiplayerGame } from '../hooks/useMultiplayerGame';
 
 function ActiveFlipsGame({ gameId, username }: { gameId: string, username: string }) {
@@ -77,6 +79,27 @@ function ActiveAcquireGame({ gameId, username }: { gameId: string, username: str
   );
 }
 
+function ActiveSplendorGame({ gameId, username }: { gameId: string, username: string }) {
+  const { gameState, myPlayerId, dispatchToBackend, error } = useMultiplayerGame<SplendorGameState, SplendorAction>(gameId, 'splendor', username);
+  const navigate = useNavigate();
+
+  if (error) return <div style={{ color: 'white', padding: '40px' }}>Error: {error}</div>;
+  if (!gameState || !myPlayerId) return <div style={{ color: 'white', padding: '40px' }}>Loading game...</div>;
+
+  const value = {
+    gameState,
+    myPlayerId,
+    dispatch: dispatchToBackend as any,
+    onLeaveGame: () => navigate('/splendor')
+  };
+
+  return (
+    <GameProvider value={value}>
+      <SplendorBoard />
+    </GameProvider>
+  );
+}
+
 export function ActiveGameWrapper() {
   const { gameType, gameId } = useParams();
   const location = useLocation();
@@ -93,6 +116,10 @@ export function ActiveGameWrapper() {
 
   if (gameType === 'acquire') {
     return <ActiveAcquireGame gameId={gameId!} username={username} />;
+  }
+
+  if (gameType === 'splendor') {
+    return <ActiveSplendorGame gameId={gameId!} username={username} />;
   }
 
   return (

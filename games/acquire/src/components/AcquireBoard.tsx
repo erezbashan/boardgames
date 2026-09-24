@@ -347,16 +347,16 @@ export function AcquireBoard() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '10px' }}>
                   <table style={{ width: '100%', textAlign: 'center', borderSpacing: '0 15px' }}>
                     <tbody>
-                      <tr>
+                      <tr style={{ opacity: state.corporations[aCorp].availableStocks === 0 ? 0.5 : 1 }}>
                         <td style={{ textAlign: 'left', lineHeight: '1.2' }}>
                           <div>Trade 2 for 1</div>
-                          <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>(@ ${state.corporations[aCorp].stockPrice})</div>
+                          <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>(@ ${state.corporations[aCorp].stockPrice}) &bull; {state.corporations[aCorp].availableStocks} left</div>
                         </td>
                         <td style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                          <button disabled={tradeCount <= 0} onClick={() => setTradeCount(t => t - 2)} style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#334155', border: '1px solid #475569', color: 'white', cursor: tradeCount <= 0 ? 'not-allowed' : 'pointer', opacity: tradeCount <= 0 ? 0.5 : 1 }}>-</button>
+                          <button disabled={tradeCount <= 0 || state.corporations[aCorp].availableStocks === 0} onClick={() => setTradeCount(t => t - 2)} style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#334155', border: '1px solid #475569', color: 'white', cursor: (tradeCount <= 0 || state.corporations[aCorp].availableStocks === 0) ? 'not-allowed' : 'pointer', opacity: (tradeCount <= 0 || state.corporations[aCorp].availableStocks === 0) ? 0.5 : 1 }}>-</button>
                           <span style={{ margin: '0 15px', display: 'inline-block', width: '20px', textAlign: 'center', fontSize: '1.1rem' }}>{tradeCount}</span>
-                          <button disabled={tradeCount + 2 > Math.min(Math.floor((myDefunctStocks - sellCount) / 2) * 2, state.corporations[aCorp].availableStocks * 2)} onClick={() => setTradeCount(t => t + 2)} style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#334155', border: '1px solid #475569', color: 'white', cursor: 'pointer' }}>+</button>
-                          <button disabled={tradeCount + 2 > Math.min(Math.floor((myDefunctStocks - sellCount) / 2) * 2, state.corporations[aCorp].availableStocks * 2)} style={{ marginLeft: '10px', width: '50px', padding: '4px', borderRadius: '6px', background: '#475569', border: 'none', color: 'white', cursor: 'pointer' }} onClick={() => {
+                          <button disabled={tradeCount + 2 > Math.min(Math.floor((myDefunctStocks - sellCount) / 2) * 2, state.corporations[aCorp].availableStocks * 2) || state.corporations[aCorp].availableStocks === 0} onClick={() => setTradeCount(t => t + 2)} style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#334155', border: '1px solid #475569', color: 'white', cursor: (state.corporations[aCorp].availableStocks === 0 || tradeCount + 2 > Math.min(Math.floor((myDefunctStocks - sellCount) / 2) * 2, state.corporations[aCorp].availableStocks * 2)) ? 'not-allowed' : 'pointer', opacity: (state.corporations[aCorp].availableStocks === 0 || tradeCount + 2 > Math.min(Math.floor((myDefunctStocks - sellCount) / 2) * 2, state.corporations[aCorp].availableStocks * 2)) ? 0.5 : 1 }}>+</button>
+                          <button disabled={tradeCount + 2 > Math.min(Math.floor((myDefunctStocks - sellCount) / 2) * 2, state.corporations[aCorp].availableStocks * 2) || state.corporations[aCorp].availableStocks === 0} style={{ marginLeft: '10px', width: '50px', padding: '4px', borderRadius: '6px', background: '#475569', border: 'none', color: 'white', cursor: (state.corporations[aCorp].availableStocks === 0 || tradeCount + 2 > Math.min(Math.floor((myDefunctStocks - sellCount) / 2) * 2, state.corporations[aCorp].availableStocks * 2)) ? 'not-allowed' : 'pointer', opacity: (state.corporations[aCorp].availableStocks === 0 || tradeCount + 2 > Math.min(Math.floor((myDefunctStocks - sellCount) / 2) * 2, state.corporations[aCorp].availableStocks * 2)) ? 0.5 : 1 }} onClick={() => {
                             const maxTrades = Math.min(Math.floor((myDefunctStocks - sellCount) / 2) * 2, state.corporations[aCorp].availableStocks * 2);
                             setTradeCount(maxTrades);
                           }}>All</button>
@@ -405,7 +405,7 @@ export function AcquireBoard() {
         )}
 
         {selectedCorp && (
-          <Modal isOpen={true} title={`${selectedCorp} Details`} onClose={() => setSelectedCorp(null)}>
+          <Modal isOpen={true} title={`${selectedCorp} Details`} onClose={() => setSelectedCorp(null)} inline={true}>
             <div>
               <table style={{ width: '100%', textAlign: 'left', borderSpacing: '0 10px' }}>
                 <tbody>

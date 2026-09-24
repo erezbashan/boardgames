@@ -27,6 +27,13 @@ export function GameSelector() {
           <h2>Acquire</h2>
           <p>Real estate and wealth</p>
         </div>
+        <div 
+          onClick={() => navigate('/splendor')}
+          style={{ background: 'rgba(255,255,255,0.1)', padding: '30px', borderRadius: '16px', cursor: 'pointer', textAlign: 'center', minWidth: '200px' }}
+        >
+          <h2>Splendor</h2>
+          <p>Gems and engine building</p>
+        </div>
       </div>
     </div>
   );

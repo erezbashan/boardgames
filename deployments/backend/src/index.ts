@@ -6,6 +6,7 @@ import { registerGame } from '@erez/boardgame-core';
 import { flipsReducer, initialFlipsState } from '@erez/flips/dist/engine/reducer';
 import { acquireReducer, initialAcquireState } from '@erez/acquire';
 import { kingOfTokyoReducer, initialKotState } from '@erez/king-of-tokyo/dist/engine/reducer';
+import { splendorReducer, initialSplendorState } from '@erez/splendor';
 
 // Initialize Firebase Admin once
 admin.initializeApp();
@@ -16,6 +17,7 @@ db.settings({ ignoreUndefinedProperties: true });
 registerGame('flips', { reducer: flipsReducer, initialState: initialFlipsState });
 registerGame('king-of-tokyo', { reducer: kingOfTokyoReducer, initialState: initialKotState });
 registerGame('acquire', { reducer: acquireReducer, initialState: initialAcquireState });
+registerGame('splendor', { reducer: splendorReducer, initialState: initialSplendorState });
 
 
 // Export everything from the modular files

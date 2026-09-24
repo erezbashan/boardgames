@@ -20,7 +20,8 @@
     "@erez/boardgame-core": "file:./boardgame-core.tgz",
     "@erez/flips": "file:./flips.tgz",
     "@erez/king-of-tokyo": "file:./king-of-tokyo.tgz",
-    "@erez/acquire": "file:./acquire.tgz"
+    "@erez/acquire": "file:./acquire.tgz",
+    "@erez/splendor": "file:./splendor.tgz"
   },
   "devDependencies": {
     "typescript": "^5.0.0"
