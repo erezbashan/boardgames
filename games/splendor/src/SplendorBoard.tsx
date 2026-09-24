@@ -122,6 +122,11 @@ export const SplendorBoard: React.FC = () => {
           }
         }}
       >
+        {isClickable && (
+          <div className="splendor-card-hover-action">
+            {canAfford ? 'Buy' : 'Reserve'}
+          </div>
+        )}
         <div className="splendor-card-header">
           <div className="splendor-card-points" style={{ color: card.bonus === 'diamond'  ? 'black' : 'white' }}>{card.points > 0 ? card.points : ''}</div>
         </div>
