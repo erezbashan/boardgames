@@ -23,8 +23,8 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, title, onClose, children, 
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={() => onClose && onClose()} style={inline ? { position: 'absolute', zIndex: 50, borderRadius: '12px' } : {}}>
-      <div className="modal-content" style={{ maxWidth: width || '600px' }} onClick={e => e.stopPropagation()}>
+    <div className="modal-overlay" onClick={() => onClose && onClose()} style={inline ? { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 50, borderRadius: '12px' } : {}}>
+      <div className="modal-content" style={{ maxWidth: width || '600px', background: inline ? 'rgba(20, 20, 25, 0.8)' : undefined }} onClick={e => e.stopPropagation()}>
         <div className="modal-header">
           <h2 className="modal-title">{title}</h2>
           {!hideClose && onClose && <button className="modal-close-btn" onClick={onClose}>&times;</button>}
