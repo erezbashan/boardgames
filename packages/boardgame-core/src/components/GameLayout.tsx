@@ -141,16 +141,21 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
                 }
                 
                 let foundMyLastTurn = false;
+                const isMyTurnCurrently = gameState?.playerOrder?.[gameState.currentPlayerIndex] === myPlayerId;
+                const targetMyTurnsFound = isMyTurnCurrently ? 2 : 1;
+                let myTurnsFound = 0;
+                
                 for (let i = logs.length - 1; i >= 0; i--) {
-                  recentLogsStartIndex = i;
-                  if (logs[i].includes(`'s Turn ---`)) {
-                    if (myName && logs[i].includes(myName)) {
-                      // Found the start of my most recent turn
+                  if (logs[i].includes(`'s Turn ---`) && myName && logs[i].includes(myName)) {
+                    myTurnsFound++;
+                    recentLogsStartIndex = i;
+                    if (myTurnsFound === targetMyTurnsFound) {
                       foundMyLastTurn = true;
                       break;
                     }
                   }
                 }
+                
                 // Fallback if we couldn't find my turn (e.g. spectator or start of game)
                 if (!foundMyLastTurn) {
                   let turnsFound = 0;
@@ -158,16 +163,16 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
                     if (logs[i].includes(`'s Turn ---`)) {
                       turnsFound++;
                       recentLogsStartIndex = i;
-                      if (turnsFound === 2) {
+                      if (turnsFound === 5) {
                         break;
                       }
                     }
                   }
+                  if (logs.length - recentLogsStartIndex < 5) {
+                     recentLogsStartIndex = Math.max(0, logs.length - 10);
+                  }
                 }
                 
-                if (logs.length - recentLogsStartIndex < 5) {
-                   recentLogsStartIndex = Math.max(0, logs.length - 10);
-                }
                 const renderedAllLogs = logs.map((l: string, index: number) => <span key={`msg-${index}`}>{renderLogMessage ? renderLogMessage(l, (m) => colorizeLog(m, players)) : colorizeLog(l, players)}</span>);
                 const renderedRecentLogs = renderedAllLogs.slice(recentLogsStartIndex);
                 return <GameLog logs={renderedRecentLogs} allLogs={renderedAllLogs} rawLogs={logs} />;
