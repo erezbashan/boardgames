@@ -94,7 +94,7 @@ function advanceTurnOrCheckNobles(state: SplendorGameState, playerId: string): S
       ...state,
       turnState: 'discard_tokens',
       pendingDiscardCount: totalGems - 10,
-      logs: [...state.logs, `${player.name} must discard ${totalGems - 10} gems.`]
+      logs: [...state.logs, `${player.name} must discard ${totalGems - 10} gems`]
     };
   }
 
@@ -291,7 +291,7 @@ export function splendorReducer(state: SplendorGameState, action: SplendorAction
           ...state.players,
           [playerId]: { ...player, gems: newPlayerGems }
         },
-        logs: [...state.logs, `${player.name} took ${Object.entries(requested).filter(([_, v]) => v > 0).map(([k, v]) => Array(v).fill(`[${k}]`)).join(' ')}`]
+        logs: [...state.logs, `${player.name} took ${Object.entries(requested).filter(([_, v]) => v > 0).flatMap(([k, v]) => Array(v).fill(`[${k}]`)).join(' ')}`]
       };
 
       return scheduleBotIfNeeded(advanceTurnOrCheckNobles(newState, playerId));
@@ -327,7 +327,7 @@ export function splendorReducer(state: SplendorGameState, action: SplendorAction
         },
         turnState: 'take_tokens',
         pendingDiscardCount: 0,
-        logs: [...state.logs, `${player.name} discarded ${totalDiscarded} gems.`]
+        logs: [...state.logs, `${player.name} discarded ${totalDiscarded} gems`]
       };
 
       // Proceed to noble check / finish turn
@@ -354,12 +354,12 @@ export function splendorReducer(state: SplendorGameState, action: SplendorAction
 
       let newBank = { ...state.bank };
       let newPlayerGems = { ...player.gems };
-      let logs = [...state.logs, `${player.name} reserved a [${card.bonus}] tier ${tier} card.`];
+      let logs = [...state.logs, `${player.name} reserved a [${card.bonus}] tier ${tier} card`];
 
       if (newBank.gold > 0) {
         newBank.gold -= 1;
         newPlayerGems.gold += 1;
-        logs.push(`${player.name} took 1 gold token.`);
+        logs.push(`${player.name} took 1 gold token`);
       }
 
       let newState = {
@@ -393,7 +393,7 @@ export function splendorReducer(state: SplendorGameState, action: SplendorAction
 
       let newBank = { ...state.bank };
       let newPlayerGems = { ...player.gems };
-      let logs = [...state.logs, `${player.name} reserved a tier ${action.payload.tier} card from the deck.`];
+      let logs = [...state.logs, `${player.name} reserved a tier ${action.payload.tier} card from the deck`];
 
       if (newBank.gold > 0) {
         newBank.gold -= 1;
@@ -453,7 +453,7 @@ export function splendorReducer(state: SplendorGameState, action: SplendorAction
             score: player.score + card.points 
           }
         },
-        logs: [...state.logs, `${player.name} purchased a [${card.bonus}] tier ${tier} card for ${card.points} points.`]
+        logs: [...state.logs, `${player.name} purchased a [${card.bonus}] tier ${tier} card for ${card.points} points`]
       };
 
       newState = replenishBoard(newState);
@@ -496,7 +496,7 @@ export function splendorReducer(state: SplendorGameState, action: SplendorAction
             score: player.score + card.points 
           }
         },
-        logs: [...state.logs, `${player.name} purchased a [${card.bonus}] reserved card for ${card.points} points.`]
+        logs: [...state.logs, `${player.name} purchased a [${card.bonus}] reserved card for ${card.points} points`]
       };
 
       return scheduleBotIfNeeded(advanceTurnOrCheckNobles(newState, playerId));
@@ -604,7 +604,7 @@ export function splendorReducer(state: SplendorGameState, action: SplendorAction
       } else {
          let newState: SplendorGameState = {
            ...state,
-           logs: [...state.logs, `${player.name} passed their turn (nothing to do).`]
+           logs: [...state.logs, `${player.name} passed their turn (nothing to do)`]
          };
          return scheduleBotIfNeeded(finishTurn(newState, playerId));
       }
