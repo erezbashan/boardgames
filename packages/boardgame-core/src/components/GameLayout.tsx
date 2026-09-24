@@ -96,7 +96,7 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
           {status === 'Lobby' && (
             <button className="btn secondary" onClick={handleAddBot}>Add Bot</button>
           )}
-          {(status === 'Lobby' || status === 'Playing') && settings && (
+          {(status === 'Lobby' || status === 'Playing') && (
             <button className="btn secondary" onClick={() => setShowSettings(true)}>Settings</button>
           )}
           {status === 'Finished' && (
