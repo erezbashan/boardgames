@@ -7,11 +7,11 @@ export const ALL_CARDS: Card[] = [
     "points": 0,
     "bonus": "diamond",
     "cost": {
-      "diamond": 3,
+      "diamond": 0,
       "sapphire": 1,
-      "emerald": 0,
-      "ruby": 0,
-      "onyx": 0
+      "emerald": 2,
+      "ruby": 1,
+      "onyx": 1
     }
   },
   {
@@ -20,24 +20,24 @@ export const ALL_CARDS: Card[] = [
     "points": 0,
     "bonus": "sapphire",
     "cost": {
-      "diamond": 0,
-      "sapphire": 2,
-      "emerald": 1,
+      "diamond": 1,
+      "sapphire": 1,
+      "emerald": 0,
       "ruby": 1,
-      "onyx": 0
+      "onyx": 1
     }
   },
   {
     "id": "c1_2",
     "tier": 1,
-    "points": 1,
+    "points": 0,
     "bonus": "emerald",
     "cost": {
       "diamond": 1,
-      "sapphire": 2,
-      "emerald": 0,
-      "ruby": 0,
-      "onyx": 0
+      "sapphire": 0,
+      "emerald": 1,
+      "ruby": 1,
+      "onyx": 1
     }
   },
   {
@@ -47,8 +47,8 @@ export const ALL_CARDS: Card[] = [
     "bonus": "ruby",
     "cost": {
       "diamond": 0,
-      "sapphire": 3,
-      "emerald": 0,
+      "sapphire": 1,
+      "emerald": 1,
       "ruby": 0,
       "onyx": 1
     }
@@ -56,27 +56,27 @@ export const ALL_CARDS: Card[] = [
   {
     "id": "c1_4",
     "tier": 1,
-    "points": 0,
+    "points": 1,
     "bonus": "onyx",
     "cost": {
       "diamond": 1,
-      "sapphire": 1,
-      "emerald": 1,
+      "sapphire": 0,
+      "emerald": 0,
       "ruby": 1,
-      "onyx": 1
+      "onyx": 3
     }
   },
   {
     "id": "c1_5",
     "tier": 1,
-    "points": 0,
+    "points": 1,
     "bonus": "diamond",
     "cost": {
       "diamond": 1,
-      "sapphire": 1,
-      "emerald": 1,
-      "ruby": 1,
-      "onyx": 0
+      "sapphire": 3,
+      "emerald": 0,
+      "ruby": 0,
+      "onyx": 1
     }
   },
   {
@@ -85,10 +85,10 @@ export const ALL_CARDS: Card[] = [
     "points": 1,
     "bonus": "sapphire",
     "cost": {
-      "diamond": 3,
-      "sapphire": 0,
-      "emerald": 1,
-      "ruby": 0,
+      "diamond": 0,
+      "sapphire": 3,
+      "emerald": 0,
+      "ruby": 2,
       "onyx": 0
     }
   },
@@ -100,8 +100,8 @@ export const ALL_CARDS: Card[] = [
     "cost": {
       "diamond": 2,
       "sapphire": 0,
-      "emerald": 0,
-      "ruby": 1,
+      "emerald": 2,
+      "ruby": 0,
       "onyx": 0
     }
   },
@@ -112,20 +112,20 @@ export const ALL_CARDS: Card[] = [
     "bonus": "ruby",
     "cost": {
       "diamond": 0,
-      "sapphire": 3,
+      "sapphire": 2,
       "emerald": 0,
-      "ruby": 2,
-      "onyx": 0
+      "ruby": 0,
+      "onyx": 1
     }
   },
   {
     "id": "c1_9",
     "tier": 1,
-    "points": 1,
+    "points": 0,
     "bonus": "onyx",
     "cost": {
       "diamond": 1,
-      "sapphire": 1,
+      "sapphire": 2,
       "emerald": 1,
       "ruby": 0,
       "onyx": 0
@@ -137,10 +137,10 @@ export const ALL_CARDS: Card[] = [
     "points": 0,
     "bonus": "diamond",
     "cost": {
-      "diamond": 3,
-      "sapphire": 0,
-      "emerald": 0,
-      "ruby": 1,
+      "diamond": 1,
+      "sapphire": 2,
+      "emerald": 1,
+      "ruby": 0,
       "onyx": 1
     }
   },
@@ -152,15 +152,15 @@ export const ALL_CARDS: Card[] = [
     "cost": {
       "diamond": 0,
       "sapphire": 0,
-      "emerald": 1,
-      "ruby": 1,
-      "onyx": 2
+      "emerald": 2,
+      "ruby": 0,
+      "onyx": 3
     }
   },
   {
     "id": "c1_12",
     "tier": 1,
-    "points": 0,
+    "points": 1,
     "bonus": "emerald",
     "cost": {
       "diamond": 1,
@@ -176,9 +176,9 @@ export const ALL_CARDS: Card[] = [
     "points": 0,
     "bonus": "ruby",
     "cost": {
-      "diamond": 1,
-      "sapphire": 0,
-      "emerald": 1,
+      "diamond": 0,
+      "sapphire": 1,
+      "emerald": 2,
       "ruby": 0,
       "onyx": 1
     }
@@ -189,11 +189,11 @@ export const ALL_CARDS: Card[] = [
     "points": 0,
     "bonus": "onyx",
     "cost": {
-      "diamond": 0,
-      "sapphire": 2,
+      "diamond": 1,
+      "sapphire": 1,
       "emerald": 0,
-      "ruby": 0,
-      "onyx": 1
+      "ruby": 1,
+      "onyx": 2
     }
   },
   {
@@ -202,37 +202,37 @@ export const ALL_CARDS: Card[] = [
     "points": 0,
     "bonus": "diamond",
     "cost": {
-      "diamond": 1,
+      "diamond": 0,
       "sapphire": 1,
-      "emerald": 1,
-      "ruby": 1,
-      "onyx": 1
+      "emerald": 0,
+      "ruby": 2,
+      "onyx": 0
     }
   },
   {
     "id": "c1_16",
     "tier": 1,
-    "points": 1,
+    "points": 0,
     "bonus": "sapphire",
     "cost": {
       "diamond": 1,
-      "sapphire": 0,
-      "emerald": 0,
-      "ruby": 2,
-      "onyx": 1
+      "sapphire": 1,
+      "emerald": 1,
+      "ruby": 0,
+      "onyx": 2
     }
   },
   {
     "id": "c1_17",
     "tier": 1,
-    "points": 1,
+    "points": 0,
     "bonus": "emerald",
     "cost": {
       "diamond": 0,
-      "sapphire": 1,
-      "emerald": 2,
+      "sapphire": 0,
+      "emerald": 1,
       "ruby": 0,
-      "onyx": 0
+      "onyx": 2
     }
   },
   {
@@ -242,30 +242,43 @@ export const ALL_CARDS: Card[] = [
     "bonus": "ruby",
     "cost": {
       "diamond": 0,
-      "sapphire": 2,
+      "sapphire": 1,
       "emerald": 2,
-      "ruby": 1,
+      "ruby": 0,
       "onyx": 0
     }
   },
   {
     "id": "c1_19",
     "tier": 1,
-    "points": 1,
+    "points": 0,
     "bonus": "onyx",
     "cost": {
-      "diamond": 4,
+      "diamond": 0,
       "sapphire": 0,
-      "emerald": 0,
-      "ruby": 0,
+      "emerald": 1,
+      "ruby": 1,
       "onyx": 1
     }
   },
   {
     "id": "c1_20",
     "tier": 1,
-    "points": 1,
+    "points": 0,
     "bonus": "diamond",
+    "cost": {
+      "diamond": 0,
+      "sapphire": 0,
+      "emerald": 1,
+      "ruby": 2,
+      "onyx": 1
+    }
+  },
+  {
+    "id": "c1_21",
+    "tier": 1,
+    "points": 0,
+    "bonus": "sapphire",
     "cost": {
       "diamond": 0,
       "sapphire": 1,
@@ -275,40 +288,27 @@ export const ALL_CARDS: Card[] = [
     }
   },
   {
-    "id": "c1_21",
-    "tier": 1,
-    "points": 0,
-    "bonus": "sapphire",
-    "cost": {
-      "diamond": 1,
-      "sapphire": 0,
-      "emerald": 1,
-      "ruby": 0,
-      "onyx": 1
-    }
-  },
-  {
     "id": "c1_22",
     "tier": 1,
     "points": 0,
     "bonus": "emerald",
     "cost": {
-      "diamond": 0,
-      "sapphire": 0,
-      "emerald": 1,
-      "ruby": 1,
+      "diamond": 1,
+      "sapphire": 1,
+      "emerald": 0,
+      "ruby": 0,
       "onyx": 1
     }
   },
   {
     "id": "c1_23",
     "tier": 1,
-    "points": 0,
+    "points": 1,
     "bonus": "ruby",
     "cost": {
-      "diamond": 0,
-      "sapphire": 0,
-      "emerald": 1,
+      "diamond": 2,
+      "sapphire": 1,
+      "emerald": 0,
       "ruby": 1,
       "onyx": 1
     }
@@ -319,10 +319,10 @@ export const ALL_CARDS: Card[] = [
     "points": 0,
     "bonus": "onyx",
     "cost": {
-      "diamond": 2,
-      "sapphire": 1,
-      "emerald": 0,
-      "ruby": 0,
+      "diamond": 1,
+      "sapphire": 0,
+      "emerald": 1,
+      "ruby": 3,
       "onyx": 0
     }
   },
@@ -336,7 +336,7 @@ export const ALL_CARDS: Card[] = [
       "sapphire": 1,
       "emerald": 1,
       "ruby": 0,
-      "onyx": 0
+      "onyx": 1
     }
   },
   {
@@ -345,24 +345,24 @@ export const ALL_CARDS: Card[] = [
     "points": 0,
     "bonus": "sapphire",
     "cost": {
-      "diamond": 2,
-      "sapphire": 2,
-      "emerald": 0,
-      "ruby": 0,
-      "onyx": 0
+      "diamond": 0,
+      "sapphire": 1,
+      "emerald": 1,
+      "ruby": 2,
+      "onyx": 1
     }
   },
   {
     "id": "c1_27",
     "tier": 1,
-    "points": 0,
+    "points": 1,
     "bonus": "emerald",
     "cost": {
-      "diamond": 1,
-      "sapphire": 0,
+      "diamond": 2,
+      "sapphire": 1,
       "emerald": 1,
-      "ruby": 1,
-      "onyx": 2
+      "ruby": 0,
+      "onyx": 0
     }
   },
   {
@@ -371,23 +371,23 @@ export const ALL_CARDS: Card[] = [
     "points": 1,
     "bonus": "ruby",
     "cost": {
-      "diamond": 3,
-      "sapphire": 0,
-      "emerald": 1,
+      "diamond": 0,
+      "sapphire": 1,
+      "emerald": 0,
       "ruby": 0,
-      "onyx": 1
+      "onyx": 2
     }
   },
   {
     "id": "c1_29",
     "tier": 1,
-    "points": 1,
+    "points": 0,
     "bonus": "onyx",
     "cost": {
-      "diamond": 0,
+      "diamond": 2,
       "sapphire": 1,
       "emerald": 0,
-      "ruby": 3,
+      "ruby": 0,
       "onyx": 1
     }
   },
@@ -397,11 +397,11 @@ export const ALL_CARDS: Card[] = [
     "points": 0,
     "bonus": "diamond",
     "cost": {
-      "diamond": 2,
-      "sapphire": 1,
-      "emerald": 0,
-      "ruby": 0,
-      "onyx": 0
+      "diamond": 0,
+      "sapphire": 0,
+      "emerald": 1,
+      "ruby": 1,
+      "onyx": 2
     }
   },
   {
@@ -409,6 +409,19 @@ export const ALL_CARDS: Card[] = [
     "tier": 1,
     "points": 0,
     "bonus": "sapphire",
+    "cost": {
+      "diamond": 1,
+      "sapphire": 0,
+      "emerald": 0,
+      "ruby": 2,
+      "onyx": 1
+    }
+  },
+  {
+    "id": "c1_32",
+    "tier": 1,
+    "points": 0,
+    "bonus": "emerald",
     "cost": {
       "diamond": 0,
       "sapphire": 0,
@@ -418,29 +431,16 @@ export const ALL_CARDS: Card[] = [
     }
   },
   {
-    "id": "c1_32",
-    "tier": 1,
-    "points": 0,
-    "bonus": "emerald",
-    "cost": {
-      "diamond": 1,
-      "sapphire": 1,
-      "emerald": 1,
-      "ruby": 1,
-      "onyx": 1
-    }
-  },
-  {
     "id": "c1_33",
     "tier": 1,
     "points": 0,
     "bonus": "ruby",
     "cost": {
-      "diamond": 1,
+      "diamond": 2,
       "sapphire": 0,
-      "emerald": 1,
+      "emerald": 0,
       "ruby": 0,
-      "onyx": 2
+      "onyx": 1
     }
   },
   {
@@ -451,9 +451,9 @@ export const ALL_CARDS: Card[] = [
     "cost": {
       "diamond": 1,
       "sapphire": 0,
-      "emerald": 0,
+      "emerald": 2,
       "ruby": 0,
-      "onyx": 2
+      "onyx": 0
     }
   },
   {
@@ -463,10 +463,10 @@ export const ALL_CARDS: Card[] = [
     "bonus": "diamond",
     "cost": {
       "diamond": 1,
-      "sapphire": 3,
-      "emerald": 0,
+      "sapphire": 1,
+      "emerald": 1,
       "ruby": 1,
-      "onyx": 0
+      "onyx": 1
     }
   },
   {
@@ -476,10 +476,10 @@ export const ALL_CARDS: Card[] = [
     "bonus": "sapphire",
     "cost": {
       "diamond": 0,
-      "sapphire": 2,
+      "sapphire": 1,
       "emerald": 0,
-      "ruby": 1,
-      "onyx": 1
+      "ruby": 4,
+      "onyx": 0
     }
   },
   {
@@ -488,61 +488,61 @@ export const ALL_CARDS: Card[] = [
     "points": 0,
     "bonus": "emerald",
     "cost": {
-      "diamond": 2,
-      "sapphire": 0,
+      "diamond": 0,
+      "sapphire": 3,
       "emerald": 1,
-      "ruby": 1,
-      "onyx": 1
+      "ruby": 0,
+      "onyx": 0
     }
   },
   {
     "id": "c1_38",
     "tier": 1,
-    "points": 1,
+    "points": 0,
     "bonus": "ruby",
     "cost": {
       "diamond": 1,
       "sapphire": 0,
-      "emerald": 0,
-      "ruby": 0,
-      "onyx": 2
+      "emerald": 2,
+      "ruby": 1,
+      "onyx": 0
     }
   },
   {
     "id": "c1_39",
     "tier": 1,
-    "points": 0,
+    "points": 1,
     "bonus": "onyx",
     "cost": {
-      "diamond": 1,
-      "sapphire": 1,
-      "emerald": 0,
-      "ruby": 3,
-      "onyx": 0
+      "diamond": 2,
+      "sapphire": 0,
+      "emerald": 1,
+      "ruby": 0,
+      "onyx": 2
     }
   },
   {
     "id": "c2_0",
     "tier": 2,
-    "points": 2,
+    "points": 1,
     "bonus": "diamond",
     "cost": {
-      "diamond": 0,
+      "diamond": 3,
       "sapphire": 2,
-      "emerald": 1,
-      "ruby": 1,
+      "emerald": 0,
+      "ruby": 0,
       "onyx": 1
     }
   },
   {
     "id": "c2_1",
     "tier": 2,
-    "points": 2,
+    "points": 1,
     "bonus": "sapphire",
     "cost": {
       "diamond": 3,
       "sapphire": 1,
-      "emerald": 0,
+      "emerald": 2,
       "ruby": 0,
       "onyx": 1
     }
@@ -553,11 +553,11 @@ export const ALL_CARDS: Card[] = [
     "points": 2,
     "bonus": "emerald",
     "cost": {
-      "diamond": 4,
-      "sapphire": 0,
+      "diamond": 1,
+      "sapphire": 1,
       "emerald": 0,
-      "ruby": 1,
-      "onyx": 1
+      "ruby": 0,
+      "onyx": 3
     }
   },
   {
@@ -566,35 +566,35 @@ export const ALL_CARDS: Card[] = [
     "points": 3,
     "bonus": "ruby",
     "cost": {
-      "diamond": 4,
+      "diamond": 2,
       "sapphire": 1,
-      "emerald": 1,
-      "ruby": 1,
+      "emerald": 0,
+      "ruby": 2,
       "onyx": 1
     }
   },
   {
     "id": "c2_4",
     "tier": 2,
-    "points": 3,
+    "points": 2,
     "bonus": "onyx",
     "cost": {
-      "diamond": 1,
-      "sapphire": 2,
-      "emerald": 2,
-      "ruby": 0,
-      "onyx": 3
+      "diamond": 0,
+      "sapphire": 4,
+      "emerald": 3,
+      "ruby": 1,
+      "onyx": 0
     }
   },
   {
     "id": "c2_5",
     "tier": 2,
-    "points": 3,
+    "points": 1,
     "bonus": "diamond",
     "cost": {
       "diamond": 1,
-      "sapphire": 2,
-      "emerald": 0,
+      "sapphire": 1,
+      "emerald": 2,
       "ruby": 2,
       "onyx": 2
     }
@@ -602,53 +602,53 @@ export const ALL_CARDS: Card[] = [
   {
     "id": "c2_6",
     "tier": 2,
-    "points": 3,
+    "points": 1,
     "bonus": "sapphire",
     "cost": {
       "diamond": 1,
       "sapphire": 1,
       "emerald": 1,
-      "ruby": 0,
-      "onyx": 2
+      "ruby": 2,
+      "onyx": 1
     }
   },
   {
     "id": "c2_7",
     "tier": 2,
-    "points": 2,
+    "points": 3,
     "bonus": "emerald",
     "cost": {
-      "diamond": 3,
-      "sapphire": 0,
-      "emerald": 4,
-      "ruby": 0,
-      "onyx": 1
+      "diamond": 1,
+      "sapphire": 3,
+      "emerald": 1,
+      "ruby": 1,
+      "onyx": 0
     }
   },
   {
     "id": "c2_8",
     "tier": 2,
-    "points": 1,
+    "points": 3,
     "bonus": "ruby",
     "cost": {
-      "diamond": 0,
+      "diamond": 2,
       "sapphire": 1,
-      "emerald": 1,
-      "ruby": 2,
-      "onyx": 1
+      "emerald": 2,
+      "ruby": 0,
+      "onyx": 2
     }
   },
   {
     "id": "c2_9",
     "tier": 2,
-    "points": 2,
+    "points": 3,
     "bonus": "onyx",
     "cost": {
-      "diamond": 2,
-      "sapphire": 1,
-      "emerald": 1,
-      "ruby": 2,
-      "onyx": 1
+      "diamond": 1,
+      "sapphire": 3,
+      "emerald": 0,
+      "ruby": 4,
+      "onyx": 0
     }
   },
   {
@@ -660,8 +660,8 @@ export const ALL_CARDS: Card[] = [
       "diamond": 1,
       "sapphire": 2,
       "emerald": 1,
-      "ruby": 1,
-      "onyx": 2
+      "ruby": 3,
+      "onyx": 1
     }
   },
   {
@@ -670,11 +670,11 @@ export const ALL_CARDS: Card[] = [
     "points": 3,
     "bonus": "sapphire",
     "cost": {
-      "diamond": 1,
-      "sapphire": 3,
-      "emerald": 0,
-      "ruby": 1,
-      "onyx": 1
+      "diamond": 2,
+      "sapphire": 2,
+      "emerald": 1,
+      "ruby": 2,
+      "onyx": 0
     }
   },
   {
@@ -683,10 +683,10 @@ export const ALL_CARDS: Card[] = [
     "points": 3,
     "bonus": "emerald",
     "cost": {
-      "diamond": 0,
-      "sapphire": 4,
-      "emerald": 0,
-      "ruby": 0,
+      "diamond": 2,
+      "sapphire": 0,
+      "emerald": 2,
+      "ruby": 1,
       "onyx": 2
     }
   },
@@ -696,62 +696,62 @@ export const ALL_CARDS: Card[] = [
     "points": 1,
     "bonus": "ruby",
     "cost": {
-      "diamond": 2,
-      "sapphire": 3,
-      "emerald": 0,
+      "diamond": 1,
+      "sapphire": 1,
+      "emerald": 2,
       "ruby": 2,
-      "onyx": 1
+      "onyx": 0
     }
   },
   {
     "id": "c2_14",
     "tier": 2,
-    "points": 1,
+    "points": 3,
     "bonus": "onyx",
     "cost": {
-      "diamond": 3,
-      "sapphire": 1,
-      "emerald": 1,
-      "ruby": 0,
-      "onyx": 3
+      "diamond": 0,
+      "sapphire": 2,
+      "emerald": 0,
+      "ruby": 5,
+      "onyx": 0
     }
   },
   {
     "id": "c2_15",
     "tier": 2,
-    "points": 2,
+    "points": 3,
     "bonus": "diamond",
     "cost": {
-      "diamond": 0,
-      "sapphire": 2,
+      "diamond": 1,
+      "sapphire": 3,
       "emerald": 2,
-      "ruby": 1,
+      "ruby": 2,
       "onyx": 0
     }
   },
   {
     "id": "c2_16",
     "tier": 2,
-    "points": 3,
+    "points": 1,
     "bonus": "sapphire",
     "cost": {
-      "diamond": 0,
-      "sapphire": 0,
-      "emerald": 2,
-      "ruby": 1,
-      "onyx": 2
+      "diamond": 1,
+      "sapphire": 1,
+      "emerald": 5,
+      "ruby": 0,
+      "onyx": 1
     }
   },
   {
     "id": "c2_17",
     "tier": 2,
-    "points": 2,
+    "points": 1,
     "bonus": "emerald",
     "cost": {
-      "diamond": 2,
-      "sapphire": 1,
+      "diamond": 0,
+      "sapphire": 4,
       "emerald": 1,
-      "ruby": 0,
+      "ruby": 2,
       "onyx": 1
     }
   },
@@ -761,24 +761,24 @@ export const ALL_CARDS: Card[] = [
     "points": 1,
     "bonus": "ruby",
     "cost": {
-      "diamond": 3,
-      "sapphire": 2,
+      "diamond": 2,
+      "sapphire": 0,
       "emerald": 0,
       "ruby": 2,
-      "onyx": 0
+      "onyx": 1
     }
   },
   {
     "id": "c2_19",
     "tier": 2,
-    "points": 1,
+    "points": 2,
     "bonus": "onyx",
     "cost": {
-      "diamond": 1,
+      "diamond": 2,
       "sapphire": 1,
-      "emerald": 0,
+      "emerald": 2,
       "ruby": 1,
-      "onyx": 3
+      "onyx": 1
     }
   },
   {
@@ -787,23 +787,23 @@ export const ALL_CARDS: Card[] = [
     "points": 2,
     "bonus": "diamond",
     "cost": {
-      "diamond": 1,
-      "sapphire": 0,
+      "diamond": 2,
+      "sapphire": 1,
       "emerald": 1,
-      "ruby": 0,
-      "onyx": 4
+      "ruby": 3,
+      "onyx": 1
     }
   },
   {
     "id": "c2_21",
     "tier": 2,
-    "points": 1,
+    "points": 2,
     "bonus": "sapphire",
     "cost": {
       "diamond": 1,
-      "sapphire": 1,
-      "emerald": 0,
-      "ruby": 1,
+      "sapphire": 0,
+      "emerald": 2,
+      "ruby": 2,
       "onyx": 2
     }
   },
@@ -813,10 +813,10 @@ export const ALL_CARDS: Card[] = [
     "points": 3,
     "bonus": "emerald",
     "cost": {
-      "diamond": 0,
-      "sapphire": 3,
-      "emerald": 1,
-      "ruby": 2,
+      "diamond": 2,
+      "sapphire": 2,
+      "emerald": 2,
+      "ruby": 0,
       "onyx": 2
     }
   },
@@ -827,49 +827,49 @@ export const ALL_CARDS: Card[] = [
     "bonus": "ruby",
     "cost": {
       "diamond": 1,
-      "sapphire": 3,
-      "emerald": 3,
+      "sapphire": 2,
+      "emerald": 4,
       "ruby": 0,
-      "onyx": 1
+      "onyx": 0
     }
   },
   {
     "id": "c2_24",
     "tier": 2,
-    "points": 3,
+    "points": 1,
     "bonus": "onyx",
     "cost": {
-      "diamond": 1,
-      "sapphire": 0,
-      "emerald": 0,
+      "diamond": 2,
+      "sapphire": 1,
+      "emerald": 2,
       "ruby": 1,
-      "onyx": 4
+      "onyx": 2
     }
   },
   {
     "id": "c2_25",
     "tier": 2,
-    "points": 2,
+    "points": 1,
     "bonus": "diamond",
     "cost": {
       "diamond": 1,
-      "sapphire": 1,
+      "sapphire": 3,
       "emerald": 2,
-      "ruby": 3,
-      "onyx": 0
+      "ruby": 1,
+      "onyx": 1
     }
   },
   {
     "id": "c2_26",
     "tier": 2,
-    "points": 1,
+    "points": 2,
     "bonus": "sapphire",
     "cost": {
-      "diamond": 1,
-      "sapphire": 1,
-      "emerald": 3,
-      "ruby": 0,
-      "onyx": 1
+      "diamond": 2,
+      "sapphire": 3,
+      "emerald": 2,
+      "ruby": 1,
+      "onyx": 0
     }
   },
   {
@@ -878,11 +878,11 @@ export const ALL_CARDS: Card[] = [
     "points": 1,
     "bonus": "emerald",
     "cost": {
-      "diamond": 0,
-      "sapphire": 1,
-      "emerald": 2,
+      "diamond": 2,
+      "sapphire": 0,
+      "emerald": 3,
       "ruby": 1,
-      "onyx": 1
+      "onyx": 0
     }
   },
   {
@@ -892,61 +892,61 @@ export const ALL_CARDS: Card[] = [
     "bonus": "ruby",
     "cost": {
       "diamond": 2,
-      "sapphire": 1,
-      "emerald": 1,
-      "ruby": 1,
-      "onyx": 1
+      "sapphire": 3,
+      "emerald": 2,
+      "ruby": 0,
+      "onyx": 0
     }
   },
   {
     "id": "c2_29",
     "tier": 2,
-    "points": 1,
+    "points": 3,
     "bonus": "onyx",
     "cost": {
-      "diamond": 0,
-      "sapphire": 1,
+      "diamond": 2,
+      "sapphire": 2,
       "emerald": 0,
       "ruby": 1,
-      "onyx": 3
+      "onyx": 1
     }
   },
   {
     "id": "c3_0",
     "tier": 3,
-    "points": 4,
+    "points": 5,
     "bonus": "diamond",
     "cost": {
-      "diamond": 1,
-      "sapphire": 4,
-      "emerald": 3,
-      "ruby": 4,
+      "diamond": 2,
+      "sapphire": 2,
+      "emerald": 1,
+      "ruby": 6,
       "onyx": 2
     }
   },
   {
     "id": "c3_1",
     "tier": 3,
-    "points": 3,
+    "points": 5,
     "bonus": "sapphire",
     "cost": {
-      "diamond": 4,
-      "sapphire": 0,
-      "emerald": 4,
-      "ruby": 2,
-      "onyx": 1
+      "diamond": 1,
+      "sapphire": 1,
+      "emerald": 1,
+      "ruby": 5,
+      "onyx": 2
     }
   },
   {
     "id": "c3_2",
     "tier": 3,
-    "points": 4,
+    "points": 3,
     "bonus": "emerald",
     "cost": {
-      "diamond": 3,
-      "sapphire": 3,
-      "emerald": 0,
-      "ruby": 1,
+      "diamond": 2,
+      "sapphire": 2,
+      "emerald": 3,
+      "ruby": 2,
       "onyx": 0
     }
   },
@@ -956,22 +956,22 @@ export const ALL_CARDS: Card[] = [
     "points": 3,
     "bonus": "ruby",
     "cost": {
-      "diamond": 0,
-      "sapphire": 2,
-      "emerald": 3,
+      "diamond": 1,
+      "sapphire": 3,
+      "emerald": 0,
       "ruby": 1,
-      "onyx": 1
+      "onyx": 2
     }
   },
   {
     "id": "c3_4",
     "tier": 3,
-    "points": 5,
+    "points": 3,
     "bonus": "onyx",
     "cost": {
-      "diamond": 3,
-      "sapphire": 0,
-      "emerald": 5,
+      "diamond": 1,
+      "sapphire": 3,
+      "emerald": 2,
       "ruby": 3,
       "onyx": 1
     }
@@ -979,14 +979,14 @@ export const ALL_CARDS: Card[] = [
   {
     "id": "c3_5",
     "tier": 3,
-    "points": 4,
+    "points": 5,
     "bonus": "diamond",
     "cost": {
-      "diamond": 3,
-      "sapphire": 5,
-      "emerald": 2,
+      "diamond": 4,
+      "sapphire": 4,
+      "emerald": 1,
       "ruby": 2,
-      "onyx": 1
+      "onyx": 3
     }
   },
   {
@@ -995,11 +995,11 @@ export const ALL_CARDS: Card[] = [
     "points": 4,
     "bonus": "sapphire",
     "cost": {
-      "diamond": 3,
-      "sapphire": 1,
-      "emerald": 0,
-      "ruby": 3,
-      "onyx": 2
+      "diamond": 1,
+      "sapphire": 2,
+      "emerald": 5,
+      "ruby": 5,
+      "onyx": 1
     }
   },
   {
@@ -1008,23 +1008,23 @@ export const ALL_CARDS: Card[] = [
     "points": 5,
     "bonus": "emerald",
     "cost": {
-      "diamond": 2,
-      "sapphire": 0,
-      "emerald": 2,
+      "diamond": 4,
+      "sapphire": 3,
+      "emerald": 3,
       "ruby": 0,
-      "onyx": 5
+      "onyx": 2
     }
   },
   {
     "id": "c3_8",
     "tier": 3,
-    "points": 4,
+    "points": 5,
     "bonus": "ruby",
     "cost": {
       "diamond": 2,
-      "sapphire": 5,
-      "emerald": 3,
-      "ruby": 0,
+      "sapphire": 1,
+      "emerald": 2,
+      "ruby": 4,
       "onyx": 2
     }
   },
@@ -1034,9 +1034,9 @@ export const ALL_CARDS: Card[] = [
     "points": 4,
     "bonus": "onyx",
     "cost": {
-      "diamond": 3,
+      "diamond": 0,
       "sapphire": 2,
-      "emerald": 1,
+      "emerald": 5,
       "ruby": 0,
       "onyx": 2
     }
@@ -1044,26 +1044,26 @@ export const ALL_CARDS: Card[] = [
   {
     "id": "c3_10",
     "tier": 3,
-    "points": 4,
+    "points": 3,
     "bonus": "diamond",
     "cost": {
-      "diamond": 2,
+      "diamond": 4,
       "sapphire": 1,
       "emerald": 1,
-      "ruby": 1,
-      "onyx": 2
+      "ruby": 4,
+      "onyx": 0
     }
   },
   {
     "id": "c3_11",
     "tier": 3,
-    "points": 3,
+    "points": 5,
     "bonus": "sapphire",
     "cost": {
-      "diamond": 2,
-      "sapphire": 1,
-      "emerald": 5,
-      "ruby": 2,
+      "diamond": 3,
+      "sapphire": 2,
+      "emerald": 1,
+      "ruby": 1,
       "onyx": 1
     }
   },
@@ -1073,50 +1073,50 @@ export const ALL_CARDS: Card[] = [
     "points": 3,
     "bonus": "emerald",
     "cost": {
-      "diamond": 0,
+      "diamond": 3,
       "sapphire": 0,
-      "emerald": 8,
-      "ruby": 1,
-      "onyx": 4
+      "emerald": 0,
+      "ruby": 2,
+      "onyx": 2
     }
   },
   {
     "id": "c3_13",
     "tier": 3,
-    "points": 3,
+    "points": 5,
     "bonus": "ruby",
     "cost": {
-      "diamond": 3,
-      "sapphire": 0,
-      "emerald": 5,
+      "diamond": 2,
+      "sapphire": 2,
+      "emerald": 1,
       "ruby": 1,
-      "onyx": 3
+      "onyx": 2
     }
   },
   {
     "id": "c3_14",
     "tier": 3,
-    "points": 3,
+    "points": 5,
     "bonus": "onyx",
     "cost": {
-      "diamond": 2,
+      "diamond": 1,
       "sapphire": 3,
       "emerald": 1,
-      "ruby": 3,
-      "onyx": 1
+      "ruby": 1,
+      "onyx": 4
     }
   },
   {
     "id": "c3_15",
     "tier": 3,
-    "points": 5,
+    "points": 3,
     "bonus": "diamond",
     "cost": {
-      "diamond": 0,
-      "sapphire": 3,
-      "emerald": 4,
-      "ruby": 2,
-      "onyx": 0
+      "diamond": 3,
+      "sapphire": 4,
+      "emerald": 0,
+      "ruby": 0,
+      "onyx": 2
     }
   },
   {
@@ -1125,50 +1125,50 @@ export const ALL_CARDS: Card[] = [
     "points": 3,
     "bonus": "sapphire",
     "cost": {
-      "diamond": 5,
-      "sapphire": 1,
-      "emerald": 3,
-      "ruby": 2,
+      "diamond": 4,
+      "sapphire": 2,
+      "emerald": 2,
+      "ruby": 3,
       "onyx": 2
     }
   },
   {
     "id": "c3_17",
     "tier": 3,
-    "points": 4,
+    "points": 5,
     "bonus": "emerald",
     "cost": {
       "diamond": 1,
-      "sapphire": 3,
-      "emerald": 2,
-      "ruby": 4,
-      "onyx": 0
+      "sapphire": 1,
+      "emerald": 0,
+      "ruby": 6,
+      "onyx": 1
     }
   },
   {
     "id": "c3_18",
     "tier": 3,
-    "points": 3,
+    "points": 4,
     "bonus": "ruby",
     "cost": {
       "diamond": 2,
-      "sapphire": 2,
-      "emerald": 1,
-      "ruby": 2,
-      "onyx": 4
+      "sapphire": 3,
+      "emerald": 4,
+      "ruby": 1,
+      "onyx": 2
     }
   },
   {
     "id": "c3_19",
     "tier": 3,
-    "points": 5,
+    "points": 3,
     "bonus": "onyx",
     "cost": {
-      "diamond": 4,
-      "sapphire": 3,
+      "diamond": 1,
+      "sapphire": 2,
       "emerald": 2,
-      "ruby": 0,
-      "onyx": 0
+      "ruby": 1,
+      "onyx": 3
     }
   }
 ];
@@ -1178,10 +1178,10 @@ export const ALL_NOBLES: Noble[] = [
     "id": "n0",
     "points": 3,
     "requirements": {
-      "diamond": 0,
-      "sapphire": 4,
-      "emerald": 4,
-      "ruby": 0,
+      "diamond": 3,
+      "sapphire": 0,
+      "emerald": 3,
+      "ruby": 3,
       "onyx": 0
     }
   },
@@ -1190,25 +1190,47 @@ export const ALL_NOBLES: Noble[] = [
     "points": 3,
     "requirements": {
       "diamond": 0,
-      "sapphire": 3,
-      "emerald": 3,
-      "ruby": 3,
-      "onyx": 0
+      "sapphire": 4,
+      "emerald": 0,
+      "ruby": 0,
+      "onyx": 4
     }
   },
   {
     "id": "n2",
     "points": 3,
     "requirements": {
-      "diamond": 3,
-      "sapphire": 3,
-      "emerald": 3,
+      "diamond": 4,
+      "sapphire": 4,
+      "emerald": 0,
       "ruby": 0,
       "onyx": 0
     }
   },
   {
     "id": "n3",
+    "points": 3,
+    "requirements": {
+      "diamond": 0,
+      "sapphire": 0,
+      "emerald": 3,
+      "ruby": 3,
+      "onyx": 3
+    }
+  },
+  {
+    "id": "n4",
+    "points": 3,
+    "requirements": {
+      "diamond": 0,
+      "sapphire": 4,
+      "emerald": 4,
+      "ruby": 0,
+      "onyx": 0
+    }
+  },
+  {
+    "id": "n5",
     "points": 3,
     "requirements": {
       "diamond": 4,
@@ -1219,36 +1241,14 @@ export const ALL_NOBLES: Noble[] = [
     }
   },
   {
-    "id": "n4",
-    "points": 3,
-    "requirements": {
-      "diamond": 4,
-      "sapphire": 0,
-      "emerald": 0,
-      "ruby": 4,
-      "onyx": 0
-    }
-  },
-  {
-    "id": "n5",
-    "points": 3,
-    "requirements": {
-      "diamond": 3,
-      "sapphire": 3,
-      "emerald": 0,
-      "ruby": 0,
-      "onyx": 3
-    }
-  },
-  {
     "id": "n6",
     "points": 3,
     "requirements": {
-      "diamond": 0,
-      "sapphire": 4,
+      "diamond": 3,
+      "sapphire": 0,
       "emerald": 0,
-      "ruby": 4,
-      "onyx": 0
+      "ruby": 3,
+      "onyx": 3
     }
   },
   {
@@ -1256,19 +1256,19 @@ export const ALL_NOBLES: Noble[] = [
     "points": 3,
     "requirements": {
       "diamond": 0,
-      "sapphire": 3,
-      "emerald": 3,
-      "ruby": 0,
-      "onyx": 3
+      "sapphire": 0,
+      "emerald": 0,
+      "ruby": 4,
+      "onyx": 4
     }
   },
   {
     "id": "n8",
     "points": 3,
     "requirements": {
-      "diamond": 4,
-      "sapphire": 4,
-      "emerald": 0,
+      "diamond": 3,
+      "sapphire": 3,
+      "emerald": 3,
       "ruby": 0,
       "onyx": 0
     }
@@ -1277,10 +1277,10 @@ export const ALL_NOBLES: Noble[] = [
     "id": "n9",
     "points": 3,
     "requirements": {
-      "diamond": 3,
-      "sapphire": 3,
+      "diamond": 0,
+      "sapphire": 4,
       "emerald": 0,
-      "ruby": 3,
+      "ruby": 4,
       "onyx": 0
     }
   }
