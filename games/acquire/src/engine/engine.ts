@@ -793,11 +793,13 @@ export function endTurn(state: AcquireState): AcquireState {
       return (getPlayerFinancials(newState, prev.id).netWorth > getPlayerFinancials(newState, current.id).netWorth) ? prev : current;
     });
     
-    newState.phase = 'GameOver';
-    newState.status = 'Finished';
-    newState.winnerId = leader.id;
-    newState.logs.push(`Game Over! The game ends because conditions are met. ${leader.name} wins with a net worth of ${getPlayerFinancials(newState, leader.id).netWorth.toLocaleString()}!`);
-    return newState;
+    if (leader.id === cpId) {
+      newState.phase = 'GameOver';
+      newState.status = 'Finished';
+      newState.winnerId = leader.id;
+      newState.logs.push(`Game Over! ${cp.name} sees they are in the lead, and ends the game with a net worth of ${getPlayerFinancials(newState, leader.id).netWorth.toLocaleString()}!`);
+      return newState;
+    }
   }
 
   // Draw tile
