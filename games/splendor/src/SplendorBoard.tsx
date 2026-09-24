@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { SplendorGameState, SplendorAction, GemType, BaseGemTypes, Card } from './types';
 import { calculatePayment } from './reducer';
-import { GameLayout, useGameContext } from '@erez/boardgame-core';
+import { GameLayout, useGameContext, Modal } from '@erez/boardgame-core';
 import './SplendorBoard.css';
 
 const GEM_COLORS: Record<GemType, string> = {
@@ -16,6 +16,7 @@ const GEM_COLORS: Record<GemType, string> = {
 export const SplendorBoard: React.FC = () => {
   const { gameState, dispatch, myPlayerId } = useGameContext<SplendorGameState, SplendorAction>();
   const [selectedGems, setSelectedGems] = useState<Partial<Record<GemType, number>>>({});
+  const [discardSelection, setDiscardSelection] = useState<Partial<Record<GemType, number>>>({});
 
   const isMyTurn = gameState.playerOrder[gameState.currentPlayerIndex] === myPlayerId;
   const turnState = gameState.turnState;
@@ -234,13 +235,49 @@ export const SplendorBoard: React.FC = () => {
     );
   };
 
+  
+  const renderStats = () => {
+    return (
+      <div style={{ padding: '20px' }}>
+        <h3>Game Summary</h3>
+        <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '20px' }}>
+          <thead>
+            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
+              <th style={{ textAlign: 'left', padding: '8px' }}>Player</th>
+              <th style={{ textAlign: 'center', padding: '8px' }}>Points</th>
+              <th style={{ textAlign: 'center', padding: '8px' }}>Cards</th>
+              <th style={{ textAlign: 'center', padding: '8px' }}>Nobles</th>
+            </tr>
+          </thead>
+          <tbody>
+            {gameState.playerOrder.map(pid => {
+              const p = gameState.players[pid];
+              const nobles = gameState.nobles.filter(n => n.points && false); // simplified, real nobles are just in cards or score
+              // actually we don't track nobles owned easily unless we parse history or add it. Let's just do Cards
+              return (
+                <tr key={pid} style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                  <td style={{ padding: '8px' }}>{p.name} {pid === gameState.winnerId && '🏆'}</td>
+                  <td style={{ textAlign: 'center', padding: '8px', fontWeight: 'bold', color: '#fbbf24' }}>{p.score}</td>
+                  <td style={{ textAlign: 'center', padding: '8px' }}>{p.cards.length}</td>
+                  <td style={{ textAlign: 'center', padding: '8px' }}>-</td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
   return (
     <GameLayout 
       gameName="Splendor" 
       helpText="Collect gems to buy cards and gain points." 
       helpUrl=""
       renderGameSpecificPlayerDetails={renderPlayerDetails}
+      renderGameSpecificStats={renderStats}
       renderLogMessage={renderLogMessage}
+
     >
       {gameState.status === 'Lobby' ? (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'white', fontSize: '1.25rem' }}>

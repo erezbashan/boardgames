@@ -349,3 +349,15 @@
   opacity: 0.3;
   cursor: not-allowed;
 }
+
+@keyframes pulseAffordable {
+  0% { box-shadow: 0 0 0px #fbbf24; }
+  50% { box-shadow: 0 0 10px 2px #fbbf24; }
+  100% { box-shadow: 0 0 0px #fbbf24; }
+}
+
+.splendor-card-affordable {
+  animation: pulseAffordable 2s infinite;
+  border: 1px solid #fbbf24 !important;
+  cursor: pointer;
+}
