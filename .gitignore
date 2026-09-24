@@ -8,3 +8,12 @@ dump.json
 scratch/
 parse_stats.js
 *.tgz
+
+# Scratch and temporary files
+.firebase/
+frontend/
+results/
+/*.js
+/*.sh
+*.log
+

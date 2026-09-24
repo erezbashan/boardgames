@@ -12,7 +12,6 @@
 .splendor-left-col { display: flex; flex-direction: column; gap: 1.5rem; min-width: max-content; }
 
 .splendor-panel {
-  background-color: #1e293b;
   padding: 1rem;
   border-radius: 0.75rem;
 }
