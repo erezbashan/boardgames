@@ -21,7 +21,7 @@ const functions = getFunctions(app);
 const auth = getAuth(app);
 
 // Use local emulators for development
-if (false) {
+if (true) {
   connectFirestoreEmulator(db, 'localhost', 8080);
   connectFunctionsEmulator(functions, 'localhost', 5001);
   connectAuthEmulator(auth, 'http://localhost:9099');
