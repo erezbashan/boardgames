@@ -1,4 +1,4 @@
-# Project Rules
+- Always read and follow the instructions in all files under .agents/rules/
 
 - just to be clear: there should be no game specific logics (for any of the games under the games folder) in the framework (under the boardgame-core folder).
 
