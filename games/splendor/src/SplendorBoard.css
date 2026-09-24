@@ -356,11 +356,7 @@
   100% { box-shadow: 0 0 0px #fbbf24; }
 }
 
-.splendor-card-affordable {
-  animation: pulseAffordable 2s infinite;
-  border: 1px solid #fbbf24 !important;
-  cursor: pointer;
-}
+
 .splendor-card-empty {
   box-sizing: border-box;
   flex-shrink: 0;
@@ -404,4 +400,10 @@
 
 .splendor-card:hover .splendor-card-hover-action {
   opacity: 1;
+}
+
+.splendor-card-affordable {
+  animation: fadeInUp 0.4s ease-out, pulseAffordable 2s infinite 0.4s;
+  border: 1px solid #fbbf24 !important;
+  cursor: pointer;
 }
