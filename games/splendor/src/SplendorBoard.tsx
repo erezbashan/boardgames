@@ -168,7 +168,7 @@ export const SplendorBoard: React.FC = () => {
           <div style={{ fontWeight: 'bold', fontSize: '1.25rem', color: player.score >= 15 ? '#22c55e' : '#fbbf24', textShadow: player.score >= 15 ? '0 0 10px #22c55e' : 'none' }}>{player.score} pts {player.score >= 15 && '👑'}</div>
           {gameState.playerOrder[0] === pid && (
             <div style={{ backgroundColor: '#475569', color: 'white', padding: '2px 6px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <span>▶️</span> Start Player
+              <span>▶️</span> Starting Player
             </div>
           )}
         </div>
@@ -179,7 +179,7 @@ export const SplendorBoard: React.FC = () => {
             const hasToken = player.gems[g] > 0;
             if (!hasBonus && !hasToken) return null;
             return (
-              <div key={g} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+              <div key={g} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '2px' }}>
                 {hasBonus ? (
                   <div className="splendor-stat-bonus" title="Permanent Card Gem" style={{ backgroundColor: GEM_COLORS[g], color: g === 'diamond' ? 'black' : 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '4px', width: '20px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', fontWeight: 'bold' }}>
                     {bonuses[g]}
@@ -195,7 +195,7 @@ export const SplendorBoard: React.FC = () => {
             );
           })}
           {player.gems.gold > 0 && (
-             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+             <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '2px' }}>
                <div style={{ height: '24px', width: '20px' }} />
                <div className="splendor-stat-token" title="Gold Token" style={{ backgroundColor: GEM_COLORS['gold'], color: 'black', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 'bold' }}>
                   {player.gems.gold}
@@ -231,34 +231,40 @@ export const SplendorBoard: React.FC = () => {
 
   
   const renderStats = () => {
+    const sortedPlayers = [...gameState.playerOrder].sort((a, b) => gameState.players[b].score - gameState.players[a].score);
     return (
       <div style={{ padding: '20px' }}>
         <h3>Game Summary</h3>
-        <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '20px' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '20px', marginBottom: '40px' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
               <th style={{ textAlign: 'left', padding: '8px' }}>Player</th>
               <th style={{ textAlign: 'center', padding: '8px' }}>Points</th>
               <th style={{ textAlign: 'center', padding: '8px' }}>Cards</th>
-              <th style={{ textAlign: 'center', padding: '8px' }}>Nobles</th>
+              <th style={{ textAlign: 'center', padding: '8px' }}>Tokens Left</th>
+              <th style={{ textAlign: 'center', padding: '8px' }}>Reserved Left</th>
             </tr>
           </thead>
           <tbody>
-            {gameState.playerOrder.map(pid => {
+            {sortedPlayers.map(pid => {
               const p = gameState.players[pid];
-              const nobles = gameState.nobles.filter(n => n.points && false); // simplified, real nobles are just in cards or score
-              // actually we don't track nobles owned easily unless we parse history or add it. Let's just do Cards
+              const totalTokens = Object.values(p.gems).reduce((a,b)=>a+b, 0);
               return (
                 <tr key={pid} style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                   <td style={{ padding: '8px' }}>{p.name} {pid === gameState.winnerId && '🏆'}</td>
                   <td style={{ textAlign: 'center', padding: '8px', fontWeight: 'bold', color: '#fbbf24' }}>{p.score}</td>
                   <td style={{ textAlign: 'center', padding: '8px' }}>{p.cards.length}</td>
-                  <td style={{ textAlign: 'center', padding: '8px' }}>-</td>
+                  <td style={{ textAlign: 'center', padding: '8px' }}>{totalTokens}</td>
+                  <td style={{ textAlign: 'center', padding: '8px' }}>{p.reservedCards.length}</td>
                 </tr>
               )
             })}
           </tbody>
         </table>
+        
+        <div style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed rgba(255,255,255,0.2)' }}>
+           <em>(Points progression graph requires tracking scores per turn in the reducer. Will implement in a future update if requested!)</em>
+        </div>
       </div>
     );
   };
