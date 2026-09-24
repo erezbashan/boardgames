@@ -31,8 +31,8 @@ export const LineChartWidget: React.FC<LineChartWidgetProps> = ({ data, lines, t
       <ResponsiveContainer width="100%" height={height}>
         <LineChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-          {!hideXAxis && <XAxis dataKey="name" stroke="rgba(255,255,255,0.5)" />}
-          <YAxis stroke="rgba(255,255,255,0.5)" width={yAxisWidth} />
+          {!hideXAxis && <XAxis dataKey="name" stroke="rgba(255,255,255,0.5)" tickLine={false} />}
+          <YAxis stroke="rgba(255,255,255,0.5)" width={yAxisWidth} tickLine={false} />
           {!hideTooltip && <Tooltip contentStyle={{ backgroundColor: 'rgba(0,0,0,0.8)', border: 'none', borderRadius: '8px', color: 'white' }} formatter={(value: any) => Math.round(Number(value))} />}
           {!hideLegend && <Legend />}
           {lines.map((line, i) => (

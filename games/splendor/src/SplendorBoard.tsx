@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { SplendorGameState, SplendorAction, GemType, BaseGemTypes, Card } from './types';
 import { calculatePayment } from './reducer';
-import { GameLayout, useGameContext, Modal } from '@erez/boardgame-core';
-import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { GameLayout, useGameContext, Modal, LineChartWidget, LineConfig, LineChartData, PLAYER_COLORS } from '@erez/boardgame-core';
 import './SplendorBoard.css';
 
 const GEM_COLORS: Record<GemType, string> = {
@@ -112,7 +111,14 @@ export const SplendorBoard: React.FC = () => {
     return (
       <div 
         className={`splendor-card ${isMyTurn && canAfford && !isReserved ? 'splendor-card-affordable' : ''}`} 
-        style={{ backgroundColor: GEM_COLORS[card.bonus], border: '1px solid rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column', cursor: isClickable ? 'pointer' : 'default' }}
+        style={{ 
+          backgroundColor: GEM_COLORS[card.bonus], 
+          border: '1px solid rgba(0,0,0,0.5)', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          cursor: isClickable ? 'pointer' : 'default',
+          position: 'relative'
+        }}
         onClick={() => {
           if (!isMyTurn || turnState !== 'take_tokens') return;
           if (canAfford) {
@@ -127,21 +133,90 @@ export const SplendorBoard: React.FC = () => {
             {canAfford ? 'Buy' : 'Reserve'}
           </div>
         )}
-        <div className="splendor-card-header">
-          <div className="splendor-card-points" style={{ color: card.bonus === 'diamond'  ? 'black' : 'white' }}>{card.points > 0 ? card.points : ''}</div>
-        </div>
-        
-        <div className="splendor-card-costs" style={{ display: 'flex', flexWrap: 'wrap', gap: '2px', marginTop: 'auto', padding: '2px', background: 'rgba(0,0,0,0.4)', borderRadius: '4px' }}>
+
+        {/* Prestige points top-right */}
+        {card.points > 0 && (
+          <div 
+            className="splendor-card-points" 
+            style={{ 
+              position: 'absolute', 
+              top: '4px', 
+              right: '8px', 
+              fontSize: '1.4rem', 
+              fontWeight: '900', 
+              color: card.bonus === 'diamond' ? '#0f172a' : 'white', 
+              textShadow: card.bonus === 'diamond' ? 'none' : '0 2px 4px rgba(0,0,0,0.7)',
+              lineHeight: 1
+            }}
+          >
+            {card.points}
+          </div>
+        )}
+
+        {/* Cost gem column starting from top-left */}
+        <div 
+          className="splendor-card-costs" 
+          style={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            gap: '3px', 
+            padding: '2px', 
+            alignItems: 'flex-start',
+            maxWidth: '50px'
+          }}
+        >
           {BaseGemTypes.map(gem => {
             if (!card.cost[gem]) return null;
             return (
-              <div key={gem} style={{ display: 'flex', alignItems: 'center', gap: '2px', background: 'rgba(0,0,0,0.5)', padding: '2px', borderRadius: '4px' }}>
-                <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: GEM_COLORS[gem], border: '1px solid rgba(255,255,255,0.5)' }} />
-                <span style={{ color: 'white', fontWeight: 'bold', fontSize: '0.75rem' }}>{card.cost[gem]}</span>
+              <div 
+                key={gem} 
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '4px', 
+                  background: 'rgba(0,0,0,0.55)', 
+                  padding: '1px 5px', 
+                  borderRadius: '4px',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.3)'
+                }}
+              >
+                <div style={{ 
+                  width: '10px', 
+                  height: '10px', 
+                  borderRadius: '50%', 
+                  backgroundColor: GEM_COLORS[gem], 
+                  border: '1px solid rgba(255,255,255,0.7)',
+                  flexShrink: 0
+                }} />
+                <span style={{ color: 'white', fontWeight: 'bold', fontSize: '0.75rem', lineHeight: 1 }}>
+                  {card.cost[gem]}
+                </span>
               </div>
             );
           })}
         </div>
+
+        {/* Prominent BUY badge on bottom right if affordable */}
+        {isMyTurn && canAfford && !isReserved && (
+          <div 
+            style={{ 
+              position: 'absolute', 
+              bottom: '4px', 
+              right: '6px', 
+              backgroundColor: '#fbbf24', 
+              color: '#000', 
+              fontSize: '0.65rem', 
+              fontWeight: '900', 
+              padding: '1px 5px', 
+              borderRadius: '4px', 
+              textTransform: 'uppercase', 
+              letterSpacing: '0.5px',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.5)'
+            }}
+          >
+            BUY
+          </div>
+        )}
       </div>
     );
   };
@@ -244,77 +319,157 @@ export const SplendorBoard: React.FC = () => {
   
   const renderStats = () => {
     const sortedPlayers = [...gameState.playerOrder].sort((a, b) => gameState.players[b].score - gameState.players[a].score);
+
+    const maxTurns = Math.max(...gameState.playerOrder.map(pid => gameState.players[pid].scoreHistory?.length || 0));
+    const chartData: LineChartData[] = [];
+    for (let i = 0; i < maxTurns; i++) {
+      const point: LineChartData = { name: `${i + 1}` };
+      gameState.playerOrder.forEach((pid, pIdx) => {
+        const hist = gameState.players[pid].scoreHistory || [];
+        const jitter = pIdx * 0.05;
+        const val = hist[i] !== undefined ? hist[i] : (hist[hist.length - 1] || 0);
+        point[gameState.players[pid].name] = val + jitter;
+      });
+      chartData.push(point);
+    }
+
+    const lines: LineConfig[] = gameState.playerOrder.map((pid, index) => ({
+      key: gameState.players[pid].name,
+      color: gameState.players[pid].color || PLAYER_COLORS[index % PLAYER_COLORS.length],
+      name: gameState.players[pid].name,
+      dot: false
+    }));
+
     return (
       <div style={{ padding: '20px' }}>
-        <h3>Game Summary</h3>
-        <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '20px', marginBottom: '40px' }}>
+        <h3 style={{ margin: '0 0 15px 0' }}>Game Summary</h3>
+        <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px', marginBottom: '30px', background: 'rgba(0,0,0,0.2)', borderRadius: '8px', overflow: 'hidden' }}>
           <thead>
-            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
-              <th style={{ textAlign: 'left', padding: '8px' }}>Player</th>
-              <th style={{ textAlign: 'center', padding: '8px' }}>Points</th>
-              <th style={{ textAlign: 'center', padding: '8px' }}>Cards</th>
-              <th style={{ textAlign: 'center', padding: '8px' }}>Tokens Left</th>
-              <th style={{ textAlign: 'center', padding: '8px' }}>Reserved Left</th>
+            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.06)' }}>
+              <th style={{ textAlign: 'left', padding: '10px' }}>Player</th>
+              <th style={{ textAlign: 'center', padding: '10px' }}>Points</th>
+              <th style={{ textAlign: 'center', padding: '10px' }}>Cards</th>
+              <th style={{ textAlign: 'center', padding: '10px' }}>Tokens Left</th>
+              <th style={{ textAlign: 'center', padding: '10px' }}>Reserved Left</th>
+              <th style={{ textAlign: 'center', padding: '10px' }}>Tokens Taken</th>
+              <th style={{ textAlign: 'center', padding: '10px' }}>Cards Reserved</th>
             </tr>
           </thead>
           <tbody>
             {sortedPlayers.map(pid => {
               const p = gameState.players[pid];
-              const totalTokens = Object.values(p.gems).reduce((a,b)=>a+b, 0);
+              const totalTokens = Object.values(p.gems).reduce((a, b) => a + b, 0);
+              const pColor = p.color || PLAYER_COLORS[gameState.playerOrder.indexOf(pid) % PLAYER_COLORS.length];
               return (
-                <tr key={pid} style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                  <td style={{ padding: '8px' }}>{p.name} {pid === gameState.winnerId && '🏆'}</td>
-                  <td style={{ textAlign: 'center', padding: '8px', fontWeight: 'bold', color: '#fbbf24' }}>{p.score}</td>
-                  <td style={{ textAlign: 'center', padding: '8px' }}>{p.cards.length}</td>
-                  <td style={{ textAlign: 'center', padding: '8px' }}>{totalTokens}</td>
-                  <td style={{ textAlign: 'center', padding: '8px' }}>{p.reservedCards.length}</td>
+                <tr key={pid} style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                  <td style={{ padding: '10px', fontWeight: 'bold', color: pColor }}>
+                    {p.name} {pid === gameState.winnerId && '🏆'}
+                  </td>
+                  <td style={{ textAlign: 'center', padding: '10px', fontWeight: 'bold', color: '#fbbf24' }}>{p.score}</td>
+                  <td style={{ textAlign: 'center', padding: '10px' }}>{p.cards.length}</td>
+                  <td style={{ textAlign: 'center', padding: '10px' }}>{totalTokens}</td>
+                  <td style={{ textAlign: 'center', padding: '10px' }}>{p.reservedCards.length}</td>
+                  <td style={{ textAlign: 'center', padding: '10px' }}>{p.stats?.tokensCollected || 0}</td>
+                  <td style={{ textAlign: 'center', padding: '10px' }}>{p.stats?.cardsReserved || 0}</td>
                 </tr>
-              )
+              );
             })}
           </tbody>
         </table>
         
-                <div style={{ height: '300px', width: '100%', marginTop: '20px' }}>
-           <ResponsiveContainer width="100%" height="100%">
-             <LineChart data={
-               (() => {
-                 const maxTurns = Math.max(...gameState.playerOrder.map(pid => gameState.players[pid].scoreHistory?.length || 0));
-                 const data = [];
-                 for(let i=0; i<maxTurns; i++) {
-                   const point: Record<string, any> = { name: `Turn ${i+1}` };
-                   gameState.playerOrder.forEach(pid => {
-                     const hist = gameState.players[pid].scoreHistory || [];
-                     point[gameState.players[pid].name] = hist[i] !== undefined ? hist[i] : (hist[hist.length-1] || 0);
-                   });
-                   data.push(point);
-                 }
-                 return data;
-               })()
-             }>
-               <XAxis dataKey="name" />
-               <YAxis />
-               <Tooltip />
-               <Legend />
-               {gameState.playerOrder.map((pid, i) => (
-                 <Line key={pid} type="monotone" dataKey={gameState.players[pid].name} stroke={['#ef4444', '#3b82f6', '#10b981', '#fbbf24'][i%4]} strokeWidth={3} />
-               ))}
-             </LineChart>
-           </ResponsiveContainer>
-        </div>
+        {chartData.length > 0 && (
+          <LineChartWidget 
+            title="Prestige Points Progression" 
+            data={chartData} 
+            lines={lines} 
+            height={260} 
+            hideLegend={true}
+            yAxisWidth={35}
+          />
+        )}
       </div>
     );
   };
 
+  const totalDiscardSelected = Object.values(discardSelection).reduce((a, b) => a + (b || 0), 0);
+  const isDiscardReady = totalDiscardSelected === gameState.pendingDiscardCount;
+
   return (
     <GameLayout 
       gameName="Splendor" 
-      helpText="v2.0 (Strict Unique, Commas Fixed) - Collect gems to buy cards and gain points." 
-      helpUrl=""
+      helpText={`Splendor is an engaging chip-collecting and card development game. Players collect gemstone tokens to buy development cards that provide permanent gem bonuses and prestige points to attract visiting nobles. The first player to reach 15 points triggers the final round.\n\nVersion: v2.0 (Strict Unique Cards, Enhanced Layout & Stats)`} 
+      helpUrl="https://en.wikipedia.org/wiki/Splendor_(board_game)"
       renderGameSpecificPlayerDetails={renderPlayerDetails}
       renderGameSpecificStats={renderStats}
       renderLogMessage={renderLogMessage}
-
     >
+      {/* Interactive Discard Modal */}
+      <Modal 
+        isOpen={turnState === 'discard_tokens' && isMyTurn} 
+        title="Discard Excess Tokens" 
+        onClose={() => {}}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '10px' }}>
+          <p style={{ margin: 0, fontSize: '1rem', color: '#cbd5e1' }}>
+            You have more than 10 tokens! Please select <strong style={{ color: '#ef4444' }}>{gameState.pendingDiscardCount}</strong> token(s) to return to the bank.
+          </p>
+
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            {(Object.keys(gameState.players[myPlayerId]?.gems || {}) as GemType[]).map(gem => {
+              const owned = gameState.players[myPlayerId]?.gems[gem] || 0;
+              if (owned <= 0) return null;
+              const discarded = discardSelection[gem] || 0;
+              const canAdd = discarded < owned && totalDiscardSelected < gameState.pendingDiscardCount;
+              const canSub = discarded > 0;
+
+              return (
+                <div key={gem} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '8px', minWidth: '70px' }}>
+                  <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: GEM_COLORS[gem], border: '2px solid rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: gem === 'diamond' || gem === 'gold' ? 'black' : 'white' }}>
+                    {owned}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <button 
+                      disabled={!canSub}
+                      onClick={() => setDiscardSelection({ ...discardSelection, [gem]: discarded - 1 })}
+                      style={{ width: '26px', height: '26px', borderRadius: '4px', border: 'none', background: canSub ? '#475569' : '#334155', color: 'white', cursor: canSub ? 'pointer' : 'not-allowed', fontWeight: 'bold' }}
+                    >
+                      -
+                    </button>
+                    <span style={{ fontWeight: 'bold', minWidth: '16px', textAlign: 'center', color: discarded > 0 ? '#ef4444' : 'white' }}>
+                      {discarded}
+                    </span>
+                    <button 
+                      disabled={!canAdd}
+                      onClick={() => setDiscardSelection({ ...discardSelection, [gem]: discarded + 1 })}
+                      style={{ width: '26px', height: '26px', borderRadius: '4px', border: 'none', background: canAdd ? '#ef4444' : '#334155', color: 'white', cursor: canAdd ? 'pointer' : 'not-allowed', fontWeight: 'bold' }}
+                    >
+                      +
+                    </button>
+                  </div>
+                  <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>return: {discarded}</span>
+                </div>
+              );
+            })}
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '12px' }}>
+            <span style={{ fontWeight: 'bold', color: isDiscardReady ? '#22c55e' : '#f59e0b' }}>
+              Selected: {totalDiscardSelected} / {gameState.pendingDiscardCount}
+            </span>
+            <button 
+              disabled={!isDiscardReady}
+              onClick={() => {
+                dispatch({ type: 'DISCARD_GEMS', payload: { gems: discardSelection } });
+                setDiscardSelection({});
+              }}
+              style={{ padding: '8px 20px', borderRadius: '6px', border: 'none', background: isDiscardReady ? '#ef4444' : '#475569', color: 'white', fontWeight: 'bold', cursor: isDiscardReady ? 'pointer' : 'not-allowed' }}
+            >
+              Confirm Discard
+            </button>
+          </div>
+        </div>
+      </Modal>
+
       {gameState.status === 'Lobby' ? (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'white', fontSize: '1.25rem' }}>
           Waiting for the host to start the game...
@@ -366,11 +521,6 @@ export const SplendorBoard: React.FC = () => {
               <div className="splendor-actions">
                 <button onClick={submitGems} className="splendor-btn take" disabled={!canTake}>Take</button>
                 <button onClick={clearSelection} className="splendor-btn cancel" disabled={totalSelected === 0}>Cancel</button>
-              </div>
-            )}
-            {turnState === 'discard_tokens' && isMyTurn && (
-              <div style={{ marginTop: '0.5rem', color: '#fca5a5', fontWeight: 'bold' }}>
-                Discard {gameState.pendingDiscardCount} tokens...
               </div>
             )}
           </div>

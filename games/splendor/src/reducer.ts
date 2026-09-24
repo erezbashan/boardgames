@@ -1,9 +1,10 @@
 
 import { baseInitialState, baseReducer } from '@erez/boardgame-core';
-import { SplendorGameState, SplendorAction, SplendorPlayer, GemInventory, BaseGemTypes, Card, Noble, GemType } from './types';
+import { SplendorGameState, SplendorAction, SplendorPlayer, SplendorStats, GemInventory, BaseGemTypes, Card, Noble, GemType } from './types';
 import { ALL_CARDS, ALL_NOBLES } from './data';
 
 export const emptyGems = (): GemInventory => ({ diamond: 0, sapphire: 0, emerald: 0, ruby: 0, onyx: 0, gold: 0 });
+export const emptyStats = (): SplendorStats => ({ tokensCollected: 0, cardsReserved: 0, cardsPurchased: 0, noblesVisited: 0 });
 
 export const initialSplendorState: SplendorGameState = {
   ...baseInitialState,
@@ -113,7 +114,11 @@ function advanceTurnOrCheckNobles(state: SplendorGameState, playerId: string): S
     const newPlayer = {
       ...player,
       nobles: [...player.nobles, noble],
-      score: player.score + noble.points
+      score: player.score + noble.points,
+      stats: {
+        ...(player.stats || emptyStats()),
+        noblesVisited: ((player.stats?.noblesVisited) || 0) + 1
+      }
     };
     const newState = {
       ...state,
@@ -205,7 +210,9 @@ export function splendorReducer(state: SplendorGameState, action: SplendorAction
         cards: [],
         reservedCards: [],
         nobles: [],
-        score: 0
+        score: 0,
+        scoreHistory: [0],
+        stats: emptyStats()
       };
     }
   }
@@ -228,8 +235,23 @@ export function splendorReducer(state: SplendorGameState, action: SplendorAction
       const shuffledTier2 = shuffle(ALL_CARDS.filter(c => c.tier === 2));
       const shuffledTier3 = shuffle(ALL_CARDS.filter(c => c.tier === 3));
 
+      const initializedPlayers = { ...nextState.players };
+      for (const pid of nextState.playerOrder) {
+        initializedPlayers[pid] = {
+          ...initializedPlayers[pid],
+          gems: emptyGems(),
+          cards: [],
+          reservedCards: [],
+          nobles: [],
+          score: 0,
+          scoreHistory: [0],
+          stats: emptyStats()
+        };
+      }
+
       let initializedState: SplendorGameState = {
         ...nextState,
+        players: initializedPlayers,
         bank,
         decks: {
           tier1: shuffledTier1,
@@ -289,7 +311,14 @@ export function splendorReducer(state: SplendorGameState, action: SplendorAction
         bank: newBank,
         players: {
           ...state.players,
-          [playerId]: { ...player, gems: newPlayerGems }
+          [playerId]: { 
+            ...player, 
+            gems: newPlayerGems,
+            stats: {
+              ...(player.stats || emptyStats()),
+              tokensCollected: ((player.stats?.tokensCollected) || 0) + totalRequested
+            }
+          }
         },
         logs: [...state.logs, `${player.name} took ${Object.entries(requested).filter(([_, v]) => v > 0).flatMap(([k, v]) => Array(v).fill(`[${k}]`)).join(' ')}`]
       };
@@ -362,13 +391,23 @@ export function splendorReducer(state: SplendorGameState, action: SplendorAction
         logs.push(`${player.name} took 1 gold token`);
       }
 
+      const tookGoldBoard = newBank.gold < state.bank.gold;
       let newState = {
         ...state,
         board: { ...state.board, [tierKey]: newRow },
         bank: newBank,
         players: {
           ...state.players,
-          [playerId]: { ...player, reservedCards: [...player.reservedCards, card], gems: newPlayerGems }
+          [playerId]: { 
+            ...player, 
+            reservedCards: [...player.reservedCards, card], 
+            gems: newPlayerGems,
+            stats: {
+              ...(player.stats || emptyStats()),
+              cardsReserved: ((player.stats?.cardsReserved) || 0) + 1,
+              tokensCollected: ((player.stats?.tokensCollected) || 0) + (tookGoldBoard ? 1 : 0)
+            }
+          }
         },
         logs
       };
@@ -400,13 +439,23 @@ export function splendorReducer(state: SplendorGameState, action: SplendorAction
         newPlayerGems.gold += 1;
       }
 
+      const tookGoldDeck = newBank.gold < state.bank.gold;
       let newState = {
         ...state,
         decks: { ...state.decks, [tierKey]: newDeck },
         bank: newBank,
         players: {
           ...state.players,
-          [playerId]: { ...player, reservedCards: [...player.reservedCards, card], gems: newPlayerGems }
+          [playerId]: { 
+            ...player, 
+            reservedCards: [...player.reservedCards, card], 
+            gems: newPlayerGems,
+            stats: {
+              ...(player.stats || emptyStats()),
+              cardsReserved: ((player.stats?.cardsReserved) || 0) + 1,
+              tokensCollected: ((player.stats?.tokensCollected) || 0) + (tookGoldDeck ? 1 : 0)
+            }
+          }
         },
         logs
       };
@@ -450,7 +499,11 @@ export function splendorReducer(state: SplendorGameState, action: SplendorAction
             ...player, 
             gems: newPlayerGems, 
             cards: [...player.cards, card],
-            score: player.score + card.points 
+            score: player.score + card.points,
+            stats: {
+              ...(player.stats || emptyStats()),
+              cardsPurchased: ((player.stats?.cardsPurchased) || 0) + 1
+            }
           }
         },
         logs: [...state.logs, `${player.name} purchased a [${card.bonus}] tier ${tier} card for ${card.points} points`]
@@ -493,7 +546,11 @@ export function splendorReducer(state: SplendorGameState, action: SplendorAction
             gems: newPlayerGems, 
             reservedCards: newReserved,
             cards: [...player.cards, card],
-            score: player.score + card.points 
+            score: player.score + card.points,
+            stats: {
+              ...(player.stats || emptyStats()),
+              cardsPurchased: ((player.stats?.cardsPurchased) || 0) + 1
+            }
           }
         },
         logs: [...state.logs, `${player.name} purchased a [${card.bonus}] reserved card for ${card.points} points`]
@@ -518,7 +575,11 @@ export function splendorReducer(state: SplendorGameState, action: SplendorAction
           [playerId]: {
             ...player,
             nobles: [...player.nobles, noble],
-            score: player.score + noble.points
+            score: player.score + noble.points,
+            stats: {
+              ...(player.stats || emptyStats()),
+              noblesVisited: ((player.stats?.noblesVisited) || 0) + 1
+            }
           }
         },
         nobles: state.nobles.filter(n => n.id !== noble.id),

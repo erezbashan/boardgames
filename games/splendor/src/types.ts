@@ -19,11 +19,18 @@ export interface Noble {
   requirements: Omit<GemInventory, 'gold'>;
 }
 
+export interface SplendorStats {
+  tokensCollected: number;
+  cardsReserved: number;
+  cardsPurchased: number;
+  noblesVisited: number;
+}
+
 export interface SplendorPlayer extends BasePlayer {
   gems: GemInventory;
   cards: Card[];
   scoreHistory?: number[];
-  
+  stats?: SplendorStats;
   reservedCards: Card[];
   nobles: Noble[];
   score: number;
