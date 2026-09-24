@@ -158,29 +158,52 @@ export const SplendorBoard: React.FC = () => {
     if (!player) return null;
     const bonuses: Record<string, number> = { diamond: 0, sapphire: 0, emerald: 0, ruby: 0, onyx: 0 };
     player.cards.forEach(c => bonuses[c.bonus]++);
+    const isMe = pid === myPlayerId;
+    const isDiscarding = turnState === 'discard_tokens' && isMe && isMyTurn;
 
     return (
-      <div className="splendor-player-details">
-        {gameState.playerOrder[0] === pid && <div className="splendor-first-player-badge" style={{ display: 'inline-block', marginBottom: '0.25rem' }}>1st Player</div>}
-        <div style={{ fontWeight: 'bold', fontSize: '1.25rem', color: '#fbbf24' }}>{player.score} pts</div>
+      <div className="splendor-player-details" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ fontWeight: 'bold', fontSize: '1.25rem', color: '#fbbf24' }}>{player.score} pts</div>
+          {gameState.playerOrder[0] === pid && (
+            <div style={{ backgroundColor: '#fbbf24', color: 'black', padding: '2px 6px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <span>🏅</span> 1st Player
+            </div>
+          )}
+        </div>
         
         <div>
-          
+          <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginBottom: '2px' }}>Bonuses (Cards)</div>
           <div className="splendor-stat-tokens">
-            {(Object.keys(player.gems) as GemType[]).map(g => player.gems[g] > 0 && (
-              <div key={g} className="splendor-stat-token" title="Current Token" style={{ backgroundColor: GEM_COLORS[g], color: g === 'diamond' || g === 'gold' ? 'black' : 'white' }}>
-                {player.gems[g]}
+            {BaseGemTypes.map(g => bonuses[g] > 0 && (
+              <div key={g} className="splendor-stat-bonus" title="Permanent Card Gem" style={{ backgroundColor: GEM_COLORS[g], color: g === 'diamond' ? 'black' : 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '4px' }}>
+                {bonuses[g]}
               </div>
             ))}
           </div>
         </div>
 
         <div>
-          
+          <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginBottom: '2px' }}>Tokens {isDiscarding ? '(Click to discard)' : ''}</div>
           <div className="splendor-stat-tokens">
-            {BaseGemTypes.map(g => bonuses[g] > 0 && (
-              <div key={g} className="splendor-stat-bonus" title="Permanent Card Gem" style={{ backgroundColor: GEM_COLORS[g], color: g === 'diamond' ? 'black' : 'white' }}>
-                {bonuses[g]}
+            {(Object.keys(player.gems) as GemType[]).map(g => player.gems[g] > 0 && (
+              <div 
+                key={g} 
+                className="splendor-stat-token" 
+                title="Current Token" 
+                onClick={() => {
+                  if (isDiscarding) {
+                    dispatch({ type: 'DISCARD_GEMS', payload: { gems: { [g]: 1 } } });
+                  }
+                }}
+                style={{ 
+                  backgroundColor: GEM_COLORS[g], 
+                  color: g === 'diamond' || g === 'gold' ? 'black' : 'white',
+                  cursor: isDiscarding ? 'pointer' : 'default',
+                  border: isDiscarding ? '2px dashed #fca5a5' : '1px solid rgba(255,255,255,0.2)'
+                }}
+              >
+                {player.gems[g]}
               </div>
             ))}
           </div>

@@ -287,7 +287,7 @@ export function splendorReducer(state: SplendorGameState, action: SplendorAction
           ...state.players,
           [playerId]: { ...player, gems: newPlayerGems }
         },
-        logs: [...state.logs, `${player.name} took ${Object.entries(requested).filter(([_, v]) => v > 0).map(([k, v]) => Array(v).fill(`[${k}]`)).join(' ')}.`]
+        logs: [...state.logs, `${player.name} took ${Object.entries(requested).filter(([_, v]) => v > 0).map(([k, v]) => Array(v).fill(`[${k}]`)).join(' ')}`]
       };
 
       return scheduleBotIfNeeded(advanceTurnOrCheckNobles(newState, playerId));
@@ -350,7 +350,7 @@ export function splendorReducer(state: SplendorGameState, action: SplendorAction
 
       let newBank = { ...state.bank };
       let newPlayerGems = { ...player.gems };
-      let logs = [...state.logs, `${player.name} reserved a tier ${tier} card.`];
+      let logs = [...state.logs, `${player.name} reserved a [${card.bonus}] tier ${tier} card.`];
 
       if (newBank.gold > 0) {
         newBank.gold -= 1;
@@ -449,7 +449,7 @@ export function splendorReducer(state: SplendorGameState, action: SplendorAction
             score: player.score + card.points 
           }
         },
-        logs: [...state.logs, `${player.name} purchased a tier ${tier} card for ${card.points} points.`]
+        logs: [...state.logs, `${player.name} purchased a [${card.bonus}] tier ${tier} card for ${card.points} points.`]
       };
 
       newState = replenishBoard(newState);
@@ -492,7 +492,7 @@ export function splendorReducer(state: SplendorGameState, action: SplendorAction
             score: player.score + card.points 
           }
         },
-        logs: [...state.logs, `${player.name} purchased a reserved card for ${card.points} points.`]
+        logs: [...state.logs, `${player.name} purchased a [${card.bonus}] reserved card for ${card.points} points.`]
       };
 
       return scheduleBotIfNeeded(advanceTurnOrCheckNobles(newState, playerId));
