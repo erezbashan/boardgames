@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { SplendorGameState, SplendorAction, GemType, BaseGemTypes, Card } from './types';
 import { calculatePayment } from './reducer';
 import { GameLayout, useGameContext, Modal } from '@erez/boardgame-core';
+import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import './SplendorBoard.css';
 
 const GEM_COLORS: Record<GemType, string> = {
@@ -105,34 +106,40 @@ export const SplendorBoard: React.FC = () => {
     const canAfford = card && gameState.players[myPlayerId] && calculatePayment(gameState.players[myPlayerId], card) !== null;
     if (!card) return <div className="splendor-card-empty" />;
     
+    const canReserve = !isReserved && gameState.players[myPlayerId]?.reservedCards.length < 3;
+    const isClickable = isMyTurn && turnState === 'take_tokens' && (canAfford || canReserve);
+
     return (
-      <div className={`splendor-card ${isMyTurn && canAfford && !isReserved ? 'splendor-card-affordable' : ''}`} style={{ backgroundColor: GEM_COLORS[card.bonus], border: '1px solid rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column' }}>
+      <div 
+        className={`splendor-card ${isMyTurn && canAfford && !isReserved ? 'splendor-card-affordable' : ''}`} 
+        style={{ backgroundColor: GEM_COLORS[card.bonus], border: '1px solid rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column', cursor: isClickable ? 'pointer' : 'default' }}
+        onClick={() => {
+          if (!isMyTurn || turnState !== 'take_tokens') return;
+          if (canAfford) {
+             isReserved ? dispatch({ type: 'PURCHASE_RESERVED_CARD', payload: { cardId: card.id } }) : dispatch({ type: 'PURCHASE_CARD_BOARD', payload: { cardId: card.id, tier } });
+          } else if (canReserve) {
+             dispatch({ type: 'RESERVE_CARD_BOARD', payload: { cardId: card.id, tier } });
+          }
+        }}
+      >
         <div className="splendor-card-header">
           <div className="splendor-card-points" style={{ color: card.bonus === 'diamond'  ? 'black' : 'white' }}>{card.points > 0 ? card.points : ''}</div>
         </div>
         
-        <div className="splendor-card-costs" style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: 'auto', padding: '4px', background: 'rgba(0,0,0,0.4)', borderRadius: '4px' }}>
+        <div className="splendor-card-costs" style={{ display: 'flex', flexWrap: 'wrap', gap: '2px', marginTop: 'auto', padding: '2px', background: 'rgba(0,0,0,0.4)', borderRadius: '4px' }}>
           {BaseGemTypes.map(gem => {
             if (!card.cost[gem]) return null;
             return (
-              <div key={gem} style={{ display: 'flex', alignItems: 'center', gap: '2px', background: 'rgba(0,0,0,0.5)', padding: '2px 4px', borderRadius: '4px' }}>
-                <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: GEM_COLORS[gem], border: '1px solid rgba(255,255,255,0.5)' }} />
-                <span style={{ color: 'white', fontWeight: 'bold', fontSize: '0.85rem' }}>{card.cost[gem]}</span>
+              <div key={gem} style={{ display: 'flex', alignItems: 'center', gap: '2px', background: 'rgba(0,0,0,0.5)', padding: '2px', borderRadius: '4px' }}>
+                <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: GEM_COLORS[gem], border: '1px solid rgba(255,255,255,0.5)' }} />
+                <span style={{ color: 'white', fontWeight: 'bold', fontSize: '0.75rem' }}>{card.cost[gem]}</span>
               </div>
             );
           })}
         </div>
-        
-        {isMyTurn && turnState === 'take_tokens' && (
-          <div className="splendor-card-overlay">
-            <button onClick={() => isReserved ? buyReserved(card.id) : buyCard(tier, card.id)} className="splendor-card-btn buy" disabled={!canAfford}>Buy</button>
-            {!isReserved && <button onClick={() => reserveCard(tier, card.id)} className="splendor-card-btn reserve">Reserve</button>}
-          </div>
-        )}
       </div>
     );
   };
-
   const renderLogMessage = (log: string, defaultColorize: (m: string) => React.ReactNode) => {
     if (!log.includes('[')) return defaultColorize(log);
     
@@ -165,7 +172,7 @@ export const SplendorBoard: React.FC = () => {
     return (
       <div className="splendor-player-details" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ fontWeight: 'bold', fontSize: '1.25rem', color: player.score >= 15 ? '#22c55e' : '#fbbf24', textShadow: player.score >= 15 ? '0 0 10px #22c55e' : 'none' }}>{player.score} pts {player.score >= 15 && '👑'}</div>
+          <div style={{ fontWeight: 'bold', fontSize: '1.25rem', color: player.score >= 15 ? '#22c55e' : '#fbbf24', textShadow: player.score >= 15 ? '0 0 10px #22c55e' : 'none' }}>{player.score} pts {player.score >= 15 && '👑'} {player.nobles && player.nobles.length > 0 && Array(player.nobles.length).fill('🏰').join('')}</div>
           {gameState.playerOrder[0] === pid && (
             <div style={{ backgroundColor: '#475569', color: 'white', padding: '2px 6px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
               <span>▶️</span> Starting Player
@@ -184,19 +191,19 @@ export const SplendorBoard: React.FC = () => {
                   <div className="splendor-stat-bonus" title="Permanent Card Gem" style={{ backgroundColor: GEM_COLORS[g], color: g === 'diamond' ? 'black' : 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '4px', width: '20px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', fontWeight: 'bold' }}>
                     {bonuses[g]}
                   </div>
-                ) : <div style={{ height: '24px', width: '20px' }} />}
+                ) : null}
                 
                 {hasToken ? (
                   <div className="splendor-stat-token" title="Current Token" style={{ backgroundColor: GEM_COLORS[g], color: g === 'diamond' ? 'black' : 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 'bold' }}>
                     {player.gems[g]}
                   </div>
-                ) : <div style={{ height: '20px', width: '20px' }} />}
+                ) : null}
               </div>
             );
           })}
           {player.gems.gold > 0 && (
              <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '2px' }}>
-               <div style={{ height: '24px', width: '20px' }} />
+               
                <div className="splendor-stat-token" title="Gold Token" style={{ backgroundColor: GEM_COLORS['gold'], color: 'black', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 'bold' }}>
                   {player.gems.gold}
                </div>
@@ -262,8 +269,32 @@ export const SplendorBoard: React.FC = () => {
           </tbody>
         </table>
         
-        <div style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed rgba(255,255,255,0.2)' }}>
-           <em>(Points progression graph requires tracking scores per turn in the reducer. Will implement in a future update if requested!)</em>
+                <div style={{ height: '300px', width: '100%', marginTop: '20px' }}>
+           <ResponsiveContainer width="100%" height="100%">
+             <LineChart data={
+               (() => {
+                 const maxTurns = Math.max(...gameState.playerOrder.map(pid => gameState.players[pid].scoreHistory?.length || 0));
+                 const data = [];
+                 for(let i=0; i<maxTurns; i++) {
+                   const point: Record<string, any> = { name: `Turn ${i+1}` };
+                   gameState.playerOrder.forEach(pid => {
+                     const hist = gameState.players[pid].scoreHistory || [];
+                     point[gameState.players[pid].name] = hist[i] !== undefined ? hist[i] : (hist[hist.length-1] || 0);
+                   });
+                   data.push(point);
+                 }
+                 return data;
+               })()
+             }>
+               <XAxis dataKey="name" />
+               <YAxis />
+               <Tooltip />
+               <Legend />
+               {gameState.playerOrder.map((pid, i) => (
+                 <Line key={pid} type="monotone" dataKey={gameState.players[pid].name} stroke={['#ef4444', '#3b82f6', '#10b981', '#fbbf24'][i%4]} strokeWidth={3} />
+               ))}
+             </LineChart>
+           </ResponsiveContainer>
         </div>
       </div>
     );
@@ -284,7 +315,7 @@ export const SplendorBoard: React.FC = () => {
           Waiting for the host to start the game...
         </div>
       ) : (
-      <div className="splendor-board">{gameState.isFinalRound && (<div style={{ position: "absolute", top: 0, left: 0, right: 0, background: "#ef4444", color: "white", textAlign: "center", padding: "4px", fontWeight: "bold", zIndex: 10, letterSpacing: "2px", animation: "pulseAffordable 2s infinite" }}>🚨 FINAL ROUND 🚨</div>)}
+      <div className="splendor-board">{gameState.isFinalRound && gameState.status === 'Playing' && (<div style={{ position: "absolute", top: 0, left: 0, right: 0, background: "#ef4444", color: "white", textAlign: "center", padding: "4px", fontWeight: "bold", zIndex: 10, letterSpacing: "2px", animation: "pulseAffordable 2s infinite" }}>🚨 FINAL ROUND 🚨</div>)}
         
         <div className="splendor-left-col">
           <div className="splendor-panel">

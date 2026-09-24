@@ -144,7 +144,11 @@ function finishTurn(state: SplendorGameState, playerId: string): SplendorGameSta
     state.logs = [...state.logs, `${player.name} reached ${player.score} points! This is the final round.`];
   }
 
+  
+  if (!player.scoreHistory) player.scoreHistory = [];
+  player.scoreHistory.push(player.score);
   const nextIndex = (state.currentPlayerIndex + 1) % state.playerOrder.length;
+
   
   if (isFinalRound && nextIndex === 0) {
     // Game over

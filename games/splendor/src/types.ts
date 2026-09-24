@@ -22,6 +22,8 @@ export interface Noble {
 export interface SplendorPlayer extends BasePlayer {
   gems: GemInventory;
   cards: Card[];
+  scoreHistory?: number[];
+  
   reservedCards: Card[];
   nobles: Noble[];
   score: number;
