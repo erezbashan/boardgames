@@ -7,3 +7,4 @@ lib
 dump.json
 scratch/
 parse_stats.js
+*.tgz
