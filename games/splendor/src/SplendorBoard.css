@@ -9,12 +9,7 @@
   align-items: flex-start;
 }
 
-.splendor-left-col {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  width: 250px;
-}
+.splendor-left-col { display: flex; flex-direction: column; gap: 1.5rem; min-width: max-content; }
 
 .splendor-panel {
   background-color: #1e293b;
@@ -142,8 +137,7 @@
   align-items: center;
 }
 
-.splendor-deck {
-  width: 5rem;
+.splendor-deck { position: relative; width: 5rem;
   height: 6.5rem;
   background-color: #334155;
   border-radius: 0.5rem;
@@ -233,7 +227,7 @@
   border-radius: 0.5rem;
   transition: opacity 0.2s;
 }
-.splendor-card:hover .splendor-card-overlay {
+.splendor-card:hover .splendor-card-overlay, .splendor-deck:hover .splendor-card-overlay {
   opacity: 1;
 }
 

@@ -19,6 +19,7 @@ export const createGame = onCall(async (request) => {
     const game = getGame(gameType);
     state = game.initialState;
   } catch (err) {
+      console.error("BOT ERROR:", err);
     throw new HttpsError('invalid-argument', 'Unsupported game type');
   }
 
@@ -59,6 +60,7 @@ export const dispatchAction = onCall(async (request) => {
       const actionWithGameId = { ...actionWithPlayer, gameId };
       newState = game.reducer(gameDoc.state, actionWithGameId);
     } catch (err) {
+      console.error("BOT ERROR:", err);
       console.error("Reducer error:", err);
       throw new HttpsError('invalid-argument', 'Unsupported game type or reducer error: ' + (err as any).message);
     }
@@ -106,8 +108,11 @@ export const onGameUpdated = onDocumentUpdated("games/{gameId}", async (event) =
     try {
       const game = getGame(data.gameType);
       const actionWithGameId = { ...actionToRun, gameId };
+      console.log("Running bot action:", actionToRun.type);
       newState = game.reducer(curState, actionWithGameId);
+      console.log("Bot action completed. Queue size:", newState.actionQueue?.length);
     } catch (err) {
+      console.error("BOT ERROR:", err);
       return;
     }
 

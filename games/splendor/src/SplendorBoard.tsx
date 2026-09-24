@@ -286,6 +286,11 @@ export const SplendorBoard: React.FC = () => {
                 onClick={() => isMyTurn && dispatch({ type: 'RESERVE_CARD_DECK', payload: { tier: tier === 'tier1' ? 1 : tier === 'tier2' ? 2 : 3 } })}
               >
                 {gameState.decks[tier].length} left
+                {isMyTurn && turnState === 'take_tokens' && (
+                  <div className="splendor-card-overlay">
+                    <button className="splendor-card-btn reserve">Reserve</button>
+                  </div>
+                )}
               </div>
               <div className="splendor-cards-row">
                 {gameState.board[tier].map((card, i) => (
