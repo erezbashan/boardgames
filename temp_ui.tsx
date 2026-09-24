@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { SplendorGameState, SplendorAction, GemType, BaseGemTypes, Card } from './types';
-import { calculatePayment } from './reducer';
 import { GameLayout, useGameContext } from '@erez/boardgame-core';
 import './SplendorBoard.css';
 
@@ -19,25 +18,9 @@ export const SplendorBoard: React.FC = () => {
 
   const isMyTurn = gameState.playerOrder[gameState.currentPlayerIndex] === myPlayerId;
   const turnState = gameState.turnState;
-  
-  let totalSelected = 0;
-  let typesSelected = 0;
-  let hasTwo = false;
-  for (const g of BaseGemTypes) {
-    if (selectedGems[g]) {
-      totalSelected += selectedGems[g];
-      typesSelected++;
-      if (selectedGems[g] === 2) hasTwo = true;
-    }
-  }
-  
-  const availableTypes = BaseGemTypes.filter(g => gameState.bank[g] > 0).length;
-  // Valid if exactly 2 of same, OR 3 different, OR we selected all available different types (if less than 3 total left)
-  const canTake = (hasTwo && totalSelected === 2) || (typesSelected === 3 && totalSelected === 3) || (!hasTwo && totalSelected === availableTypes);
-
 
   const handleGemClick = (gem: GemType) => {
-    if (!isMyTurn || gem === 'gold') return;
+    if (!isMyTurn) return;
     
     if (turnState === 'take_tokens') {
       const current = selectedGems[gem] || 0;
@@ -55,7 +38,6 @@ export const SplendorBoard: React.FC = () => {
       if (hasTwo && total > 2) return;
       if (!hasTwo && total > 3) return;
       if (newSelected[gem] === 2 && gameState.bank[gem] < 4) return;
-      if (newSelected[gem] === 3) return;
 
       setSelectedGems(newSelected);
     } else if (turnState === 'discard_tokens') {
@@ -99,14 +81,13 @@ export const SplendorBoard: React.FC = () => {
   };
 
   const renderCard = (card: Card | null, tier: 1|2|3, isReserved = false) => {
-    const canAfford = card && gameState.players[myPlayerId] && calculatePayment(gameState.players[myPlayerId], card) !== null;
     if (!card) return <div className="splendor-card-empty" />;
     
     return (
-      <div className="splendor-card" style={{ backgroundColor: GEM_COLORS[card.bonus] }}>
+      <div className="splendor-card">
         <div className="splendor-card-header">
           <div className="splendor-card-points">{card.points > 0 ? card.points : ''}</div>
-          
+          <div className="splendor-card-bonus" style={{ backgroundColor: GEM_COLORS[card.bonus] }} title={`Provides 1 ${card.bonus}`} />
         </div>
         
         <div className="splendor-card-costs">
@@ -123,33 +104,11 @@ export const SplendorBoard: React.FC = () => {
 
         {isMyTurn && turnState === 'take_tokens' && (
           <div className="splendor-card-overlay">
-            <button onClick={() => isReserved ? buyReserved(card.id) : buyCard(tier, card.id)} className="splendor-card-btn buy" disabled={!canAfford}>Buy</button>
+            <button onClick={() => isReserved ? buyReserved(card.id) : buyCard(tier, card.id)} className="splendor-card-btn buy">Buy</button>
             {!isReserved && <button onClick={() => reserveCard(tier, card.id)} className="splendor-card-btn reserve">Reserve</button>}
           </div>
         )}
       </div>
-    );
-  };
-
-  
-  const renderLogMessage = (log: string, defaultColorize: (m: string) => React.ReactNode) => {
-    if (!log.includes('[')) return defaultColorize(log);
-    
-    const parts = log.split(/(\[[a-z]+\])/);
-    return (
-      <>
-        {parts.map((part, i) => {
-          if (part.startsWith('[') && part.endsWith(']')) {
-            const gem = part.slice(1, -1) as GemType;
-            if (GEM_COLORS[gem]) {
-              return (
-                <span key={i} className="splendor-log-gem" style={{ backgroundColor: GEM_COLORS[gem] }} title={gem} />
-              );
-            }
-          }
-          return <span key={i}>{defaultColorize(part)}</span>;
-        })}
-      </>
     );
   };
 
@@ -216,7 +175,6 @@ export const SplendorBoard: React.FC = () => {
       helpText="Collect gems to buy cards and gain points." 
       helpUrl=""
       renderGameSpecificPlayerDetails={renderPlayerDetails}
-      renderLogMessage={renderLogMessage}
     >
       {gameState.status === 'Lobby' ? (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'white', fontSize: '1.25rem' }}>
@@ -264,10 +222,10 @@ export const SplendorBoard: React.FC = () => {
                 </div>
               ))}
             </div>
-            {turnState === 'take_tokens' && isMyTurn && (
+            {Object.keys(selectedGems).length > 0 && turnState === 'take_tokens' && (
               <div className="splendor-actions">
-                <button onClick={submitGems} className="splendor-btn take" disabled={!canTake}>Take</button>
-                <button onClick={clearSelection} className="splendor-btn cancel" disabled={totalSelected === 0}>Cancel</button>
+                <button onClick={submitGems} className="splendor-btn take">Take</button>
+                <button onClick={clearSelection} className="splendor-btn cancel">Cancel</button>
               </div>
             )}
             {turnState === 'discard_tokens' && isMyTurn && (

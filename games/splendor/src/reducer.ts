@@ -43,7 +43,7 @@ function getPlayerBonuses(player: SplendorPlayer): Record<string, number> {
 }
 
 // Check if player can afford a card and return the exact payment needed (including gold)
-function calculatePayment(player: SplendorPlayer, card: Card): GemInventory | null {
+export function calculatePayment(player: SplendorPlayer, card: Card): GemInventory | null {
   const bonuses = getPlayerBonuses(player);
   let goldNeeded = 0;
   const payment = emptyGems();
@@ -287,7 +287,7 @@ export function splendorReducer(state: SplendorGameState, action: SplendorAction
           ...state.players,
           [playerId]: { ...player, gems: newPlayerGems }
         },
-        logs: [...state.logs, `${player.name} took ${Object.entries(requested).filter(([_, v]) => v > 0).map(([k, v]) => `${v} ${k}`).join(', ')}.`]
+        logs: [...state.logs, `${player.name} took ${Object.entries(requested).filter(([_, v]) => v > 0).map(([k, v]) => Array(v).fill(`[${k}]`)).join(' ')}.`]
       };
 
       return scheduleBotIfNeeded(advanceTurnOrCheckNobles(newState, playerId));

@@ -334,3 +334,33 @@
   box-shadow: 0 15px 25px -5px rgba(0,0,0,0.3);
   z-index: 10;
 }
+
+.splendor-token, .splendor-mini-token, .splendor-stat-token, .splendor-log-gem {
+  border: 2px solid rgba(255, 255, 255, 0.4) !important;
+  box-sizing: border-box;
+}
+.splendor-token { flex-shrink: 0; }
+.splendor-log-gem {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  vertical-align: middle;
+  margin: 0 0.125rem;
+}
+.splendor-first-player-badge {
+  background-color: #f59e0b;
+  color: white;
+  font-size: 0.6rem;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  margin-right: 0.25rem;
+}
+.splendor-card-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+.splendor-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
