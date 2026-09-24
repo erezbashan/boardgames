@@ -193,13 +193,13 @@ export const SplendorBoard: React.FC = () => {
             return (
               <div key={g} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '2px' }}>
                 {hasBonus ? (
-                  <div className="splendor-stat-bonus" title="Permanent Card Gem" style={{ backgroundColor: GEM_COLORS[g], color: g === 'diamond' ? 'black' : 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '4px', width: '20px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                  <div className="splendor-stat-bonus" title="Permanent Card Gem" style={{ backgroundColor: GEM_COLORS[g], color: g === 'diamond' ? 'black' : 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '4px', boxSizing: 'border-box', width: '20px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', fontWeight: 'bold' }}>
                     {bonuses[g]}
                   </div>
                 ) : null}
                 
                 {hasToken ? (
-                  <div className="splendor-stat-token" title="Current Token" style={{ backgroundColor: GEM_COLORS[g], color: g === 'diamond' ? 'black' : 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                  <div className="splendor-stat-token" title="Current Token" style={{ backgroundColor: GEM_COLORS[g], color: g === 'diamond' ? 'black' : 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '50%', boxSizing: 'border-box', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 'bold' }}>
                     {player.gems[g]}
                   </div>
                 ) : null}
@@ -209,7 +209,7 @@ export const SplendorBoard: React.FC = () => {
           {player.gems.gold > 0 && (
              <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '2px' }}>
                
-               <div className="splendor-stat-token" title="Gold Token" style={{ backgroundColor: GEM_COLORS['gold'], color: 'black', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 'bold' }}>
+               <div className="splendor-stat-token" title="Gold Token" style={{ backgroundColor: GEM_COLORS['gold'], color: 'black', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '50%', boxSizing: 'border-box', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 'bold' }}>
                   {player.gems.gold}
                </div>
              </div>
@@ -308,7 +308,7 @@ export const SplendorBoard: React.FC = () => {
   return (
     <GameLayout 
       gameName="Splendor" 
-      helpText="Collect gems to buy cards and gain points." 
+      helpText="v2.0 (Strict Unique, Commas Fixed) - Collect gems to buy cards and gain points." 
       helpUrl=""
       renderGameSpecificPlayerDetails={renderPlayerDetails}
       renderGameSpecificStats={renderStats}
@@ -320,7 +320,8 @@ export const SplendorBoard: React.FC = () => {
           Waiting for the host to start the game...
         </div>
       ) : (
-      <div className="splendor-board">{gameState.isFinalRound && gameState.status === 'Playing' && (<div style={{ position: "absolute", top: 0, left: 0, right: 0, background: "#ef4444", color: "white", textAlign: "center", padding: "4px", fontWeight: "bold", zIndex: 10, letterSpacing: "2px", animation: "pulseAffordable 2s infinite" }}>🚨 FINAL ROUND 🚨</div>)}
+      <div className="splendor-board">
+        {gameState.isFinalRound && gameState.status === 'Playing' && (<div style={{ position: "absolute", top: 0, left: 0, right: 0, background: "#ef4444", color: "white", textAlign: "center", padding: "4px", fontWeight: "bold", zIndex: 10, letterSpacing: "2px", animation: "pulseAffordable 2s infinite" }}>🚨 FINAL ROUND 🚨</div>)}
         
         <div className="splendor-left-col">
           <div className="splendor-panel">
