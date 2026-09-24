@@ -17,6 +17,8 @@ export const SplendorBoard: React.FC = () => {
   const { gameState, dispatch, myPlayerId } = useGameContext<SplendorGameState, SplendorAction>();
   const [selectedGems, setSelectedGems] = useState<Partial<Record<GemType, number>>>({});
   const [discardSelection, setDiscardSelection] = useState<Partial<Record<GemType, number>>>({});
+  
+  
 
   const isMyTurn = gameState.playerOrder[gameState.currentPlayerIndex] === myPlayerId;
   const turnState = gameState.turnState;
@@ -104,24 +106,23 @@ export const SplendorBoard: React.FC = () => {
     if (!card) return <div className="splendor-card-empty" />;
     
     return (
-      <div className="splendor-card" style={{ backgroundColor: GEM_COLORS[card.bonus] }}>
+      <div className={`splendor-card ${isMyTurn && canAfford && !isReserved ? 'splendor-card-affordable' : ''}`} style={{ backgroundColor: GEM_COLORS[card.bonus], border: '1px solid rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column' }}>
         <div className="splendor-card-header">
-          <div className="splendor-card-points">{card.points > 0 ? card.points : ''}</div>
-          
+          <div className="splendor-card-points" style={{ color: card.bonus === 'diamond'  ? 'black' : 'white' }}>{card.points > 0 ? card.points : ''}</div>
         </div>
         
-        <div className="splendor-card-costs">
+        <div className="splendor-card-costs" style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: 'auto', padding: '4px', background: 'rgba(0,0,0,0.4)', borderRadius: '4px' }}>
           {BaseGemTypes.map(gem => {
             if (!card.cost[gem]) return null;
             return (
-              <div key={gem} className="splendor-card-cost">
-                <div className="splendor-mini-token" style={{ backgroundColor: GEM_COLORS[gem] }} />
-                {card.cost[gem]}
+              <div key={gem} style={{ display: 'flex', alignItems: 'center', gap: '2px', background: 'rgba(0,0,0,0.5)', padding: '2px 4px', borderRadius: '4px' }}>
+                <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: GEM_COLORS[gem], border: '1px solid rgba(255,255,255,0.5)' }} />
+                <span style={{ color: 'white', fontWeight: 'bold', fontSize: '0.85rem' }}>{card.cost[gem]}</span>
               </div>
             );
           })}
         </div>
-
+        
         {isMyTurn && turnState === 'take_tokens' && (
           <div className="splendor-card-overlay">
             <button onClick={() => isReserved ? buyReserved(card.id) : buyCard(tier, card.id)} className="splendor-card-btn buy" disabled={!canAfford}>Buy</button>
@@ -132,7 +133,6 @@ export const SplendorBoard: React.FC = () => {
     );
   };
 
-  
   const renderLogMessage = (log: string, defaultColorize: (m: string) => React.ReactNode) => {
     if (!log.includes('[')) return defaultColorize(log);
     
@@ -167,47 +167,41 @@ export const SplendorBoard: React.FC = () => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ fontWeight: 'bold', fontSize: '1.25rem', color: player.score >= 15 ? '#22c55e' : '#fbbf24', textShadow: player.score >= 15 ? '0 0 10px #22c55e' : 'none' }}>{player.score} pts {player.score >= 15 && '👑'}</div>
           {gameState.playerOrder[0] === pid && (
-            <div style={{ backgroundColor: '#fbbf24', color: 'black', padding: '2px 6px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <span>🏅</span> 1st Player
+            <div style={{ backgroundColor: '#475569', color: 'white', padding: '2px 6px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <span>▶️</span> Start Player
             </div>
           )}
         </div>
         
-        <div>
-          <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginBottom: '2px' }}>Bonuses (Cards)</div>
-          <div className="splendor-stat-tokens">
-            {BaseGemTypes.map(g => bonuses[g] > 0 && (
-              <div key={g} className="splendor-stat-bonus" title="Permanent Card Gem" style={{ backgroundColor: GEM_COLORS[g], color: g === 'diamond' ? 'black' : 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '4px' }}>
-                {bonuses[g]}
+        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+          {BaseGemTypes.map(g => {
+            const hasBonus = bonuses[g] > 0;
+            const hasToken = player.gems[g] > 0;
+            if (!hasBonus && !hasToken) return null;
+            return (
+              <div key={g} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+                {hasBonus ? (
+                  <div className="splendor-stat-bonus" title="Permanent Card Gem" style={{ backgroundColor: GEM_COLORS[g], color: g === 'diamond' ? 'black' : 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '4px', width: '20px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                    {bonuses[g]}
+                  </div>
+                ) : <div style={{ height: '24px', width: '20px' }} />}
+                
+                {hasToken ? (
+                  <div className="splendor-stat-token" title="Current Token" style={{ backgroundColor: GEM_COLORS[g], color: g === 'diamond' ? 'black' : 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                    {player.gems[g]}
+                  </div>
+                ) : <div style={{ height: '20px', width: '20px' }} />}
               </div>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginBottom: '2px' }}>Tokens {isDiscarding ? '(Click to discard)' : ''}</div>
-          <div className="splendor-stat-tokens">
-            {(Object.keys(player.gems) as GemType[]).map(g => player.gems[g] > 0 && (
-              <div 
-                key={g} 
-                className="splendor-stat-token" 
-                title="Current Token" 
-                onClick={() => {
-                  if (isDiscarding) {
-                    dispatch({ type: 'DISCARD_GEMS', payload: { gems: { [g]: 1 } } });
-                  }
-                }}
-                style={{ 
-                  backgroundColor: GEM_COLORS[g], 
-                  color: g === 'diamond' || g === 'gold' ? 'black' : 'white',
-                  cursor: isDiscarding ? 'pointer' : 'default',
-                  border: isDiscarding ? '2px dashed #fca5a5' : '1px solid rgba(255,255,255,0.2)'
-                }}
-              >
-                {player.gems[g]}
-              </div>
-            ))}
-          </div>
+            );
+          })}
+          {player.gems.gold > 0 && (
+             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+               <div style={{ height: '24px', width: '20px' }} />
+               <div className="splendor-stat-token" title="Gold Token" style={{ backgroundColor: GEM_COLORS['gold'], color: 'black', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                  {player.gems.gold}
+               </div>
+             </div>
+          )}
         </div>
 
         {player.reservedCards.length > 0 && (
