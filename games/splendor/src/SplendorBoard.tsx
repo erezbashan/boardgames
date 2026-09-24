@@ -161,6 +161,7 @@ export const SplendorBoard: React.FC = () => {
 
     return (
       <div className="splendor-player-details">
+        {gameState.playerOrder[0] === pid && <div className="splendor-first-player-badge" style={{ display: 'inline-block', marginBottom: '0.25rem' }}>1st Player</div>}
         <div style={{ fontWeight: 'bold', fontSize: '1.25rem', color: '#fbbf24' }}>{player.score} pts</div>
         
         <div>

@@ -27,11 +27,7 @@
   margin-top: 0;
 }
 
-.splendor-bank-tokens {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 0.75rem;
-}
+.splendor-bank-tokens { display: flex; gap: 0.5rem; flex-wrap: nowrap; width: 20.5rem; justify-content: space-between; }
 
 .splendor-token {
   width: 3rem;
@@ -80,11 +76,7 @@
 .splendor-btn.take { background-color: #22c55e; }
 .splendor-btn.cancel { background-color: #6b7280; }
 
-.splendor-nobles {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: nowrap;
-}
+.splendor-nobles { display: flex; gap: 0.5rem; flex-wrap: nowrap; justify-content: space-between; width: 20.5rem; }
 
 .splendor-noble {
   width: 5rem;
