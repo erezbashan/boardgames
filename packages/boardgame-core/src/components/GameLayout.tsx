@@ -135,13 +135,32 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
             <div className="game-log-wrapper">
               {(() => {
                                 let recentLogsStartIndex = 0;
-                let turnsFound = 0;
+                let myName = '';
+                if (myPlayerId && gameState?.players && gameState.players[myPlayerId]) {
+                  myName = gameState.players[myPlayerId].name || '';
+                }
+                
+                let foundMyLastTurn = false;
                 for (let i = logs.length - 1; i >= 0; i--) {
+                  recentLogsStartIndex = i;
                   if (logs[i].includes(`'s Turn ---`)) {
-                    turnsFound++;
-                    recentLogsStartIndex = i;
-                    if (turnsFound === 2) {
+                    if (myName && logs[i].includes(myName)) {
+                      // Found the start of my most recent turn
+                      foundMyLastTurn = true;
                       break;
+                    }
+                  }
+                }
+                // Fallback if we couldn't find my turn (e.g. spectator or start of game)
+                if (!foundMyLastTurn) {
+                  let turnsFound = 0;
+                  for (let i = logs.length - 1; i >= 0; i--) {
+                    if (logs[i].includes(`'s Turn ---`)) {
+                      turnsFound++;
+                      recentLogsStartIndex = i;
+                      if (turnsFound === 2) {
+                        break;
+                      }
                     }
                   }
                 }

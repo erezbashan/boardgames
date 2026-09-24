@@ -122,11 +122,12 @@ export function playTile(state: AcquireState, playerId: string, tileId: TileId):
   const newPlayers = { ...state.players };
   newPlayers[playerId] = { ...player, tiles: newPlayerTiles };
 
-  let newState = {
+  let newState: AcquireState = {
     ...state,
     board: newBoard,
     players: newPlayers,
-    logs: [...state.logs, `${player.name} played tile ${tileId}`]
+    logs: [...state.logs, `${player.name} played tile ${tileId}`],
+    turnContext: { ...(state.turnContext || {}), lastPlacedTile: tileId } as any
   };
 
   // Check adjacency
@@ -698,7 +699,22 @@ export function buyStock(state: AcquireState, playerId: string, corpName: Corpor
 
   const afterRanks = getRankings(newState, corpName);
   if (beforeRanks.first.join(',') !== afterRanks.first.join(',') || beforeRanks.second.join(',') !== afterRanks.second.join(',')) {
-    const msg = player.name + ' shakes up the ' + corpName + ' shareholder rankings!';
+    let msg = player.name + ' shakes up the ' + corpName + ' shareholder rankings!';
+    const wasFirst = beforeRanks.first.includes(playerId);
+    const wasSharedFirst = wasFirst && beforeRanks.first.length > 1;
+    const isFirst = afterRanks.first.includes(playerId);
+    const isSharedFirst = isFirst && afterRanks.first.length > 1;
+    const wasSecond = beforeRanks.second.includes(playerId);
+    const isSecond = afterRanks.second.includes(playerId);
+
+    if (isFirst && !wasFirst) {
+      msg = player.name + ' took 1st place in ' + corpName + '!';
+    } else if (isFirst && wasSharedFirst && !isSharedFirst) {
+      msg = player.name + ' took sole 1st place in ' + corpName + '!';
+    } else if (isSecond && !wasSecond && !wasFirst) {
+      msg = player.name + ' moved up to 2nd place in ' + corpName + '!';
+    }
+
     newState.logs.push(msg);
     newState.turnContext = { ...newState.turnContext, rankChange: { corp: corpName, triggerPlayerId: playerId } };
   }

@@ -17,7 +17,7 @@ function ActiveFlipsGame({ gameId, username }: { gameId: string, username: strin
   }
 
   if (!gameState || !myPlayerId) {
-    return <div style={{ color: 'white', padding: '40px' }}>Loading game from Firebase...</div>;
+    return <div style={{ color: 'white', padding: '40px' }}>Loading game...</div>;
   }
 
   const value = {
@@ -39,7 +39,7 @@ function ActiveKotGame({ gameId, username }: { gameId: string, username: string 
   const navigate = useNavigate();
 
   if (error) return <div style={{ color: 'white', padding: '40px' }}>Error: {error}</div>;
-  if (!gameState || !myPlayerId) return <div style={{ color: 'white', padding: '40px' }}>Loading game from Firebase...</div>;
+  if (!gameState || !myPlayerId) return <div style={{ color: 'white', padding: '40px' }}>Loading game...</div>;
 
   const value = {
     gameState,
@@ -61,7 +61,7 @@ function ActiveAcquireGame({ gameId, username }: { gameId: string, username: str
   const navigate = useNavigate();
 
   if (error) return <div style={{ color: 'white', padding: '40px' }}>Error: {error}</div>;
-  if (!gameState || !myPlayerId) return <div style={{ color: 'white', padding: '40px' }}>Loading game from Firebase...</div>;
+  if (!gameState || !myPlayerId) return <div style={{ color: 'white', padding: '40px' }}>Loading game...</div>;
 
   const value = {
     gameState,
