@@ -874,7 +874,7 @@ export function endTurn(state: AcquireState): AcquireState {
     currentPlayerIndex: nextPlayerIndex,
     phase: 'PlayTile',
     sharesBoughtThisTurn: 0,
-    turnContext: { ...newState.turnContext, rankChange: undefined, lastPlacedTile: undefined }
+    turnContext: { ...newState.turnContext, rankChange: undefined, lastPlacedTile: undefined, startOfTurnRanks: undefined }
   };
 }
 
