@@ -12,6 +12,6 @@ export function getBotAction(state: AcquireState, playerId: string): AcquireActi
     switch (player.botStrategy) {
         case 'heuristic': return heuristicBot.takeTurn(state, playerId);
         case 'random': return randomBot.takeTurn(state, playerId);
-        default: return randomBot.takeTurn(state, playerId);
+        default: return heuristicBot.takeTurn(state, playerId);
     }
 }
