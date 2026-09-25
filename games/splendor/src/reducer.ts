@@ -152,7 +152,9 @@ function finishTurn(state: SplendorGameState, playerId: string): SplendorGameSta
 
   
   if (!player.scoreHistory) player.scoreHistory = [];
+  if (!player.cardCountHistory) player.cardCountHistory = [];
   player.scoreHistory.push(player.score);
+  player.cardCountHistory.push(player.cards.length);
   const nextIndex = (state.currentPlayerIndex + 1) % state.playerOrder.length;
 
   
@@ -213,6 +215,7 @@ export function splendorReducer(state: SplendorGameState, action: SplendorAction
         nobles: [],
         score: 0,
         scoreHistory: [0],
+        cardCountHistory: [0],
         stats: emptyStats()
       };
     }
@@ -246,6 +249,7 @@ export function splendorReducer(state: SplendorGameState, action: SplendorAction
           nobles: [],
           score: 0,
           scoreHistory: [0],
+          cardCountHistory: [0],
           stats: emptyStats()
         };
       }

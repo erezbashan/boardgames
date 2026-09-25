@@ -31,6 +31,7 @@ export interface SplendorPlayer extends BasePlayer {
   gems: GemInventory;
   cards: Card[];
   scoreHistory?: number[];
+  cardCountHistory?: number[];
   stats?: SplendorStats;
   reservedCards: Card[];
   nobles: Noble[];

@@ -441,15 +441,24 @@ export const SplendorBoard: React.FC = () => {
 
     const maxTurns = Math.max(...gameState.playerOrder.map(pid => gameState.players[pid].scoreHistory?.length || 0));
     const chartData: LineChartData[] = [];
+    const cardsChartData: LineChartData[] = [];
     for (let i = 0; i < maxTurns; i++) {
       const point: LineChartData = { name: `${i + 1}` };
+      const cardPoint: LineChartData = { name: `${i + 1}` };
       gameState.playerOrder.forEach((pid, pIdx) => {
-        const hist = gameState.players[pid].scoreHistory || [];
+        const p = gameState.players[pid];
+        const hist = p.scoreHistory || [];
+        const cardHist = p.cardCountHistory || [];
         const jitter = pIdx * 0.05;
+        
         const val = hist[i] !== undefined ? hist[i] : (hist[hist.length - 1] || 0);
-        point[gameState.players[pid].name] = val + jitter;
+        point[p.name] = val + jitter;
+
+        const cardVal = cardHist[i] !== undefined ? cardHist[i] : (cardHist[cardHist.length - 1] || 0);
+        cardPoint[p.name] = cardVal + jitter;
       });
       chartData.push(point);
+      cardsChartData.push(cardPoint);
     }
 
     const lines: LineConfig[] = gameState.playerOrder.map((pid, index) => ({
@@ -498,14 +507,24 @@ export const SplendorBoard: React.FC = () => {
         </table>
         
         {chartData.length > 0 && (
-          <LineChartWidget 
-            title="Prestige Points Progression" 
-            data={chartData} 
-            lines={lines} 
-            height={260} 
-            hideLegend={true}
-            yAxisWidth={35}
-          />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <LineChartWidget 
+              title="Prestige Points Progression" 
+              data={chartData} 
+              lines={lines} 
+              height={260} 
+              hideLegend={true}
+              yAxisWidth={35}
+            />
+            <LineChartWidget 
+              title="Cards Collected Progression" 
+              data={cardsChartData} 
+              lines={lines} 
+              height={260} 
+              hideLegend={true}
+              yAxisWidth={35}
+            />
+          </div>
         )}
       </div>
     );
