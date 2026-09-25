@@ -1,7 +1,13 @@
 {
   "functions": {
     "source": "deployments/backend",
-    "runtime": "nodejs20"
+    "runtime": "nodejs20",
+    "ignore": [
+      "node_modules",
+      ".git",
+      "firebase-debug.log",
+      "firebase-debug.*.log"
+    ]
   },
   "hosting": {
     "public": "deployments/portal/dist",
