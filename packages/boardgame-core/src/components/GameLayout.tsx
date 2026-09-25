@@ -46,6 +46,7 @@ export interface GameLayoutProps {
   renderGameSpecificPlayerDetails?: (playerId: string) => React.ReactNode;
   renderGameSpecificStats?: () => React.ReactNode;
   renderLogMessage?: (msg: string, defaultRenderer: (m: string) => React.ReactNode) => React.ReactNode;
+  bottomAreaOverlay?: React.ReactNode;
 }
 
 export const GameLayout: React.FC<GameLayoutProps> = ({
@@ -58,7 +59,8 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
   children,
   renderGameSpecificPlayerDetails,
   renderGameSpecificStats,
-  renderLogMessage
+  renderLogMessage,
+  bottomAreaOverlay
 }) => {
   const [showSettings, setShowSettings] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
@@ -146,7 +148,8 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
               </>
             )}
           </div>
-          <div className="game-bottom-area" style={{ flex: bottomAreaRatio }}>
+          <div className="game-bottom-area" style={{ flex: bottomAreaRatio, position: 'relative' }}>
+            {bottomAreaOverlay}
             <div className="game-log-wrapper">
               {(() => {
                                 let recentLogsStartIndex = 0;

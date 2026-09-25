@@ -84,24 +84,29 @@ export class HeuristicBot implements Bot {
     // Add personality to break identical first turns
     const idHash = playerId.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
     const preferredColor = BaseGemTypes[idHash % 5];
-    const secondaryColor = BaseGemTypes[(idHash + 2) % 5];
+
+    const opponents = Object.values(state.players).filter(p => p.id !== playerId);
 
     const evalCard = (p: SplendorPlayer, c: Card) => {
       let v = c.points * wPointValue + wBonusValue;
-      if (c.bonus === preferredColor) v += 5.0; // Stronger bias
-      if (c.bonus === secondaryColor) v += 3.0;
-      
-      // Subjective card bias per bot to force divergent paths in early game
-      const cardHash = c.id.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
-      const subjectiveBias = ((idHash * cardHash) % 100) / 100; // 0.0 to 1.0
-      v += subjectiveBias * (maxScore < 3 ? 20.0 : 2.0);
+      if (c.bonus === preferredColor) v += 2.5; // Slight bias towards a specific color to diversify bot strategies
       
       const b = getBonuses(p);
       for (const n of state.nobles) {
         if ((n.requirements[c.bonus] || 0) > b[c.bonus]) v += wNobleSynergy;
       }
       const totalCost = Object.values(c.cost).reduce((a, b) => a + (b || 0), 0);
-      return v - (totalCost * wCostPenalty);
+      let score = v - (totalCost * wCostPenalty);
+
+      // Collision Avoidance: If an opponent is very close to buying this card, drastically reduce its value
+      for (const opp of opponents) {
+         const oppMissing = calculateMissingGems(opp, c);
+         if (oppMissing <= 1) { // If they can buy it (0) or are 1 gem away (1)
+            score -= 50.0; // Massive penalty, look for something else
+         }
+      }
+
+      return score;
     };
 
     const allBoardCards = [
@@ -191,14 +196,6 @@ export class HeuristicBot implements Bot {
         const gemsTaken = Object.values(take).reduce((a: any, b: any) => a + (b || 0), 0);
         takeScore += (gemsTaken as number) * 1.5; 
         if (totalGems + (gemsTaken as number) > 10) takeScore -= 30;
-
-        // Add chaos to early game gem selection so bots immediately diverge
-        if (maxScore < 3) {
-           let gemHash = 0;
-           for (const g of Object.keys(take)) gemHash += g.charCodeAt(0);
-           const chaos = ((idHash * gemHash) % 100) / 100;
-           takeScore += chaos * 15.0;
-        }
 
         consider({ type: 'TAKE_GEMS', payload: { gems: take } } as any, takeScore);
       }

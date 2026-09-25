@@ -105,16 +105,17 @@ export const SplendorBoard: React.FC = () => {
     dispatch({ type: 'PURCHASE_RESERVED_CARD', payload: { cardId } });
   };
 
-  const renderCard = (card: Card | null, tier: 1|2|3, isReserved = false, isPurchased = false) => {
+  const renderCard = (card: Card | null, tier: 1|2|3, isReserved = false, isPurchased = false, ownerId?: string) => {
     const canAfford = card && gameState.players[myPlayerId] && calculatePayment(gameState.players[myPlayerId], card) !== null;
     if (!card) return <div className="splendor-card-empty" />;
     
+    const isMine = ownerId === myPlayerId;
     const canReserve = !isReserved && gameState.players[myPlayerId]?.reservedCards.length < 3;
-    const isClickable = !isAnimating && !isPurchased && isMyTurn && turnState === 'take_tokens' && (canAfford || canReserve);
+    const isClickable = !isAnimating && !isPurchased && isMyTurn && turnState === 'take_tokens' && (!isReserved || isMine) && (canAfford || canReserve);
 
     return (
       <div 
-        className={`splendor-card ${!isPurchased && isMyTurn && canAfford ? 'splendor-card-affordable' : ''}`} 
+        className={`splendor-card ${!isPurchased && isMyTurn && canAfford && (!isReserved || isMine) ? 'splendor-card-affordable' : ''}`} 
         style={{ 
           backgroundColor: GEM_COLORS[card.bonus], 
           border: '2px solid #cbd5e1', // Neutral slate-300 frame
@@ -375,7 +376,7 @@ export const SplendorBoard: React.FC = () => {
                   style={{ width: '3.6rem', height: '4.4rem', position: 'relative' }}
                 >
                   <div style={{ position: 'absolute', top: 0, left: 0, transform: 'scale(0.65)', transformOrigin: 'top left' }}>
-                    {renderCard(c, c.tier, true)}
+                    {renderCard(c, c.tier, true, false, pid)}
                   </div>
                 </motion.div>
               ))}
@@ -513,21 +514,12 @@ export const SplendorBoard: React.FC = () => {
   const totalDiscardSelected = Object.values(discardSelection).reduce((a, b) => a + (b || 0), 0);
   const isDiscardReady = totalDiscardSelected === gameState.pendingDiscardCount;
 
-  return (
-    <GameLayout 
-      gameName="Splendor" 
-      turnAnimationDelayMs={2500}
-      helpText={`Splendor is an engaging chip-collecting and card development game. Players collect gemstone tokens to buy development cards that provide permanent gem bonuses and prestige points to attract visiting nobles. The first player to reach 15 points triggers the final round.\n\nVersion: v2.0 (Strict Unique Cards, Enhanced Layout & Stats)`} 
-      helpUrl="https://en.wikipedia.org/wiki/Splendor_(board_game)"
-      renderGameSpecificPlayerDetails={renderPlayerDetails}
-      renderGameSpecificStats={renderStats}
-      renderLogMessage={renderLogMessage}
-    >
-      {/* Interactive Discard Modal */}
+  const discardModal = (
       <Modal 
         isOpen={turnState === 'discard_tokens' && isMyTurn} 
         title="Discard Excess Tokens" 
         onClose={() => {}}
+        inline={true}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '10px' }}>
           <p style={{ margin: 0, fontSize: '1rem', color: '#cbd5e1' }}>
@@ -589,6 +581,19 @@ export const SplendorBoard: React.FC = () => {
           </div>
         </div>
       </Modal>
+  );
+
+  return (
+    <GameLayout 
+      gameName="Splendor" 
+      turnAnimationDelayMs={2500}
+      helpText={`Splendor is an engaging chip-collecting and card development game. Players collect gemstone tokens to buy development cards that provide permanent gem bonuses and prestige points to attract visiting nobles. The first player to reach 15 points triggers the final round.\n\nVersion: v2.0 (Strict Unique Cards, Enhanced Layout & Stats)`} 
+      helpUrl="https://en.wikipedia.org/wiki/Splendor_(board_game)"
+      renderGameSpecificPlayerDetails={renderPlayerDetails}
+      renderGameSpecificStats={renderStats}
+      renderLogMessage={renderLogMessage}
+      bottomAreaOverlay={discardModal}
+    >
 
       {gameState.status === 'Lobby' ? (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'white', fontSize: '1.25rem' }}>
