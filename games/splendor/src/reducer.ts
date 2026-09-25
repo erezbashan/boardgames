@@ -71,6 +71,16 @@ export function calculatePayment(player: SplendorPlayer, card: Card): GemInvento
 }
 
 
+function getTickDelay(st: SplendorGameState): number {
+   const aliveHumans = st.playerOrder.filter(id => st.players[id] && !st.players[id].isBot).length;
+   if (aliveHumans === 0) return 1;
+   
+   if (st.settings?.gameSpeed === 'Fast') return 1500; // Half of normal
+   if (st.settings?.gameSpeed === 'Slow') return 6000;
+   if (st.settings?.gameSpeed === 'Ultra') return 1;
+   return 3000;
+}
+
 function scheduleBotIfNeeded(state: SplendorGameState): SplendorGameState {
   if (state.status !== 'Playing') return state;
   const currentPlayerId = state.playerOrder[state.currentPlayerIndex];
@@ -82,7 +92,7 @@ function scheduleBotIfNeeded(state: SplendorGameState): SplendorGameState {
   }
   return {
     ...state,
-    actionQueue: [...(state.actionQueue || []), { delayMs: 3000, action: { type: 'PLAY_BOT' } as any }]
+    actionQueue: [...(state.actionQueue || []), { delayMs: getTickDelay(state), action: { type: 'PLAY_BOT' } as any }]
   };
 }
 

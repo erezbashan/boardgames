@@ -602,10 +602,15 @@ export const SplendorBoard: React.FC = () => {
       </Modal>
   );
 
+  let turnDelay = 2500;
+  if (gameState.settings?.gameSpeed === 'Fast') turnDelay = 1250;
+  if (gameState.settings?.gameSpeed === 'Slow') turnDelay = 5000;
+  if (gameState.settings?.gameSpeed === 'Ultra') turnDelay = 0;
+
   return (
     <GameLayout 
       gameName="Splendor" 
-      turnAnimationDelayMs={2500}
+      turnAnimationDelayMs={turnDelay}
       helpText={`Splendor is an engaging chip-collecting and card development game. Players collect gemstone tokens to buy development cards that provide permanent gem bonuses and prestige points to attract visiting nobles. The first player to reach 15 points triggers the final round.\n\nVersion: v2.0 (Strict Unique Cards, Enhanced Layout & Stats)`} 
       helpUrl="https://en.wikipedia.org/wiki/Splendor_(board_game)"
       renderGameSpecificPlayerDetails={renderPlayerDetails}

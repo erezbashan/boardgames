@@ -7,8 +7,21 @@ export function useVisualGameState(actualState: SplendorGameState): SplendorGame
    const queueRef = useRef<SplendorGameState[]>([]);
    const isAnimatingRef = useRef(false);
    const timeoutRef = useRef<any>(null);
+   
+   // Keep track of the current speed setting
+   const speedRef = useRef(actualState.settings?.gameSpeed || 'Normal');
+   useEffect(() => {
+     speedRef.current = actualState.settings?.gameSpeed || 'Normal';
+   }, [actualState.settings?.gameSpeed]);
 
    useEffect(() => {
+     // If in Ultra, skip all animations
+     if (speedRef.current === 'Ultra') {
+        queueRef.current = [];
+        setVisualState(actualState);
+        return;
+     }
+
      const lastTarget = queueRef.current.length > 0 ? queueRef.current[queueRef.current.length - 1] : visualState;
      
      // Only sequence if it's a real turn progression
@@ -30,15 +43,20 @@ export function useVisualGameState(actualState: SplendorGameState): SplendorGame
    }, [actualState]);
 
    const playNext = () => {
-      if (queueRef.current.length === 0) {
+      if (queueRef.current.length === 0 || speedRef.current === 'Ultra') {
          isAnimatingRef.current = false;
+         if (speedRef.current === 'Ultra') setVisualState(queueRef.current[queueRef.current.length - 1] || visualState);
          return;
       }
       isAnimatingRef.current = true;
       const nextState = queueRef.current.shift()!;
       setVisualState(nextState);
       
-      timeoutRef.current = setTimeout(playNext, 400); // 400ms per step
+      let delay = 400; // Normal
+      if (speedRef.current === 'Fast') delay = 200;
+      if (speedRef.current === 'Slow') delay = 800;
+      
+      timeoutRef.current = setTimeout(playNext, delay);
    };
 
    useEffect(() => () => clearTimeout(timeoutRef.current), []);
