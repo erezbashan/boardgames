@@ -359,33 +359,6 @@ export const SplendorBoard: React.FC = () => {
           )}
           </AnimatePresence>
         </motion.div>
-
-        <AnimatePresence>
-        {player.reservedCards.length > 0 && (
-          <motion.div layout initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} style={{ marginTop: '0.25rem' }}>
-            <div style={{ fontSize: "0.75rem", color: "#9ca3af" }}>⏳</div>
-            <motion.div layout className="splendor-reserved-cards">
-              <AnimatePresence>
-              {player.reservedCards.map(c => (
-                <motion.div 
-                  layout 
-                  key={c.id} 
-                  initial={{ opacity: 0, scale: 0 }} 
-                  animate={{ opacity: 1, scale: 1 }} 
-                  exit={{ opacity: 0, scale: 0 }} 
-                  transition={{ type: 'spring', bounce: 0.4, duration: 0.5 * speedMult }}
-                  style={{ width: '3.6rem', height: '4.4rem', position: 'relative' }}
-                >
-                  <div style={{ position: 'absolute', top: 0, left: 0, transform: 'scale(0.65)', transformOrigin: 'top left' }}>
-                    {renderCard(c, c.tier, true, false, pid)}
-                  </div>
-                </motion.div>
-              ))}
-              </AnimatePresence>
-            </motion.div>
-          </motion.div>
-        )}
-        </AnimatePresence>
         
         {turnState === 'choose_noble' && isMyTurn && pid === myPlayerId && (
           <div className="splendor-noble-choice">
@@ -401,37 +374,66 @@ export const SplendorBoard: React.FC = () => {
         )}
         </div>
 
-        <AnimatePresence>
-        {player.nobles && player.nobles.length > 0 && (
-          <motion.div layout initial={{ opacity: 0, width: 0 }} animate={{ opacity: 1, width: 'auto' }} exit={{ opacity: 0, width: 0 }} style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end', maxWidth: '40%' }}>
-            <AnimatePresence>
-            {player.nobles.map(n => (
-              <motion.div 
-                layout 
-                key={n.id} 
-                initial={{ opacity: 0, scale: 0 }} 
-                animate={{ opacity: 1, scale: 1 }} 
-                exit={{ opacity: 0, scale: 0 }} 
-                transition={{ type: 'spring', bounce: 0.4, duration: 0.5 * speedMult }} 
-                style={{ width: '4.5rem', height: '4.5rem', position: 'relative', margin: 0 }}
-              >
-                <div className="splendor-noble" style={{ position: 'absolute', top: 0, right: 0, transform: 'scale(0.8)', transformOrigin: 'top right', margin: 0 }}>
-                  <div style={{ fontWeight: 'bold' }}>{n.points} pts</div>
-                  <div className="splendor-noble-reqs">
-                    {BaseGemTypes.map(g => n.requirements[g] ? (
-                      <div key={g} className="splendor-noble-req">
-                        <div className="splendor-mini-token" style={{ backgroundColor: GEM_COLORS[g] }} />
-                        <span>{n.requirements[g]}</span>
-                      </div>
-                    ) : null)}
-                  </div>
-                </div>
+        <div style={{ display: 'flex', flexDirection: 'row', gap: '1rem', alignItems: 'flex-start', justifyContent: 'flex-end', flexWrap: 'wrap', maxWidth: '55%' }}>
+          <AnimatePresence>
+          {player.reservedCards.length > 0 && (
+            <motion.div layout initial={{ opacity: 0, width: 0 }} animate={{ opacity: 1, width: 'auto' }} exit={{ opacity: 0, width: 0 }}>
+              <div style={{ fontSize: "0.75rem", color: "#9ca3af", marginBottom: '4px' }}>⏳</div>
+              <motion.div layout className="splendor-reserved-cards" style={{ display: 'flex', gap: '4px' }}>
+                <AnimatePresence>
+                {player.reservedCards.map(c => (
+                  <motion.div 
+                    layout 
+                    key={c.id} 
+                    initial={{ opacity: 0, scale: 0 }} 
+                    animate={{ opacity: 1, scale: 1 }} 
+                    exit={{ opacity: 0, scale: 0 }} 
+                    transition={{ type: 'spring', bounce: 0.4, duration: 0.5 * speedMult }}
+                    style={{ width: '3.6rem', height: '4.4rem', position: 'relative' }}
+                  >
+                    <div style={{ position: 'absolute', top: 0, left: 0, transform: 'scale(0.65)', transformOrigin: 'top left' }}>
+                      {renderCard(c, c.tier, true, false, pid)}
+                    </div>
+                  </motion.div>
+                ))}
+                </AnimatePresence>
               </motion.div>
-            ))}
-            </AnimatePresence>
-          </motion.div>
-        )}
-        </AnimatePresence>
+            </motion.div>
+          )}
+          </AnimatePresence>
+
+          <AnimatePresence>
+          {player.nobles && player.nobles.length > 0 && (
+            <motion.div layout initial={{ opacity: 0, width: 0 }} animate={{ opacity: 1, width: 'auto' }} exit={{ opacity: 0, width: 0 }} style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <AnimatePresence>
+              {player.nobles.map(n => (
+                <motion.div 
+                  layout 
+                  key={n.id} 
+                  initial={{ opacity: 0, scale: 0 }} 
+                  animate={{ opacity: 1, scale: 1 }} 
+                  exit={{ opacity: 0, scale: 0 }} 
+                  transition={{ type: 'spring', bounce: 0.4, duration: 0.5 * speedMult }} 
+                  style={{ width: '4.5rem', height: '4.5rem', position: 'relative', margin: 0 }}
+                >
+                  <div className="splendor-noble" style={{ position: 'absolute', top: 0, right: 0, transform: 'scale(0.8)', transformOrigin: 'top right', margin: 0 }}>
+                    <div style={{ fontWeight: 'bold' }}>{n.points} pts</div>
+                    <div className="splendor-noble-reqs">
+                      {BaseGemTypes.map(g => n.requirements[g] ? (
+                        <div key={g} className="splendor-noble-req">
+                          <div className="splendor-mini-token" style={{ backgroundColor: GEM_COLORS[g] }} />
+                          <span>{n.requirements[g]}</span>
+                        </div>
+                      ) : null)}
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+              </AnimatePresence>
+            </motion.div>
+          )}
+          </AnimatePresence>
+        </div>
       </div>
     );
   };

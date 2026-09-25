@@ -232,6 +232,25 @@ export function splendorReducer(state: SplendorGameState, action: SplendorAction
   }
 
   switch (action.type) {
+    case 'NEW_GAME': {
+      const initializedPlayers = { ...nextState.players };
+      for (const pid of nextState.playerOrder) {
+        if (initializedPlayers[pid]) {
+          initializedPlayers[pid] = {
+            ...initializedPlayers[pid],
+            gems: emptyGems(),
+            cards: [],
+            reservedCards: [],
+            nobles: [],
+            score: 0,
+            scoreHistory: [0],
+            cardCountHistory: [0],
+            stats: emptyStats()
+          };
+        }
+      }
+      return { ...nextState, players: initializedPlayers };
+    }
     case 'START_GAME': {
       if (state.status !== 'Lobby') return state;
       
