@@ -27,6 +27,7 @@ export interface SplendorStats {
 }
 
 export interface SplendorPlayer extends BasePlayer {
+  botStrategy?: 'random' | 'heuristic';
   gems: GemInventory;
   cards: Card[];
   scoreHistory?: number[];

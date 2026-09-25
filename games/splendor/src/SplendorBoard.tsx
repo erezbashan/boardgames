@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { SplendorGameState, SplendorAction, GemType, BaseGemTypes, Card } from './types';
 import { calculatePayment } from './reducer';
 import { GameLayout, useGameContext, Modal, LineChartWidget, LineConfig, LineChartData, PLAYER_COLORS } from '@erez/boardgame-core';
@@ -101,19 +102,19 @@ export const SplendorBoard: React.FC = () => {
     dispatch({ type: 'PURCHASE_RESERVED_CARD', payload: { cardId } });
   };
 
-  const renderCard = (card: Card | null, tier: 1|2|3, isReserved = false) => {
+  const renderCard = (card: Card | null, tier: 1|2|3, isReserved = false, isPurchased = false) => {
     const canAfford = card && gameState.players[myPlayerId] && calculatePayment(gameState.players[myPlayerId], card) !== null;
     if (!card) return <div className="splendor-card-empty" />;
     
     const canReserve = !isReserved && gameState.players[myPlayerId]?.reservedCards.length < 3;
-    const isClickable = isMyTurn && turnState === 'take_tokens' && (canAfford || canReserve);
+    const isClickable = !isPurchased && isMyTurn && turnState === 'take_tokens' && (canAfford || canReserve);
 
     return (
       <div 
-        className={`splendor-card ${isMyTurn && canAfford && !isReserved ? 'splendor-card-affordable' : ''}`} 
+        className={`splendor-card ${!isPurchased && isMyTurn && canAfford ? 'splendor-card-affordable' : ''}`} 
         style={{ 
           backgroundColor: GEM_COLORS[card.bonus], 
-          border: '1px solid rgba(0,0,0,0.5)', 
+          border: '2px solid #cbd5e1', // Neutral slate-300 frame
           display: 'flex', 
           flexDirection: 'column', 
           cursor: isClickable ? 'pointer' : 'default',
@@ -153,7 +154,7 @@ export const SplendorBoard: React.FC = () => {
           </div>
         )}
 
-        {/* Cost gem column starting from top-left */}
+        {/* Cost gem column starting from bottom-left */}
         <div 
           className="splendor-card-costs" 
           style={{ 
@@ -162,7 +163,8 @@ export const SplendorBoard: React.FC = () => {
             gap: '3px', 
             padding: '2px', 
             alignItems: 'flex-start',
-            maxWidth: '50px'
+            maxWidth: '50px',
+            marginTop: 'auto'
           }}
         >
           {BaseGemTypes.map(gem => {
@@ -197,7 +199,7 @@ export const SplendorBoard: React.FC = () => {
         </div>
 
         {/* Prominent BUY badge on bottom right if affordable */}
-        {isMyTurn && canAfford && !isReserved && (
+        {!isPurchased && isMyTurn && canAfford && (
           <div 
             style={{ 
               position: 'absolute', 
@@ -250,55 +252,135 @@ export const SplendorBoard: React.FC = () => {
     const isDiscarding = turnState === 'discard_tokens' && isMe && isMyTurn;
 
     return (
-      <div className="splendor-player-details" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ fontWeight: 'bold', fontSize: '1.25rem', color: player.score >= 15 ? '#22c55e' : '#fbbf24', textShadow: player.score >= 15 ? '0 0 10px #22c55e' : 'none' }}>{player.score} pts {player.score >= 15 && '👑'} {player.nobles && player.nobles.length > 0 && Array(player.nobles.length).fill('🏰').join('')}</div>
-          {gameState.playerOrder[0] === pid && (
-            <div style={{ backgroundColor: '#475569', color: 'white', padding: '2px 6px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <span>▶️</span> Starting Player
+      <div className="splendor-player-details" style={{ display: 'flex', flexDirection: 'row', gap: '1rem', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ fontWeight: 'bold', fontSize: '1.25rem', color: player.score >= 15 ? '#22c55e' : '#fbbf24', textShadow: player.score >= 15 ? '0 0 10px #22c55e' : 'none' }}>
+              {player.score} pts {player.score >= 15 && '👑'}
             </div>
-          )}
-        </div>
-        
-        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-          {BaseGemTypes.map(g => {
-            const hasBonus = bonuses[g] > 0;
+            {gameState.playerOrder[0] === pid && (
+              <div style={{ backgroundColor: '#475569', color: 'white', padding: '2px 6px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <span>▶️</span> Starting Player
+              </div>
+            )}
+          </div>
+          
+          <motion.div layout style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <AnimatePresence mode="popLayout">
+          {BaseGemTypes.map((g, gIdx) => {
+            const colorCards = player.cards.filter(c => c.bonus === g);
+            const hasBonus = colorCards.length > 0;
             const hasToken = player.gems[g] > 0;
             if (!hasBonus && !hasToken) return null;
+            const tokenCount = player.gems[g];
+            const tokenWidth = tokenCount > 0 ? 20 + (tokenCount - 1) * 10 : 0;
             return (
-              <div key={g} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '2px' }}>
-                {hasBonus ? (
-                  <div className="splendor-stat-bonus" title="Permanent Card Gem" style={{ backgroundColor: GEM_COLORS[g], color: g === 'diamond' ? 'black' : 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '4px', boxSizing: 'border-box', width: '20px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', fontWeight: 'bold' }}>
-                    {bonuses[g]}
-                  </div>
-                ) : null}
+              <motion.div layout key={g} initial={{ opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0, transition: { delay: 0.6 } }} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '4px' }}>
+                {hasBonus && (
+                  <motion.div 
+                    layout 
+                    transition={{ layout: { delay: 1.2, type: 'spring' } }} 
+                    className="splendor-stat-bonus" 
+                    style={{ position: 'relative', height: '4.4rem', width: `${3.6 + (colorCards.length - 1) * 1.5}rem` }}
+                  >
+                     <AnimatePresence>
+                     {colorCards.map((c, i) => (
+                       <motion.div 
+                         layout 
+                         key={c.id} 
+                         initial={{ opacity: 0, scale: 0.3 }} 
+                         animate={{ opacity: 1, scale: 0.65 }} 
+                         exit={{ opacity: 0, scale: 0.3 }}
+                         transition={{ delay: 1.2, duration: 0.5, type: 'spring' }} 
+                         style={{ position: 'absolute', top: 0, left: `${i * 1.5}rem`, originX: 0, originY: 0, zIndex: colorCards.length - i }}
+                       >
+                         {renderCard(c, c.tier, false, true)}
+                       </motion.div>
+                     ))}
+                     </AnimatePresence>
+                  </motion.div>
+                )}
                 
-                {hasToken ? (
-                  <div className="splendor-stat-token" title="Current Token" style={{ backgroundColor: GEM_COLORS[g], color: g === 'diamond' ? 'black' : 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '50%', boxSizing: 'border-box', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 'bold' }}>
-                    {player.gems[g]}
-                  </div>
-                ) : null}
-              </div>
+                <motion.div 
+                  layout 
+                  initial={{ width: 0 }} 
+                  animate={{ width: tokenWidth }} 
+                  transition={{ duration: 0.3 }} 
+                  style={{ position: 'relative', height: tokenCount > 0 ? '20px' : '0px' }}
+                >
+                  <AnimatePresence>
+                  {[...Array(tokenCount)].map((_, i) => (
+                    <motion.div 
+                      key={`token-${g}-${i}`} 
+                      initial={{ opacity: 0, scale: 0 }} 
+                      animate={{ opacity: 1, scale: 1 }} 
+                      exit={{ opacity: 0, scale: 0, transition: { duration: 0.2, delay: Math.max(0, 5 - i) * 0.08 } }} 
+                      transition={{ delay: 0.2 + i * 0.1, duration: 0.3 }} 
+                      title={`${g} Token`} 
+                      style={{ backgroundColor: GEM_COLORS[g], border: '1px solid rgba(255,255,255,0.3)', borderRadius: '50%', boxSizing: 'border-box', width: '20px', height: '20px', position: 'absolute', top: 0, left: `${i * 10}px`, zIndex: i }}
+                    />
+                  ))}
+                  </AnimatePresence>
+                </motion.div>
+              </motion.div>
             );
           })}
+          </AnimatePresence>
+          <AnimatePresence>
           {player.gems.gold > 0 && (
-             <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '2px' }}>
-               
-               <div className="splendor-stat-token" title="Gold Token" style={{ backgroundColor: GEM_COLORS['gold'], color: 'black', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '50%', boxSizing: 'border-box', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 'bold' }}>
-                  {player.gems.gold}
-               </div>
-             </div>
+             <motion.div layout key="gold-container" initial={{ opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0, transition: { delay: 0.6 } }} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '2px' }}>
+               <motion.div 
+                 layout 
+                 initial={{ width: 0 }} 
+                 animate={{ width: 20 + (player.gems.gold - 1) * 10 }} 
+                 transition={{ duration: 0.3 }} 
+                 style={{ position: 'relative', height: '20px' }}
+               >
+                 <AnimatePresence>
+                   {[...Array(player.gems.gold)].map((_, i) => (
+                     <motion.div 
+                       key={`token-gold-${i}`} 
+                       initial={{ opacity: 0, scale: 0 }} 
+                       animate={{ opacity: 1, scale: 1 }} 
+                       exit={{ opacity: 0, scale: 0, transition: { duration: 0.2, delay: Math.max(0, 5 - i) * 0.08 } }} 
+                       transition={{ delay: 0.2 + i * 0.1, duration: 0.3 }} 
+                       title="Gold Token" 
+                       style={{ backgroundColor: GEM_COLORS['gold'], border: '1px solid rgba(255,255,255,0.3)', borderRadius: '50%', boxSizing: 'border-box', width: '20px', height: '20px', position: 'absolute', top: 0, left: `${i * 10}px`, zIndex: i }}
+                     />
+                   ))}
+                 </AnimatePresence>
+               </motion.div>
+             </motion.div>
           )}
-        </div>
+          </AnimatePresence>
+        </motion.div>
 
+        <AnimatePresence>
         {player.reservedCards.length > 0 && (
-          <div style={{ marginTop: '0.25rem' }}>
+          <motion.div layout initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} style={{ marginTop: '0.25rem' }}>
             <div style={{ fontSize: "0.75rem", color: "#9ca3af" }}>⏳</div>
-            <div className="splendor-reserved-cards">
-              {player.reservedCards.map((c, i) => <div key={i}>{renderCard(c, c.tier, true)}</div>)}
-            </div>
-          </div>
+            <motion.div layout className="splendor-reserved-cards">
+              <AnimatePresence>
+              {player.reservedCards.map(c => (
+                <motion.div 
+                  layout 
+                  key={c.id} 
+                  initial={{ opacity: 0, scale: 0 }} 
+                  animate={{ opacity: 1, scale: 1 }} 
+                  exit={{ opacity: 0, scale: 0 }} 
+                  transition={{ type: 'spring', bounce: 0.4 }}
+                  style={{ width: '3.6rem', height: '4.4rem', position: 'relative' }}
+                >
+                  <div style={{ position: 'absolute', top: 0, left: 0, transform: 'scale(0.65)', transformOrigin: 'top left' }}>
+                    {renderCard(c, c.tier, true)}
+                  </div>
+                </motion.div>
+              ))}
+              </AnimatePresence>
+            </motion.div>
+          </motion.div>
         )}
+        </AnimatePresence>
         
         {turnState === 'choose_noble' && isMyTurn && pid === myPlayerId && (
           <div className="splendor-noble-choice">
@@ -312,6 +394,39 @@ export const SplendorBoard: React.FC = () => {
             </div>
           </div>
         )}
+        </div>
+
+        <AnimatePresence>
+        {player.nobles && player.nobles.length > 0 && (
+          <motion.div layout initial={{ opacity: 0, width: 0 }} animate={{ opacity: 1, width: 'auto' }} exit={{ opacity: 0, width: 0 }} style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end', maxWidth: '40%' }}>
+            <AnimatePresence>
+            {player.nobles.map(n => (
+              <motion.div 
+                layout 
+                key={n.id} 
+                initial={{ opacity: 0, scale: 0 }} 
+                animate={{ opacity: 1, scale: 1 }} 
+                exit={{ opacity: 0, scale: 0 }} 
+                transition={{ type: 'spring', bounce: 0.4 }} 
+                style={{ width: '4.5rem', height: '4.5rem', position: 'relative', margin: 0 }}
+              >
+                <div className="splendor-noble" style={{ position: 'absolute', top: 0, right: 0, transform: 'scale(0.8)', transformOrigin: 'top right', margin: 0 }}>
+                  <div style={{ fontWeight: 'bold' }}>{n.points} pts</div>
+                  <div className="splendor-noble-reqs">
+                    {BaseGemTypes.map(g => n.requirements[g] ? (
+                      <div key={g} className="splendor-noble-req">
+                        <div className="splendor-mini-token" style={{ backgroundColor: GEM_COLORS[g] }} />
+                        <span>{n.requirements[g]}</span>
+                      </div>
+                    ) : null)}
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+            </AnimatePresence>
+          </motion.div>
+        )}
+        </AnimatePresence>
       </div>
     );
   };
@@ -348,9 +463,9 @@ export const SplendorBoard: React.FC = () => {
             <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.06)' }}>
               <th style={{ textAlign: 'left', padding: '10px' }}>Player</th>
               <th style={{ textAlign: 'center', padding: '10px' }}>Points</th>
+              <th style={{ textAlign: 'center', padding: '10px' }}>Card Pts</th>
+              <th style={{ textAlign: 'center', padding: '10px' }}>Noble Pts</th>
               <th style={{ textAlign: 'center', padding: '10px' }}>Cards</th>
-              <th style={{ textAlign: 'center', padding: '10px' }}>Tokens Left</th>
-              <th style={{ textAlign: 'center', padding: '10px' }}>Reserved Left</th>
               <th style={{ textAlign: 'center', padding: '10px' }}>Tokens Taken</th>
               <th style={{ textAlign: 'center', padding: '10px' }}>Cards Reserved</th>
             </tr>
@@ -358,7 +473,8 @@ export const SplendorBoard: React.FC = () => {
           <tbody>
             {sortedPlayers.map(pid => {
               const p = gameState.players[pid];
-              const totalTokens = Object.values(p.gems).reduce((a, b) => a + b, 0);
+              const cardPts = p.cards.reduce((acc, c) => acc + c.points, 0);
+              const noblePts = p.nobles.reduce((acc, n) => acc + n.points, 0);
               const pColor = p.color || PLAYER_COLORS[gameState.playerOrder.indexOf(pid) % PLAYER_COLORS.length];
               return (
                 <tr key={pid} style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
@@ -366,9 +482,9 @@ export const SplendorBoard: React.FC = () => {
                     {p.name} {pid === gameState.winnerId && '🏆'}
                   </td>
                   <td style={{ textAlign: 'center', padding: '10px', fontWeight: 'bold', color: '#fbbf24' }}>{p.score}</td>
+                  <td style={{ textAlign: 'center', padding: '10px', color: '#cbd5e1' }}>{cardPts}</td>
+                  <td style={{ textAlign: 'center', padding: '10px', color: '#cbd5e1' }}>{noblePts}</td>
                   <td style={{ textAlign: 'center', padding: '10px' }}>{p.cards.length}</td>
-                  <td style={{ textAlign: 'center', padding: '10px' }}>{totalTokens}</td>
-                  <td style={{ textAlign: 'center', padding: '10px' }}>{p.reservedCards.length}</td>
                   <td style={{ textAlign: 'center', padding: '10px' }}>{p.stats?.tokensCollected || 0}</td>
                   <td style={{ textAlign: 'center', padding: '10px' }}>{p.stats?.cardsReserved || 0}</td>
                 </tr>
@@ -397,6 +513,7 @@ export const SplendorBoard: React.FC = () => {
   return (
     <GameLayout 
       gameName="Splendor" 
+      turnAnimationDelayMs={1500}
       helpText={`Splendor is an engaging chip-collecting and card development game. Players collect gemstone tokens to buy development cards that provide permanent gem bonuses and prestige points to attract visiting nobles. The first player to reach 15 points triggers the final round.\n\nVersion: v2.0 (Strict Unique Cards, Enhanced Layout & Stats)`} 
       helpUrl="https://en.wikipedia.org/wiki/Splendor_(board_game)"
       renderGameSpecificPlayerDetails={renderPlayerDetails}
@@ -481,9 +598,17 @@ export const SplendorBoard: React.FC = () => {
         <div className="splendor-left-col">
           <div className="splendor-panel">
             <h3 className="splendor-panel-title">Nobles</h3>
-            <div className="splendor-nobles">
-              {gameState.nobles.map(n => (
-                <div key={n.id} className="splendor-noble">
+            <motion.div layout className="splendor-nobles">
+              <AnimatePresence>
+              {gameState.nobles.map((n, idx) => (
+                <motion.div 
+                  key={n.id} 
+                  initial={{ opacity: 0, scale: 0, x: -50 }}
+                  animate={{ opacity: 1, scale: 1, x: 0 }}
+                  exit={{ opacity: 0, scale: 0 }}
+                  transition={{ delay: 0.5 + idx * 0.2, type: 'spring' }}
+                  className="splendor-noble"
+                >
                   <div style={{ fontWeight: 'bold' }}>{n.points} pts</div>
                   <div className="splendor-noble-reqs">
                     {BaseGemTypes.map(g => n.requirements[g] ? (
@@ -493,17 +618,21 @@ export const SplendorBoard: React.FC = () => {
                       </div>
                     ) : null)}
                   </div>
-                </div>
+                </motion.div>
               ))}
-            </div>
+              </AnimatePresence>
+            </motion.div>
           </div>
 
           <div className="splendor-panel splendor-bank-panel">
             <h3 className="splendor-panel-title">Bank</h3>
-            <div className="splendor-bank-tokens">
-              {(Object.keys(gameState.bank) as GemType[]).map(gem => (
-                <div 
+            <motion.div layout className="splendor-bank-tokens">
+              {(Object.keys(gameState.bank) as GemType[]).map((gem, idx) => (
+                <motion.div 
                   key={gem} 
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.8 + idx * 0.1, type: 'spring' }}
                   onClick={() => handleGemClick(gem)}
                   className="splendor-token"
                   style={{ 
@@ -514,9 +643,9 @@ export const SplendorBoard: React.FC = () => {
                 >
                   {gameState.bank[gem]}
                   {selectedGems[gem] ? <div className="splendor-token-badge">{selectedGems[gem]}</div> : null}
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
             {turnState === 'take_tokens' && isMyTurn && (
               <div className="splendor-actions">
                 <button onClick={submitGems} className="splendor-btn take" disabled={!canTake}>Take</button>
@@ -541,9 +670,19 @@ export const SplendorBoard: React.FC = () => {
                 )}
               </div>
               <div className="splendor-cards-row">
-                {gameState.board[tier].map((card, i) => (
-                   <div key={i}>{renderCard(card, tier === 'tier1' ? 1 : tier === 'tier2' ? 2 : 3)}</div>
-                ))}
+                <AnimatePresence mode="popLayout">
+                  {gameState.board[tier].map((card, i) => (
+                    <motion.div 
+                      key={card ? card.id : `empty-${i}`}
+                      initial={{ rotateY: 90, opacity: 0, scale: 0.8 }}
+                      animate={{ rotateY: 0, opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.5, y: -100, transition: { duration: 0.5 } }}
+                      transition={{ duration: 0.8, delay: 2.4 }} // very late so player actions happen first
+                    >
+                      {renderCard(card, tier === 'tier1' ? 1 : tier === 'tier2' ? 2 : 3)}
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
               </div>
             </div>
           ))}

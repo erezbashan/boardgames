@@ -8,7 +8,8 @@
     "build": "tsc && rsync -a --include '*/' --include '*.css' --exclude '*' src/ dist/"
   },
   "dependencies": {
-    "@erez/boardgame-core": "*"
+    "@erez/boardgame-core": "*",
+    "framer-motion": "^13.4.3"
   },
   "devDependencies": {
     "typescript": "^5.0.0"

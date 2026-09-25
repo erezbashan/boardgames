@@ -82,6 +82,7 @@
   width: 5rem;
   height: 5rem;
   background-color: #854d0e;
+  border: 2px solid #cbd5e1;
   border-radius: 0.5rem;
   padding: 0.25rem;
   display: flex;
@@ -271,8 +272,6 @@
 .splendor-reserved-cards {
   display: flex;
   gap: 0.25rem;
-  transform: scale(0.65);
-  transform-origin: top left;
 }
 
 .splendor-noble-choice {
@@ -305,12 +304,17 @@
 
 
 @keyframes popIn {
-  0% { transform: scale(0.8); opacity: 0; }
+  0% { transform: scale(0.3); opacity: 0; box-shadow: 0 0 0px 0px rgba(255,215,0,0); }
+  50% { transform: scale(1.4); opacity: 1; box-shadow: 0 0 25px 10px rgba(255,215,0,0.8); }
+  75% { transform: scale(0.9); box-shadow: 0 0 10px 5px rgba(255,215,0,0.4); }
+  100% { transform: scale(1); opacity: 1; box-shadow: 0 0 0px 0px rgba(255,215,0,0); }
+}
+@keyframes popInGem {
+  0% { transform: scale(0.5); opacity: 0; }
+  50% { transform: scale(1.2); opacity: 1; }
   100% { transform: scale(1); opacity: 1; }
 }
-.splendor-card, .splendor-token, .splendor-noble, .splendor-stat-token, .splendor-stat-bonus {
-  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-}
+
 .splendor-card {
   transition: transform 0.2s, box-shadow 0.2s;
 }
@@ -382,20 +386,7 @@
   100% { transform: translateX(0) scale(1); opacity: 1; }
 }
 
-@keyframes popIn {
-  0% { opacity: 0; transform: scale(0.5); }
-  70% { transform: scale(1.1); }
-  100% { opacity: 1; transform: scale(1); }
-}
 
-.splendor-card {
-  animation: flipReveal 0.6s ease-out;
-  position: relative;
-}
-
-.splendor-stat-token, .splendor-stat-bonus, .splendor-log-gem {
-  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
 
 .splendor-card-hover-action {
   position: absolute;

@@ -36,6 +36,7 @@ export const colorizeLog = (logText: string, players: any[] = []) => {
 export interface GameLayoutProps {
   bottomAreaRatio?: number;
   gameName: string;
+  turnAnimationDelayMs?: number;
   
   // Content Slots
   helpText?: string;
@@ -50,6 +51,7 @@ export interface GameLayoutProps {
 export const GameLayout: React.FC<GameLayoutProps> = ({
   bottomAreaRatio = 45,
   gameName,
+  turnAnimationDelayMs = 0,
   helpText,
   helpUrl,
   settings,
@@ -71,8 +73,21 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
   const displayOrder = myIndex >= 0 ? [...playerOrder.slice(myIndex), ...playerOrder.slice(0, myIndex)] : playerOrder;
   const players = displayOrder.map((id: string) => playersMap[id]);
   
+  const actualCurrentPlayerId = playerOrder[currentPlayerIndex];
+  const [visualCurrentPlayerId, setVisualCurrentPlayerId] = useState(actualCurrentPlayerId);
 
-  const currentPlayerId = playerOrder[currentPlayerIndex];
+  useEffect(() => {
+    if (turnAnimationDelayMs > 0) {
+      if (actualCurrentPlayerId !== visualCurrentPlayerId) {
+        const timeout = setTimeout(() => {
+          setVisualCurrentPlayerId(actualCurrentPlayerId);
+        }, turnAnimationDelayMs);
+        return () => clearTimeout(timeout);
+      }
+    } else {
+      setVisualCurrentPlayerId(actualCurrentPlayerId);
+    }
+  }, [actualCurrentPlayerId, visualCurrentPlayerId, turnAnimationDelayMs]);
 
   // Auto-show stats after 2 seconds when finished
   useEffect(() => {
@@ -190,7 +205,7 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
         {/* RIGHT PANE (Players) */}
         <div className="game-right-pane">
           {players.map((p: any) => {
-            const isPlaying = p.id === currentPlayerId && status === 'Playing';
+            const isPlaying = p.id === visualCurrentPlayerId && status === 'Playing';
             const isMe = p.id === myPlayerId;
             const isWinner = p.id === gameState.winnerId;
             return (
