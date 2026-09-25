@@ -257,8 +257,8 @@ export const SplendorBoard: React.FC = () => {
     const isDiscarding = turnState === 'discard_tokens' && isMe && isMyTurn;
 
     return (
-      <div className="splendor-player-details" style={{ display: 'flex', flexDirection: 'row', gap: '1rem', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
+      <div className="splendor-player-details" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ fontWeight: 'bold', fontSize: '1.25rem', color: player.score >= 15 ? '#22c55e' : '#fbbf24', textShadow: player.score >= 15 ? '0 0 10px #22c55e' : 'none' }}>
               {player.score} pts {player.score >= 15 && '👑'}
@@ -374,7 +374,7 @@ export const SplendorBoard: React.FC = () => {
         )}
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'row', gap: '1rem', alignItems: 'flex-start', justifyContent: 'flex-end', flexWrap: 'wrap', maxWidth: '55%' }}>
+        <div style={{ display: 'flex', flexDirection: 'row', gap: '1rem', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', width: '100%' }}>
           <AnimatePresence>
           {player.reservedCards.length > 0 && (
             <motion.div layout initial={{ opacity: 0, width: 0 }} animate={{ opacity: 1, width: 'auto' }} exit={{ opacity: 0, width: 0 }}>
@@ -404,7 +404,7 @@ export const SplendorBoard: React.FC = () => {
 
           <AnimatePresence>
           {player.nobles && player.nobles.length > 0 && (
-            <motion.div layout initial={{ opacity: 0, width: 0 }} animate={{ opacity: 1, width: 'auto' }} exit={{ opacity: 0, width: 0 }} style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <motion.div layout initial={{ opacity: 0, width: 0 }} animate={{ opacity: 1, width: 'auto' }} exit={{ opacity: 0, width: 0 }} style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginLeft: 'auto' }}>
               <AnimatePresence>
               {player.nobles.map(n => (
                 <motion.div 
