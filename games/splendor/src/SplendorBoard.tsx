@@ -19,6 +19,7 @@ import { useVisualGameState } from './useVisualGameState';
 export const SplendorBoard: React.FC = () => {
   const { gameState: actualState, dispatch, myPlayerId } = useGameContext<SplendorGameState, SplendorAction>();
   const gameState = useVisualGameState(actualState);
+  const speedMult = gameState.settings?.gameSpeed === 'Ultra' ? 0.01 : gameState.settings?.gameSpeed === 'Fast' ? 0.5 : gameState.settings?.gameSpeed === 'Slow' ? 2 : 1;
   
   const [selectedGems, setSelectedGems] = useState<Partial<Record<GemType, number>>>({});
   const [discardSelection, setDiscardSelection] = useState<Partial<Record<GemType, number>>>({});
@@ -279,11 +280,11 @@ export const SplendorBoard: React.FC = () => {
             const tokenCount = player.gems[g];
             const tokenWidth = tokenCount > 0 ? 20 + (tokenCount - 1) * 10 : 0;
             return (
-              <motion.div layout key={g} initial={{ opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0, transition: { delay: 0.6 } }} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '4px' }}>
+              <motion.div layout key={g} initial={{ opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0, transition: { delay: 0.6 * speedMult } }} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '4px' }}>
                 {hasBonus && (
                   <motion.div 
                     layout 
-                    transition={{ layout: { type: 'spring' } }} 
+                    transition={{ layout: { type: 'spring', duration: 0.4 * speedMult } }} 
                     className="splendor-stat-bonus" 
                     style={{ position: 'relative', height: '4.4rem', width: `${3.6 + (colorCards.length - 1) * 1.5}rem` }}
                   >
@@ -295,7 +296,7 @@ export const SplendorBoard: React.FC = () => {
                          initial={{ opacity: 0, scale: 0.3 }} 
                          animate={{ opacity: 1, scale: 0.65 }} 
                          exit={{ opacity: 0, scale: 0.3 }}
-                         transition={{ duration: 0.3, type: 'spring' }} 
+                         transition={{ duration: 0.3 * speedMult, type: 'spring' }} 
                          style={{ position: 'absolute', top: 0, left: `${i * 1.5}rem`, originX: 0, originY: 0, zIndex: colorCards.length - i }}
                        >
                          {renderCard(c, c.tier, false, true)}
@@ -309,7 +310,7 @@ export const SplendorBoard: React.FC = () => {
                   layout 
                   initial={{ width: 0 }} 
                   animate={{ width: tokenWidth }} 
-                  transition={{ duration: 0.3 }} 
+                  transition={{ duration: 0.3 * speedMult }} 
                   style={{ position: 'relative', height: '20px' }}
                 >
                   <AnimatePresence>
@@ -318,8 +319,8 @@ export const SplendorBoard: React.FC = () => {
                       key={`token-${g}-${i}`} 
                       initial={{ opacity: 0, scale: 0 }} 
                       animate={{ opacity: 1, scale: 1 }} 
-                      exit={{ opacity: 0, scale: 0, transition: { duration: 0.3 } }} 
-                      transition={{ duration: 0.3 }} 
+                      exit={{ opacity: 0, scale: 0, transition: { duration: 0.3 * speedMult } }} 
+                      transition={{ duration: 0.3 * speedMult }} 
                       title={`${g} Token`} 
                       style={{ backgroundColor: GEM_COLORS[g], border: '1px solid rgba(255,255,255,0.3)', borderRadius: '50%', boxSizing: 'border-box', width: '20px', height: '20px', position: 'absolute', top: 0, left: `${i * 10}px`, zIndex: i }}
                     />
@@ -332,12 +333,12 @@ export const SplendorBoard: React.FC = () => {
           </AnimatePresence>
           <AnimatePresence>
           {player.gems.gold > 0 && (
-             <motion.div layout key="gold-container" initial={{ opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0, transition: { delay: 0.6 } }} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '2px' }}>
+             <motion.div layout key="gold-container" initial={{ opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0, transition: { delay: 0.6 * speedMult } }} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '2px' }}>
                <motion.div 
                  layout 
                  initial={{ width: 0 }} 
                  animate={{ width: 20 + (player.gems.gold - 1) * 10 }} 
-                 transition={{ duration: 0.3 }} 
+                 transition={{ duration: 0.3 * speedMult }} 
                  style={{ position: 'relative', height: '20px' }}
                >
                  <AnimatePresence>
@@ -346,8 +347,8 @@ export const SplendorBoard: React.FC = () => {
                        key={`token-gold-${i}`} 
                        initial={{ opacity: 0, scale: 0 }} 
                        animate={{ opacity: 1, scale: 1 }} 
-                       exit={{ opacity: 0, scale: 0, transition: { duration: 0.3 } }} 
-                       transition={{ duration: 0.3 }} 
+                       exit={{ opacity: 0, scale: 0, transition: { duration: 0.3 * speedMult } }} 
+                       transition={{ duration: 0.3 * speedMult }} 
                        title="Gold Token" 
                        style={{ backgroundColor: GEM_COLORS['gold'], border: '1px solid rgba(255,255,255,0.3)', borderRadius: '50%', boxSizing: 'border-box', width: '20px', height: '20px', position: 'absolute', top: 0, left: `${i * 10}px`, zIndex: i }}
                      />
@@ -372,7 +373,7 @@ export const SplendorBoard: React.FC = () => {
                   initial={{ opacity: 0, scale: 0 }} 
                   animate={{ opacity: 1, scale: 1 }} 
                   exit={{ opacity: 0, scale: 0 }} 
-                  transition={{ type: 'spring', bounce: 0.4 }}
+                  transition={{ type: 'spring', bounce: 0.4, duration: 0.5 * speedMult }}
                   style={{ width: '3.6rem', height: '4.4rem', position: 'relative' }}
                 >
                   <div style={{ position: 'absolute', top: 0, left: 0, transform: 'scale(0.65)', transformOrigin: 'top left' }}>
@@ -411,7 +412,7 @@ export const SplendorBoard: React.FC = () => {
                 initial={{ opacity: 0, scale: 0 }} 
                 animate={{ opacity: 1, scale: 1 }} 
                 exit={{ opacity: 0, scale: 0 }} 
-                transition={{ type: 'spring', bounce: 0.4 }} 
+                transition={{ type: 'spring', bounce: 0.4, duration: 0.5 * speedMult }} 
                 style={{ width: '4.5rem', height: '4.5rem', position: 'relative', margin: 0 }}
               >
                 <div className="splendor-noble" style={{ position: 'absolute', top: 0, right: 0, transform: 'scale(0.8)', transformOrigin: 'top right', margin: 0 }}>
@@ -638,7 +639,7 @@ export const SplendorBoard: React.FC = () => {
                   initial={{ opacity: 0, scale: 0, x: -50 }}
                   animate={{ opacity: 1, scale: 1, x: 0 }}
                   exit={{ opacity: 0, scale: 0 }}
-                  transition={{ delay: 0.5 + idx * 0.2, type: 'spring' }}
+                  transition={{ delay: (0.5 + idx * 0.2) * speedMult, type: 'spring', duration: 0.5 * speedMult }}
                   className="splendor-noble"
                 >
                   <div style={{ fontWeight: 'bold' }}>{n.points} pts</div>
@@ -664,7 +665,7 @@ export const SplendorBoard: React.FC = () => {
                   key={gem} 
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.8 + idx * 0.1, type: 'spring' }}
+                  transition={{ delay: (0.8 + idx * 0.1) * speedMult, type: 'spring', duration: 0.5 * speedMult }}
                   onClick={() => handleGemClick(gem)}
                   className="splendor-token"
                   style={{ 
@@ -708,8 +709,8 @@ export const SplendorBoard: React.FC = () => {
                       key={card ? card.id : `empty-${i}`}
                       initial={{ rotateY: 90, opacity: 0, scale: 0.8 }}
                       animate={{ rotateY: 0, opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.5, y: -100, transition: { duration: 0.4 } }}
-                      transition={{ duration: 0.4 }}
+                      exit={{ opacity: 0, scale: 0.5, y: -100, transition: { duration: 0.4 * speedMult } }}
+                      transition={{ duration: 0.4 * speedMult }}
                     >
                       {renderCard(card, tier === 'tier1' ? 1 : tier === 'tier2' ? 2 : 3)}
                     </motion.div>
