@@ -306,7 +306,7 @@ export const SplendorBoard: React.FC = () => {
                   initial={{ width: 0 }} 
                   animate={{ width: tokenWidth }} 
                   transition={{ duration: 0.3 }} 
-                  style={{ position: 'relative', height: tokenCount > 0 ? '20px' : '0px' }}
+                  style={{ position: 'relative', height: '20px' }}
                 >
                   <AnimatePresence>
                   {[...Array(tokenCount)].map((_, i) => (
