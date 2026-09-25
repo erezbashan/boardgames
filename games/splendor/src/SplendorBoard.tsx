@@ -14,15 +14,18 @@ const GEM_COLORS: Record<GemType, string> = {
   gold: '#eab308'
 };
 
+import { useVisualGameState } from './useVisualGameState';
+
 export const SplendorBoard: React.FC = () => {
-  const { gameState, dispatch, myPlayerId } = useGameContext<SplendorGameState, SplendorAction>();
+  const { gameState: actualState, dispatch, myPlayerId } = useGameContext<SplendorGameState, SplendorAction>();
+  const gameState = useVisualGameState(actualState);
+  
   const [selectedGems, setSelectedGems] = useState<Partial<Record<GemType, number>>>({});
   const [discardSelection, setDiscardSelection] = useState<Partial<Record<GemType, number>>>({});
   
-  
-
-  const isMyTurn = gameState.playerOrder[gameState.currentPlayerIndex] === myPlayerId;
-  const turnState = gameState.turnState;
+  const isMyTurn = actualState.playerOrder[actualState.currentPlayerIndex] === myPlayerId;
+  const turnState = actualState.turnState;
+  const isAnimating = gameState !== actualState;
   
   let totalSelected = 0;
   let typesSelected = 0;
@@ -41,7 +44,7 @@ export const SplendorBoard: React.FC = () => {
 
 
   const handleGemClick = (gem: GemType) => {
-    if (!isMyTurn || gem === 'gold') return;
+    if (!isMyTurn || gem === 'gold' || isAnimating) return;
     
     if (turnState === 'take_tokens') {
       const current = selectedGems[gem] || 0;
@@ -107,7 +110,7 @@ export const SplendorBoard: React.FC = () => {
     if (!card) return <div className="splendor-card-empty" />;
     
     const canReserve = !isReserved && gameState.players[myPlayerId]?.reservedCards.length < 3;
-    const isClickable = !isPurchased && isMyTurn && turnState === 'take_tokens' && (canAfford || canReserve);
+    const isClickable = !isAnimating && !isPurchased && isMyTurn && turnState === 'take_tokens' && (canAfford || canReserve);
 
     return (
       <div 
@@ -279,7 +282,7 @@ export const SplendorBoard: React.FC = () => {
                 {hasBonus && (
                   <motion.div 
                     layout 
-                    transition={{ layout: { delay: 1.2, type: 'spring' } }} 
+                    transition={{ layout: { type: 'spring' } }} 
                     className="splendor-stat-bonus" 
                     style={{ position: 'relative', height: '4.4rem', width: `${3.6 + (colorCards.length - 1) * 1.5}rem` }}
                   >
@@ -291,7 +294,7 @@ export const SplendorBoard: React.FC = () => {
                          initial={{ opacity: 0, scale: 0.3 }} 
                          animate={{ opacity: 1, scale: 0.65 }} 
                          exit={{ opacity: 0, scale: 0.3 }}
-                         transition={{ delay: 1.2, duration: 0.5, type: 'spring' }} 
+                         transition={{ duration: 0.3, type: 'spring' }} 
                          style={{ position: 'absolute', top: 0, left: `${i * 1.5}rem`, originX: 0, originY: 0, zIndex: colorCards.length - i }}
                        >
                          {renderCard(c, c.tier, false, true)}
@@ -314,8 +317,8 @@ export const SplendorBoard: React.FC = () => {
                       key={`token-${g}-${i}`} 
                       initial={{ opacity: 0, scale: 0 }} 
                       animate={{ opacity: 1, scale: 1 }} 
-                      exit={{ opacity: 0, scale: 0, transition: { duration: 0.2, delay: Math.max(0, 5 - i) * 0.08 } }} 
-                      transition={{ delay: 0.2 + i * 0.1, duration: 0.3 }} 
+                      exit={{ opacity: 0, scale: 0, transition: { duration: 0.3 } }} 
+                      transition={{ duration: 0.3 }} 
                       title={`${g} Token`} 
                       style={{ backgroundColor: GEM_COLORS[g], border: '1px solid rgba(255,255,255,0.3)', borderRadius: '50%', boxSizing: 'border-box', width: '20px', height: '20px', position: 'absolute', top: 0, left: `${i * 10}px`, zIndex: i }}
                     />
@@ -342,8 +345,8 @@ export const SplendorBoard: React.FC = () => {
                        key={`token-gold-${i}`} 
                        initial={{ opacity: 0, scale: 0 }} 
                        animate={{ opacity: 1, scale: 1 }} 
-                       exit={{ opacity: 0, scale: 0, transition: { duration: 0.2, delay: Math.max(0, 5 - i) * 0.08 } }} 
-                       transition={{ delay: 0.2 + i * 0.1, duration: 0.3 }} 
+                       exit={{ opacity: 0, scale: 0, transition: { duration: 0.3 } }} 
+                       transition={{ duration: 0.3 }} 
                        title="Gold Token" 
                        style={{ backgroundColor: GEM_COLORS['gold'], border: '1px solid rgba(255,255,255,0.3)', borderRadius: '50%', boxSizing: 'border-box', width: '20px', height: '20px', position: 'absolute', top: 0, left: `${i * 10}px`, zIndex: i }}
                      />
@@ -513,7 +516,7 @@ export const SplendorBoard: React.FC = () => {
   return (
     <GameLayout 
       gameName="Splendor" 
-      turnAnimationDelayMs={1500}
+      turnAnimationDelayMs={2500}
       helpText={`Splendor is an engaging chip-collecting and card development game. Players collect gemstone tokens to buy development cards that provide permanent gem bonuses and prestige points to attract visiting nobles. The first player to reach 15 points triggers the final round.\n\nVersion: v2.0 (Strict Unique Cards, Enhanced Layout & Stats)`} 
       helpUrl="https://en.wikipedia.org/wiki/Splendor_(board_game)"
       renderGameSpecificPlayerDetails={renderPlayerDetails}
@@ -676,8 +679,8 @@ export const SplendorBoard: React.FC = () => {
                       key={card ? card.id : `empty-${i}`}
                       initial={{ rotateY: 90, opacity: 0, scale: 0.8 }}
                       animate={{ rotateY: 0, opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.5, y: -100, transition: { duration: 0.5 } }}
-                      transition={{ duration: 0.8, delay: 2.4 }} // very late so player actions happen first
+                      exit={{ opacity: 0, scale: 0.5, y: -100, transition: { duration: 0.4 } }}
+                      transition={{ duration: 0.4 }}
                     >
                       {renderCard(card, tier === 'tier1' ? 1 : tier === 'tier2' ? 2 : 3)}
                     </motion.div>
