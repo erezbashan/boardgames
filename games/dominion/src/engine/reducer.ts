@@ -88,6 +88,7 @@ import { DominionAction } from './actions';
 
 function checkBotTurn(state: DominionState): DominionState {
   if (state.status !== 'Playing') return state;
+  if (state.actionQueue && state.actionQueue.length > 0) return state; // Engine is busy, wait!
 
   let activePlayerId = state.playerOrder[state.currentPlayerIndex];
   if (state.pendingActions.length > 0 && state.pendingActions[0].type === 'REQUEST_INPUT') {

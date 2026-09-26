@@ -209,7 +209,7 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
           <span 
             key={match.index}
             style={{ color: '#60a5fa', cursor: 'pointer', textDecoration: 'underline', fontWeight: 'bold' }}
-            onMouseEnter={(e) => showPopup(e, def)}
+            
             onMouseLeave={hidePopup}
           >
             {cardName}
