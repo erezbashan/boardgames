@@ -149,9 +149,9 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
         }}
         onClick={onClick}
       >
-        <div style={{ position: 'absolute', top: '-8px', left: '-8px', zIndex: 10 }}>
+        <div style={{ position: 'absolute', top: '-8px', right: '-8px', zIndex: 10 }}>
           <div 
-            style={{ width: '24px', height: '24px', background: '#3b82f6', border: '2px solid white', borderRadius: '50%', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '14px', cursor: 'help', boxShadow: '0 2px 5px rgba(0,0,0,0.5)' }}
+            style={{ width: '24px', height: '24px', background: '#475569', border: '2px solid white', borderRadius: '50%', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '14px', cursor: 'help', boxShadow: '0 2px 5px rgba(0,0,0,0.5)' }}
             onMouseEnter={(e) => { e.stopPropagation(); showPopup(e, def); }}
             onMouseLeave={(e) => { e.stopPropagation(); hidePopup(); }}
           >?</div>
@@ -249,9 +249,9 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
           onClick={() => !disabled && handleBuyCard(id)}
         >
           {/* Top Bar: Name */}
-          <div style={{ position: 'absolute', top: '-8px', left: '-8px', zIndex: 10 }}>
+          <div style={{ position: 'absolute', top: '-8px', right: '-8px', zIndex: 10 }}>
             <div 
-              style={{ width: '24px', height: '24px', background: '#3b82f6', border: '2px solid white', borderRadius: '50%', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '14px', cursor: 'help', boxShadow: '0 2px 5px rgba(0,0,0,0.5)' }}
+              style={{ width: '24px', height: '24px', background: '#475569', border: '2px solid white', borderRadius: '50%', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '14px', cursor: 'help', boxShadow: '0 2px 5px rgba(0,0,0,0.5)' }}
               onMouseEnter={(e) => { e.stopPropagation(); showPopup(e, def); }}
               onMouseLeave={(e) => { e.stopPropagation(); hidePopup(); }}
             >?</div>
