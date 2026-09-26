@@ -43,27 +43,9 @@ function processPendingActions(state: DominionState) {
     
     switch (pending.type) {
       case 'DRAW_CARDS': {
-        if (player.deck.length === 0) {
-          if (player.discard.length === 0) break; // Can't draw anymore
-          player.deck = shuffle([...player.discard]);
-          player.discard = [];
-          state.logs.push(`-- ${player.name} shuffles their discard pile --`);
-        }
-        const card = player.deck.pop();
-        if (card) {
-          player.hand.push(card);
-          const lastLog = state.logs[state.logs.length - 1] || "";
-          const match = lastLog.match(new RegExp(`^${player.name} draws (?:a|(\\d+)) cards?$`));
-          if (match) {
-             const count = match[1] ? parseInt(match[1]) + 1 : 2;
-             state.logs[state.logs.length - 1] = `${player.name} draws ${count} cards`;
-          } else {
-             state.logs.push(`${player.name} draws a card`);
-          }
-        }
-        if (pending.amount > 1) {
+        if (pending.amount > 0) {
           state.actionQueue = state.actionQueue || [];
-          state.actionQueue.push({ delayMs: 250, action: { type: 'DRAW_CARDS_ASYNC', playerId: pending.playerId, amount: pending.amount - 1 } });
+          state.actionQueue.push({ delayMs: 250, action: { type: 'DRAW_CARDS_ASYNC', playerId: pending.playerId, amount: pending.amount } });
         }
         break;
       }
@@ -148,7 +130,21 @@ export function dominionReducer
         if (def.name === 'Silver') player.coins += 2;
         if (def.name === 'Gold') player.coins += 3;
         
-        nextState.logs.push(`${player.name} plays [${def.name}]`);
+                const lastLog = nextState.logs[nextState.logs.length - 1] || "";
+        const match = lastLog.match(new RegExp(`^${player.name} plays (?:(\\\\d+) )?\\[${def.name}\\]\\.?$`));
+        if (match) {
+           const count = match[1] ? parseInt(match[1]) + 1 : 2;
+           nextState.logs[nextState.logs.length - 1] = `${player.name} plays ${count} [${def.name}].`;
+        } else {
+                   const lastLog = nextState.logs[nextState.logs.length - 1] || "";
+        const match = lastLog.match(new RegExp(`^${player.name} plays (?:(\\\\d+) )?\\[${def.name}\\]\\.?$`));
+        if (match) {
+           const count = match[1] ? parseInt(match[1]) + 1 : 2;
+           nextState.logs[nextState.logs.length - 1] = `${player.name} plays ${count} [${def.name}].`;
+        } else {
+           nextState.logs.push(`${player.name} plays [${def.name}].`);
+        }
+        }
 
         if (treasures.length > 1) {
            nextState.actionQueue = nextState.actionQueue || [];
@@ -259,7 +255,14 @@ export function dominionReducer
         player.actions--;
         player.hand.splice(cardIndex, 1);
         player.playArea.push(card);
-        nextState.logs.push(`${player.name} plays [${def.name}].`);
+                const lastLog = nextState.logs[nextState.logs.length - 1] || "";
+        const match = lastLog.match(new RegExp(`^${player.name} plays (?:(\\\\d+) )?\\[${def.name}\\]\\.?$`));
+        if (match) {
+           const count = match[1] ? parseInt(match[1]) + 1 : 2;
+           nextState.logs[nextState.logs.length - 1] = `${player.name} plays ${count} [${def.name}].`;
+        } else {
+           nextState.logs.push(`${player.name} plays [${def.name}].`);
+        }
         
         if (def.onPlay) {
           const generatedActions = def.onPlay(nextState, action.playerId);
@@ -269,6 +272,14 @@ export function dominionReducer
         if (!def.types.includes('TREASURE')) break; // Can only play treasures now
         player.hand.splice(cardIndex, 1);
         player.playArea.push(card);
+        const lastLog = nextState.logs[nextState.logs.length - 1] || "";
+        const match = lastLog.match(new RegExp(`^${player.name} plays (?:(\\\\d+) )?\\[${def.name}\\]\\.?$`));
+        if (match) {
+           const count = match[1] ? parseInt(match[1]) + 1 : 2;
+           nextState.logs[nextState.logs.length - 1] = `${player.name} plays ${count} [${def.name}].`;
+        } else {
+           nextState.logs.push(`${player.name} plays [${def.name}].`);
+        }
         if (def.onPlay) {
           const generatedActions = def.onPlay(nextState, action.playerId);
           nextState.pendingActions.unshift(...generatedActions);
@@ -403,6 +414,16 @@ export function dominionReducer
   nextState = checkBotTurn(nextState);
 
   recalculateVP(nextState);
+
+  // End Game Detection
+  if (nextState.status === 'Playing') {
+    const emptyPiles = Object.values(nextState.supply).filter(count => count === 0).length;
+    if (nextState.supply['province'] === 0 || emptyPiles >= 3) {
+      nextState.status = 'Finished';
+      nextState.logs.push(`-- Game Over! --`);
+    }
+  }
+
   return nextState;
 
 }
