@@ -1,3 +1,5 @@
+import { DominionBoard } from '@erez/dominion';
+import type { DominionState, PlayerAction as DominionAction } from '@erez/dominion';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { GameProvider } from '@erez/boardgame-core';
 import { FlipsBoard } from '@erez/flips';
@@ -100,6 +102,33 @@ function ActiveSplendorGame({ gameId, username }: { gameId: string, username: st
   );
 }
 
+
+function ActiveDominionGame({ gameId, username }: { gameId: string, username: string }) {
+  const { gameState, myPlayerId, dispatchToBackend, error } = useMultiplayerGame<DominionState, DominionAction>(gameId, 'dominion', username);
+  const navigate = useNavigate();
+
+  if (error) {
+    return <div style={{ color: 'white', padding: '40px' }}>Error: {error}</div>;
+  }
+
+  if (!gameState || !myPlayerId) {
+    return <div style={{ color: 'white', padding: '40px' }}>Loading game...</div>;
+  }
+
+  const value = {
+    gameState,
+    myPlayerId,
+    dispatch: dispatchToBackend as any,
+    onLeaveGame: () => navigate('/dominion')
+  };
+
+  return (
+    <GameProvider value={value}>
+      <DominionBoard gameState={gameState} myPlayerId={myPlayerId} dispatch={dispatchToBackend} onLeaveGame={() => navigate('/dominion')} />
+    </GameProvider>
+  );
+}
+
 export function ActiveGameWrapper() {
   const { gameType, gameId } = useParams();
   const location = useLocation();
@@ -120,6 +149,10 @@ export function ActiveGameWrapper() {
 
   if (gameType === 'splendor') {
     return <ActiveSplendorGame gameId={gameId!} username={username} />;
+  }
+
+  if (gameType === 'dominion') {
+    return <ActiveDominionGame gameId={gameId!} username={username} />;
   }
 
   return (

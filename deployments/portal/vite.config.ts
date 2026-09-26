@@ -12,9 +12,10 @@ export default defineConfig({
       '@erez/acquire': path.resolve(__dirname, '../../games/acquire/src/index.ts'),
       '@erez/splendor': path.resolve(__dirname, '../../games/splendor/src/index.ts'),
       '@erez/flips': path.resolve(__dirname, '../../games/flips/src/index.ts'),
+      '@erez/dominion': path.resolve(__dirname, '../../games/dominion/src/index.ts'),
     }
   },
   optimizeDeps: {
-    exclude: ['@erez/boardgame-core', '@erez/flips', '@erez/king-of-tokyo', '@erez/acquire', '@erez/splendor']
+    exclude: ['@erez/boardgame-core', '@erez/flips', '@erez/king-of-tokyo', '@erez/acquire', '@erez/splendor', '@erez/dominion']
   }
 })

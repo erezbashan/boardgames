@@ -6,3 +6,5 @@
   1. Rebuild the packages: `npm run build --workspaces`
   2. Clear Vite cache and restart: `rm -rf deployments/portal/node_modules/.vite && rm -rf node_modules/.vite && npm run dev --workspace=deployments/portal -- --force` (or tell the user to restart their own dev server with `--force`).
 - **Card Architecture Strict Rule**: Any logic of a card MUST be limited entirely to the card's code file (e.g. `someCard.ts`). The generic game engine code (`reducer.ts`, `KotBoard.tsx`, etc.) MUST NOT contain any hardcoded references, variable checks, or logic tied to specific cards (e.g. no `includes('giant_brain')`). The engine should instead provide generic hooks, state properties, or contexts that cards can modify using their `onEvent` handlers.
+
+- bot implementations should always be separated to the bot file and not tied to the game mechanics. Different bot implementations should be possible, each in its own files, without affecting the game play code,

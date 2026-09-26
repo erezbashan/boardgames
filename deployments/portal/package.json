@@ -12,13 +12,14 @@
   "dependencies": {
     "@erez/acquire": "*",
     "@erez/boardgame-core": "*",
+    "@erez/dominion": "^1.0.0",
     "@erez/flips": "*",
     "@erez/king-of-tokyo": "*",
     "@erez/splendor": "*",
     "firebase": "^11.0.0",
     "framer-motion": "^13.4.3",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
     "react-router": "^8.2.0",
     "react-router-dom": "^7.18.1"
   },

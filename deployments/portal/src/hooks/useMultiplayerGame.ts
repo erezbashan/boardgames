@@ -50,7 +50,8 @@ export function useMultiplayerGame<State extends BaseGameState, Action extends {
     if (gameState && myPlayerId && gameState.status === 'Lobby') {
       const iAmInGame = !!gameState.players[myPlayerId];
       if (!iAmInGame) {
-        dispatchToBackend({ type: 'JOIN_GAME', payload: { playerId: myPlayerId, name: username || 'Guest', isBot: false } } as unknown as Action);
+        console.log('Dispatching JOIN_GAME for me:', myPlayerId);
+dispatchToBackend({ type: 'JOIN_GAME', payload: { playerId: myPlayerId, name: username || 'Guest', isBot: false } } as unknown as Action);
       }
     }
   }, [gameState?.status, myPlayerId, username]);

@@ -7,6 +7,7 @@ import { flipsReducer, initialFlipsState } from '@erez/flips/dist/engine/reducer
 import { acquireReducer, initialAcquireState } from '@erez/acquire';
 import { kingOfTokyoReducer, initialKotState } from '@erez/king-of-tokyo/dist/engine/reducer';
 import { splendorReducer, initialSplendorState } from '@erez/splendor';
+import { dominionReducer, initialDominionState } from '@erez/dominion';
 
 // Initialize Firebase Admin once
 admin.initializeApp();
@@ -18,6 +19,9 @@ registerGame('flips', { reducer: flipsReducer, initialState: initialFlipsState }
 registerGame('king-of-tokyo', { reducer: kingOfTokyoReducer, initialState: initialKotState });
 registerGame('acquire', { reducer: acquireReducer, initialState: initialAcquireState });
 registerGame('splendor', { reducer: splendorReducer, initialState: initialSplendorState });
+
+registerGame('dominion', { reducer: dominionReducer, initialState: initialDominionState });
+
 
 
 // Export everything from the modular files
