@@ -43,17 +43,20 @@ function processPendingActions(state: DominionState) {
     
     switch (pending.type) {
       case 'DRAW_CARDS': {
-        let amountToDraw = pending.amount;
-        while (amountToDraw > 0) {
-          if (player.deck.length === 0) {
-            if (player.discard.length === 0) break; // Can't draw anymore
-            player.deck = shuffle([...player.discard]);
-            player.discard = [];
-            state.logs.push(`${player.name} shuffles their discard pile.`);
-          }
-          const card = player.deck.pop();
-          if (card) player.hand.push(card);
-          amountToDraw--;
+        if (player.deck.length === 0) {
+          if (player.discard.length === 0) break; // Can't draw anymore
+          player.deck = shuffle([...player.discard]);
+          player.discard = [];
+          state.logs.push(`-- ${player.name} shuffles their discard pile --`);
+        }
+        const card = player.deck.pop();
+        if (card) {
+          player.hand.push(card);
+          state.logs.push(`-- ${player.name} draws a card --`);
+        }
+        if (pending.amount > 1) {
+          state.actionQueue = state.actionQueue || [];
+          state.actionQueue.push({ delayMs: 250, action: { type: 'DRAW_CARDS_ASYNC', playerId: pending.playerId, amount: pending.amount - 1 } });
         }
         break;
       }
@@ -129,14 +132,44 @@ export function dominionReducer
       if (!player) break;
       const treasures = player.hand.filter((c: any) => getCardDef(c.cardId).types.includes('TREASURE'));
       if (treasures.length > 0) {
-        treasures.forEach((t: any) => {
-          player.hand = player.hand.filter((c: any) => c.id !== t.id);
-          player.playArea.push(t);
-          const def = getCardDef(t.cardId);
-          if (def.name === 'Copper') player.coins += 1;
-          if (def.name === 'Silver') player.coins += 2;
-          if (def.name === 'Gold') player.coins += 3;
-        });
+        const t = treasures[0]; // just one!
+        player.hand = player.hand.filter((c: any) => c.id !== t.id);
+        player.playArea.push(t);
+        const def = getCardDef(t.cardId);
+        if (def.name === 'Copper') player.coins += 1;
+        if (def.name === 'Silver') player.coins += 2;
+        if (def.name === 'Gold') player.coins += 3;
+        
+        nextState.logs.push(`-- ${player.name} moves [${def.name}] to play area --`);
+
+        if (treasures.length > 1) {
+           nextState.actionQueue = nextState.actionQueue || [];
+           nextState.actionQueue.push({ delayMs: 400, action: { type: 'AUTO_PLAY_TREASURES', playerId: action.playerId }});
+        }
+      }
+      break;
+    }
+
+    case 'DRAW_CARDS_ASYNC': {
+      if (nextState.status !== 'Playing') break;
+      const player = nextState.players[action.playerId];
+      if (!player) break;
+      
+      if (player.deck.length === 0) {
+        if (player.discard.length === 0) break; 
+        player.deck = shuffle([...player.discard]);
+        player.discard = [];
+        nextState.logs.push(`-- ${player.name} shuffles their discard pile --`);
+      }
+      const card = player.deck.pop();
+      if (card) {
+        player.hand.push(card);
+        nextState.logs.push(`-- ${player.name} draws a card --`);
+      }
+      
+      if (action.amount > 1) {
+        nextState.actionQueue = nextState.actionQueue || [];
+        nextState.actionQueue.push({ delayMs: 250, action: { type: 'DRAW_CARDS_ASYNC', playerId: action.playerId, amount: action.amount - 1 } });
       }
       break;
     }

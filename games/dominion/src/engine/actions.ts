@@ -7,6 +7,7 @@ export type PlayerAction =
   | { type: 'END_PHASE'; playerId: string }
   | { type: 'RESOLVE_INPUT'; playerId: string; payload: any }
   | { type: 'PLAY_BOT' }
-  | { type: 'AUTO_PLAY_TREASURES'; playerId: string };
+  | { type: 'AUTO_PLAY_TREASURES'; playerId: string }
+  | { type: 'DRAW_CARDS_ASYNC'; playerId: string; amount: number };
 
 export type DominionAction = PlayerAction | BaseAction;

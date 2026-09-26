@@ -246,12 +246,17 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
             padding: '4px'
           }}
           onClick={() => !disabled && handleBuyCard(id)}
-          onMouseEnter={(e) => showPopup(e, def)}
-          onMouseLeave={hidePopup}
         >
           {/* Top Bar: Name */}
-          <div style={{ background: 'rgba(0,0,0,0.7)', color: 'white', fontSize: '10px', padding: '2px', borderRadius: '4px', textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            {def.name}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ background: 'rgba(0,0,0,0.7)', color: 'white', fontSize: '10px', padding: '2px 4px', borderRadius: '4px', textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1, marginRight: '4px' }}>
+              {def.name}
+            </div>
+            <div 
+              style={{ width: '16px', height: '16px', background: 'rgba(255,255,255,0.9)', borderRadius: '50%', color: 'black', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '10px', cursor: 'help' }}
+              onMouseEnter={(e) => { e.stopPropagation(); showPopup(e, def); }}
+              onMouseLeave={(e) => { e.stopPropagation(); hidePopup(); }}
+            >?</div>
           </div>
           
           {/* Bottom Bar: Cost & Count */}
