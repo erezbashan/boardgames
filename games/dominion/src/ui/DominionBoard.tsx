@@ -102,8 +102,12 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
   };
 
   const showPopup = (e: React.MouseEvent, def: CardDefinition) => {
-    setHoveredCardDef(def);
-    setPopupPos({ x: e.clientX, y: e.clientY });
+    if (hoveredCardDef?.id === def.id) {
+       hidePopup();
+    } else {
+       setHoveredCardDef(def);
+       setPopupPos({ x: e.clientX, y: e.clientY });
+    }
   };
 
   const hidePopup = () => {
@@ -149,11 +153,10 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
         }}
         onClick={onClick}
       >
-        <div style={{ position: 'absolute', top: '-8px', right: '-8px', zIndex: 10 }}>
+        <div style={{ position: 'absolute', top: '2px', right: '4px', zIndex: 10 }}>
           <div 
-            style={{ width: '24px', height: '24px', background: '#475569', border: '2px solid white', borderRadius: '50%', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '14px', cursor: 'help', boxShadow: '0 2px 5px rgba(0,0,0,0.5)' }}
-            onMouseEnter={(e) => { e.stopPropagation(); showPopup(e, def); }}
-            onMouseLeave={(e) => { e.stopPropagation(); hidePopup(); }}
+            style={{ color: 'rgba(255,255,255,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '18px', cursor: 'pointer', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}
+            onClick={(e) => { e.stopPropagation(); showPopup(e, def); }}
           >?</div>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', background: 'rgba(0,0,0,0.7)', padding: '2px 4px', borderRadius: '4px' }}>
@@ -249,11 +252,10 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
           onClick={() => !disabled && handleBuyCard(id)}
         >
           {/* Top Bar: Name */}
-          <div style={{ position: 'absolute', top: '-8px', right: '-8px', zIndex: 10 }}>
+          <div style={{ position: 'absolute', top: '2px', right: '4px', zIndex: 10 }}>
             <div 
-              style={{ width: '24px', height: '24px', background: '#475569', border: '2px solid white', borderRadius: '50%', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '14px', cursor: 'help', boxShadow: '0 2px 5px rgba(0,0,0,0.5)' }}
-              onMouseEnter={(e) => { e.stopPropagation(); showPopup(e, def); }}
-              onMouseLeave={(e) => { e.stopPropagation(); hidePopup(); }}
+              style={{ color: 'rgba(255,255,255,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '18px', cursor: 'pointer', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}
+              onClick={(e) => { e.stopPropagation(); showPopup(e, def); }}
             >?</div>
           </div>
           <div style={{ background: 'rgba(0,0,0,0.7)', color: 'white', fontSize: '10px', padding: '2px 4px', borderRadius: '4px', textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -275,12 +277,15 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
 
     // Sort hand & playArea to cleanly stack identical cards using negative margins instead of absolute positioning!
     const handCards = [...me.hand].sort((a,b) => a.cardId.localeCompare(b.cardId));
-    const playAreaCards = [...me.playArea].sort((a,b) => a.cardId.localeCompare(b.cardId));
+    const activePlayer = gameState.players[gameState.playerOrder[gameState.currentPlayerIndex]];
+    const playAreaCards = [...activePlayer.playArea].sort((a,b) => a.cardId.localeCompare(b.cardId));
 
     return (
       <div style={{ display: 'flex', gap: '20px', padding: '20px', height: '100%', boxSizing: 'border-box' }}>
         {/* Hover Popup - Renders Full Card Image */}
         {hoveredCardDef && popupPos && (
+          <>
+          <div style={{ position: 'fixed', inset: 0, zIndex: 9998 }} onClick={hidePopup} />
           <div style={{
             position: 'fixed',
             left: Math.min(popupPos.x + 15, window.innerWidth - 260),
@@ -305,6 +310,7 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
             </h4>
             <div style={{ fontSize: '14px', lineHeight: '1.5' }}>{hoveredCardDef.description}</div>
           </div>
+          </>
         )}
 
         {/* Left Column: Supply Market (Grid) */}
@@ -357,7 +363,7 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
           
           {/* Play Area */}
           <div style={{ border: '1px solid #475569', padding: '15px', minHeight: '180px', borderRadius: '8px', background: '#0f172a' }}>
-            <h3 style={{ marginTop: 0, color: '#94a3b8' }}>Play Area</h3>
+            <h3 style={{ marginTop: 0, color: '#94a3b8' }}>{activePlayer.id === myPlayerId ? 'Your' : activePlayer.name + '\'s'} Play Area</h3>
             <div style={{ display: 'flex', flexWrap: 'wrap', paddingLeft: '10px' }}>
               <AnimatePresence>
                 {playAreaCards.map((card, i) => {
@@ -380,8 +386,19 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
               {/* Deck (Left) */}
               <div style={{ width: '110px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                 <div style={{ height: '140px', width: '100px', background: '#020617', border: '2px solid #334155', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', fontSize: '28px', position: 'relative', boxShadow: '0 4px 10px rgba(0,0,0,0.5)' }}>
-                  {me.deck.length}
-                  <div style={{ position: 'absolute', bottom: '10px', fontSize: '14px', color: '#94a3b8' }}>Deck</div>
+                  <AnimatePresence>
+                    {me.deck.map((card, i) => (
+                      <motion.div
+                        layoutId={card.id}
+                        key={card.id}
+                        initial={false}
+                        animate={{ opacity: 0, scale: 0.5 }}
+                        style={{ position: 'absolute', zIndex: -1 }}
+                      />
+                    ))}
+                  </AnimatePresence>
+                  <span style={{zIndex: 10}}>{me.deck.length}</span>
+                  <div style={{ position: 'absolute', bottom: '10px', fontSize: '14px', color: '#94a3b8', zIndex: 10 }}>Deck</div>
                 </div>
               </div>
 

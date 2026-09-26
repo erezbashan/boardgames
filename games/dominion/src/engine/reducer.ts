@@ -52,8 +52,8 @@ function processPendingActions(state: DominionState) {
         const card = player.deck.pop();
         if (card) {
           player.hand.push(card);
-          const lastLog = state.logs[state.logs.length - 1];
-          const match = lastLog?.match(new RegExp(`^${player.name} draws (?:a|(\d+)) cards?$`));
+          const lastLog = state.logs[state.logs.length - 1] || "";
+          const match = lastLog.match(new RegExp(`^${player.name} draws (?:a|(\\d+)) cards?$`));
           if (match) {
              const count = match[1] ? parseInt(match[1]) + 1 : 2;
              state.logs[state.logs.length - 1] = `${player.name} draws ${count} cards`;
@@ -147,14 +147,7 @@ export function dominionReducer
         if (def.name === 'Silver') player.coins += 2;
         if (def.name === 'Gold') player.coins += 3;
         
-        const lastLog = nextState.logs[nextState.logs.length - 1];
-        const match = lastLog?.match(new RegExp(`^${player.name} moves (?:a|(\d+)) treasures? to play area$`));
-        if (match) {
-           const count = match[1] ? parseInt(match[1]) + 1 : 2;
-           nextState.logs[nextState.logs.length - 1] = `${player.name} moves ${count} treasures to play area`;
-        } else {
-           nextState.logs.push(`${player.name} moves a treasure to play area`);
-        }
+        nextState.logs.push(`${player.name} plays [${def.name}]`);
 
         if (treasures.length > 1) {
            nextState.actionQueue = nextState.actionQueue || [];
@@ -184,8 +177,8 @@ export function dominionReducer
       const card = player.deck.pop();
       if (card) {
         player.hand.push(card);
-        const lastLog = nextState.logs[nextState.logs.length - 1];
-        const match = lastLog?.match(new RegExp(`^${player.name} draws (?:a|(\d+)) cards?$`));
+        const lastLog = nextState.logs[nextState.logs.length - 1] || "";
+        const match = lastLog.match(new RegExp(`^${player.name} draws (?:a|(\\d+)) cards?$`));
         if (match) {
            const count = match[1] ? parseInt(match[1]) + 1 : 2;
            nextState.logs[nextState.logs.length - 1] = `${player.name} draws ${count} cards`;
@@ -325,7 +318,7 @@ export function dominionReducer
       player.actions = 0;
       player.buys = 0;
       
-      nextState.logs.push(`${player.name} sweeps cards to discard`);
+      
 
       const nextPlayerIndex = (nextState.playerOrder.indexOf(action.playerId) + 1) % nextState.playerOrder.length;
       const nextPlayerId = nextState.playerOrder[nextPlayerIndex];
