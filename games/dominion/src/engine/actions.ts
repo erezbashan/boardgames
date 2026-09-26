@@ -6,6 +6,7 @@ export type PlayerAction =
   | { type: 'BUY_CARD'; playerId: string; cardId: string }
   | { type: 'END_PHASE'; playerId: string }
   | { type: 'RESOLVE_INPUT'; playerId: string; payload: any }
-  | { type: 'PLAY_BOT' };
+  | { type: 'PLAY_BOT' }
+  | { type: 'PLAY_ALL_TREASURES'; playerId: string };
 
 export type DominionAction = PlayerAction | BaseAction;
