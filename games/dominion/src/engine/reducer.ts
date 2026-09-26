@@ -96,22 +96,6 @@ function checkBotTurn(state: DominionState): DominionState {
 }
 
 
-function autoPlayTreasures(state: DominionState, playerId: string) {
-  const player = state.players[playerId];
-  const treasures = player.hand.filter((c: any) => getCardDef(c.cardId).types.includes('TREASURE'));
-  if (treasures.length > 0) {
-    treasures.forEach((t: any) => {
-      player.hand = player.hand.filter((c: any) => c.id !== t.id);
-      player.playArea.push(t);
-      const def = getCardDef(t.cardId);
-      if (def.onPlay) {
-        state.pendingActions.push(...def.onPlay(state, playerId));
-      }
-    });
-    state.logs.push(`-- ${player.name} auto-plays ${treasures.length} treasures --`);
-  }
-}
-
 export function dominionReducer
 (state: DominionState, action: DominionAction): DominionState {
   // First run through the baseReducer to handle JOIN_GAME, START_GAME, etc.
@@ -139,23 +123,20 @@ export function dominionReducer
       break;
     }
   
-    case 'PLAY_ALL_TREASURES': {
+    case 'AUTO_PLAY_TREASURES': {
       if (nextState.status !== 'Playing') break;
-      if (nextState.phase !== 'BUY') break;
-      if (nextState.playerOrder[nextState.currentPlayerIndex] !== action.playerId) break;
-
       const player = nextState.players[action.playerId];
+      if (!player) break;
       const treasures = player.hand.filter((c: any) => getCardDef(c.cardId).types.includes('TREASURE'));
       if (treasures.length > 0) {
         treasures.forEach((t: any) => {
           player.hand = player.hand.filter((c: any) => c.id !== t.id);
           player.playArea.push(t);
           const def = getCardDef(t.cardId);
-          if (def.onPlay) {
-            nextState.pendingActions.push(...def.onPlay(nextState, action.playerId));
-          }
+          if (def.name === 'Copper') player.coins += 1;
+          if (def.name === 'Silver') player.coins += 2;
+          if (def.name === 'Gold') player.coins += 3;
         });
-        nextState.logs.push(`-- ${player.name} plays all treasures --`);
       }
       break;
     }
@@ -260,7 +241,8 @@ export function dominionReducer
       
       if (nextState.phase === 'ACTION') {
         nextState.phase = 'BUY';
-        autoPlayTreasures(nextState, action.playerId);
+        nextState.actionQueue = nextState.actionQueue || [];
+        nextState.actionQueue.push({ delayMs: 1000, action: { type: 'AUTO_PLAY_TREASURES', playerId: action.playerId } });
       } else if (nextState.phase === 'BUY') {
         // CLEANUP
         const player = nextState.players[action.playerId];
@@ -328,7 +310,8 @@ export function dominionReducer
     const hasActions = p.hand.some(c => getCardDef(c.cardId).types.includes('ACTION'));
     if (p.actions <= 0 || !hasActions) {
       nextState.phase = 'BUY';
-      autoPlayTreasures(nextState, nextState.playerOrder[nextState.currentPlayerIndex]);
+      nextState.actionQueue = nextState.actionQueue || [];
+      nextState.actionQueue.push({ delayMs: 1000, action: { type: 'AUTO_PLAY_TREASURES', playerId: p.id } });
     }
   }
 

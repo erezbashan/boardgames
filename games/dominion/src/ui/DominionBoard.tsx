@@ -48,20 +48,6 @@ const getTreasureValue = (def: CardDefinition) => {
   return 0;
 };
 
-// Helper to group cards by type for stacking
-function groupCards(cards: any[]) {
-  const groups: { cardId: string, instances: any[] }[] = [];
-  cards.forEach(c => {
-    let g = groups.find(x => x.cardId === c.cardId);
-    if (!g) {
-      g = { cardId: c.cardId, instances: [] };
-      groups.push(g);
-    }
-    g.instances.push(c);
-  });
-  return groups;
-}
-
 export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch, onLeaveGame }) => {
   const [selectedCards, setSelectedCards] = useState<string[]>([]);
   const [hoveredCardDef, setHoveredCardDef] = useState<CardDefinition | null>(null);
@@ -137,9 +123,9 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
         exit={{ opacity: 0, scale: 0.8 }}
         transition={{ 
           type: 'spring', 
-          stiffness: 300, 
-          damping: 25, 
-          delay: index * 0.1 // Slower stagger for nice effect
+          stiffness: 350, 
+          damping: 28, 
+          delay: index * 0.1 // Stagger drawing
         }}
         key={card.id} 
         style={{ 
@@ -174,25 +160,6 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
           >?</div>
         </div>
       </motion.div>
-    );
-  };
-
-  const renderCardGroup = (group: {cardId: string, instances: any[]}, groupIndex: number, area: 'hand' | 'play') => {
-    return (
-      <div key={group.cardId} style={{ position: 'relative', width: `${90 + (group.instances.length - 1) * 25}px`, height: '130px', marginRight: '5px' }}>
-        <AnimatePresence mode="popLayout">
-          {group.instances.map((card, idx) => (
-            <div key={card.id} style={{ position: 'absolute', left: `${idx * 25}px`, top: 0, zIndex: idx }}>
-              {renderCard(card, groupIndex * 5 + idx, () => {
-                if (area === 'hand') {
-                  if (isInputPhase) toggleCardSelection(card.id);
-                  else handlePlayCard(card.id);
-                }
-              }, selectedCards.includes(card.id), true)}
-            </div>
-          ))}
-        </AnimatePresence>
-      </div>
     );
   };
 
@@ -252,53 +219,58 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
     const treasureSupply = supplyEntries.filter(s => s.def.types.includes('TREASURE')).sort((a,b) => b.def.cost - a.def.cost);
     const kingdomSupply = supplyEntries.filter(s => !s.def.types.includes('VICTORY') && !s.def.types.includes('TREASURE')).sort((a,b) => b.def.cost - a.def.cost);
 
-    const renderSupplySection = (items: typeof supplyEntries) => (
-      <div style={{ marginBottom: '8px' }}>
-        {items.map(({ id, count, def }) => {
-          const canAfford = potentialPower >= def.cost;
-          const disabled = !isMyTurn || gameState.phase !== 'BUY' || me.buys <= 0 || count <= 0 || me.coins < def.cost;
+    const renderMarketCard = (id: string, count: number, def: CardDefinition) => {
+      const canAfford = potentialPower >= def.cost;
+      const disabled = !isMyTurn || gameState.phase !== 'BUY' || me.buys <= 0 || count <= 0 || me.coins < def.cost;
+      const imageUrl = CARD_IMAGES[id];
+
+      return (
+        <div 
+          key={id} 
+          style={{ 
+            position: 'relative', 
+            width: '80px', 
+            height: '115px', 
+            borderRadius: '6px',
+            border: `2px solid ${disabled ? '#475569' : '#3b82f6'}`,
+            cursor: disabled ? 'not-allowed' : 'pointer',
+            backgroundImage: imageUrl ? `url(${imageUrl})` : 'none',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            opacity: disabled ? 0.6 : 1,
+            boxShadow: disabled ? 'none' : '0 4px 10px rgba(59, 130, 246, 0.4)',
+            transition: 'all 0.2s',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            padding: '4px'
+          }}
+          onClick={() => !disabled && handleBuyCard(id)}
+          onMouseEnter={(e) => showPopup(e, def)}
+          onMouseLeave={hidePopup}
+        >
+          {/* Top Bar: Name */}
+          <div style={{ background: 'rgba(0,0,0,0.7)', color: 'white', fontSize: '10px', padding: '2px', borderRadius: '4px', textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {def.name}
+          </div>
           
-          return (
-            <div key={id} style={{ display: 'flex', justifyContent: 'space-between', margin: '4px 0', color: 'white', alignItems: 'center' }}>
-              <button 
-                disabled={disabled}
-                onClick={() => handleBuyCard(id)}
-                style={{ 
-                  padding: '6px 10px', 
-                  cursor: disabled ? 'not-allowed' : 'pointer', 
-                  background: disabled ? '#334155' : (canAfford ? '#2563eb' : '#3b82f6'), 
-                  color: disabled ? '#64748b' : 'white', 
-                  border: 'none', 
-                  borderRadius: '4px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  flex: 1,
-                  marginRight: '10px',
-                  transition: 'background 0.2s',
-                  position: 'relative'
-                }}
-              >
-                <span 
-                  onMouseEnter={(e) => showPopup(e, def)}
-                  onMouseLeave={hidePopup}
-                  style={{ cursor: 'help', marginRight: '4px', fontSize: '14px', background: 'rgba(255,255,255,0.2)', padding: '2px 6px', borderRadius: '4px' }}
-                >?</span>
-                <span>{getIcon(def.types)}</span>
-                <span style={{ fontWeight: 'bold' }}>{def.name}</span>
-                <span style={{ marginLeft: 'auto', background: 'rgba(0,0,0,0.3)', padding: '2px 6px', borderRadius: '4px' }}>{def.cost}$</span>
-              </button>
-              <div style={{ position: 'relative' }}>
-                <span style={{ color: count === 0 ? '#ef4444' : '#cbd5e1', fontSize: '14px', width: '45px', textAlign: 'right', display: 'inline-block' }}>
-                  {count} left
-                </span>
-              </div>
+          {/* Bottom Bar: Cost & Count */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ background: 'rgba(255,255,255,0.9)', color: 'black', fontWeight: 'bold', fontSize: '12px', width: '20px', height: '20px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {def.cost}
             </div>
-          );
-        })}
-      </div>
-    );
-    
+            <div style={{ background: count === 0 ? '#ef4444' : 'rgba(0,0,0,0.8)', color: 'white', fontSize: '11px', padding: '2px 4px', borderRadius: '4px', fontWeight: 'bold' }}>
+              {count}
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // Sort hand & playArea to cleanly stack identical cards using negative margins instead of absolute positioning!
+    const handCards = [...me.hand].sort((a,b) => a.cardId.localeCompare(b.cardId));
+    const playAreaCards = [...me.playArea].sort((a,b) => a.cardId.localeCompare(b.cardId));
+
     return (
       <div style={{ display: 'flex', gap: '20px', padding: '20px', height: '100%', boxSizing: 'border-box' }}>
         {/* Hover Popup - Renders Full Card Image */}
@@ -329,13 +301,18 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
           </div>
         )}
 
-        {/* Left Column: Supply */}
-        <div style={{ minWidth: '340px', display: 'flex', flexDirection: 'column', gap: '20px', overflowY: 'auto', paddingRight: '10px' }}>
-          <div style={{ border: '1px solid #475569', padding: '15px', borderRadius: '8px', background: '#1e293b' }}>
-            <h3 style={{ marginTop: 0, color: 'white', borderBottom: '1px solid #334155', paddingBottom: '8px' }}>Supply Market</h3>
-            {renderSupplySection(victorySupply)}
-            {renderSupplySection(treasureSupply)}
-            {renderSupplySection(kingdomSupply)}
+        {/* Left Column: Supply Market (Grid) */}
+        <div style={{ minWidth: '380px', maxWidth: '380px', display: 'flex', flexDirection: 'column', gap: '15px', overflowY: 'auto', paddingRight: '5px' }}>
+          {/* Victory & Treasure Row */}
+          <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', justifyContent: 'center' }}>
+            {victorySupply.map(s => renderMarketCard(s.id, s.count, s.def))}
+          </div>
+          <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', justifyContent: 'center' }}>
+            {treasureSupply.map(s => renderMarketCard(s.id, s.count, s.def))}
+          </div>
+          {/* Kingdom Row */}
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center', marginTop: '10px' }}>
+            {kingdomSupply.map(s => renderMarketCard(s.id, s.count, s.def))}
           </div>
         </div>
 
@@ -375,8 +352,17 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
           {/* Play Area */}
           <div style={{ border: '1px solid #475569', padding: '15px', minHeight: '180px', borderRadius: '8px', background: '#0f172a' }}>
             <h3 style={{ marginTop: 0, color: '#94a3b8' }}>Play Area</h3>
-            <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-              {groupCards(me.playArea).map((group, i) => renderCardGroup(group, i, 'play'))}
+            <div style={{ display: 'flex', flexWrap: 'wrap', paddingLeft: '10px' }}>
+              <AnimatePresence>
+                {playAreaCards.map((card, i) => {
+                   const isGrouped = i > 0 && playAreaCards[i-1].cardId === card.cardId;
+                   return (
+                     <div key={card.id} style={{ marginLeft: isGrouped ? '-60px' : '10px', zIndex: i, position: 'relative' }}>
+                       {renderCard(card, i, undefined, false, isGrouped)}
+                     </div>
+                   );
+                })}
+              </AnimatePresence>
             </div>
           </div>
 
@@ -394,8 +380,21 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
               </div>
 
               {/* Hand (Middle) */}
-              <div style={{ flex: 1, display: 'flex', flexWrap: 'wrap', alignContent: 'flex-start', background: '#0f172a', padding: '15px', borderRadius: '8px', boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.3)' }}>
-                {groupCards(me.hand).map((group, i) => renderCardGroup(group, i, 'hand'))}
+              <div style={{ flex: 1, display: 'flex', flexWrap: 'wrap', alignContent: 'flex-start', background: '#0f172a', padding: '15px', borderRadius: '8px', boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.3)', paddingLeft: '10px' }}>
+                <AnimatePresence>
+                  {handCards.map((card, i) => {
+                     const isSelected = selectedCards.includes(card.id);
+                     const isGrouped = i > 0 && handCards[i-1].cardId === card.cardId;
+                     return (
+                       <div key={card.id} style={{ marginLeft: isGrouped ? '-60px' : '10px', zIndex: i, position: 'relative' }}>
+                         {renderCard(card, i, () => {
+                           if (isInputPhase) toggleCardSelection(card.id);
+                           else handlePlayCard(card.id);
+                         }, isSelected, isGrouped)}
+                       </div>
+                     );
+                  })}
+                </AnimatePresence>
               </div>
 
               {/* Discard (Right) */}
