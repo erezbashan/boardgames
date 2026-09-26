@@ -220,7 +220,6 @@ export function dominionReducer
     }
 
     case 'START_GAME': {
-      // Basic initialization (hardcoded supply for now)
       nextState.supply = {
         copper: 60, silver: 40, gold: 30,
         estate: 24, duchy: 12, province: 12, curse: 30,
@@ -234,16 +233,18 @@ export function dominionReducer
         p.hand = [];
         p.discard = [];
         p.playArea = [];
-        nextState.pendingActions.push({ type: 'DRAW_CARDS', playerId: p.id, amount: 5 });
       });
       nextState.currentPlayerIndex = 0;
-      nextState.phase = 'ACTION';
+      nextState.phase = 'CLEANUP'; // Block actions while starting hands draw
       const firstPlayerId = nextState.playerOrder[0];
 
-      const firstPlayer = nextState.players[firstPlayerId];
-      nextState.logs.push(`-- ${firstPlayer.name}'s turn starts --`);
-      nextState.players[firstPlayerId].actions = 1;
-      nextState.players[firstPlayerId].buys = 1;
+      let chain: PlayerAction = { type: 'START_TURN', playerId: firstPlayerId };
+      for (let i = nextState.playerOrder.length - 1; i >= 0; i--) {
+         chain = { type: 'DRAW_CARDS_ASYNC', playerId: nextState.playerOrder[i], amount: 5, onComplete: chain };
+      }
+      nextState.actionQueue = nextState.actionQueue || [];
+      nextState.actionQueue.push({ delayMs: 250, action: chain });
+
       nextState.status = 'Playing';
       break;
     }
@@ -307,6 +308,7 @@ export function dominionReducer
         nextState.actionQueue = nextState.actionQueue || [];
         nextState.actionQueue.push({ delayMs: 500, action: { type: 'AUTO_PLAY_TREASURES', playerId: action.playerId } });
       } else if (nextState.phase === 'BUY') {
+        nextState.phase = 'CLEANUP';
         const player = nextState.players[action.playerId];
         nextState.logs.push(`-- ${player.name}'s turn ends --`);
         nextState.actionQueue = nextState.actionQueue || [];
@@ -385,7 +387,7 @@ export function dominionReducer
   processPendingActions(nextState);
 
   // Auto-skip ACTION phase if no valid actions
-  if (nextState.status === 'Playing' && nextState.phase === 'ACTION' && nextState.pendingActions.length === 0) {
+  if (nextState.status === 'Playing' && (!nextState.actionQueue || nextState.actionQueue.length === 0) && nextState.phase === 'ACTION' && nextState.pendingActions.length === 0) {
     const p = nextState.players[nextState.playerOrder[nextState.currentPlayerIndex]];
     const hasActions = p.hand.some(c => getCardDef(c.cardId).types.includes('ACTION'));
     if (p.actions <= 0 || !hasActions) {
@@ -396,7 +398,7 @@ export function dominionReducer
   }
 
   // Auto-end BUY phase if 0 buys
-  if (nextState.status === 'Playing' && nextState.phase === 'BUY' && nextState.pendingActions.length === 0) {
+  if (nextState.status === 'Playing' && (!nextState.actionQueue || nextState.actionQueue.length === 0) && nextState.phase === 'BUY' && nextState.pendingActions.length === 0) {
     const p = nextState.players[nextState.playerOrder[nextState.currentPlayerIndex]];
     if (p.buys <= 0) {
         nextState.actionQueue = nextState.actionQueue || [];
