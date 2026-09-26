@@ -19,13 +19,13 @@ import { useVisualGameState } from './useVisualGameState';
 export const SplendorBoard: React.FC = () => {
   const { gameState: actualState, dispatch, myPlayerId } = useGameContext<SplendorGameState, SplendorAction>();
   const gameState = useVisualGameState(actualState);
-  const speedMult = gameState.settings?.gameSpeed === 'Ultra' ? 0.01 : gameState.settings?.gameSpeed === 'Fast' ? 0.5 : gameState.settings?.gameSpeed === 'Slow' ? 2 : 1;
+  const speedMult = (gameState.status === 'Lobby' || gameState.settings?.gameSpeed === 'Ultra') ? 0.001 : gameState.settings?.gameSpeed === 'Fast' ? 0.5 : gameState.settings?.gameSpeed === 'Slow' ? 2 : 1;
   
   const [selectedGems, setSelectedGems] = useState<Partial<Record<GemType, number>>>({});
   const [discardSelection, setDiscardSelection] = useState<Partial<Record<GemType, number>>>({});
   
-  const isMyTurn = actualState.playerOrder[actualState.currentPlayerIndex] === myPlayerId;
-  const turnState = actualState.turnState;
+  const isMyTurn = gameState.playerOrder[gameState.currentPlayerIndex] === myPlayerId;
+  const turnState = gameState.turnState;
   const isAnimating = gameState !== actualState;
   
   let totalSelected = 0;

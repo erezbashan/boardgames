@@ -2,7 +2,7 @@
   "name": "backend",
   "private": true,
   "main": "lib/index.js",
-  "scripts": {
+  "scripts": { "force-rebuild": "echo 1",
     "build": "tsc",
     "build:watch": "tsc --watch",
     "serve": "npm run build && FIRESTORE_EMULATOR_HOST=\"127.0.0.1:8080\" FIREBASE_AUTH_EMULATOR_HOST=\"127.0.0.1:9099\" firebase emulators:start --only functions",
