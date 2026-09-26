@@ -8,6 +8,8 @@ export type PlayerAction =
   | { type: 'RESOLVE_INPUT'; playerId: string; payload: any }
   | { type: 'PLAY_BOT' }
   | { type: 'AUTO_PLAY_TREASURES'; playerId: string }
-  | { type: 'DRAW_CARDS_ASYNC'; playerId: string; amount: number };
+  | { type: 'DRAW_CARDS_ASYNC'; playerId: string; amount: number; onComplete?: PlayerAction }
+  | { type: 'CLEANUP_PHASE'; playerId: string }
+  | { type: 'START_TURN'; playerId: string };
 
 export type DominionAction = PlayerAction | BaseAction;

@@ -52,7 +52,14 @@ function processPendingActions(state: DominionState) {
         const card = player.deck.pop();
         if (card) {
           player.hand.push(card);
-          state.logs.push(`-- ${player.name} draws a card --`);
+          const lastLog = state.logs[state.logs.length - 1];
+          const match = lastLog?.match(new RegExp(`^${player.name} draws (?:a|(\d+)) cards?$`));
+          if (match) {
+             const count = match[1] ? parseInt(match[1]) + 1 : 2;
+             state.logs[state.logs.length - 1] = `${player.name} draws ${count} cards`;
+          } else {
+             state.logs.push(`${player.name} draws a card`);
+          }
         }
         if (pending.amount > 1) {
           state.actionQueue = state.actionQueue || [];
@@ -140,11 +147,18 @@ export function dominionReducer
         if (def.name === 'Silver') player.coins += 2;
         if (def.name === 'Gold') player.coins += 3;
         
-        nextState.logs.push(`-- ${player.name} moves [${def.name}] to play area --`);
+        const lastLog = nextState.logs[nextState.logs.length - 1];
+        const match = lastLog?.match(new RegExp(`^${player.name} moves (?:a|(\d+)) treasures? to play area$`));
+        if (match) {
+           const count = match[1] ? parseInt(match[1]) + 1 : 2;
+           nextState.logs[nextState.logs.length - 1] = `${player.name} moves ${count} treasures to play area`;
+        } else {
+           nextState.logs.push(`${player.name} moves a treasure to play area`);
+        }
 
         if (treasures.length > 1) {
            nextState.actionQueue = nextState.actionQueue || [];
-           nextState.actionQueue.push({ delayMs: 400, action: { type: 'AUTO_PLAY_TREASURES', playerId: action.playerId }});
+           nextState.actionQueue.push({ delayMs: 250, action: { type: 'AUTO_PLAY_TREASURES', playerId: action.playerId }});
         }
       }
       break;
@@ -156,20 +170,36 @@ export function dominionReducer
       if (!player) break;
       
       if (player.deck.length === 0) {
-        if (player.discard.length === 0) break; 
+        if (player.discard.length === 0) {
+           if (action.onComplete) {
+              nextState.actionQueue = nextState.actionQueue || [];
+              nextState.actionQueue.push({ delayMs: 250, action: action.onComplete });
+           }
+           break; 
+        }
         player.deck = shuffle([...player.discard]);
         player.discard = [];
-        nextState.logs.push(`-- ${player.name} shuffles their discard pile --`);
+        nextState.logs.push(`${player.name} shuffles their discard pile`);
       }
       const card = player.deck.pop();
       if (card) {
         player.hand.push(card);
-        nextState.logs.push(`-- ${player.name} draws a card --`);
+        const lastLog = nextState.logs[nextState.logs.length - 1];
+        const match = lastLog?.match(new RegExp(`^${player.name} draws (?:a|(\d+)) cards?$`));
+        if (match) {
+           const count = match[1] ? parseInt(match[1]) + 1 : 2;
+           nextState.logs[nextState.logs.length - 1] = `${player.name} draws ${count} cards`;
+        } else {
+           nextState.logs.push(`${player.name} draws a card`);
+        }
       }
       
       if (action.amount > 1) {
         nextState.actionQueue = nextState.actionQueue || [];
-        nextState.actionQueue.push({ delayMs: 250, action: { type: 'DRAW_CARDS_ASYNC', playerId: action.playerId, amount: action.amount - 1 } });
+        nextState.actionQueue.push({ delayMs: 250, action: { type: 'DRAW_CARDS_ASYNC', playerId: action.playerId, amount: action.amount - 1, onComplete: action.onComplete } });
+      } else if (action.onComplete) {
+        nextState.actionQueue = nextState.actionQueue || [];
+        nextState.actionQueue.push({ delayMs: 250, action: action.onComplete });
       }
       break;
     }
@@ -275,28 +305,45 @@ export function dominionReducer
       if (nextState.phase === 'ACTION') {
         nextState.phase = 'BUY';
         nextState.actionQueue = nextState.actionQueue || [];
-        nextState.actionQueue.push({ delayMs: 1000, action: { type: 'AUTO_PLAY_TREASURES', playerId: action.playerId } });
+        nextState.actionQueue.push({ delayMs: 500, action: { type: 'AUTO_PLAY_TREASURES', playerId: action.playerId } });
       } else if (nextState.phase === 'BUY') {
-        // CLEANUP
         const player = nextState.players[action.playerId];
-        player.discard.push(...player.playArea, ...player.hand);
-        player.playArea = [];
-        player.hand = [];
-        player.coins = 0;
-        player.actions = 0;
-        player.buys = 0;
-        
-        nextState.pendingActions.push({ type: 'DRAW_CARDS', playerId: action.playerId, amount: 5 });
-        
-        // Next Turn
-        nextState.currentPlayerIndex = (nextState.currentPlayerIndex + 1) % nextState.playerOrder.length;
-        const nextPlayer = nextState.players[nextState.playerOrder[nextState.currentPlayerIndex]];
-        nextState.phase = 'ACTION';
-      const firstPlayerId = nextState.playerOrder[0];
-        nextPlayer.actions = 1;
-        nextPlayer.buys = 1;
-        nextState.logs.push(`-- ${nextPlayer.name}'s turn starts --`);
+        nextState.logs.push(`-- ${player.name}'s turn ends --`);
+        nextState.actionQueue = nextState.actionQueue || [];
+        nextState.actionQueue.push({ delayMs: 500, action: { type: 'CLEANUP_PHASE', playerId: action.playerId } });
       }
+      break;
+    }
+    case 'CLEANUP_PHASE': {
+      const player = nextState.players[action.playerId];
+      player.discard.push(...player.playArea, ...player.hand);
+      player.playArea = [];
+      player.hand = [];
+      player.coins = 0;
+      player.actions = 0;
+      player.buys = 0;
+      
+      nextState.logs.push(`${player.name} sweeps cards to discard`);
+
+      const nextPlayerIndex = (nextState.playerOrder.indexOf(action.playerId) + 1) % nextState.playerOrder.length;
+      const nextPlayerId = nextState.playerOrder[nextPlayerIndex];
+
+      nextState.actionQueue = nextState.actionQueue || [];
+      nextState.actionQueue.push({ delayMs: 250, action: { 
+         type: 'DRAW_CARDS_ASYNC', 
+         playerId: action.playerId, 
+         amount: 5,
+         onComplete: { type: 'START_TURN', playerId: nextPlayerId }
+      }});
+      break;
+    }
+    case 'START_TURN': {
+      nextState.currentPlayerIndex = nextState.playerOrder.indexOf(action.playerId);
+      const nextPlayer = nextState.players[action.playerId];
+      nextState.phase = 'ACTION';
+      nextPlayer.actions = 1;
+      nextPlayer.buys = 1;
+      nextState.logs.push(`-- ${nextPlayer.name}'s turn starts --`);
       break;
     }
     case 'RESOLVE_INPUT': {

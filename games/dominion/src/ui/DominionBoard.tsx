@@ -149,16 +149,17 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
         }}
         onClick={onClick}
       >
+        <div style={{ position: 'absolute', top: '-8px', left: '-8px', zIndex: 10 }}>
+          <div 
+            style={{ width: '24px', height: '24px', background: '#3b82f6', border: '2px solid white', borderRadius: '50%', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '14px', cursor: 'help', boxShadow: '0 2px 5px rgba(0,0,0,0.5)' }}
+            onMouseEnter={(e) => { e.stopPropagation(); showPopup(e, def); }}
+            onMouseLeave={(e) => { e.stopPropagation(); hidePopup(); }}
+          >?</div>
+        </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', background: 'rgba(0,0,0,0.7)', padding: '2px 4px', borderRadius: '4px' }}>
           <strong style={{ fontSize: '11px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{def.name}</strong>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-          <div 
-            style={{ width: '22px', height: '22px', background: 'rgba(255,255,255,0.95)', borderRadius: '50%', color: 'black', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '14px', cursor: 'help', boxShadow: '0 2px 4px rgba(0,0,0,0.5)' }}
-            onMouseEnter={(e) => showPopup(e, def)}
-            onMouseLeave={hidePopup}
-          >?</div>
-        </div>
+        
       </motion.div>
     );
   };
@@ -248,15 +249,15 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
           onClick={() => !disabled && handleBuyCard(id)}
         >
           {/* Top Bar: Name */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ background: 'rgba(0,0,0,0.7)', color: 'white', fontSize: '10px', padding: '2px 4px', borderRadius: '4px', textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1, marginRight: '4px' }}>
-              {def.name}
-            </div>
+          <div style={{ position: 'absolute', top: '-8px', left: '-8px', zIndex: 10 }}>
             <div 
-              style={{ width: '16px', height: '16px', background: 'rgba(255,255,255,0.9)', borderRadius: '50%', color: 'black', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '10px', cursor: 'help' }}
+              style={{ width: '24px', height: '24px', background: '#3b82f6', border: '2px solid white', borderRadius: '50%', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '14px', cursor: 'help', boxShadow: '0 2px 5px rgba(0,0,0,0.5)' }}
               onMouseEnter={(e) => { e.stopPropagation(); showPopup(e, def); }}
               onMouseLeave={(e) => { e.stopPropagation(); hidePopup(); }}
             >?</div>
+          </div>
+          <div style={{ background: 'rgba(0,0,0,0.7)', color: 'white', fontSize: '10px', padding: '2px 4px', borderRadius: '4px', textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {def.name}
           </div>
           
           {/* Bottom Bar: Cost & Count */}
