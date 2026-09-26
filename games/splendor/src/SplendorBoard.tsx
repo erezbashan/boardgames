@@ -116,7 +116,7 @@ export const SplendorBoard: React.FC = () => {
 
     return (
       <div 
-        className={`splendor-card ${!isPurchased && isMyTurn && canAfford && (!isReserved || isMine) ? 'splendor-card-affordable' : ''}`} 
+        className={`splendor-card ${!isAnimating && !isPurchased && isMyTurn && canAfford && (!isReserved || isMine) ? 'splendor-card-affordable' : ''}`} 
         style={{ 
           backgroundColor: GEM_COLORS[card.bonus], 
           border: '2px solid #cbd5e1', // Neutral slate-300 frame
@@ -674,7 +674,7 @@ export const SplendorBoard: React.FC = () => {
                     backgroundColor: GEM_COLORS[gem], 
                     color: gem === 'diamond' || gem === 'gold' ? 'black' : 'white', 
                     border: selectedGems[gem] ? '3px solid white' : '2px solid rgba(0,0,0,0.2)',
-                    animation: (isMyTurn && turnState === 'take_tokens' && gameState.bank[gem] > 0 && gem !== 'gold') ? 'pulseAffordable 1.8s infinite' : 'none'
+                    animation: (!isAnimating && isMyTurn && turnState === 'take_tokens' && gameState.bank[gem] > 0 && gem !== 'gold') ? 'pulseAffordable 1.8s infinite' : 'none'
                   }}
                 >
                   {gameState.bank[gem]}

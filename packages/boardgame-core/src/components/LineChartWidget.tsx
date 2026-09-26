@@ -43,7 +43,7 @@ export const LineChartWidget: React.FC<LineChartWidgetProps> = ({ data, lines, t
               stroke={line.color} 
               strokeWidth={3}
               dot={line.dot ?? true}
-              activeDot={{ r: 8 }} 
+              activeDot={false} 
             />
           ))}
         </LineChart>
