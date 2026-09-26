@@ -10,11 +10,10 @@ function recalculateVP(state: DominionState) {
     let vp = 0;
     const allCards = [...p.deck, ...p.discard, ...p.hand, ...p.playArea];
     allCards.forEach(c => {
-      const def = getCardDef(c.cardId);
-      if (def.name === 'Estate') vp += 1;
-      if (def.name === 'Duchy') vp += 3;
-      if (def.name === 'Province') vp += 6;
-      if (def.name === 'Curse') vp -= 1;
+      if (c.cardId === 'estate') vp += 1;
+      if (c.cardId === 'duchy') vp += 3;
+      if (c.cardId === 'province') vp += 6;
+      if (c.cardId === 'curse') vp -= 1;
     });
     p.victoryPoints = vp;
   });
