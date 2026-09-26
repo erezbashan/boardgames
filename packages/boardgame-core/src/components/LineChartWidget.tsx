@@ -33,7 +33,6 @@ export const LineChartWidget: React.FC<LineChartWidgetProps> = ({ data, lines, t
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
           {!hideXAxis && <XAxis dataKey="name" stroke="rgba(255,255,255,0.5)" tickLine={false} />}
           <YAxis stroke="rgba(255,255,255,0.5)" width={yAxisWidth} tickLine={false} />
-          {!hideTooltip && <Tooltip contentStyle={{ backgroundColor: 'rgba(0,0,0,0.8)', border: 'none', borderRadius: '8px', color: 'white' }} formatter={(value: any) => Math.round(Number(value))} />}
           {!hideLegend && <Legend />}
           {lines.map((line, i) => (
             <Line 

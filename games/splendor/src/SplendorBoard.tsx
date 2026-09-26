@@ -673,7 +673,8 @@ export const SplendorBoard: React.FC = () => {
                   style={{ 
                     backgroundColor: GEM_COLORS[gem], 
                     color: gem === 'diamond' || gem === 'gold' ? 'black' : 'white', 
-                    border: selectedGems[gem] ? '3px solid white' : '2px solid rgba(0,0,0,0.2)' 
+                    border: selectedGems[gem] ? '3px solid white' : '2px solid rgba(0,0,0,0.2)',
+                    animation: (isMyTurn && turnState === 'take_tokens' && gameState.bank[gem] > 0 && gem !== 'gold') ? 'pulseAffordable 1.8s infinite' : 'none'
                   }}
                 >
                   {gameState.bank[gem]}

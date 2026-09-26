@@ -98,14 +98,21 @@ export class HeuristicBot implements Bot {
       const totalCost = Object.values(c.cost).reduce((a, b) => a + (b || 0), 0);
       let score = v - (totalCost * wCostPenalty);
 
-      // Collision Avoidance: If an opponent is very close to buying this card, drastically reduce its value
+      // Collision Avoidance: If an opponent is collecting the gems needed for this card, reduce its value.
       for (const opp of opponents) {
+         let overlap = 0;
+         for (const g of BaseGemTypes) {
+           if ((c.cost[g] || 0) > 0 && opp.gems[g] > 0) {
+             overlap += Math.min(c.cost[g] || 0, opp.gems[g]);
+           }
+         }
+         score -= overlap * 8.0; // Subtract 8 points for every gem an opponent has collected towards this card
+
          const oppMissing = calculateMissingGems(opp, c);
-         if (oppMissing <= 1) { // If they can buy it (0) or are 1 gem away (1)
-            score -= 50.0; // Massive penalty, look for something else
+         if (oppMissing <= 1) { 
+            score -= 50.0; // Massive penalty if they are extremely close
          }
       }
-
       return score;
     };
 
