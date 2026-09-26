@@ -97,6 +97,26 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
       <div style={{ fontSize: '12px', color: '#cbd5e1', background: 'rgba(0,0,0,0.3)', padding: '4px', borderRadius: '4px', marginTop: '4px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>VP:</span> <strong style={{ color: '#fbbf24' }}>{p.victoryPoints}</strong></div>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Cards:</span> <strong>{p.deck.length + p.discard.length + p.hand.length + p.playArea.length}</strong></div>
+        
+        {playerId !== myPlayerId && (
+          <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{color: '#94a3b8', fontSize: '10px'}}>Discard:</span>
+            <div style={{ position: 'relative', width: '40px', height: '60px', border: '1px solid #475569', borderRadius: '4px' }}>
+              <AnimatePresence>
+                 {p.discard.map((card, i) => (
+                    <motion.div
+                      layoutId={card.id}
+                      key={card.id}
+                      initial={{ opacity: 0, scale: 4, x: -200, y: 100 }}
+                      animate={{ opacity: 1, scale: 1, x: 0, y: 0 }}
+                      transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+                      style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundImage: `url(${CARD_IMAGES[card.cardId]})`, backgroundSize: 'cover', borderRadius: '4px', zIndex: i }}
+                    />
+                 ))}
+              </AnimatePresence>
+            </div>
+          </div>
+        )}
       </div>
     );
   };
@@ -430,8 +450,9 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
                       <motion.div
                         layoutId={card.id}
                         key={card.id}
-                        initial={false}
-                        animate={{ opacity: 1, scale: 1 }}
+                        initial={{ opacity: 0, scale: 3, y: -200 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        transition={{ type: 'spring', stiffness: 200, damping: 20 }}
                         style={{
                           position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
                           backgroundImage: `url(${CARD_IMAGES[card.cardId]})`, backgroundSize: 'cover',
