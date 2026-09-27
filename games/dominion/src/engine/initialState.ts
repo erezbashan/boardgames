@@ -12,5 +12,6 @@ export const initialDominionState: DominionState = {
   winnerId: null,
   chatMessages: [],
   logs: ['Game created.'],
-  actionQueue: []
+  actionQueue: [],
+  history: []
 };

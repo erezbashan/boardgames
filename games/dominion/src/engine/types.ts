@@ -28,9 +28,16 @@ export type PendingAction =
   | { type: 'SHUFFLE_DISCARD'; playerId: string }
   | { type: 'REQUEST_INPUT'; playerId: string; inputType: string; payload?: any };
 
+export interface HistorySnapshot {
+  turnNum: number;
+  vps: Record<string, number>;
+  deckSizes: Record<string, number>;
+}
+
 export interface DominionState extends BaseGameState<PlayerState> {
   phase: Phase;
   supply: Record<string, number>;
   trash: CardInstance[];
   pendingActions: PendingAction[];
+  history: HistorySnapshot[];
 }

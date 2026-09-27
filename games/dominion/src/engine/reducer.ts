@@ -217,6 +217,7 @@ export function dominionReducer
         market: 10, festival: 10, laboratory: 10,
         council_room: 10, moat: 10, bazaar: 10
       };
+      nextState.history = [];
       
       Object.values(nextState.players).forEach(p => {
         p.deck = createInitialDeck();
@@ -351,6 +352,19 @@ export function dominionReducer
       nextPlayer.actions = 1;
       nextPlayer.buys = 1;
       nextState.logs.push(`-- ${nextPlayer.name}'s turn starts --`);
+      
+      // Push VP snapshot for stats graph (once per player turn)
+      nextState.history = nextState.history || [];
+      const turnNum = nextState.history.length + 1;
+      const vpSnapshot: Record<string, number> = {};
+      const deckSizeSnapshot: Record<string, number> = {};
+      nextState.playerOrder.forEach(pid => {
+        const p = nextState.players[pid];
+        vpSnapshot[pid] = p.victoryPoints;
+        const allCards = [...p.deck, ...p.hand, ...p.playArea, ...p.discard];
+        deckSizeSnapshot[pid] = allCards.length;
+      });
+      nextState.history.push({ turnNum, vps: vpSnapshot, deckSizes: deckSizeSnapshot });
       break;
     }
     case 'RESOLVE_INPUT': {
@@ -421,6 +435,14 @@ export function dominionReducer
     if (nextState.supply['province'] === 0 || emptyPiles >= 3) {
       nextState.status = 'Finished';
       nextState.logs.push(`-- Game Over! --`);
+      // Find winner: most VP; tie-break by fewest turns taken (more remaining turns = fewer taken)
+      let bestVP = -Infinity;
+      let winnerId: string | null = null;
+      nextState.playerOrder.forEach(pid => {
+        const vp = nextState.players[pid].victoryPoints;
+        if (vp > bestVP) { bestVP = vp; winnerId = pid; }
+      });
+      nextState.winnerId = winnerId;
     }
   }
 
