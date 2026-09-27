@@ -31,7 +31,10 @@ const CARD_IMAGES: Record<string, string> = {
   "laboratory": "https://wiki.dominionstrategy.com/images/thumb/0/0c/Laboratory.jpg/200px-Laboratory.jpg",
   "council_room": "https://wiki.dominionstrategy.com/images/thumb/e/e0/Council_Room.jpg/200px-Council_Room.jpg",
   "moat": "https://wiki.dominionstrategy.com/images/thumb/f/fe/Moat.jpg/200px-Moat.jpg",
-  "bazaar": "https://wiki.dominionstrategy.com/images/thumb/f/f7/Bazaar.jpg/200px-Bazaar.jpg"
+  "chancellor": "https://wiki.dominionstrategy.com/images/thumb/5/55/Chancellor.jpg/200px-Chancellor.jpg",
+  "throne_room": "https://wiki.dominionstrategy.com/images/thumb/c/c4/Throne_Room.jpg/200px-Throne_Room.jpg",
+  "adventurer": "https://wiki.dominionstrategy.com/images/thumb/a/a8/Adventurer.jpg/200px-Adventurer.jpg",
+  "chapel": "https://wiki.dominionstrategy.com/images/thumb/7/75/Chapel.jpg/200px-Chapel.jpg"
 };
 
 const getIcon = (types: CardType[]) => {
@@ -96,38 +99,45 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
     if (!p) return null;
     return (
       <div style={{ fontSize: '12px', color: '#cbd5e1', background: 'rgba(0,0,0,0.3)', padding: '4px', borderRadius: '4px', marginTop: '4px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>VP:</span> <strong style={{ color: '#fbbf24' }}>{p.victoryPoints}</strong></div>
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Cards:</span> <strong>{p.deck.length + p.discard.length + p.hand.length + p.playArea.length}</strong></div>
+        <div style={{ display: 'flex', gap: '6px', alignItems: 'center', marginBottom: '4px' }}>
+          <span>VP:</span> <strong style={{ color: '#fbbf24' }}>{p.victoryPoints}</strong>
+        </div>
         
-        {playerId !== myPlayerId && (
-          <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-             <div style={{ textAlign: 'center', fontSize: '10px', color: '#94a3b8' }}>
-                <div style={{ width: '30px', height: '45px', border: '1px solid #475569', borderRadius: '3px', background: '#020617', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>{p.deck.length}</div>
-                Deck
-             </div>
-             <div style={{ textAlign: 'center', fontSize: '10px', color: '#94a3b8' }}>
-                <div style={{ width: '30px', height: '45px', border: '1px solid #475569', borderRadius: '3px', background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>{p.hand.length}</div>
-                Hand
-             </div>
-             <div style={{ textAlign: 'center', fontSize: '10px', color: '#94a3b8' }}>
-                <div style={{ position: 'relative', width: '30px', height: '45px', border: '1px solid #475569', borderRadius: '3px', background: '#1e293b' }}>
-                  <AnimatePresence>
-                     {p.discard.map((card, i) => (
-                        <motion.div
-                          layoutId={card.id}
-                          key={card.id}
-                          initial={{ opacity: 0, scale: 4, x: -200, y: 100 }}
-                          animate={{ opacity: 1, scale: 1, x: 0, y: 0 }}
-                          transition={{ type: 'spring', stiffness: 200, damping: 20 }}
-                          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundImage: `url(${CARD_IMAGES[card.cardId]})`, backgroundSize: 'cover', borderRadius: '3px', zIndex: i }}
-                        />
-                     ))}
-                  </AnimatePresence>
-                </div>
-                Discard
-             </div>
-          </div>
-        )}
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '4px' }}>
+           <div style={{ textAlign: 'center', fontSize: '10px', color: '#94a3b8' }}>
+              <div style={{ width: '30px', height: '42px', border: '1px solid #475569', borderRadius: '3px', background: '#020617', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold' }}>{p.deck.length}</div>
+              Deck
+           </div>
+           <div style={{ textAlign: 'center', fontSize: '10px', color: '#94a3b8' }}>
+              <div style={{ display: 'flex', gap: '1px', minHeight: '42px', alignItems: 'flex-end' }}>
+                {p.hand.length > 0 ? (
+                  Array.from({ length: Math.min(p.hand.length, 7) }).map((_, i) => (
+                    <div key={i} style={{ width: '14px', height: '20px', background: '#1e3a5f', border: '1px solid #475569', borderRadius: '2px' }} />
+                  ))
+                ) : (
+                  <div style={{ width: '30px', height: '42px', border: '1px solid #475569', borderRadius: '3px', background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569' }}>0</div>
+                )}
+              </div>
+              Hand
+           </div>
+           <div style={{ textAlign: 'center', fontSize: '10px', color: '#94a3b8' }}>
+              <div style={{ position: 'relative', width: '30px', height: '42px', border: '1px solid #475569', borderRadius: '3px', background: '#1e293b' }}>
+                <AnimatePresence>
+                   {p.discard.map((card, i) => (
+                      <motion.div
+                        layoutId={card.id}
+                        key={card.id}
+                        initial={{ opacity: 0, scale: 4, x: -200, y: 100 }}
+                        animate={{ opacity: 1, scale: 1, x: 0, y: 0 }}
+                        transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundImage: `url(${CARD_IMAGES[card.cardId]})`, backgroundSize: 'cover', borderRadius: '3px', zIndex: i }}
+                      />
+                   ))}
+                </AnimatePresence>
+              </div>
+              Discard
+           </div>
+        </div>
       </div>
     );
   };
@@ -189,9 +199,6 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
             style={{ color: 'rgba(255,255,255,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '18px', cursor: 'pointer', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}
             onClick={(e) => { e.stopPropagation(); showPopup(e, def); }}
           >?</div>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', background: 'rgba(0,0,0,0.7)', padding: '2px 4px', borderRadius: '4px' }}>
-          <strong style={{ fontSize: '11px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{def.name}</strong>
         </div>
         
       </motion.div>

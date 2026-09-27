@@ -1,7 +1,7 @@
 import { CardDefinition } from './types';
 import { Copper, Silver, Gold } from './base/treasures';
 import { Estate, Duchy, Province, Curse } from './base/victory';
-import { Village, Smithy, Woodcutter, Cellar, Market, Festival, Laboratory, CouncilRoom, Moat, Bazaar } from './base/actions';
+import { Village, Smithy, Woodcutter, Cellar, Market, Festival, Laboratory, CouncilRoom, Moat, Chancellor, ThroneRoom, Adventurer, Chapel } from './base/actions';
 
 export const Cards: Record<string, CardDefinition> = {
   copper: Copper,
@@ -20,11 +20,17 @@ export const Cards: Record<string, CardDefinition> = {
   laboratory: Laboratory,
   council_room: CouncilRoom,
   moat: Moat,
-  bazaar: Bazaar
+  chancellor: Chancellor,
+  throne_room: ThroneRoom,
+  adventurer: Adventurer,
+  chapel: Chapel
 };
 
 export function getCardDef(cardId: string): CardDefinition {
   const def = Cards[cardId];
-  if (!def) throw new Error(`Card ${cardId} not found`);
+  if (!def) {
+    // Return a safe fallback for deprecated/unknown cards (e.g. old saved games with removed cards)
+    return { id: cardId, name: cardId, types: ['ACTION'], cost: 0, description: 'Unknown card' };
+  }
   return def;
 }

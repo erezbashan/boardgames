@@ -124,15 +124,52 @@ export const Moat: CardDefinition = {
   ]
 };
 
-export const Bazaar: CardDefinition = {
-  id: 'bazaar',
-  name: 'Bazaar',
+export const Chancellor: CardDefinition = {
+  id: 'chancellor',
+  name: 'Chancellor',
   types: ['ACTION'],
-  cost: 5,
-  description: '+1 Card, +2 Actions, +1 Coin',
+  cost: 3,
+  description: '+2 Coins. You may immediately put your deck into your discard pile.',
   onPlay: (state, playerId) => [
-    { type: 'DRAW_CARDS', playerId, amount: 1 },
-    { type: 'GAIN_ACTIONS', playerId, amount: 2 },
+    { type: 'GAIN_COINS', playerId, amount: 2 },
+    // Simplified: always puts deck into discard
+    { type: 'SHUFFLE_DISCARD', playerId }
+  ]
+};
+
+export const ThroneRoom: CardDefinition = {
+  id: 'throne_room',
+  name: 'Throne Room',
+  types: ['ACTION'],
+  cost: 4,
+  description: 'Choose an Action card in your hand. Play it twice.',
+  onPlay: (state, playerId) => [
+    { type: 'GAIN_ACTIONS', playerId, amount: 1 }
+    // Simplified: just gives +1 action for now (full implementation needs card selection)
+  ]
+};
+
+export const Adventurer: CardDefinition = {
+  id: 'adventurer',
+  name: 'Adventurer',
+  types: ['ACTION'],
+  cost: 6,
+  description: 'Reveal cards from your deck until you reveal 2 Treasure cards. Put those in your hand.',
+  onPlay: (state, playerId) => [
+    // Simplified: draw 2 cards as approximation 
+    { type: 'DRAW_CARDS', playerId, amount: 2 },
     { type: 'GAIN_COINS', playerId, amount: 1 }
+  ]
+};
+
+export const Chapel: CardDefinition = {
+  id: 'chapel',
+  name: 'Chapel',
+  types: ['ACTION'],
+  cost: 2,
+  description: 'Trash up to 4 cards from your hand.',
+  onPlay: (state, playerId) => [
+    // Simplified: draws 1 card for now (trash mechanics not yet implemented)
+    { type: 'DRAW_CARDS', playerId, amount: 1 }
   ]
 };

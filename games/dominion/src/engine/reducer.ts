@@ -212,10 +212,11 @@ export function dominionReducer
     case 'START_GAME': {
       nextState.supply = {
         copper: 60, silver: 40, gold: 30,
-        estate: 24, duchy: 12, province: 12, curse: 30,
+        estate: 24, duchy: 12, province: 12,
         village: 10, smithy: 10, woodcutter: 10, cellar: 10,
         market: 10, festival: 10, laboratory: 10,
-        council_room: 10, moat: 10, bazaar: 10
+        council_room: 10, moat: 10, chancellor: 10,
+        throne_room: 10, adventurer: 10, chapel: 10
       };
       nextState.history = [];
       

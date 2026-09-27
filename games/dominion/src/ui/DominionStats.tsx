@@ -7,6 +7,13 @@ interface DominionStatsProps {
   gameState: DominionState;
 }
 
+function getTreasureValue(cardId: string): number {
+  if (cardId === 'copper') return 1;
+  if (cardId === 'silver') return 2;
+  if (cardId === 'gold') return 3;
+  return 0;
+}
+
 export const DominionStats: React.FC<DominionStatsProps> = ({ gameState }) => {
   const { players, playerOrder, history } = gameState;
 
@@ -16,8 +23,8 @@ export const DominionStats: React.FC<DominionStatsProps> = ({ gameState }) => {
     const allCards = [...p.deck, ...p.hand, ...p.discard, ...p.playArea];
     const treasures = allCards.filter(c => getCardDef(c.cardId).types.includes('TREASURE')).length;
     const actions = allCards.filter(c => getCardDef(c.cardId).types.includes('ACTION')).length;
-    const victory = allCards.filter(c => getCardDef(c.cardId).types.includes('VICTORY') && c.cardId !== 'curse').length;
-    const curses = allCards.filter(c => c.cardId === 'curse').length;
+    const victory = allCards.filter(c => getCardDef(c.cardId).types.includes('VICTORY')).length;
+    const totalMoney = allCards.reduce((sum, c) => sum + getTreasureValue(c.cardId), 0);
     return {
       id,
       name: p.name,
@@ -27,7 +34,7 @@ export const DominionStats: React.FC<DominionStatsProps> = ({ gameState }) => {
       treasures,
       actions,
       victory,
-      curses,
+      totalMoney,
     };
   }).sort((a, b) => b.vp - a.vp);
 
@@ -49,15 +56,6 @@ export const DominionStats: React.FC<DominionStatsProps> = ({ gameState }) => {
     vpData.push(finalEntry);
   }
 
-  // 3. Deck Size Line Chart Data
-  const deckData: LineChartData[] = (history || []).map(snap => {
-    const entry: LineChartData = { name: `T${snap.turnNum}` };
-    playerOrder.forEach(pid => {
-      entry[players[pid].name] = snap.deckSizes[pid] ?? 0;
-    });
-    return entry;
-  });
-
   const lines: LineConfig[] = playerOrder.map((id, index) => ({
     key: players[id].name,
     color: players[id].color || PLAYER_COLORS[index % PLAYER_COLORS.length],
@@ -75,11 +73,11 @@ export const DominionStats: React.FC<DominionStatsProps> = ({ gameState }) => {
             <tr style={{ background: 'rgba(255,255,255,0.1)' }}>
               <th style={{ padding: '10px' }}>Player</th>
               <th style={{ padding: '10px' }}>⭐ VP</th>
-              <th style={{ padding: '10px' }}>🃏 Total Cards</th>
-              <th style={{ padding: '10px' }}>💰 Treasures</th>
-              <th style={{ padding: '10px' }}>⚡ Actions</th>
-              <th style={{ padding: '10px' }}>🏆 Victory</th>
-              <th style={{ padding: '10px' }}>💀 Curses</th>
+              <th style={{ padding: '10px' }}>🃏 Cards in Deck</th>
+              <th style={{ padding: '10px' }}>💰 Treasure Cards</th>
+              <th style={{ padding: '10px' }}>💵 Total Coin Value</th>
+              <th style={{ padding: '10px' }}>⚡ Action Cards</th>
+              <th style={{ padding: '10px' }}>🏆 Victory Cards</th>
             </tr>
           </thead>
           <tbody>
@@ -91,9 +89,9 @@ export const DominionStats: React.FC<DominionStatsProps> = ({ gameState }) => {
                 <td style={{ padding: '10px', fontWeight: 'bold' }}>{row.vp}</td>
                 <td style={{ padding: '10px' }}>{row.total}</td>
                 <td style={{ padding: '10px', color: '#eab308' }}>{row.treasures}</td>
+                <td style={{ padding: '10px', color: '#fbbf24' }}>{row.totalMoney}</td>
                 <td style={{ padding: '10px', color: '#3b82f6' }}>{row.actions}</td>
                 <td style={{ padding: '10px', color: '#22c55e' }}>{row.victory}</td>
-                <td style={{ padding: '10px', color: '#ef4444' }}>{row.curses || '—'}</td>
               </tr>
             ))}
           </tbody>
@@ -107,23 +105,15 @@ export const DominionStats: React.FC<DominionStatsProps> = ({ gameState }) => {
           data={vpData}
           lines={lines}
           height={220}
+          hideLegend
+          hideDots
+          hideXAxis
           yAxisWidth={40}
         />
       ) : (
         <p style={{ textAlign: 'center', color: 'gray', fontStyle: 'italic' }}>
           Play a few turns to see VP progression!
         </p>
-      )}
-
-      {/* Deck Size Chart */}
-      {deckData.length > 1 && (
-        <LineChartWidget
-          title="Deck Size Over Time"
-          data={deckData}
-          lines={lines}
-          height={180}
-          yAxisWidth={40}
-        />
       )}
     </div>
   );

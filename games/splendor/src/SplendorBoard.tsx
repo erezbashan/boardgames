@@ -549,7 +549,7 @@ export const SplendorBoard: React.FC = () => {
           </p>
 
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            {(Object.keys(gameState.players[myPlayerId]?.gems || {}) as GemType[]).map(gem => {
+            {([...BaseGemTypes, 'gold' as GemType]).filter(gem => (gameState.players[myPlayerId]?.gems || {})[gem] > 0).map(gem => {
               const owned = gameState.players[myPlayerId]?.gems[gem] || 0;
               if (owned <= 0) return null;
               const discarded = discardSelection[gem] || 0;
@@ -662,7 +662,7 @@ export const SplendorBoard: React.FC = () => {
           <div className="splendor-panel splendor-bank-panel">
             <h3 className="splendor-panel-title">Bank</h3>
             <motion.div layout className="splendor-bank-tokens">
-              {(Object.keys(gameState.bank) as GemType[]).map((gem, idx) => (
+              {([...BaseGemTypes, 'gold' as GemType]).map((gem, idx) => (
                 <motion.div 
                   key={gem} 
                   initial={{ opacity: 0, scale: 0 }}

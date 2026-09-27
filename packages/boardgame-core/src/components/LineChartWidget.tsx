@@ -21,10 +21,11 @@ interface LineChartWidgetProps {
   hideXAxis?: boolean;
   hideLegend?: boolean;
   hideTooltip?: boolean;
+  hideDots?: boolean;
   yAxisWidth?: number;
 }
 
-export const LineChartWidget: React.FC<LineChartWidgetProps> = ({ data, lines, title, height = 300, hideXAxis, hideLegend, hideTooltip, yAxisWidth = 40 }) => {
+export const LineChartWidget: React.FC<LineChartWidgetProps> = ({ data, lines, title, height = 300, hideXAxis, hideLegend, hideTooltip, hideDots, yAxisWidth = 40 }) => {
   return (
     <div style={{ width: '100%', height: height + 50, marginBottom: '20px' }}>
       {title && <h3 style={{ textAlign: 'center', marginBottom: '10px' }}>{title}</h3>}
@@ -33,6 +34,7 @@ export const LineChartWidget: React.FC<LineChartWidgetProps> = ({ data, lines, t
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
           {!hideXAxis && <XAxis dataKey="name" stroke="rgba(255,255,255,0.5)" tickLine={false} />}
           <YAxis stroke="rgba(255,255,255,0.5)" width={yAxisWidth} tickLine={false} />
+          {!hideTooltip && <Tooltip contentStyle={{ background: '#1e293b', border: '1px solid #475569', color: 'white' }} />}
           {!hideLegend && <Legend />}
           {lines.map((line, i) => (
             <Line 
@@ -42,8 +44,8 @@ export const LineChartWidget: React.FC<LineChartWidgetProps> = ({ data, lines, t
               name={line.name || line.key} 
               stroke={line.color} 
               strokeWidth={3}
-              dot={line.dot ?? true}
-              activeDot={false} 
+              dot={hideDots ? false : (line.dot ?? true)}
+              activeDot={hideDots ? false : undefined} 
             />
           ))}
         </LineChart>
