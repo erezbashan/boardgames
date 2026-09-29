@@ -105,47 +105,139 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
   const renderPlayerDetails = (playerId: string) => {
     const p = gameState.players[playerId];
     if (!p) return null;
+    const isMe = playerId === myPlayerId;
+    const isInputPhaseForMe = isInputPhase && gameState.pendingActions[0]?.playerId === myPlayerId;
+
+    // Sort hand same as play area (cost desc)
+    const sortedHand = [...p.hand].sort((a, b) => {
+      const costDiff = getCardDef(b.cardId).cost - getCardDef(a.cardId).cost;
+      return costDiff !== 0 ? costDiff : a.cardId.localeCompare(b.cardId);
+    });
+
     return (
-      <div style={{ fontSize: '12px', color: '#cbd5e1', background: 'rgba(0,0,0,0.3)', padding: '4px', borderRadius: '4px', marginTop: '4px' }}>
-        <div style={{ display: 'flex', gap: '6px', alignItems: 'center', marginBottom: '4px' }}>
+      <div style={{ fontSize: '12px', color: '#cbd5e1', background: 'rgba(0,0,0,0.3)', padding: '6px', borderRadius: '4px', marginTop: '4px' }}>
+        {/* VP row */}
+        <div style={{ display: 'flex', gap: '6px', alignItems: 'center', marginBottom: '6px' }}>
           <span>VP:</span> <strong style={{ color: '#fbbf24' }}>{p.victoryPoints}</strong>
+          {isMe && isMyTurn && (
+            <span style={{ marginLeft: 'auto', fontSize: '10px', color: '#34d399', fontWeight: 'bold' }}>YOUR TURN</span>
+          )}
         </div>
-        
-        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '4px' }}>
-           <div style={{ textAlign: 'center', fontSize: '10px', color: '#94a3b8' }}>
-              <div style={{ width: '30px', height: '42px', border: '1px solid #475569', borderRadius: '3px', background: '#020617', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold' }}>{p.deck.length}</div>
-              Deck
-           </div>
-           <div style={{ textAlign: 'center', fontSize: '10px', color: '#94a3b8' }}>
+
+        {/* Deck / Discard row (always small) */}
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', marginBottom: '8px' }}>
+          {/* Deck */}
+          <div style={{ textAlign: 'center', fontSize: '10px', color: '#94a3b8' }}>
+            <div style={{ width: '30px', height: '42px', border: '1px solid #475569', borderRadius: '3px', background: '#020617', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold' }}>{p.deck.length}</div>
+            Deck
+          </div>
+          {/* Discard (with layoutId animation so cards fly here) */}
+          <div style={{ textAlign: 'center', fontSize: '10px', color: '#94a3b8' }}>
+            <div style={{ position: 'relative', width: '30px', height: '42px', border: '1px solid #475569', borderRadius: '3px', background: '#1e293b' }}>
+              <AnimatePresence>
+                {p.discard.map((card, i) => (
+                  <motion.div
+                    layoutId={card.id}
+                    key={card.id}
+                    initial={{ opacity: 0, scale: 3, y: -80 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundImage: `url(${CARD_IMAGES[card.cardId]})`, backgroundSize: 'cover', borderRadius: '3px', zIndex: i }}
+                  />
+                ))}
+              </AnimatePresence>
+              <div style={{ position: 'absolute', top: '2px', right: '2px', background: 'rgba(0,0,0,0.8)', padding: '1px 4px', borderRadius: '8px', fontSize: '9px', color: 'white', zIndex: 9999, fontWeight: 'bold' }}>{p.discard.length}</div>
+            </div>
+            Discard
+          </div>
+          {/* Hand count for other players, or label for me */}
+          {!isMe && (
+            <div style={{ textAlign: 'center', fontSize: '10px', color: '#94a3b8' }}>
               <div style={{ display: 'flex', gap: '1px', minHeight: '42px', alignItems: 'flex-end' }}>
                 {p.hand.length > 0 ? (
-                  Array.from({ length: Math.min(p.hand.length, 7) }).map((_, i) => (
-                    <div key={i} style={{ width: '14px', height: '20px', background: '#1e3a5f', border: '1px solid #475569', borderRadius: '2px' }} />
+                  Array.from({ length: Math.min(p.hand.length, 5) }).map((_, i) => (
+                    <div key={i} style={{ width: '12px', height: '18px', background: '#1e3a5f', border: '1px solid #475569', borderRadius: '2px' }} />
                   ))
                 ) : (
                   <div style={{ width: '30px', height: '42px', border: '1px solid #475569', borderRadius: '3px', background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569' }}>0</div>
                 )}
               </div>
-              Hand
-           </div>
-           <div style={{ textAlign: 'center', fontSize: '10px', color: '#94a3b8' }}>
-              <div style={{ position: 'relative', width: '30px', height: '42px', border: '1px solid #475569', borderRadius: '3px', background: '#1e293b' }}>
-                <AnimatePresence>
-                   {p.discard.map((card, i) => (
-                      <motion.div
-                        layoutId={card.id}
-                        key={card.id}
-                        initial={{ opacity: 0, scale: 4, x: -200, y: 100 }}
-                        animate={{ opacity: 1, scale: 1, x: 0, y: 0 }}
-                        transition={{ type: 'spring', stiffness: 200, damping: 20 }}
-                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundImage: `url(${CARD_IMAGES[card.cardId]})`, backgroundSize: 'cover', borderRadius: '3px', zIndex: i }}
-                      />
-                   ))}
-                </AnimatePresence>
-              </div>
-              Discard
-           </div>
+              Hand ({p.hand.length})
+            </div>
+          )}
         </div>
+
+        {/* Hand cards — only for my player, face up and clickable */}
+        {isMe && (
+          <div>
+            <div style={{ fontSize: '10px', color: '#94a3b8', marginBottom: '4px' }}>
+              Hand ({sortedHand.length} cards){isInputPhaseForMe ? ' — click to select' : isMyTurn && gameState.phase === 'ACTION' ? ' — click action cards to play' : isMyTurn && gameState.phase === 'BUY' ? ' — treasures auto-played' : ''}
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px', paddingBottom: '4px' }}>
+              <AnimatePresence>
+                {sortedHand.map((card, i) => {
+                  const isSelected = selectedCards.includes(card.id);
+                  const def = getCardDef(card.cardId);
+                  const isPlayableAction = isMyTurn && gameState.phase === 'ACTION' && me.actions > 0 && def.types.includes('ACTION') && !isInputPhase;
+                  const imageUrl = CARD_IMAGES[card.cardId];
+                  return (
+                    <motion.div
+                      layout
+                      layoutId={card.id}
+                      key={card.id}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      transition={{ type: 'spring', stiffness: 350, damping: 28 }}
+                      onClick={() => {
+                        if (isInputPhase) toggleCardSelection(card.id);
+                        else if (isMyTurn) handlePlayCard(card.id);
+                      }}
+                      style={{
+                        width: '52px',
+                        height: '75px',
+                        border: `2px solid ${isSelected ? '#3b82f6' : isPlayableAction ? '#34d399' : 'rgba(100,116,139,0.5)'}`,
+                        borderRadius: '5px',
+                        background: isSelected ? '#1e3a8a' : '#1e293b',
+                        backgroundImage: imageUrl ? `url(${imageUrl})` : 'none',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        cursor: (isMyTurn || isInputPhaseForMe) ? 'pointer' : 'default',
+                        position: 'relative',
+                        boxShadow: isPlayableAction ? '0 0 8px rgba(52,211,153,0.6)' : '0 2px 4px rgba(0,0,0,0.5)',
+                        animation: isPlayableAction ? 'blinkGlow 1.5s infinite' : 'none',
+                        flexShrink: 0,
+                      }}
+                    >
+                      {/* Cost badge */}
+                      <div style={{ position: 'absolute', bottom: '2px', left: '2px', background: 'rgba(0,0,0,0.85)', borderRadius: '3px', padding: '1px 3px', fontSize: '9px', color: '#fbbf24', fontWeight: 'bold', zIndex: 10 }}>
+                        {def.cost}$
+                      </div>
+                      {/* Type icon */}
+                      <div style={{ position: 'absolute', top: '2px', left: '2px', fontSize: '10px', zIndex: 10 }}>
+                        {getIcon(def.types)}
+                      </div>
+                      {/* Info button */}
+                      <div
+                        style={{ position: 'absolute', top: '2px', right: '2px', color: 'rgba(255,255,255,0.7)', fontSize: '10px', cursor: 'pointer', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.9)', zIndex: 10 }}
+                        onClick={(e) => { e.stopPropagation(); showPopup(e, def); }}
+                      >?</div>
+                      {/* Selection overlay */}
+                      {isSelected && (
+                        <div style={{ position: 'absolute', inset: 0, background: 'rgba(59,130,246,0.3)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 5 }}>
+                          <span style={{ fontSize: '18px' }}>✓</span>
+                        </div>
+                      )}
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+              {sortedHand.length === 0 && (
+                <div style={{ color: '#475569', fontSize: '10px', padding: '8px 0' }}>Empty hand</div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     );
   };
@@ -322,11 +414,7 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
       );
     };
 
-    // Sort hand & playArea by cost descending (same as market), then by cardId for stable order
-    const handCards = [...me.hand].sort((a,b) => {
-      const costDiff = getCardDef(b.cardId).cost - getCardDef(a.cardId).cost;
-      return costDiff !== 0 ? costDiff : a.cardId.localeCompare(b.cardId);
-    });
+    // Sort playArea by cost descending (same as market), then by cardId for stable order
     const activePlayer = gameState.players[gameState.playerOrder[gameState.currentPlayerIndex]];
     const playAreaCards = [...activePlayer.playArea].sort((a,b) => {
       const costDiff = getCardDef(b.cardId).cost - getCardDef(a.cardId).cost;
@@ -438,82 +526,6 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
               </AnimatePresence>
             </div>
           </div>
-
-          {/* Hand & Decks */}
-          <div style={{ border: '1px solid #475569', padding: '15px', flex: 1, borderRadius: '8px', background: '#1e293b', display: 'flex', flexDirection: 'column' }}>
-            <h3 style={{ marginTop: 0, color: 'white' }}>Your Cards</h3>
-            
-            <div style={{ display: 'flex', gap: '20px', flex: 1 }}>
-              {/* Deck (Left) */}
-              <div style={{ width: '110px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ height: '140px', width: '100px', background: '#020617', border: '2px solid #334155', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', fontSize: '28px', position: 'relative', boxShadow: '0 4px 10px rgba(0,0,0,0.5)' }}>
-                  <AnimatePresence>
-                    {me.deck.map((card, i) => (
-                      <motion.div
-                        layoutId={card.id}
-                        key={card.id}
-                        initial={false}
-                        animate={{ opacity: 0, scale: 0.5 }}
-                        style={{ position: 'absolute', zIndex: -1 }}
-                      />
-                    ))}
-                  </AnimatePresence>
-                  <span style={{zIndex: 10}}>{me.deck.length}</span>
-                  <div style={{ position: 'absolute', bottom: '10px', fontSize: '14px', color: '#94a3b8', zIndex: 10 }}>Deck</div>
-                </div>
-              </div>
-
-              {/* Hand (Middle) */}
-              <div style={{ flex: 1, display: 'flex', flexWrap: 'wrap', alignContent: 'flex-start', background: '#0f172a', padding: '15px', borderRadius: '8px', boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.3)', paddingLeft: '10px', overflowY: 'auto', maxHeight: '200px' }}>
-                <AnimatePresence>
-                  {handCards.map((card, i) => {
-                     const isSelected = selectedCards.includes(card.id);
-                     const isGrouped = i > 0 && handCards[i-1].cardId === card.cardId;
-                     const def = getCardDef(card.cardId);
-                     const isPlayableAction = isMyTurn && gameState.phase === 'ACTION' && me.actions > 0 && def.types.includes('ACTION');
-                     return (
-                       <div key={card.id} style={{ marginLeft: isGrouped ? '-60px' : '10px', zIndex: i, position: 'relative' }}>
-                         <div style={{ animation: isPlayableAction ? 'blinkGlow 1.5s infinite' : 'none', borderRadius: '8px' }}>
-                           {renderCard(card, i, () => {
-                           if (isInputPhase) toggleCardSelection(card.id);
-                           else handlePlayCard(card.id);
-                         }, isSelected, isGrouped)}
-                         </div>
-                       </div>
-                     );
-                  })}
-                </AnimatePresence>
-              </div>
-
-              {/* Discard (Right) */}
-              <div style={{ width: '110px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ height: '140px', width: '100px', background: '#1e293b', border: '2px solid #475569', borderRadius: '8px', position: 'relative', boxShadow: '0 4px 10px rgba(0,0,0,0.5)' }}>
-                  
-                  {/* Invisible stack of all discard cards to allow framer-motion to fly them here */}
-                  <AnimatePresence>
-                    {me.discard.map((card, i) => (
-                      <motion.div
-                        layoutId={card.id}
-                        key={card.id}
-                        initial={{ opacity: 0, scale: 3, y: -200 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        transition={{ type: 'spring', stiffness: 200, damping: 20 }}
-                        style={{
-                          position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-                          backgroundImage: `url(${CARD_IMAGES[card.cardId]})`, backgroundSize: 'cover',
-                          borderRadius: '8px', zIndex: i
-                        }}
-                      />
-                    ))}
-                  </AnimatePresence>
-
-                  {/* Top overlay data */}
-                  <div style={{ position: 'absolute', top: '5px', right: '5px', background: 'rgba(0,0,0,0.8)', padding: '2px 8px', borderRadius: '12px', fontSize: '14px', color: 'white', zIndex: 9999, fontWeight: 'bold' }}>{me.discard.length}</div>
-                  <div style={{ position: 'absolute', bottom: '5px', width: '100%', textAlign: 'center', fontSize: '14px', color: 'white', background: 'rgba(0,0,0,0.7)', padding: '4px 0', zIndex: 9999, borderBottomLeftRadius: '8px', borderBottomRightRadius: '8px' }}>Discard</div>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     );
@@ -573,7 +585,7 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
   };
 
   return (
-    <GameLayout bottomAreaRatio={25}
+    <GameLayout
       gameName="Dominion"
       helpText="Build your deck and collect Victory Points! First to buy Provinces or empty 3 piles wins."
       helpUrl="https://en.wikipedia.org/wiki/Dominion_(card_game)"
