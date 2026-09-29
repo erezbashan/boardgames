@@ -6,10 +6,10 @@ export function getRandomBotAction(state: DominionState, playerId: string): Play
   const isInputPhase = state.pendingActions.length > 0 && state.pendingActions[0].type === 'REQUEST_INPUT';
   
   if (isInputPhase) {
-    const req = state.pendingActions[0];
-    if (req.playerId !== playerId) return null;
+    const inputReq = state.pendingActions[0] as { type: 'REQUEST_INPUT'; playerId: string; inputType: string; payload?: any };
+    if (inputReq.playerId !== playerId) return null;
     
-    if (req.inputType === 'DISCARD_FOR_CELLAR') {
+    if (inputReq.inputType === 'DISCARD_FOR_CELLAR') {
       const hand = state.players[playerId].hand;
       // Smart: discard victory cards and curses (useless in hand), keep treasures & actions
       const toDiscard = hand
@@ -21,7 +21,7 @@ export function getRandomBotAction(state: DominionState, playerId: string): Play
       return { type: 'RESOLVE_INPUT', playerId, payload: { discardedIds: toDiscard } };
     }
 
-    if (req.inputType === 'TRASH_FOR_CHAPEL') {
+    if (inputReq.inputType === 'TRASH_FOR_CHAPEL') {
       // Use the card's own botChoose if available
       const chapelDef = getCardDef('chapel');
       if (chapelDef.botChoose) {
