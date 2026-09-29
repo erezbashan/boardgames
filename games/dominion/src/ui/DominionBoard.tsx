@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { GameLayout } from '@erez/boardgame-core';
-import { DominionState } from '../engine/types';
+import { DominionState, ALL_KINGDOM_CARDS } from '../engine/types';
 import { PlayerAction } from '../engine/actions';
 import { getCardDef, Cards } from '../engine/cards';
 import { CardDefinition, CardType } from '../engine/cards/types';
@@ -31,10 +31,10 @@ const CARD_IMAGES: Record<string, string> = {
   "laboratory": "https://wiki.dominionstrategy.com/images/thumb/0/0c/Laboratory.jpg/200px-Laboratory.jpg",
   "council_room": "https://wiki.dominionstrategy.com/images/thumb/e/e0/Council_Room.jpg/200px-Council_Room.jpg",
   "moat": "https://wiki.dominionstrategy.com/images/thumb/f/fe/Moat.jpg/200px-Moat.jpg",
-  "chancellor": "https://wiki.dominionstrategy.com/images/thumb/5/55/Chancellor.jpg/200px-Chancellor.jpg",
+  "workshop": "https://wiki.dominionstrategy.com/images/thumb/2/2b/Workshop.jpg/200px-Workshop.jpg",
   "throne_room": "https://wiki.dominionstrategy.com/images/thumb/c/c4/Throne_Room.jpg/200px-Throne_Room.jpg",
-  "adventurer": "https://wiki.dominionstrategy.com/images/thumb/a/a8/Adventurer.jpg/200px-Adventurer.jpg",
-  "chapel": "https://wiki.dominionstrategy.com/images/thumb/7/75/Chapel.jpg/200px-Chapel.jpg"
+  "chapel": "https://wiki.dominionstrategy.com/images/thumb/7/75/Chapel.jpg/200px-Chapel.jpg",
+  "gardens": "https://wiki.dominionstrategy.com/images/thumb/a/a3/Gardens.jpg/200px-Gardens.jpg"
 };
 
 const getIcon = (types: CardType[]) => {
@@ -78,12 +78,20 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
 
   const handleResolveInput = () => {
     const req = gameState.pendingActions[0];
-    if (req?.type === 'REQUEST_INPUT' && req.inputType === 'DISCARD_FOR_CELLAR') {
-      dispatch({ 
-        type: 'RESOLVE_INPUT', 
-        playerId: myPlayerId, 
-        payload: { discardedIds: selectedCards } 
-      });
+    if (req?.type === 'REQUEST_INPUT') {
+      if (req.inputType === 'DISCARD_FOR_CELLAR') {
+        dispatch({ 
+          type: 'RESOLVE_INPUT', 
+          playerId: myPlayerId, 
+          payload: { discardedIds: selectedCards } 
+        });
+      } else if (req.inputType === 'TRASH_FOR_CHAPEL') {
+        dispatch({ 
+          type: 'RESOLVE_INPUT', 
+          playerId: myPlayerId, 
+          payload: { trashedIds: selectedCards } 
+        });
+      }
       setSelectedCards([]);
     }
   };
@@ -314,10 +322,16 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
       );
     };
 
-    // Sort hand & playArea to cleanly stack identical cards using negative margins instead of absolute positioning!
-    const handCards = [...me.hand].sort((a,b) => a.cardId.localeCompare(b.cardId));
+    // Sort hand & playArea by cost descending (same as market), then by cardId for stable order
+    const handCards = [...me.hand].sort((a,b) => {
+      const costDiff = getCardDef(b.cardId).cost - getCardDef(a.cardId).cost;
+      return costDiff !== 0 ? costDiff : a.cardId.localeCompare(b.cardId);
+    });
     const activePlayer = gameState.players[gameState.playerOrder[gameState.currentPlayerIndex]];
-    const playAreaCards = [...activePlayer.playArea].sort((a,b) => a.cardId.localeCompare(b.cardId));
+    const playAreaCards = [...activePlayer.playArea].sort((a,b) => {
+      const costDiff = getCardDef(b.cardId).cost - getCardDef(a.cardId).cost;
+      return costDiff !== 0 ? costDiff : a.cardId.localeCompare(b.cardId);
+    });
 
     return (
       <div style={{ display: 'flex', gap: '20px', padding: '20px', height: '100%', boxSizing: 'border-box' }}>
@@ -392,13 +406,21 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
             </div>
           </div>
           
-          {isInputPhase && gameState.pendingActions[0]?.playerId === myPlayerId && (
-            <div style={{ padding: '15px', background: '#7f1d1d', border: '2px solid #ef4444', borderRadius: '8px', color: 'white', boxShadow: '0 4px 6px rgba(0,0,0,0.3)' }}>
-              <strong style={{ fontSize: '18px' }}>⚠️ Action Required: </strong> 
-              {gameState.pendingActions[0]?.type === 'REQUEST_INPUT' && gameState.pendingActions[0].inputType === 'DISCARD_FOR_CELLAR' ? 'Select cards to discard for Cellar.' : 'Waiting for input...'}
-              <button onClick={handleResolveInput} style={{ marginLeft: '15px', padding: '6px 16px', background: 'white', color: '#7f1d1d', fontWeight: 'bold', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Confirm Selection</button>
-            </div>
-          )}
+          {isInputPhase && gameState.pendingActions[0]?.playerId === myPlayerId && (() => {
+            const req = gameState.pendingActions[0];
+            const inputType = req?.type === 'REQUEST_INPUT' ? req.inputType : null;
+            const msg = inputType === 'DISCARD_FOR_CELLAR' 
+              ? 'Select cards to discard for Cellar (you\'ll draw the same number).'
+              : inputType === 'TRASH_FOR_CHAPEL'
+              ? `Select up to 4 cards to trash permanently with Chapel (${selectedCards.length} selected).`
+              : 'Waiting for input...';
+            return (
+              <div style={{ padding: '15px', background: '#7f1d1d', border: '2px solid #ef4444', borderRadius: '8px', color: 'white', boxShadow: '0 4px 6px rgba(0,0,0,0.3)' }}>
+                <strong style={{ fontSize: '18px' }}>⚠️ Action Required: </strong> {msg}
+                <button onClick={handleResolveInput} style={{ marginLeft: '15px', padding: '6px 16px', background: 'white', color: '#7f1d1d', fontWeight: 'bold', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Confirm Selection</button>
+              </div>
+            );
+          })()}
           
           {/* Play Area */}
           <div style={{ border: '1px solid #475569', padding: '15px', minHeight: '180px', maxHeight: '250px', overflowY: 'auto', borderRadius: '8px', background: '#0f172a' }}>
@@ -497,6 +519,59 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
     );
   };
 
+  const renderSettings = () => {
+    const currentKingdom = gameState.settings?.kingdomCards ?? ALL_KINGDOM_CARDS;
+    const isLobby = gameState.status === 'Lobby';
+
+    const toggleCard = (cardId: string) => {
+      const current = currentKingdom.includes(cardId)
+        ? currentKingdom.filter(id => id !== cardId)
+        : [...currentKingdom, cardId];
+      dispatch({ type: 'UPDATE_SETTINGS', payload: { ...(gameState.settings || {}), kingdomCards: current } });
+    };
+
+    return (
+      <div>
+        <div style={{ marginBottom: '8px', color: '#94a3b8', fontSize: '13px' }}>
+          Select which Kingdom cards to include (chosen at game start):
+        </div>
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+          <button
+            disabled={!isLobby}
+            onClick={() => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...(gameState.settings || {}), kingdomCards: [...ALL_KINGDOM_CARDS] } })}
+            style={{ padding: '4px 10px', fontSize: '12px', background: 'transparent', color: '#60a5fa', border: '1px solid #60a5fa', borderRadius: '4px', cursor: isLobby ? 'pointer' : 'default', opacity: isLobby ? 1 : 0.5 }}
+          >All</button>
+          <button
+            disabled={!isLobby}
+            onClick={() => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...(gameState.settings || {}), kingdomCards: [] } })}
+            style={{ padding: '4px 10px', fontSize: '12px', background: 'transparent', color: '#60a5fa', border: '1px solid #60a5fa', borderRadius: '4px', cursor: isLobby ? 'pointer' : 'default', opacity: isLobby ? 1 : 0.5 }}
+          >None</button>
+        </div>
+        <div style={{ background: 'rgba(0,0,0,0.2)', padding: '10px', borderRadius: '8px', maxHeight: '280px', overflowY: 'auto' }}>
+          {ALL_KINGDOM_CARDS.map(cardId => {
+            const def = getCardDef(cardId);
+            const isActive = currentKingdom.includes(cardId);
+            return (
+              <div key={cardId} style={{ padding: '4px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <input
+                  type="checkbox"
+                  checked={isActive}
+                  disabled={!isLobby}
+                  style={{ cursor: isLobby ? 'pointer' : 'not-allowed', opacity: isLobby ? 1 : 0.6 }}
+                  onChange={() => isLobby && toggleCard(cardId)}
+                />
+                <span style={{ color: isActive ? 'white' : '#475569', cursor: isLobby ? 'pointer' : 'default' }} onClick={() => isLobby && toggleCard(cardId)}>
+                  {def.name} <span style={{ color: '#94a3b8', fontSize: '11px' }}>({def.cost}$)</span>
+                </span>
+              </div>
+            );
+          })}
+        </div>
+        {!isLobby && <p style={{ color: 'gray', fontSize: '12px', marginTop: '8px' }}>Settings can only be changed in the Lobby.</p>}
+      </div>
+    );
+  };
+
   return (
     <GameLayout bottomAreaRatio={25}
       gameName="Dominion"
@@ -505,6 +580,7 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
       renderGameSpecificPlayerDetails={renderPlayerDetails}
       renderGameSpecificStats={() => <DominionStats gameState={gameState} />}
       renderLogMessage={renderLogMessage}
+      settings={renderSettings()}
     >
       {gameState.status === 'Lobby' ? (
         <div style={{ color: 'white', padding: '40px', textAlign: 'center' }}>

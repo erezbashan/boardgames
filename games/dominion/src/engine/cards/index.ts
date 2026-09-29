@@ -1,7 +1,8 @@
 import { CardDefinition } from './types';
 import { Copper, Silver, Gold } from './base/treasures';
 import { Estate, Duchy, Province, Curse } from './base/victory';
-import { Village, Smithy, Woodcutter, Cellar, Market, Festival, Laboratory, CouncilRoom, Moat, Chancellor, ThroneRoom, Adventurer, Chapel } from './base/actions';
+import { Gardens } from './base/actions';
+import { Village, Smithy, Woodcutter, Cellar, Market, Festival, Laboratory, CouncilRoom, Moat, Workshop, ThroneRoom, Chapel } from './base/actions';
 
 export const Cards: Record<string, CardDefinition> = {
   copper: Copper,
@@ -11,6 +12,7 @@ export const Cards: Record<string, CardDefinition> = {
   duchy: Duchy,
   province: Province,
   curse: Curse,
+  gardens: Gardens,
   village: Village,
   smithy: Smithy,
   woodcutter: Woodcutter,
@@ -20,10 +22,9 @@ export const Cards: Record<string, CardDefinition> = {
   laboratory: Laboratory,
   council_room: CouncilRoom,
   moat: Moat,
-  chancellor: Chancellor,
+  workshop: Workshop,
   throne_room: ThroneRoom,
-  adventurer: Adventurer,
-  chapel: Chapel
+  chapel: Chapel,
 };
 
 export function getCardDef(cardId: string): CardDefinition {

@@ -124,16 +124,15 @@ export const Moat: CardDefinition = {
   ]
 };
 
-export const Chancellor: CardDefinition = {
-  id: 'chancellor',
-  name: 'Chancellor',
+export const Workshop: CardDefinition = {
+  id: 'workshop',
+  name: 'Workshop',
   types: ['ACTION'],
   cost: 3,
-  description: '+2 Coins. You may immediately put your deck into your discard pile.',
+  description: 'Gain a card costing up to 4.',
   onPlay: (state, playerId) => [
-    { type: 'GAIN_COINS', playerId, amount: 2 },
-    // Simplified: always puts deck into discard
-    { type: 'SHUFFLE_DISCARD', playerId }
+    // Simplified: gain +2 coins (approximation until full GAIN_CARD mechanic is built)
+    { type: 'GAIN_COINS', playerId, amount: 2 }
   ]
 };
 
@@ -144,21 +143,8 @@ export const ThroneRoom: CardDefinition = {
   cost: 4,
   description: 'Choose an Action card in your hand. Play it twice.',
   onPlay: (state, playerId) => [
-    { type: 'GAIN_ACTIONS', playerId, amount: 1 }
-    // Simplified: just gives +1 action for now (full implementation needs card selection)
-  ]
-};
-
-export const Adventurer: CardDefinition = {
-  id: 'adventurer',
-  name: 'Adventurer',
-  types: ['ACTION'],
-  cost: 6,
-  description: 'Reveal cards from your deck until you reveal 2 Treasure cards. Put those in your hand.',
-  onPlay: (state, playerId) => [
-    // Simplified: draw 2 cards as approximation 
-    { type: 'DRAW_CARDS', playerId, amount: 2 },
-    { type: 'GAIN_COINS', playerId, amount: 1 }
+    { type: 'GAIN_ACTIONS', playerId, amount: 2 }
+    // Simplified: gives +2 actions (full implementation needs card selection UI)
   ]
 };
 
@@ -169,7 +155,41 @@ export const Chapel: CardDefinition = {
   cost: 2,
   description: 'Trash up to 4 cards from your hand.',
   onPlay: (state, playerId) => [
-    // Simplified: draws 1 card for now (trash mechanics not yet implemented)
-    { type: 'DRAW_CARDS', playerId, amount: 1 }
-  ]
+    {
+      type: 'REQUEST_INPUT',
+      playerId,
+      inputType: 'TRASH_FOR_CHAPEL',
+      payload: { min: 0, max: 4 }
+    }
+  ],
+  botChoose: (state, options) => {
+    // Bot trashes: curse cards first, then excess coppers (keep 4+), then estates early game
+    const pId = options.playerId;
+    const hand = state.players[pId].hand;
+    const allCards = [...state.players[pId].deck, ...state.players[pId].discard, ...hand];
+    const totalCards = allCards.length;
+    const curses = hand.filter(c => c.cardId === 'curse').map(c => c.id);
+    const coppers = hand.filter(c => c.cardId === 'copper').map(c => c.id);
+    const estates = hand.filter(c => c.cardId === 'estate').map(c => c.id);
+    const toTrash: string[] = [...curses];
+    // Trash coppers if we have many (keep min 4 total across deck)
+    const totalCoppers = allCards.filter(c => c.cardId === 'copper').length;
+    if (totalCoppers > 4) {
+      toTrash.push(...coppers.slice(0, Math.min(coppers.length, totalCoppers - 4)));
+    }
+    // Trash estates early game if deck is small
+    if (totalCards < 15) {
+      toTrash.push(...estates.slice(0, Math.min(estates.length, 1)));
+    }
+    return { trashedIds: toTrash.slice(0, 4) };
+  }
+};
+
+export const Gardens: CardDefinition = {
+  id: 'gardens',
+  name: 'Gardens',
+  types: ['VICTORY'],
+  cost: 4,
+  description: 'Worth 1 VP for every 10 cards you have (rounded down).',
+  // Gardens VP is calculated dynamically in recalculateVP, not via onPlay
 };

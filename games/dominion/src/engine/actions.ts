@@ -2,6 +2,7 @@ import { BaseAction } from '@erez/boardgame-core';
 
 export type PlayerAction =
   | { type: 'START_GAME' }
+  | { type: 'UPDATE_SETTINGS'; payload: any }
   | { type: 'PLAY_CARD'; playerId: string; instanceId: string }
   | { type: 'BUY_CARD'; playerId: string; cardId: string }
   | { type: 'END_PHASE'; playerId: string }

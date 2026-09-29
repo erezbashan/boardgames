@@ -34,10 +34,20 @@ export interface HistorySnapshot {
   deckSizes: Record<string, number>;
 }
 
+export interface DominionSettings {
+  kingdomCards: string[]; // Which kingdom cards to include (from the full pool)
+}
+
+export const ALL_KINGDOM_CARDS = [
+  'village', 'smithy', 'woodcutter', 'cellar', 'market', 'festival',
+  'laboratory', 'council_room', 'moat', 'workshop', 'throne_room', 'chapel'
+];
+
 export interface DominionState extends BaseGameState<PlayerState> {
   phase: Phase;
   supply: Record<string, number>;
   trash: CardInstance[];
   pendingActions: PendingAction[];
   history: HistorySnapshot[];
+  settings?: DominionSettings;
 }

@@ -9,17 +9,26 @@ export function getRandomBotAction(state: DominionState, playerId: string): Play
     const req = state.pendingActions[0];
     if (req.playerId !== playerId) return null;
     
-    // Check if the card itself defined a bot choice!
-    // We don't track which card asked for it in the payload right now easily unless we pass it.
-    // For now, if it's CELLAR discard, let's just discard random cards.
-    if (req.type === 'REQUEST_INPUT' && req.inputType === 'DISCARD_FOR_CELLAR') {
-       const hand = state.players[playerId].hand;
-       // Discard 0 to hand.length cards randomly
-       const numToDiscard = Math.floor(Math.random() * (hand.length + 1));
-       const shuffledHand = [...hand].sort(() => 0.5 - Math.random());
-       const discardedIds = shuffledHand.slice(0, numToDiscard).map(c => c.id);
-       
-       return { type: 'RESOLVE_INPUT', playerId, payload: { discardedIds } };
+    if (req.inputType === 'DISCARD_FOR_CELLAR') {
+      const hand = state.players[playerId].hand;
+      // Smart: discard victory cards and curses (useless in hand), keep treasures & actions
+      const toDiscard = hand
+        .filter(c => {
+          const def = getCardDef(c.cardId);
+          return def.types.includes('VICTORY') || c.cardId === 'curse';
+        })
+        .map(c => c.id);
+      return { type: 'RESOLVE_INPUT', playerId, payload: { discardedIds: toDiscard } };
+    }
+
+    if (req.inputType === 'TRASH_FOR_CHAPEL') {
+      // Use the card's own botChoose if available
+      const chapelDef = getCardDef('chapel');
+      if (chapelDef.botChoose) {
+        const result = chapelDef.botChoose(state, { playerId });
+        return { type: 'RESOLVE_INPUT', playerId, payload: result };
+      }
+      return { type: 'RESOLVE_INPUT', playerId, payload: { trashedIds: [] } };
     }
   }
 
@@ -31,30 +40,75 @@ export function getRandomBotAction(state: DominionState, playerId: string): Play
   if (state.phase === 'ACTION') {
     const playableActions = me.hand.filter(c => getCardDef(c.cardId).types.includes('ACTION'));
     if (me.actions > 0 && playableActions.length > 0) {
-      // Pick random action
-      const card = playableActions[Math.floor(Math.random() * playableActions.length)];
-      return { type: 'PLAY_CARD', playerId, instanceId: card.id };
+      // Priority 1: Action cards that give more actions (village, festival, market, lab, etc.)
+      const actionGivers = playableActions.filter(c => {
+        const def = getCardDef(c.cardId);
+        // These cards give +Actions: check description or specific ids known to give actions
+        const desc = def.description.toLowerCase();
+        return desc.includes('+2 actions') || desc.includes('+1 action');
+      });
+
+      // Among action-givers, prefer more expensive cards
+      const sortedActionGivers = [...actionGivers].sort((a, b) => 
+        getCardDef(b.cardId).cost - getCardDef(a.cardId).cost
+      );
+
+      if (sortedActionGivers.length > 0) {
+        return { type: 'PLAY_CARD', playerId, instanceId: sortedActionGivers[0].id };
+      }
+
+      // Priority 2: Any action card, sorted by cost descending
+      const sortedActions = [...playableActions].sort((a, b) =>
+        getCardDef(b.cardId).cost - getCardDef(a.cardId).cost
+      );
+      return { type: 'PLAY_CARD', playerId, instanceId: sortedActions[0].id };
     }
     // Else end phase
     return { type: 'END_PHASE', playerId };
   }
 
   if (state.phase === 'BUY') {
-    // 1. Play all treasures (Greedy, no reason not to in base game)
+    // 1. Play all treasures (always beneficial)
     const playableTreasures = me.hand.filter(c => getCardDef(c.cardId).types.includes('TREASURE'));
     if (playableTreasures.length > 0) {
-      return { type: 'PLAY_CARD', playerId, instanceId: playableTreasures[0].id };
+      // Play most valuable treasure first
+      const sorted = [...playableTreasures].sort((a, b) =>
+        getCardDef(b.cardId).cost - getCardDef(a.cardId).cost
+      );
+      return { type: 'PLAY_CARD', playerId, instanceId: sorted[0].id };
     }
 
-    // 2. Buy cards if we have buys
+    // 2. Buy if we have buys remaining
     if (me.buys > 0) {
-      const affordable = Object.keys(state.supply).filter(cardId => 
-        state.supply[cardId] > 0 && getCardDef(cardId).cost <= me.coins
-      );
+      // Filter to affordable cards that don't give negative VP
+      const affordable = Object.keys(state.supply).filter(cardId => {
+        if (state.supply[cardId] <= 0) return false;
+        const def = getCardDef(cardId);
+        if (def.cost > me.coins) return false;
+        // Never buy curses (negative VP)
+        if (cardId === 'curse') return false;
+        return true;
+      });
+
       if (affordable.length > 0) {
-        // Buy random affordable card
-        const randomCard = affordable[Math.floor(Math.random() * affordable.length)];
-        return { type: 'BUY_CARD', playerId, cardId: randomCard };
+        // Prefer to keep buying if we have coins to spend (don't waste coins on coppers if we can afford something better)
+        // Sort by cost descending — buy the most expensive affordable card
+        const sorted = [...affordable].sort((a, b) => getCardDef(b).cost - getCardDef(a).cost);
+        
+        // But: if we have 0 coins remaining after, and buys > 1, skip to preserve buys
+        const bestCard = sorted[0];
+        const remainingCoins = me.coins - getCardDef(bestCard).cost;
+        
+        // Don't buy coppers if we can afford something more useful (cost >= 2)
+        if (getCardDef(bestCard).cost === 0 && sorted.length > 1) {
+          // Try next best option
+          const secondBest = sorted[1];
+          if (getCardDef(secondBest).cost <= me.coins) {
+            return { type: 'BUY_CARD', playerId, cardId: secondBest };
+          }
+        }
+        
+        return { type: 'BUY_CARD', playerId, cardId: bestCard };
       }
     }
     

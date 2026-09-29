@@ -116,7 +116,7 @@ export const SplendorBoard: React.FC = () => {
 
     return (
       <div 
-        className={`splendor-card ${!isAnimating && !isPurchased && isMyTurn && canAfford && (!isReserved || isMine) ? 'splendor-card-affordable' : ''}`} 
+        className={`splendor-card ${!isAnimating && !isPurchased && isMyTurn && turnState === 'take_tokens' && canAfford && (!isReserved || isMine) ? 'splendor-card-affordable' : ''}`} 
         style={{ 
           backgroundColor: GEM_COLORS[card.bonus], 
           border: '2px solid #cbd5e1', // Neutral slate-300 frame
@@ -204,7 +204,7 @@ export const SplendorBoard: React.FC = () => {
         </div>
 
         {/* Prominent BUY badge on bottom right if affordable */}
-        {!isPurchased && isMyTurn && canAfford && (
+        {!isAnimating && !isPurchased && isMyTurn && turnState === 'take_tokens' && canAfford && (!isReserved || isMine) && (
           <div 
             style={{ 
               position: 'absolute', 

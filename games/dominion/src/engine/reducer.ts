@@ -9,11 +9,13 @@ function recalculateVP(state: DominionState) {
   Object.values(state.players).forEach((p: any) => {
     let vp = 0;
     const allCards = [...p.deck, ...p.discard, ...p.hand, ...p.playArea];
+    const totalCards = allCards.length;
     allCards.forEach(c => {
       if (c.cardId === 'estate') vp += 1;
       if (c.cardId === 'duchy') vp += 3;
       if (c.cardId === 'province') vp += 6;
       if (c.cardId === 'curse') vp -= 1;
+      if (c.cardId === 'gardens') vp += Math.floor(totalCards / 10);
     });
     p.victoryPoints = vp;
   });
@@ -98,6 +100,11 @@ export function dominionReducer
   nextState = JSON.parse(JSON.stringify(nextState));
 
   switch (action.type) {
+    case 'UPDATE_SETTINGS': {
+      nextState.settings = action.payload;
+      break;
+    }
+
     case 'JOIN_GAME': {
       const pid = (action as any).payload.playerId;
       if (nextState.players[pid] && !nextState.players[pid].deck) {
@@ -210,13 +217,26 @@ export function dominionReducer
     }
 
     case 'START_GAME': {
+      const numPlayers = nextState.playerOrder.length;
+      // Per Dominion rules: 2p=8 provinces/duchies/estates, 3-4p=12
+      const victoryCount = numPlayers <= 2 ? 8 : 12;
+      // Per Dominion rules: 60 copper minus 7 per player (starters), min 0
+      const copperCount = Math.max(0, 60 - 7 * numPlayers);
+      // Build kingdom supply from settings (or defaults)
+      const defaultKingdom = ['village', 'smithy', 'woodcutter', 'cellar', 'market', 'festival',
+        'laboratory', 'council_room', 'moat', 'workshop', 'throne_room', 'chapel'];
+      const kingdomCards = nextState.settings?.kingdomCards?.length
+        ? nextState.settings.kingdomCards
+        : defaultKingdom;
+
+      const kingdomSupply: Record<string, number> = {};
+      kingdomCards.forEach(id => { kingdomSupply[id] = 10; });
+
       nextState.supply = {
-        copper: 60, silver: 40, gold: 30,
-        estate: 24, duchy: 12, province: 12,
-        village: 10, smithy: 10, woodcutter: 10, cellar: 10,
-        market: 10, festival: 10, laboratory: 10,
-        council_room: 10, moat: 10, chancellor: 10,
-        throne_room: 10, adventurer: 10, chapel: 10
+        copper: copperCount, silver: 40, gold: 30,
+        estate: victoryCount, duchy: victoryCount, province: victoryCount,
+        gardens: victoryCount,
+        ...kingdomSupply
       };
       nextState.history = [];
       
@@ -397,6 +417,28 @@ export function dominionReducer
           if (validDiscards > 0) {
             nextState.pendingActions.unshift({ type: 'DRAW_CARDS', playerId: action.playerId, amount: validDiscards });
           }
+        }
+
+        if (req.inputType === 'TRASH_FOR_CHAPEL') {
+          const trashedIds: string[] = action.payload.trashedIds || [];
+          const player = nextState.players[action.playerId];
+          
+          let validTrashes = 0;
+          for (const id of trashedIds.slice(0, 4)) {
+            const idx = player.hand.findIndex(c => c.id === id);
+            if (idx !== -1) {
+              const card = player.hand.splice(idx, 1)[0];
+              nextState.trash = nextState.trash || [];
+              nextState.trash.push(card);
+              validTrashes++;
+            }
+          }
+          if (validTrashes > 0) {
+            nextState.logs.push(`${player.name} trashes ${validTrashes} card${validTrashes > 1 ? 's' : ''} with Chapel.`);
+          }
+          
+          // Pop the REQUEST_INPUT
+          nextState.pendingActions.shift();
         }
       }
       break;
