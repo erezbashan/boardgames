@@ -24,7 +24,7 @@ const CARD_IMAGES: Record<string, string> = {
   "curse": "https://wiki.dominionstrategy.com/images/thumb/9/97/Curse.jpg/200px-Curse.jpg",
   "village": "https://wiki.dominionstrategy.com/images/thumb/5/5a/Village.jpg/200px-Village.jpg",
   "smithy": "https://wiki.dominionstrategy.com/images/thumb/3/36/Smithy.jpg/200px-Smithy.jpg",
-  "woodcutter": "https://wiki.dominionstrategy.com/images/thumb/d/d6/Woodcutter.jpg/200px-Woodcutter.jpg",
+  "militia": "https://wiki.dominionstrategy.com/images/thumb/a/a0/Militia.jpg/200px-Militia.jpg",
   "cellar": "https://wiki.dominionstrategy.com/images/thumb/1/1c/Cellar.jpg/200px-Cellar.jpg",
   "market": "https://wiki.dominionstrategy.com/images/thumb/7/7e/Market.jpg/200px-Market.jpg",
   "festival": "https://wiki.dominionstrategy.com/images/thumb/e/ec/Festival.jpg/200px-Festival.jpg",
@@ -68,7 +68,17 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
   };
 
   const handleBuyCard = (cardId: string) => {
-    if (!isMyTurn || gameState.phase !== 'BUY') return;
+    if (!isMyTurn) return;
+    const req = gameState.pendingActions[0] as any;
+    const isInputPhaseForMe = isInputPhase && req?.playerId === myPlayerId;
+    if (isInputPhaseForMe && req?.inputType === 'GAIN_CARD') {
+      const maxCost = req?.payload?.maxCost || 99;
+      if (getCardDef(cardId).cost <= maxCost && gameState.supply[cardId] > 0) {
+        dispatch({ type: 'RESOLVE_INPUT', playerId: myPlayerId, payload: { cardId } });
+      }
+      return;
+    }
+    if (gameState.phase !== 'BUY' || isInputPhase) return;
     dispatch({ type: 'BUY_CARD', playerId: myPlayerId, cardId });
   };
 
@@ -91,12 +101,6 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
           playerId: myPlayerId, 
           payload: { trashedIds: selectedCards } 
         });
-      } else if (req.inputType === 'PLAY_FOR_THRONE_ROOM') {
-        dispatch({ 
-          type: 'RESOLVE_INPUT', 
-          playerId: myPlayerId, 
-          payload: { instanceId: selectedCards[0] || '' } 
-        });
       }
       setSelectedCards([]);
     }
@@ -107,10 +111,10 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
     const inputType = req?.type === 'REQUEST_INPUT' ? req.inputType : null;
 
     if (inputType === 'PLAY_FOR_THRONE_ROOM') {
-      // Only allow 1 selection, and it must be an action
+      // Auto-confirm
       const card = me.hand.find(c => c.id === instanceId);
       if (card && !getCardDef(card.cardId).types.includes('ACTION')) return;
-      setSelectedCards(prev => prev.includes(instanceId) ? [] : [instanceId]);
+      dispatch({ type: 'RESOLVE_INPUT', playerId: myPlayerId, payload: { instanceId } });
       return;
     }
 
@@ -423,8 +427,8 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
           
           {/* Bottom Bar: Cost & Count */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ background: 'rgba(255,255,255,0.9)', color: 'black', fontWeight: 'bold', fontSize: '12px', width: '20px', height: '20px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {def.cost}
+            <div style={{ background: 'rgba(255,255,255,0.9)', color: 'black', fontWeight: 'bold', fontSize: '11px', padding: '2px 6px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              ${def.cost}
             </div>
             <div style={{ background: count === 0 ? '#ef4444' : 'rgba(0,0,0,0.8)', color: 'white', fontSize: '11px', padding: '2px 4px', borderRadius: '4px', fontWeight: 'bold' }}>
               {count}
@@ -515,7 +519,7 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
           </div>
           
           {isInputPhase && gameState.pendingActions[0]?.playerId === myPlayerId && (() => {
-            const req = gameState.pendingActions[0];
+            const req = gameState.pendingActions[0] as any;
             const inputType = req?.type === 'REQUEST_INPUT' ? req.inputType : null;
             const msg = inputType === 'DISCARD_FOR_CELLAR' 
               ? 'Select cards to discard for Cellar (you\'ll draw the same number).'
@@ -523,17 +527,24 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
               ? `Select up to 4 cards to trash permanently with Chapel (${selectedCards.length} selected).`
               : inputType === 'PLAY_FOR_THRONE_ROOM'
               ? `Select an Action card from your hand to play twice with Throne Room.`
+              : inputType === 'GAIN_CARD'
+              ? `Select a card from the market costing up to $${req.payload?.maxCost || 99} to gain.`
               : 'Waiting for input...';
+              
+            const needsConfirm = ['DISCARD_FOR_CELLAR', 'TRASH_FOR_CHAPEL'].includes(inputType || '');
+            
             return (
               <div style={{ padding: '15px', background: '#7f1d1d', border: '2px solid #ef4444', borderRadius: '8px', color: 'white', boxShadow: '0 4px 6px rgba(0,0,0,0.3)' }}>
                 <strong style={{ fontSize: '18px' }}>⚠️ Action Required: </strong> {msg}
-                <button onClick={handleResolveInput} style={{ marginLeft: '15px', padding: '6px 16px', background: 'white', color: '#7f1d1d', fontWeight: 'bold', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Confirm Selection</button>
+                {needsConfirm && (
+                  <button onClick={handleResolveInput} style={{ marginLeft: '15px', padding: '6px 16px', background: 'white', color: '#7f1d1d', fontWeight: 'bold', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Confirm Selection</button>
+                )}
               </div>
             );
           })()}
           
           {/* Play Area */}
-          <div style={{ border: '1px solid #475569', padding: '15px', minHeight: '300px', maxHeight: '450px', overflowY: 'auto', borderRadius: '8px', background: '#0f172a' }}>
+          <div style={{ border: '1px solid #475569', padding: '15px', minHeight: '300px', maxHeight: '450px', overflowY: 'scroll', borderRadius: '8px', background: '#0f172a' }}>
             <h3 style={{ marginTop: 0, color: '#94a3b8' }}>{activePlayer.id === myPlayerId ? 'Your' : activePlayer.name + '\'s'} Play Area</h3>
             <div style={{ display: 'flex', flexWrap: 'wrap', paddingLeft: '10px' }}>
               <AnimatePresence>

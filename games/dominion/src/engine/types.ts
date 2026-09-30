@@ -40,7 +40,7 @@ export interface DominionSettings {
 }
 
 export const ALL_KINGDOM_CARDS = [
-  'village', 'smithy', 'woodcutter', 'cellar', 'market', 'festival',
+  'village', 'smithy', 'militia', 'cellar', 'market', 'festival',
   'laboratory', 'council_room', 'moat', 'workshop', 'throne_room', 'chapel'
 ];
 

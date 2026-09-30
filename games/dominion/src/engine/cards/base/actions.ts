@@ -23,15 +23,15 @@ export const Smithy: CardDefinition = {
   ]
 };
 
-export const Woodcutter: CardDefinition = {
-  id: 'woodcutter',
-  name: 'Woodcutter',
-  types: ['ACTION'],
-  cost: 3,
-  description: '+1 Buy, +2 Coins',
+export const Militia: CardDefinition = {
+  id: 'militia',
+  name: 'Militia',
+  types: ['ACTION', 'ATTACK'],
+  cost: 4,
+  description: '+2 Coins. Each other player discards down to 3 cards in hand.',
   onPlay: (state, playerId) => [
-    { type: 'GAIN_BUYS', playerId, amount: 1 },
     { type: 'GAIN_COINS', playerId, amount: 2 }
+    // Note: Attack part is skipped for now until Attack mechanics are fully built
   ]
 };
 
@@ -131,9 +131,17 @@ export const Workshop: CardDefinition = {
   cost: 3,
   description: 'Gain a card costing up to 4.',
   onPlay: (state, playerId) => [
-    // Simplified: gain +2 coins (approximation until full GAIN_CARD mechanic is built)
-    { type: 'GAIN_COINS', playerId, amount: 2 }
-  ]
+    { type: 'REQUEST_INPUT', playerId, inputType: 'GAIN_CARD', payload: { maxCost: 4 } }
+  ],
+  botChoose: (state, { playerId }) => {
+    // Bot simply finds the most expensive affordable action or treasure up to 4
+    const affordable = Object.entries(state.supply)
+       .filter(([id, count]) => count > 0 && getCardDef(id).cost <= 4)
+       .map(([id]) => getCardDef(id));
+    if (affordable.length === 0) return { cardId: '' };
+    affordable.sort((a, b) => b.cost - a.cost);
+    return { cardId: affordable[0].id };
+  }
 };
 
 export const ThroneRoom: CardDefinition = {

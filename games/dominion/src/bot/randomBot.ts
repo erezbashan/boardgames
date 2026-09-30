@@ -38,6 +38,15 @@ export function getRandomBotAction(state: DominionState, playerId: string): Play
       }
       return { type: 'RESOLVE_INPUT', playerId, payload: { instanceId: '' } };
     }
+
+    if (inputReq.inputType === 'GAIN_CARD') {
+      const workshopDef = getCardDef('workshop');
+      if (workshopDef.botChoose) {
+        const result = workshopDef.botChoose(state, { playerId });
+        return { type: 'RESOLVE_INPUT', playerId, payload: result };
+      }
+      return { type: 'RESOLVE_INPUT', playerId, payload: { cardId: '' } };
+    }
   }
 
   // Not input phase

@@ -281,7 +281,7 @@ export function dominionReducer
         player.hand.splice(cardIndex, 1);
         player.playArea.push(card);
                 const lastLog = nextState.logs[nextState.logs.length - 1] || "";
-        const match = lastLog.match(new RegExp(`^${player.name} plays (?:(\\\\d+) )?\\[${def.name}\\]\\.?$`));
+        const match = lastLog.match(new RegExp(`^${player.name} plays (?:(\\d+) )?\\[${def.name}\\]\\.?$`));
         if (match) {
            const count = match[1] ? parseInt(match[1]) + 1 : 2;
            nextState.logs[nextState.logs.length - 1] = `${player.name} plays ${count} [${def.name}].`;
@@ -298,7 +298,7 @@ export function dominionReducer
         player.hand.splice(cardIndex, 1);
         player.playArea.push(card);
         const lastLog = nextState.logs[nextState.logs.length - 1] || "";
-        const match = lastLog.match(new RegExp(`^${player.name} plays (?:(\\\\d+) )?\\[${def.name}\\]\\.?$`));
+        const match = lastLog.match(new RegExp(`^${player.name} plays (?:(\\d+) )?\\[${def.name}\\]\\.?$`));
         if (match) {
            const count = match[1] ? parseInt(match[1]) + 1 : 2;
            nextState.logs[nextState.logs.length - 1] = `${player.name} plays ${count} [${def.name}].`;
@@ -348,7 +348,8 @@ export function dominionReducer
     }
     case 'CLEANUP_PHASE': {
       const player = nextState.players[action.playerId];
-      player.discard.push(...player.playArea, ...player.hand);
+      const validPlayArea = player.playArea.filter(c => !(c as any)._throned);
+      player.discard.push(...validPlayArea, ...player.hand);
       player.playArea = [];
       player.hand = [];
       player.coins = 0;
@@ -482,6 +483,22 @@ export function dominionReducer
                 nextState.pendingActions.shift();
              }
           }
+        }
+
+        if (req.inputType === 'GAIN_CARD') {
+          const cardId: string = action.payload.cardId;
+          const player = nextState.players[action.playerId];
+          
+          if (cardId && nextState.supply[cardId] > 0) {
+            const def = getCardDef(cardId);
+            const maxCost = req.payload?.maxCost || 99;
+            if (def.cost <= maxCost) {
+              nextState.supply[cardId]--;
+              player.discard.push({ id: generateInstanceId(cardId), cardId });
+              nextState.logs.push(`${player.name} gains [${def.name}].`);
+            }
+          }
+          nextState.pendingActions.shift();
         }
       }
       break;

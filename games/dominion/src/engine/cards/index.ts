@@ -2,7 +2,7 @@ import { CardDefinition } from './types';
 import { Copper, Silver, Gold } from './base/treasures';
 import { Estate, Duchy, Province, Curse } from './base/victory';
 import { Gardens } from './base/actions';
-import { Village, Smithy, Woodcutter, Cellar, Market, Festival, Laboratory, CouncilRoom, Moat, Workshop, ThroneRoom, Chapel } from './base/actions';
+import { Village, Smithy, Militia, Cellar, Market, Festival, Laboratory, CouncilRoom, Moat, Workshop, ThroneRoom, Chapel } from './base/actions';
 
 export const Cards: Record<string, CardDefinition> = {
   copper: Copper,
@@ -15,7 +15,7 @@ export const Cards: Record<string, CardDefinition> = {
   gardens: Gardens,
   village: Village,
   smithy: Smithy,
-  woodcutter: Woodcutter,
+  militia: Militia,
   cellar: Cellar,
   market: Market,
   festival: Festival,
