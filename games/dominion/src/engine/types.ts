@@ -26,7 +26,8 @@ export type PendingAction =
   | { type: 'GAIN_BUYS'; playerId: string; amount: number }
   | { type: 'GAIN_COINS'; playerId: string; amount: number }
   | { type: 'SHUFFLE_DISCARD'; playerId: string }
-  | { type: 'REQUEST_INPUT'; playerId: string; inputType: string; payload?: any };
+  | { type: 'REQUEST_INPUT'; playerId: string; inputType: string; payload?: any }
+  | { type: 'LOG'; playerId: string; message: string };
 
 export interface HistorySnapshot {
   turnNum: number;

@@ -64,6 +64,9 @@ function processPendingActions(state: DominionState) {
         player.deck = shuffle([...player.deck, ...player.discard]);
         player.discard = [];
         break;
+      case 'LOG':
+        state.logs.push((pending as any).message);
+        break;
     }
   }
 }
@@ -439,6 +442,46 @@ export function dominionReducer
           
           // Pop the REQUEST_INPUT
           nextState.pendingActions.shift();
+        }
+
+        if (req.inputType === 'PLAY_FOR_THRONE_ROOM') {
+          const instanceId: string = action.payload.instanceId;
+          const player = nextState.players[action.playerId];
+          
+          if (!instanceId) {
+             nextState.pendingActions.shift();
+          } else {
+             const idx = player.hand.findIndex(c => c.id === instanceId);
+             if (idx !== -1) {
+                const card = player.hand.splice(idx, 1)[0];
+                const def = getCardDef(card.cardId);
+                if (def.types.includes('ACTION')) {
+                   player.playArea.push(card);
+                   nextState.logs.push(`${player.name} plays [${def.name}] via Throne Room.`);
+                   
+                   const clonedCard = { ...card, id: card.id + '_throne', _throned: true } as any;
+                   player.playArea.push(clonedCard);
+                   
+                   nextState.pendingActions.shift();
+
+                   if (def.onPlay) {
+                      const actions2 = def.onPlay(nextState, action.playerId);
+                      const actions1 = def.onPlay(nextState, action.playerId);
+                      
+                      // Queue them: actions1 first, then a special log, then actions2
+                      nextState.pendingActions.unshift(
+                         ...actions1,
+                         { type: 'LOG', playerId: action.playerId, message: `${player.name} plays [${def.name}] again.` } as any,
+                         ...actions2
+                      );
+                   }
+                } else {
+                   nextState.pendingActions.shift();
+                }
+             } else {
+                nextState.pendingActions.shift();
+             }
+          }
         }
       }
       break;

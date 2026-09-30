@@ -1,5 +1,5 @@
 import { CardDefinition } from '../types';
-
+import { getCardDef } from '../index';
 export const Village: CardDefinition = {
   id: 'village',
   name: 'Village',
@@ -142,10 +142,25 @@ export const ThroneRoom: CardDefinition = {
   types: ['ACTION'],
   cost: 4,
   description: 'Choose an Action card in your hand. Play it twice.',
-  onPlay: (state, playerId) => [
-    { type: 'GAIN_ACTIONS', playerId, amount: 2 }
-    // Simplified: gives +2 actions (full implementation needs card selection UI)
-  ]
+  onPlay: (state, playerId) => {
+    // Only prompt if they have action cards in hand
+    const hasActions = state.players[playerId].hand.some(c => getCardDef(c.cardId).types.includes('ACTION'));
+    if (!hasActions) return [];
+
+    return [{
+      type: 'REQUEST_INPUT',
+      playerId,
+      inputType: 'PLAY_FOR_THRONE_ROOM'
+    }];
+  },
+  botChoose: (state, { playerId }) => {
+    const hand = state.players[playerId].hand;
+    const actions = hand.filter(c => getCardDef(c.cardId).types.includes('ACTION'));
+    if (actions.length === 0) return { instanceId: '' };
+    // Play the most expensive one
+    actions.sort((a, b) => getCardDef(b.cardId).cost - getCardDef(a.cardId).cost);
+    return { instanceId: actions[0].id };
+  }
 };
 
 export const Chapel: CardDefinition = {

@@ -31,10 +31,10 @@ const CARD_IMAGES: Record<string, string> = {
   "laboratory": "https://wiki.dominionstrategy.com/images/thumb/0/0c/Laboratory.jpg/200px-Laboratory.jpg",
   "council_room": "https://wiki.dominionstrategy.com/images/thumb/e/e0/Council_Room.jpg/200px-Council_Room.jpg",
   "moat": "https://wiki.dominionstrategy.com/images/thumb/f/fe/Moat.jpg/200px-Moat.jpg",
-  "workshop": "https://wiki.dominionstrategy.com/images/thumb/2/2b/Workshop.jpg/200px-Workshop.jpg",
-  "throne_room": "https://wiki.dominionstrategy.com/images/thumb/c/c4/Throne_Room.jpg/200px-Throne_Room.jpg",
-  "chapel": "https://wiki.dominionstrategy.com/images/thumb/7/75/Chapel.jpg/200px-Chapel.jpg",
-  "gardens": "https://wiki.dominionstrategy.com/images/thumb/a/a3/Gardens.jpg/200px-Gardens.jpg"
+  "workshop": "https://raw.githubusercontent.com/tempfillernamegithq/dominion-cards/master/dominion/workshop.jpg",
+  "throne_room": "https://raw.githubusercontent.com/tempfillernamegithq/dominion-cards/master/dominion/throne-room.jpg",
+  "chapel": "https://raw.githubusercontent.com/tempfillernamegithq/dominion-cards/master/dominion/chapel.jpg",
+  "gardens": "https://raw.githubusercontent.com/tempfillernamegithq/dominion-cards/master/dominion/gardens.jpg"
 };
 
 const getIcon = (types: CardType[]) => {
@@ -91,12 +91,29 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
           playerId: myPlayerId, 
           payload: { trashedIds: selectedCards } 
         });
+      } else if (req.inputType === 'PLAY_FOR_THRONE_ROOM') {
+        dispatch({ 
+          type: 'RESOLVE_INPUT', 
+          playerId: myPlayerId, 
+          payload: { instanceId: selectedCards[0] || '' } 
+        });
       }
       setSelectedCards([]);
     }
   };
 
   const toggleCardSelection = (instanceId: string) => {
+    const req = gameState.pendingActions[0];
+    const inputType = req?.type === 'REQUEST_INPUT' ? req.inputType : null;
+
+    if (inputType === 'PLAY_FOR_THRONE_ROOM') {
+      // Only allow 1 selection, and it must be an action
+      const card = me.hand.find(c => c.id === instanceId);
+      if (card && !getCardDef(card.cardId).types.includes('ACTION')) return;
+      setSelectedCards(prev => prev.includes(instanceId) ? [] : [instanceId]);
+      return;
+    }
+
     setSelectedCards(prev => 
       prev.includes(instanceId) ? prev.filter(id => id !== instanceId) : [...prev, instanceId]
     );
@@ -194,10 +211,10 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
                         else if (isMyTurn) handlePlayCard(card.id);
                       }}
                       style={{
-                        width: '52px',
-                        height: '75px',
+                        width: '70px',
+                        height: '100px',
                         border: `2px solid ${isSelected ? '#3b82f6' : isPlayableAction ? '#34d399' : 'rgba(100,116,139,0.5)'}`,
-                        borderRadius: '5px',
+                        borderRadius: '6px',
                         background: isSelected ? '#1e3a8a' : '#1e293b',
                         backgroundImage: imageUrl ? `url(${imageUrl})` : 'none',
                         backgroundSize: 'cover',
@@ -209,10 +226,6 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
                         flexShrink: 0,
                       }}
                     >
-                      {/* Cost badge */}
-                      <div style={{ position: 'absolute', bottom: '2px', left: '2px', background: 'rgba(0,0,0,0.85)', borderRadius: '3px', padding: '1px 3px', fontSize: '9px', color: '#fbbf24', fontWeight: 'bold', zIndex: 10 }}>
-                        {def.cost}$
-                      </div>
                       {/* Type icon */}
                       <div style={{ position: 'absolute', top: '2px', left: '2px', fontSize: '10px', zIndex: 10 }}>
                         {getIcon(def.types)}
@@ -301,6 +314,13 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
           >?</div>
         </div>
         
+        {card._throned && (
+          <div style={{ position: 'absolute', bottom: '4px', left: '0', right: '0', textAlign: 'center', zIndex: 10 }}>
+            <span style={{ background: '#eab308', color: 'black', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold', boxShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
+              x2 (Throned)
+            </span>
+          </div>
+        )}
       </motion.div>
     );
   };
@@ -501,6 +521,8 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
               ? 'Select cards to discard for Cellar (you\'ll draw the same number).'
               : inputType === 'TRASH_FOR_CHAPEL'
               ? `Select up to 4 cards to trash permanently with Chapel (${selectedCards.length} selected).`
+              : inputType === 'PLAY_FOR_THRONE_ROOM'
+              ? `Select an Action card from your hand to play twice with Throne Room.`
               : 'Waiting for input...';
             return (
               <div style={{ padding: '15px', background: '#7f1d1d', border: '2px solid #ef4444', borderRadius: '8px', color: 'white', boxShadow: '0 4px 6px rgba(0,0,0,0.3)' }}>
@@ -511,7 +533,7 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
           })()}
           
           {/* Play Area */}
-          <div style={{ border: '1px solid #475569', padding: '15px', minHeight: '180px', maxHeight: '250px', overflowY: 'auto', borderRadius: '8px', background: '#0f172a' }}>
+          <div style={{ border: '1px solid #475569', padding: '15px', minHeight: '300px', maxHeight: '450px', overflowY: 'auto', borderRadius: '8px', background: '#0f172a' }}>
             <h3 style={{ marginTop: 0, color: '#94a3b8' }}>{activePlayer.id === myPlayerId ? 'Your' : activePlayer.name + '\'s'} Play Area</h3>
             <div style={{ display: 'flex', flexWrap: 'wrap', paddingLeft: '10px' }}>
               <AnimatePresence>

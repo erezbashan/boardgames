@@ -22,13 +22,21 @@ export function getRandomBotAction(state: DominionState, playerId: string): Play
     }
 
     if (inputReq.inputType === 'TRASH_FOR_CHAPEL') {
-      // Use the card's own botChoose if available
       const chapelDef = getCardDef('chapel');
       if (chapelDef.botChoose) {
         const result = chapelDef.botChoose(state, { playerId });
         return { type: 'RESOLVE_INPUT', playerId, payload: result };
       }
       return { type: 'RESOLVE_INPUT', playerId, payload: { trashedIds: [] } };
+    }
+
+    if (inputReq.inputType === 'PLAY_FOR_THRONE_ROOM') {
+      const throneDef = getCardDef('throne_room');
+      if (throneDef.botChoose) {
+        const result = throneDef.botChoose(state, { playerId });
+        return { type: 'RESOLVE_INPUT', playerId, payload: result };
+      }
+      return { type: 'RESOLVE_INPUT', playerId, payload: { instanceId: '' } };
     }
   }
 
