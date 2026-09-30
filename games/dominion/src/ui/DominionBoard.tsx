@@ -34,7 +34,12 @@ const CARD_IMAGES: Record<string, string> = {
   "workshop": "https://raw.githubusercontent.com/tempfillernamegithq/dominion-cards/master/dominion/workshop.jpg",
   "throne_room": "https://raw.githubusercontent.com/tempfillernamegithq/dominion-cards/master/dominion/throne-room.jpg",
   "chapel": "https://raw.githubusercontent.com/tempfillernamegithq/dominion-cards/master/dominion/chapel.jpg",
-  "gardens": "https://raw.githubusercontent.com/tempfillernamegithq/dominion-cards/master/dominion/gardens.jpg"
+  "gardens": "https://raw.githubusercontent.com/tempfillernamegithq/dominion-cards/master/dominion/gardens.jpg",
+  "witch": "https://wiki.dominionstrategy.com/images/thumb/b/b3/Witch.jpg/200px-Witch.jpg",
+  "moneylender": "https://wiki.dominionstrategy.com/images/thumb/7/70/Moneylender.jpg/200px-Moneylender.jpg",
+  "poacher": "https://wiki.dominionstrategy.com/images/thumb/8/87/Poacher.jpg/200px-Poacher.jpg",
+  "remodel": "https://wiki.dominionstrategy.com/images/thumb/2/2e/Remodel.jpg/200px-Remodel.jpg",
+  "mine": "https://wiki.dominionstrategy.com/images/thumb/8/8e/Mine.jpg/200px-Mine.jpg"
 };
 
 const getIcon = (types: CardType[]) => {
@@ -73,7 +78,9 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
     const isInputPhaseForMe = isInputPhase && req?.playerId === myPlayerId;
     if (isInputPhaseForMe && req?.inputType === 'GAIN_CARD') {
       const maxCost = req?.payload?.maxCost || 99;
-      if (getCardDef(cardId).cost <= maxCost && gameState.supply[cardId] > 0) {
+      const def = getCardDef(cardId);
+      if (req.payload?.treasureOnly && !def.types.includes('TREASURE')) return;
+      if (def.cost <= maxCost && gameState.supply[cardId] > 0) {
         dispatch({ type: 'RESOLVE_INPUT', playerId: myPlayerId, payload: { cardId } });
       }
       return;
@@ -89,13 +96,13 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
   const handleResolveInput = () => {
     const req = gameState.pendingActions[0];
     if (req?.type === 'REQUEST_INPUT') {
-      if (req.inputType === 'DISCARD_FOR_CELLAR') {
+      if (req.inputType === 'DISCARD_FOR_CELLAR' || req.inputType === 'DISCARD_FOR_POACHER') {
         dispatch({ 
           type: 'RESOLVE_INPUT', 
           playerId: myPlayerId, 
           payload: { discardedIds: selectedCards } 
         });
-      } else if (req.inputType === 'TRASH_FOR_CHAPEL') {
+      } else if (req.inputType === 'TRASH_FOR_CHAPEL' || req.inputType === 'TRASH_FOR_REMODEL' || req.inputType === 'TRASH_FOR_MINE' || req.inputType === 'TRASH_COPPER_FOR_MONEYLENDER') {
         dispatch({ 
           type: 'RESOLVE_INPUT', 
           playerId: myPlayerId, 
@@ -118,9 +125,29 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
       return;
     }
 
-    setSelectedCards(prev => 
-      prev.includes(instanceId) ? prev.filter(id => id !== instanceId) : [...prev, instanceId]
-    );
+    const card = me.hand.find(c => c.id === instanceId);
+    if (!card) return;
+
+    if (inputType === 'TRASH_COPPER_FOR_MONEYLENDER' && card.cardId !== 'copper') return;
+    if (inputType === 'TRASH_FOR_MINE' && !getCardDef(card.cardId).types.includes('TREASURE')) return;
+
+    setSelectedCards(prev => {
+      if (prev.includes(instanceId)) return prev.filter(id => id !== instanceId);
+      
+      const maxSelections = 
+        inputType === 'TRASH_FOR_CHAPEL' ? 4 :
+        inputType === 'TRASH_FOR_REMODEL' ? 1 :
+        inputType === 'TRASH_FOR_MINE' ? 1 :
+        inputType === 'TRASH_COPPER_FOR_MONEYLENDER' ? 1 :
+        inputType === 'DISCARD_FOR_POACHER' ? (req as any).payload?.amount || 0 :
+        99;
+        
+      if (prev.length >= maxSelections) {
+         if (maxSelections === 1) return [instanceId];
+         return prev;
+      }
+      return [...prev, instanceId];
+    });
   };
 
   const renderPlayerDetails = (playerId: string) => {
@@ -351,7 +378,8 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
           <span 
             key={match.index}
             style={{ color: '#60a5fa', cursor: 'pointer', textDecoration: 'underline', fontWeight: 'bold' }}
-            
+            onMouseEnter={(e) => showPopup(e, def)}
+            onClick={(e) => showPopup(e, def)}
             onMouseLeave={hidePopup}
           >
             {cardName}
@@ -387,8 +415,15 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
     const kingdomSupply = supplyEntries.filter(s => !s.def.types.includes('VICTORY') && !s.def.types.includes('TREASURE')).sort((a,b) => b.def.cost - a.def.cost);
 
     const renderMarketCard = (id: string, count: number, def: CardDefinition) => {
-      const canAfford = potentialPower >= def.cost;
-      const disabled = !isMyTurn || gameState.phase !== 'BUY' || me.buys <= 0 || count <= 0 || me.coins < def.cost;
+      let disabled = true;
+      const req = gameState.pendingActions[0] as any;
+      if (isInputPhase && req?.playerId === myPlayerId && req?.inputType === 'GAIN_CARD') {
+         const maxCost = req.payload?.maxCost || 99;
+         const validTarget = !req.payload?.treasureOnly || def.types.includes('TREASURE');
+         disabled = count <= 0 || def.cost > maxCost || !validTarget;
+      } else {
+         disabled = !isMyTurn || gameState.phase !== 'BUY' || me.buys <= 0 || count <= 0 || me.coins < def.cost || isInputPhase;
+      }
       const imageUrl = CARD_IMAGES[id];
 
       return (
@@ -529,9 +564,17 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
               ? `Select an Action card from your hand to play twice with Throne Room.`
               : inputType === 'GAIN_CARD'
               ? `Select a card from the market costing up to $${req.payload?.maxCost || 99} to gain.`
+              : inputType === 'TRASH_COPPER_FOR_MONEYLENDER'
+              ? `Select a Copper to trash for +3 Coins (or confirm with 0 to skip).`
+              : inputType === 'DISCARD_FOR_POACHER'
+              ? `Select ${req.payload?.amount} card(s) to discard for Poacher (${selectedCards.length} selected).`
+              : inputType === 'TRASH_FOR_REMODEL'
+              ? `Select a card to trash to gain a card costing up to $2 more.`
+              : inputType === 'TRASH_FOR_MINE'
+              ? `Select a Treasure to trash to gain a Treasure costing up to $3 more.`
               : 'Waiting for input...';
               
-            const needsConfirm = ['DISCARD_FOR_CELLAR', 'TRASH_FOR_CHAPEL'].includes(inputType || '');
+            const needsConfirm = ['DISCARD_FOR_CELLAR', 'TRASH_FOR_CHAPEL', 'TRASH_COPPER_FOR_MONEYLENDER', 'DISCARD_FOR_POACHER', 'TRASH_FOR_REMODEL', 'TRASH_FOR_MINE'].includes(inputType || '');
             
             return (
               <div style={{ padding: '15px', background: '#7f1d1d', border: '2px solid #ef4444', borderRadius: '8px', color: 'white', boxShadow: '0 4px 6px rgba(0,0,0,0.3)' }}>

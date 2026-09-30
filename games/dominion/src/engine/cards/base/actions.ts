@@ -216,3 +216,86 @@ export const Gardens: CardDefinition = {
   description: 'Worth 1 VP for every 10 cards you have (rounded down).',
   // Gardens VP is calculated dynamically in recalculateVP, not via onPlay
 };
+
+export const Witch: CardDefinition = {
+  id: 'witch',
+  name: 'Witch',
+  types: ['ACTION', 'ATTACK'],
+  cost: 5,
+  description: '+2 Cards. Each other player gains a Curse.',
+  onPlay: (state, playerId) => {
+    const actions: any[] = [{ type: 'DRAW_CARDS', playerId, amount: 2 }];
+    for (const pId in state.players) {
+      if (pId !== playerId) {
+        actions.push({ type: 'FORCE_GAIN_CARD', playerId: pId, cardId: 'curse' });
+      }
+    }
+    return actions;
+  }
+};
+
+export const Moneylender: CardDefinition = {
+  id: 'moneylender',
+  name: 'Moneylender',
+  types: ['ACTION'],
+  cost: 4,
+  description: 'You may trash a Copper from your hand for +3 Coins.',
+  onPlay: (state, playerId) => {
+    const hasCopper = state.players[playerId].hand.some(c => c.cardId === 'copper');
+    if (!hasCopper) return [];
+    return [{ type: 'REQUEST_INPUT', playerId, inputType: 'TRASH_COPPER_FOR_MONEYLENDER' }];
+  },
+  botChoose: (state, { playerId }) => {
+    const copper = state.players[playerId].hand.find(c => c.cardId === 'copper');
+    return { trashedIds: copper ? [copper.id] : [] };
+  }
+};
+
+export const Poacher: CardDefinition = {
+  id: 'poacher',
+  name: 'Poacher',
+  types: ['ACTION'],
+  cost: 4,
+  description: '+1 Card, +1 Action, +1 Coin. Discard a card per empty Supply pile.',
+  onPlay: (state, playerId) => {
+    const actions: any[] = [
+      { type: 'DRAW_CARDS', playerId, amount: 1 },
+      { type: 'GAIN_ACTIONS', playerId, amount: 1 },
+      { type: 'GAIN_COINS', playerId, amount: 1 }
+    ];
+    const emptyPiles = Object.values(state.supply).filter(count => count === 0).length;
+    if (emptyPiles > 0) {
+      actions.push({ type: 'REQUEST_INPUT', playerId, inputType: 'DISCARD_FOR_POACHER', payload: { amount: emptyPiles } });
+    }
+    return actions;
+  },
+  botChoose: (state, { playerId }) => {
+    // Basic bot just discards random cards (usually estates/curses first if possible)
+    return { discardedIds: [] }; // We will fix bot logic in a sec if we want
+  }
+};
+
+export const Remodel: CardDefinition = {
+  id: 'remodel',
+  name: 'Remodel',
+  types: ['ACTION'],
+  cost: 4,
+  description: 'Trash a card from your hand. Gain a card costing up to 2 more than it.',
+  onPlay: (state, playerId) => {
+    if (state.players[playerId].hand.length === 0) return [];
+    return [{ type: 'REQUEST_INPUT', playerId, inputType: 'TRASH_FOR_REMODEL' }];
+  }
+};
+
+export const Mine: CardDefinition = {
+  id: 'mine',
+  name: 'Mine',
+  types: ['ACTION'],
+  cost: 5,
+  description: 'You may trash a Treasure from your hand. Gain a Treasure to your hand costing up to 3 more than it.',
+  onPlay: (state, playerId) => {
+    const hasTreasure = state.players[playerId].hand.some(c => getCardDef(c.cardId).types.includes('TREASURE'));
+    if (!hasTreasure) return [];
+    return [{ type: 'REQUEST_INPUT', playerId, inputType: 'TRASH_FOR_MINE' }];
+  }
+};

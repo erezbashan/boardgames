@@ -67,6 +67,18 @@ function processPendingActions(state: DominionState) {
       case 'LOG':
         state.logs.push((pending as any).message);
         break;
+      case 'FORCE_GAIN_CARD': {
+        const { cardId, destination } = pending as any;
+        if (state.supply[cardId] > 0) {
+          state.supply[cardId]--;
+          const inst = { id: generateInstanceId(cardId), cardId };
+          if (destination === 'hand') player.hand.push(inst);
+          else if (destination === 'deck') player.deck.push(inst);
+          else player.discard.push(inst);
+          state.logs.push(`${player.name} gains [${getCardDef(cardId).name}].`);
+        }
+        break;
+      }
     }
   }
 }
@@ -131,6 +143,12 @@ export function dominionReducer
       const player = nextState.players[action.playerId];
       if (!player) break;
       const treasures = player.hand.filter((c: any) => getCardDef(c.cardId).types.includes('TREASURE'));
+      treasures.sort((a: any, b: any) => {
+         const defA = getCardDef(a.cardId);
+         const defB = getCardDef(b.cardId);
+         if (defA.cost !== defB.cost) return defB.cost - defA.cost;
+         return a.cardId.localeCompare(b.cardId);
+      });
       if (treasures.length > 0) {
         const t = treasures[0]; // just one!
         player.hand = player.hand.filter((c: any) => c.id !== t.id);
@@ -140,22 +158,14 @@ export function dominionReducer
         if (def.name === 'Silver') player.coins += 2;
         if (def.name === 'Gold') player.coins += 3;
         
-                const lastLog = nextState.logs[nextState.logs.length - 1] || "";
-        const match = lastLog.match(new RegExp(`^${player.name} plays (?:(\\\\d+) )?\\[${def.name}\\]\\.?$`));
-        if (match) {
-           const count = match[1] ? parseInt(match[1]) + 1 : 2;
-           nextState.logs[nextState.logs.length - 1] = `${player.name} plays ${count} [${def.name}].`;
-        } else {
-                   const lastLog = nextState.logs[nextState.logs.length - 1] || "";
-        const match = lastLog.match(new RegExp(`^${player.name} plays (?:(\\\\d+) )?\\[${def.name}\\]\\.?$`));
+        const lastLog = nextState.logs[nextState.logs.length - 1] || "";
+        const match = lastLog.match(new RegExp(`^${player.name} plays (?:(\\d+) )?\\[${def.name}\\]\\.?$`));
         if (match) {
            const count = match[1] ? parseInt(match[1]) + 1 : 2;
            nextState.logs[nextState.logs.length - 1] = `${player.name} plays ${count} [${def.name}].`;
         } else {
            nextState.logs.push(`${player.name} plays [${def.name}].`);
         }
-        }
-
         if (treasures.length > 1) {
            nextState.actionQueue = nextState.actionQueue || [];
            nextState.actionQueue.push({ delayMs: 250, action: { type: 'AUTO_PLAY_TREASURES', playerId: action.playerId }});
@@ -494,11 +504,81 @@ export function dominionReducer
             const maxCost = req.payload?.maxCost || 99;
             if (def.cost <= maxCost) {
               nextState.supply[cardId]--;
-              player.discard.push({ id: generateInstanceId(cardId), cardId });
+              const inst = { id: generateInstanceId(cardId), cardId };
+              if (req.payload?.destination === 'hand') player.hand.push(inst);
+              else if (req.payload?.destination === 'deck') player.deck.push(inst);
+              else player.discard.push(inst);
               nextState.logs.push(`${player.name} gains [${def.name}].`);
             }
           }
           nextState.pendingActions.shift();
+        }
+
+        if (req.inputType === 'TRASH_COPPER_FOR_MONEYLENDER') {
+          const trashedIds: string[] = action.payload.trashedIds || [];
+          const player = nextState.players[action.playerId];
+          if (trashedIds.length === 1) {
+            const cardIndex = player.hand.findIndex(c => c.id === trashedIds[0] && c.cardId === 'copper');
+            if (cardIndex >= 0) {
+              const card = player.hand[cardIndex];
+              player.hand.splice(cardIndex, 1);
+              nextState.trash.push(card);
+              player.coins += 3;
+              nextState.logs.push(`${player.name} trashes a Copper for +3 Coins.`);
+            }
+          }
+          nextState.pendingActions.shift();
+        }
+
+        if (req.inputType === 'DISCARD_FOR_POACHER') {
+          const discardedIds: string[] = action.payload.discardedIds || [];
+          const player = nextState.players[action.playerId];
+          const toDiscard = Math.min(discardedIds.length, req.payload?.amount || 0);
+          for (let i = 0; i < toDiscard; i++) {
+             const idx = player.hand.findIndex(c => c.id === discardedIds[i]);
+             if (idx >= 0) {
+               player.discard.push(player.hand[idx]);
+               player.hand.splice(idx, 1);
+             }
+          }
+          nextState.logs.push(`${player.name} discards ${toDiscard} cards for Poacher.`);
+          nextState.pendingActions.shift();
+        }
+
+        if (req.inputType === 'TRASH_FOR_REMODEL') {
+          const trashedIds: string[] = action.payload.trashedIds || [];
+          const player = nextState.players[action.playerId];
+          nextState.pendingActions.shift();
+          
+          if (trashedIds.length === 1) {
+            const idx = player.hand.findIndex(c => c.id === trashedIds[0]);
+            if (idx >= 0) {
+              const card = player.hand[idx];
+              player.hand.splice(idx, 1);
+              nextState.trash.push(card);
+              const maxCost = getCardDef(card.cardId).cost + 2;
+              nextState.logs.push(`${player.name} trashes [${getCardDef(card.cardId).name}].`);
+              nextState.pendingActions.unshift({ type: 'REQUEST_INPUT', playerId: action.playerId, inputType: 'GAIN_CARD', payload: { maxCost } });
+            }
+          }
+        }
+
+        if (req.inputType === 'TRASH_FOR_MINE') {
+          const trashedIds: string[] = action.payload.trashedIds || [];
+          const player = nextState.players[action.playerId];
+          nextState.pendingActions.shift();
+          
+          if (trashedIds.length === 1) {
+            const idx = player.hand.findIndex(c => c.id === trashedIds[0] && getCardDef(c.cardId).types.includes('TREASURE'));
+            if (idx >= 0) {
+              const card = player.hand[idx];
+              player.hand.splice(idx, 1);
+              nextState.trash.push(card);
+              const maxCost = getCardDef(card.cardId).cost + 3;
+              nextState.logs.push(`${player.name} trashes [${getCardDef(card.cardId).name}].`);
+              nextState.pendingActions.unshift({ type: 'REQUEST_INPUT', playerId: action.playerId, inputType: 'GAIN_CARD', payload: { maxCost, destination: 'hand', treasureOnly: true } });
+            }
+          }
         }
       }
       break;

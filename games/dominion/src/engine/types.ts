@@ -27,7 +27,8 @@ export type PendingAction =
   | { type: 'GAIN_COINS'; playerId: string; amount: number }
   | { type: 'SHUFFLE_DISCARD'; playerId: string }
   | { type: 'REQUEST_INPUT'; playerId: string; inputType: string; payload?: any }
-  | { type: 'LOG'; playerId: string; message: string };
+  | { type: 'LOG'; playerId: string; message: string }
+  | { type: 'FORCE_GAIN_CARD'; playerId: string; cardId: string; destination?: 'discard' | 'hand' | 'deck' };
 
 export interface HistorySnapshot {
   turnNum: number;
@@ -41,7 +42,8 @@ export interface DominionSettings {
 
 export const ALL_KINGDOM_CARDS = [
   'village', 'smithy', 'militia', 'cellar', 'market', 'festival',
-  'laboratory', 'council_room', 'moat', 'workshop', 'throne_room', 'chapel'
+  'laboratory', 'council_room', 'moat', 'workshop', 'throne_room', 'chapel',
+  'witch', 'moneylender', 'poacher', 'remodel', 'mine'
 ];
 
 export interface DominionState extends BaseGameState<PlayerState> {
