@@ -130,6 +130,10 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
 
     if (inputType === 'TRASH_COPPER_FOR_MONEYLENDER' && card.cardId !== 'copper') return;
     if (inputType === 'TRASH_FOR_MINE' && !getCardDef(card.cardId).types.includes('TREASURE')) return;
+    if ((req as any).payload?.filterTypes) {
+      const allowed = (req as any).payload.filterTypes as string[];
+      if (!getCardDef(card.cardId).types.some(t => allowed.includes(t))) return;
+    }
 
     setSelectedCards(prev => {
       if (prev.includes(instanceId)) return prev.filter(id => id !== instanceId);
@@ -138,6 +142,7 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
         inputType === 'TRASH_FOR_CHAPEL' ? 4 :
         inputType === 'TRASH_FOR_REMODEL' ? 1 :
         inputType === 'TRASH_FOR_MINE' ? 1 :
+        inputType === 'HAND_TO_DECK' ? 1 :
         inputType === 'TRASH_COPPER_FOR_MONEYLENDER' ? 1 :
         (inputType === 'DISCARD_FOR_POACHER' || inputType === 'DISCARD_FOR_MILITIA') ? (req as any).payload?.amount || 0 :
         99;
@@ -588,6 +593,10 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
               ? `Select a card to trash to gain a card costing up to $2 more.`
               : inputType === 'TRASH_FOR_MINE'
               ? `Select a Treasure to trash to gain a Treasure costing up to $3 more.`
+              : inputType === 'HAND_TO_DECK'
+              ? `Select a card from your hand to put on top of your deck.`
+              : inputType === 'PLAY_VASSAL_ACTION'
+              ? `Do you want to play [${getCardDef(req.payload?.cardId).name}]?`
               : 'Waiting for input...';
               
             const needsConfirm = ['DISCARD_FOR_CELLAR', 'TRASH_FOR_CHAPEL', 'TRASH_COPPER_FOR_MONEYLENDER', 'DISCARD_FOR_POACHER', 'DISCARD_FOR_MILITIA', 'TRASH_FOR_REMODEL', 'TRASH_FOR_MINE'].includes(inputType || '');
@@ -597,6 +606,12 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
                 <strong style={{ fontSize: '18px' }}>⚠️ Action Required: </strong> {msg}
                 {needsConfirm && (
                   <button onClick={handleResolveInput} style={{ marginLeft: '15px', padding: '6px 16px', background: 'white', color: '#7f1d1d', fontWeight: 'bold', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Confirm Selection</button>
+                )}
+                {inputType === 'PLAY_VASSAL_ACTION' && (
+                  <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                    <button onClick={() => dispatch({ type: 'RESOLVE_INPUT', playerId: myPlayerId, payload: { playCard: true } })} style={{ padding: '6px 16px', background: '#34d399', color: 'black', fontWeight: 'bold', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Yes, Play It</button>
+                    <button onClick={() => dispatch({ type: 'RESOLVE_INPUT', playerId: myPlayerId, payload: { playCard: false } })} style={{ padding: '6px 16px', background: '#94a3b8', color: 'black', fontWeight: 'bold', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>No, Discard It</button>
+                  </div>
                 )}
               </div>
             );
@@ -640,11 +655,11 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
           Rules Override:
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(0,0,0,0.2)', padding: '10px', borderRadius: '8px', marginBottom: '16px' }}>
-          <label style={{ fontSize: '13px', color: '#cbd5e1' }}>Provinces Count:</label>
+          <label style={{ fontSize: '13px', color: '#cbd5e1' }}>Victory Cards Count (Estates, Duchies, Provinces, Gardens):</label>
           <select 
             disabled={!isLobby}
-            value={gameState.settings?.provincesOverride || 0}
-            onChange={(e) => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...(gameState.settings || {}), provincesOverride: Number(e.target.value) || undefined } })}
+            value={gameState.settings?.victoryCardsOverride || 0}
+            onChange={(e) => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...(gameState.settings || {}), victoryCardsOverride: Number(e.target.value) || undefined } })}
             style={{ background: '#1e293b', color: 'white', border: '1px solid #475569', borderRadius: '4px', padding: '4px', cursor: isLobby ? 'pointer' : 'not-allowed' }}
           >
             <option value={0}>According to Game Rules</option>

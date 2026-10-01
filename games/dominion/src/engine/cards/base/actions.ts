@@ -321,3 +321,107 @@ export const Mine: CardDefinition = {
     return [{ type: 'REQUEST_INPUT', playerId, inputType: 'TRASH_FOR_MINE' }];
   }
 };
+
+export const Merchant: CardDefinition = {
+  id: 'merchant',
+  name: 'Merchant',
+  types: ['ACTION'],
+  cost: 3,
+  description: '+1 Card, +1 Action. The first time you play a Silver this turn, +1 Coin.',
+  onPlay: (state, playerId) => [
+    { type: 'DRAW_CARDS', playerId, amount: 1 },
+    { type: 'GAIN_ACTIONS', playerId, amount: 1 },
+    { type: 'PLAY_MERCHANT', playerId }
+  ]
+};
+
+export const Artisan: CardDefinition = {
+  id: 'artisan',
+  name: 'Artisan',
+  types: ['ACTION'],
+  cost: 6,
+  description: 'Gain a card to your hand costing up to $5. Put a card from your hand onto your deck.',
+  onPlay: (state, playerId) => [
+    { type: 'REQUEST_INPUT', playerId, inputType: 'GAIN_CARD', payload: { maxCost: 5, destination: 'hand' } },
+    { type: 'REQUEST_INPUT', playerId, inputType: 'HAND_TO_DECK' }
+  ],
+  botChoose: (state, options) => {
+    // Basic bot just picks a copper or estate to put on deck
+    const hand = state.players[options.playerId].hand;
+    const junk = hand.find(c => c.cardId === 'estate' || c.cardId === 'copper') || hand[0];
+    return { cardId: junk ? junk.id : '' };
+  }
+};
+
+export const Bandit: CardDefinition = {
+  id: 'bandit',
+  name: 'Bandit',
+  types: ['ACTION', 'ATTACK'],
+  cost: 5,
+  description: 'Gain a Gold. Each other player reveals the top 2 cards of their deck, trashes a revealed Treasure other than Copper, and discards the rest.',
+  onPlay: (state, playerId) => {
+    const actions: any[] = [{ type: 'FORCE_GAIN_CARD', playerId, cardId: 'gold' }];
+    for (const pId in state.players) {
+      if (pId !== playerId) {
+        const hasMoat = state.players[pId].hand.some(c => c.cardId === 'moat');
+        if (hasMoat) {
+          const moat = state.players[pId].hand.find(c => c.cardId === 'moat');
+          actions.push({ type: 'REVEAL_CARD', playerId: pId, instanceId: moat!.id, message: `🛡️ [Moat] ${state.players[pId].name} reveals a Moat and is unaffected by the attack.` });
+        } else {
+          actions.push({ type: 'BANDIT_ATTACK', playerId: pId });
+        }
+      }
+    }
+    return actions;
+  }
+};
+
+export const Bureaucrat: CardDefinition = {
+  id: 'bureaucrat',
+  name: 'Bureaucrat',
+  types: ['ACTION', 'ATTACK'],
+  cost: 4,
+  description: 'Gain a Silver onto your deck. Each other player reveals a Victory card from their hand and puts it onto their deck (or reveals a hand with no Victory cards).',
+  onPlay: (state, playerId) => {
+    const actions: any[] = [{ type: 'FORCE_GAIN_CARD', playerId, cardId: 'silver', destination: 'deck' }];
+    for (const pId in state.players) {
+      if (pId !== playerId) {
+        const hasMoat = state.players[pId].hand.some(c => c.cardId === 'moat');
+        if (hasMoat) {
+          const moat = state.players[pId].hand.find(c => c.cardId === 'moat');
+          actions.push({ type: 'REVEAL_CARD', playerId: pId, instanceId: moat!.id, message: `🛡️ [Moat] ${state.players[pId].name} reveals a Moat and is unaffected by the attack.` });
+        } else {
+          const vCards = state.players[pId].hand.filter(c => getCardDef(c.cardId).types.includes('VICTORY'));
+          if (vCards.length === 0) {
+            actions.push({ type: 'REVEAL_HAND', playerId: pId });
+          } else if (vCards.length === 1) {
+            // Auto put it on deck
+            actions.push({ type: 'REQUEST_INPUT', playerId: pId, inputType: 'HAND_TO_DECK', payload: { cardId: vCards[0].id } });
+          } else {
+            // Need user input
+            actions.push({ type: 'REQUEST_INPUT', playerId: pId, inputType: 'HAND_TO_DECK', payload: { filterTypes: ['VICTORY'] } });
+          }
+        }
+      }
+    }
+    return actions;
+  },
+  botChoose: (state, options) => {
+    const vCards = state.players[options.playerId].hand.filter(c => getCardDef(c.cardId).types.includes('VICTORY'));
+    if (vCards.length > 0) return { cardId: vCards[0].id };
+    return { cardId: '' };
+  }
+};
+
+export const Vassal: CardDefinition = {
+  id: 'vassal',
+  name: 'Vassal',
+  types: ['ACTION'],
+  cost: 3,
+  description: '+2 Coins. Discard the top card of your deck. If it is an Action card, you may play it.',
+  onPlay: (state, playerId) => [
+    { type: 'GAIN_COINS', playerId, amount: 2 },
+    { type: 'VASSAL_EFFECT', playerId }
+  ],
+  botChoose: () => ({ playCard: true })
+};

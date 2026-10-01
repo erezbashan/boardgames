@@ -90,6 +90,91 @@ function processPendingActions(state: DominionState) {
         }
         break;
       }
+      case 'REVEAL_HAND': {
+        if (player.hand.length === 0) {
+          state.logs.push(`${player.name} reveals an empty hand.`);
+        } else {
+          const names = player.hand.map(c => `[${getCardDef(c.cardId).name}]`).join(', ');
+          state.logs.push(`${player.name} reveals their hand: ${names}`);
+          // Pulse all cards to show they were revealed
+          player.hand.forEach(c => c._revealed = true);
+        }
+        break;
+      }
+      case 'BANDIT_ATTACK': {
+        // Opponent reveals top 2 cards of deck (shuffling if needed), trashes highest cost treasure (non-copper), discards rest.
+        let revealedCards = [];
+        for (let i = 0; i < 2; i++) {
+          if (player.deck.length === 0 && player.discard.length > 0) {
+            player.deck = shuffle([...player.discard]);
+            player.discard = [];
+            state.logs.push(`${player.name} shuffles their discard pile.`);
+          }
+          const c = player.deck.pop();
+          if (c) revealedCards.push(c);
+        }
+        
+        if (revealedCards.length > 0) {
+          state.logs.push(`${player.name} reveals ${revealedCards.map(c => `[${getCardDef(c.cardId).name}]`).join(' and ')}.`);
+          
+          // Find treasures other than copper
+          const trasheableTreasures = revealedCards.filter(c => getCardDef(c.cardId).types.includes('TREASURE') && c.cardId !== 'copper');
+          
+          if (trasheableTreasures.length > 0) {
+            trasheableTreasures.sort((a, b) => getCardDef(b.cardId).cost - getCardDef(a.cardId).cost);
+            const toTrash = trasheableTreasures[0];
+            state.trash.push(toTrash);
+            state.logs.push(`${player.name} trashes [${getCardDef(toTrash.cardId).name}].`);
+            
+            // Discard the rest
+            revealedCards.forEach(c => {
+              if (c.id !== toTrash.id) player.discard.push(c);
+            });
+          } else {
+            // Discard all
+            player.discard.push(...revealedCards);
+            state.logs.push(`${player.name} discards them.`);
+          }
+        }
+        break;
+      }
+      case 'PLAY_MERCHANT': {
+        player.merchantPlays = (player.merchantPlays || 0) + 1;
+        break;
+      }
+      case 'CLEAR_MERCHANT': {
+        player.merchantPlays = 0;
+        break;
+      }
+      case 'VASSAL_EFFECT': {
+        if (player.deck.length === 0 && player.discard.length > 0) {
+          player.deck = shuffle([...player.discard]);
+          player.discard = [];
+          state.logs.push(`${player.name} shuffles their discard pile.`);
+        }
+        const card = player.deck.pop();
+        if (card) {
+          player.discard.push(card);
+          state.logs.push(`${player.name} discards [${getCardDef(card.cardId).name}].`);
+          if (getCardDef(card.cardId).types.includes('ACTION')) {
+            if (player.isBot) {
+               // Bot always plays it
+               const def = getCardDef(card.cardId);
+               player.playArea.push(player.discard.pop()!);
+               state.logs.push(`${player.name} plays [${def.name}] via Vassal.`);
+               if (def.onPlay) {
+                 state.pendingActions.unshift(...def.onPlay(state, player.id));
+               }
+            } else {
+               // Request user input
+               state.pendingActions.unshift({ type: 'REQUEST_INPUT', playerId: player.id, inputType: 'PLAY_VASSAL_ACTION', payload: { instanceId: card.id, cardId: card.cardId } });
+            }
+          }
+        } else {
+          state.logs.push(`${player.name} has no cards to discard.`);
+        }
+        break;
+      }
     }
   }
 }
@@ -243,8 +328,7 @@ export function dominionReducer
     case 'START_GAME': {
       const numPlayers = nextState.playerOrder.length;
       // Per Dominion rules: 2p=8 provinces/duchies/estates, 3-4p=12
-      const baseVictoryCount = numPlayers <= 2 ? 8 : 12;
-      const provinceCount = nextState.settings?.provincesOverride || baseVictoryCount;
+      const baseVictoryCount = nextState.settings?.victoryCardsOverride || (numPlayers <= 2 ? 8 : 12);
       
       // Per Dominion rules: 60 copper minus 7 per player (starters), min 0
       const copperCount = Math.max(0, 60 - 7 * numPlayers);
@@ -261,7 +345,7 @@ export function dominionReducer
 
       nextState.supply = {
         copper: copperCount, silver: 40, gold: 30,
-        estate: baseVictoryCount, duchy: baseVictoryCount, province: provinceCount,
+        estate: baseVictoryCount, duchy: baseVictoryCount, province: baseVictoryCount,
         ...kingdomSupply
       };
 
@@ -387,6 +471,7 @@ export function dominionReducer
       player.coins = 0;
       player.actions = 0;
       player.buys = 0;
+      player.merchantPlays = 0;
       
       
 
@@ -550,6 +635,54 @@ export function dominionReducer
             }
           }
           nextState.pendingActions.shift();
+        }
+
+        if (req.inputType === 'HAND_TO_DECK') {
+          const cardId: string = action.payload.cardId;
+          const player = nextState.players[action.playerId];
+          if (cardId) {
+            const idx = player.hand.findIndex(c => c.id === cardId);
+            if (idx >= 0) {
+              const card = player.hand.splice(idx, 1)[0];
+              player.deck.push(card);
+              nextState.logs.push(`${player.name} puts a card from hand onto their deck.`);
+            }
+          }
+          nextState.pendingActions.shift();
+        }
+
+        if (req.inputType === 'DISCARD_TO_DECK') {
+          const cardId: string = action.payload.cardId;
+          const player = nextState.players[action.playerId];
+          if (cardId) {
+            const idx = player.discard.findIndex(c => c.id === cardId);
+            if (idx >= 0) {
+              const card = player.discard.splice(idx, 1)[0];
+              player.deck.push(card);
+              nextState.logs.push(`${player.name} puts a card from their discard pile onto their deck.`);
+            }
+          }
+          nextState.pendingActions.shift();
+        }
+
+        if (req.inputType === 'PLAY_VASSAL_ACTION') {
+          const playCard: boolean = action.payload.playCard;
+          const instanceId: string = req.payload.instanceId;
+          const player = nextState.players[action.playerId];
+          nextState.pendingActions.shift();
+
+          if (playCard) {
+            const idx = player.discard.findIndex(c => c.id === instanceId);
+            if (idx >= 0) {
+               const card = player.discard.splice(idx, 1)[0];
+               const def = getCardDef(card.cardId);
+               player.playArea.push(card);
+               nextState.logs.push(`${player.name} plays [${def.name}] via Vassal.`);
+               if (def.onPlay) {
+                 nextState.pendingActions.unshift(...def.onPlay(nextState, player.id));
+               }
+            }
+          }
         }
 
         if (req.inputType === 'DISCARD_FOR_POACHER' || req.inputType === 'DISCARD_FOR_MILITIA') {

@@ -19,6 +19,7 @@ export interface PlayerState extends BasePlayer {
   buys: number;
   coins: number;
   victoryPoints: number;
+  merchantPlays?: number; // For Merchant card
 }
 
 export type PendingAction = 
@@ -30,7 +31,12 @@ export type PendingAction =
   | { type: 'REQUEST_INPUT'; playerId: string; inputType: string; payload?: any }
   | { type: 'LOG'; playerId: string; message: string }
   | { type: 'REVEAL_CARD'; playerId: string; instanceId: string; message?: string }
-  | { type: 'FORCE_GAIN_CARD'; playerId: string; cardId: string; destination?: 'discard' | 'hand' | 'deck' };
+  | { type: 'FORCE_GAIN_CARD'; playerId: string; cardId: string; destination?: 'discard' | 'hand' | 'deck' }
+  | { type: 'REVEAL_HAND'; playerId: string }
+  | { type: 'BANDIT_ATTACK'; playerId: string }
+  | { type: 'CLEAR_MERCHANT'; playerId: string }
+  | { type: 'PLAY_MERCHANT'; playerId: string }
+  | { type: 'VASSAL_EFFECT'; playerId: string };
 
 export interface HistorySnapshot {
   turnNum: number;
@@ -40,13 +46,14 @@ export interface HistorySnapshot {
 
 export interface DominionSettings {
   kingdomCards: string[]; // Which kingdom cards to include (from the full pool)
-  provincesOverride?: number; // Override default number of provinces
+  victoryCardsOverride?: number; // Override default number of victory cards
 }
 
 export const ALL_KINGDOM_CARDS = [
   'village', 'smithy', 'militia', 'cellar', 'market', 'festival',
   'laboratory', 'council_room', 'moat', 'workshop', 'throne_room', 'chapel',
-  'witch', 'moneylender', 'poacher', 'remodel', 'mine'
+  'witch', 'moneylender', 'poacher', 'remodel', 'mine',
+  'merchant', 'vassal', 'artisan', 'bandit', 'bureaucrat'
 ];
 
 export interface DominionState extends BaseGameState<PlayerState> {
