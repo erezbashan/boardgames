@@ -130,19 +130,32 @@ export function getRandomBotAction(state: DominionState, playerId: string): Play
       });
 
       if (affordable.length > 0) {
-        // Prefer to keep buying if we have coins to spend (don't waste coins on coppers if we can afford something better)
-        // Sort by cost descending — buy the most expensive affordable card
-        const sorted = [...affordable].sort((a, b) => getCardDef(b).cost - getCardDef(a).cost);
+        // Evaluate the priority of cards based on cost, with some heuristics
+        const deckSize = state.players[playerId].deck.length + state.players[playerId].discard.length + state.players[playerId].hand.length + state.players[playerId].playArea.length;
         
-        // But: if we have 0 coins remaining after, and buys > 1, skip to preserve buys
-        const bestCard = sorted[0];
-        const remainingCoins = me.coins - getCardDef(bestCard).cost;
+        const evaluate = (cardId: string) => {
+           let val = getCardDef(cardId).cost;
+           // Avoid Gardens early game (needs 40+ cards to be better than Duchy, 30+ to be okay)
+           if (cardId === 'gardens' && deckSize < 30) val -= 2;
+           // Value Provinces highly
+           if (cardId === 'province') val += 1;
+           return val;
+        };
+
+        const sorted = [...affordable].sort((a, b) => evaluate(b) - evaluate(a));
+        
+        // Find all cards that tie for the best evaluation score
+        const bestEval = evaluate(sorted[0]);
+        const bestCards = sorted.filter(c => evaluate(c) === bestEval);
+        
+        // Pick a random one among the best
+        const bestCard = bestCards[Math.floor(Math.random() * bestCards.length)];
         
         // Don't buy coppers if we can afford something more useful (cost >= 2)
         if (getCardDef(bestCard).cost === 0 && sorted.length > 1) {
-          // Try next best option
-          const secondBest = sorted[1];
-          if (getCardDef(secondBest).cost <= me.coins) {
+          // Try next best option (might just be more 0 cost, but okay)
+          const secondBest = sorted.find(c => getCardDef(c).cost > 0);
+          if (secondBest && getCardDef(secondBest).cost <= me.coins) {
             return { type: 'BUY_CARD', playerId, cardId: secondBest };
           }
         }

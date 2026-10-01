@@ -232,7 +232,9 @@ export function dominionReducer
     case 'START_GAME': {
       const numPlayers = nextState.playerOrder.length;
       // Per Dominion rules: 2p=8 provinces/duchies/estates, 3-4p=12
-      const victoryCount = numPlayers <= 2 ? 8 : 12;
+      const baseVictoryCount = numPlayers <= 2 ? 8 : 12;
+      const provinceCount = nextState.settings?.provincesOverride || baseVictoryCount;
+      
       // Per Dominion rules: 60 copper minus 7 per player (starters), min 0
       const copperCount = Math.max(0, 60 - 7 * numPlayers);
       // Build kingdom supply from settings (or defaults)
@@ -241,14 +243,21 @@ export function dominionReducer
         : ALL_KINGDOM_CARDS.slice(0, 10);
 
       const kingdomSupply: Record<string, number> = {};
-      kingdomCards.forEach(id => { kingdomSupply[id] = 10; });
+      kingdomCards.forEach(id => {
+         const def = getCardDef(id);
+         kingdomSupply[id] = def.types.includes('VICTORY') ? baseVictoryCount : 10;
+      });
 
       nextState.supply = {
         copper: copperCount, silver: 40, gold: 30,
-        estate: victoryCount, duchy: victoryCount, province: victoryCount,
-        gardens: victoryCount,
+        estate: baseVictoryCount, duchy: baseVictoryCount, province: provinceCount,
         ...kingdomSupply
       };
+
+      // Only add curse if there is a card that interacts with it (Witch)
+      if (kingdomCards.includes('witch')) {
+        nextState.supply.curse = numPlayers <= 2 ? 10 : (numPlayers - 1) * 10;
+      }
       nextState.history = [];
       
       Object.values(nextState.players).forEach(p => {

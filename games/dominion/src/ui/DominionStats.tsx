@@ -115,6 +115,52 @@ export const DominionStats: React.FC<DominionStatsProps> = ({ gameState }) => {
           Play a few turns to see VP progression!
         </p>
       )}
+
+      {/* Deck Composition Table */}
+      <div>
+        <h3 style={{ textAlign: 'center', marginBottom: '15px' }}>Deck Composition</h3>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'center', background: 'rgba(0,0,0,0.2)', borderRadius: '8px', overflow: 'hidden', fontSize: '14px' }}>
+            <thead>
+              <tr style={{ background: 'rgba(255,255,255,0.1)' }}>
+                <th style={{ padding: '8px', textAlign: 'left' }}>Player</th>
+                {Array.from(new Set(
+                  playerOrder.flatMap(id => {
+                    const p = players[id];
+                    return [...p.deck, ...p.hand, ...p.discard, ...p.playArea].map(c => c.cardId);
+                  })
+                )).sort((a,b) => getCardDef(b).cost - getCardDef(a).cost || a.localeCompare(b)).map(cardId => (
+                  <th key={cardId} style={{ padding: '8px' }}>{getCardDef(cardId).name}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {tableData.map((row) => {
+                const p = players[row.id];
+                const allCards = [...p.deck, ...p.hand, ...p.discard, ...p.playArea];
+                const counts: Record<string, number> = {};
+                allCards.forEach(c => { counts[c.cardId] = (counts[c.cardId] || 0) + 1; });
+                
+                return (
+                  <tr key={row.id} style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                    <td style={{ padding: '8px', textAlign: 'left', fontWeight: 'bold', color: row.color || 'white' }}>{row.name}</td>
+                    {Array.from(new Set(
+                      playerOrder.flatMap(pid => {
+                        const pp = players[pid];
+                        return [...pp.deck, ...pp.hand, ...pp.discard, ...pp.playArea].map(c => c.cardId);
+                      })
+                    )).sort((a,b) => getCardDef(b).cost - getCardDef(a).cost || a.localeCompare(b)).map(cardId => (
+                      <td key={cardId} style={{ padding: '8px', color: counts[cardId] ? 'white' : 'rgba(255,255,255,0.2)' }}>
+                        {counts[cardId] || '-'}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 };

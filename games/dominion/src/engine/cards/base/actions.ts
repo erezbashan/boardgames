@@ -35,12 +35,17 @@ export const Militia: CardDefinition = {
     // Each other player discards down to 3 cards
     for (const pId in state.players) {
       if (pId !== playerId && state.players[pId].hand.length > 3) {
-        actions.push({
-          type: 'REQUEST_INPUT',
-          playerId: pId,
-          inputType: 'DISCARD_FOR_MILITIA',
-          payload: { amount: state.players[pId].hand.length - 3 }
-        });
+        const hasMoat = state.players[pId].hand.some(c => c.cardId === 'moat');
+        if (hasMoat) {
+          actions.push({ type: 'LOG', playerId: pId, message: `🛡️ [Moat] ${state.players[pId].name} reveals a Moat and is unaffected by the attack.` });
+        } else {
+          actions.push({
+            type: 'REQUEST_INPUT',
+            playerId: pId,
+            inputType: 'DISCARD_FOR_MILITIA',
+            payload: { amount: state.players[pId].hand.length - 3 }
+          });
+        }
       }
     }
     return actions;
@@ -239,7 +244,12 @@ export const Witch: CardDefinition = {
     const actions: any[] = [{ type: 'DRAW_CARDS', playerId, amount: 2 }];
     for (const pId in state.players) {
       if (pId !== playerId) {
-        actions.push({ type: 'FORCE_GAIN_CARD', playerId: pId, cardId: 'curse' });
+        const hasMoat = state.players[pId].hand.some(c => c.cardId === 'moat');
+        if (hasMoat) {
+          actions.push({ type: 'LOG', playerId: pId, message: `🛡️ [Moat] ${state.players[pId].name} reveals a Moat and is unaffected by the attack.` });
+        } else {
+          actions.push({ type: 'FORCE_GAIN_CARD', playerId: pId, cardId: 'curse' });
+        }
       }
     }
     return actions;

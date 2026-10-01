@@ -38,6 +38,7 @@ export interface HistorySnapshot {
 
 export interface DominionSettings {
   kingdomCards: string[]; // Which kingdom cards to include (from the full pool)
+  provincesOverride?: number; // Override default number of provinces
 }
 
 export const ALL_KINGDOM_CARDS = [

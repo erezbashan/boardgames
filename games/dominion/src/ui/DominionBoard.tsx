@@ -414,9 +414,9 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
     const potentialPower = me.coins + handTreasuresValue;
 
     const supplyEntries = Object.entries(gameState.supply).map(([id, count]) => ({ id, count, def: getCardDef(id) }));
-    const victorySupply = supplyEntries.filter(s => s.def.types.includes('VICTORY')).sort((a,b) => b.def.cost - a.def.cost);
-    const treasureSupply = supplyEntries.filter(s => s.def.types.includes('TREASURE')).sort((a,b) => b.def.cost - a.def.cost);
-    const kingdomSupply = supplyEntries.filter(s => !s.def.types.includes('VICTORY') && !s.def.types.includes('TREASURE')).sort((a,b) => b.def.cost - a.def.cost);
+    const victorySupply = supplyEntries.filter(s => s.def.types.includes('VICTORY') && !ALL_KINGDOM_CARDS.includes(s.id)).sort((a,b) => b.def.cost - a.def.cost);
+    const treasureSupply = supplyEntries.filter(s => s.def.types.includes('TREASURE') && !ALL_KINGDOM_CARDS.includes(s.id)).sort((a,b) => b.def.cost - a.def.cost);
+    const kingdomSupply = supplyEntries.filter(s => ALL_KINGDOM_CARDS.includes(s.id)).sort((a,b) => b.def.cost - a.def.cost);
 
     const renderMarketCard = (id: string, count: number, def: CardDefinition) => {
       let disabled = true;
@@ -647,7 +647,7 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
           >None</button>
         </div>
         <div style={{ background: 'rgba(0,0,0,0.2)', padding: '10px', borderRadius: '8px', maxHeight: '280px', overflowY: 'auto' }}>
-          {ALL_KINGDOM_CARDS.map(cardId => {
+          {[...ALL_KINGDOM_CARDS].sort((a, b) => getCardDef(a).name.localeCompare(getCardDef(b).name)).map(cardId => {
             const def = getCardDef(cardId);
             const isActive = currentKingdom.includes(cardId);
             return (
@@ -666,7 +666,28 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
             );
           })}
         </div>
-        {!isLobby && <p style={{ color: 'gray', fontSize: '12px', marginTop: '8px' }}>Settings can only be changed in the Lobby.</p>}
+        
+        <div style={{ marginTop: '16px', marginBottom: '8px', color: '#94a3b8', fontSize: '13px' }}>
+          Rules Override:
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(0,0,0,0.2)', padding: '10px', borderRadius: '8px' }}>
+          <label style={{ fontSize: '13px', color: '#cbd5e1' }}>Provinces Count:</label>
+          <select 
+            disabled={!isLobby}
+            value={gameState.settings?.provincesOverride || 0}
+            onChange={(e) => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...(gameState.settings || {}), provincesOverride: Number(e.target.value) || undefined } })}
+            style={{ background: '#1e293b', color: 'white', border: '1px solid #475569', borderRadius: '4px', padding: '4px', cursor: isLobby ? 'pointer' : 'not-allowed' }}
+          >
+            <option value={0}>According to Game Rules</option>
+            <option value={4}>4 (Short Game)</option>
+            <option value={8}>8 (2 Players)</option>
+            <option value={12}>12 (3-4 Players)</option>
+            <option value={16}>16 (Long Game)</option>
+            <option value={20}>20 (Marathon)</option>
+          </select>
+        </div>
+
+        {!isLobby && <p style={{ color: 'gray', fontSize: '12px', marginTop: '12px' }}>Settings can only be changed in the Lobby.</p>}
       </div>
     );
   };
