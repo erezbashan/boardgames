@@ -204,10 +204,10 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
                   p.hand.slice(0, 7).map((card, i) => {
                     if (card._revealed) {
                       return (
-                        <div key={i} style={{ width: '20px', height: '30px', backgroundImage: `url(${CARD_IMAGES[card.cardId]})`, backgroundSize: 'cover', border: '1px solid #fbbf24', borderRadius: '2px', zIndex: i, marginLeft: i > 0 ? '-10px' : '0' }} title="Revealed Moat" />
+                        <div key={i} style={{ width: '30px', height: '42px', backgroundImage: `url(${CARD_IMAGES[card.cardId]})`, backgroundSize: 'cover', border: '1px solid #fbbf24', borderRadius: '3px', zIndex: i, marginLeft: i > 0 ? '-20px' : '0', boxShadow: '0 0 5px rgba(251,191,36,0.5)' }} title="Revealed Moat" />
                       );
                     }
-                    return <div key={i} style={{ width: '12px', height: '18px', background: '#1e3a5f', border: '1px solid #475569', borderRadius: '2px', marginLeft: i > 0 ? '-6px' : '0' }} />;
+                    return <div key={i} style={{ width: '30px', height: '42px', background: '#1e3a5f', border: '1px solid #475569', borderRadius: '3px', marginLeft: i > 0 ? '-20px' : '0', zIndex: i, boxShadow: '-2px 0 5px rgba(0,0,0,0.3)' }} />;
                   })
                 ) : (
                   <div style={{ width: '30px', height: '42px', border: '1px solid #475569', borderRadius: '3px', background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569' }}>0</div>
