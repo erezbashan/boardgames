@@ -441,8 +441,9 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
       const imageUrl = CARD_IMAGES[id];
 
       return (
-        <div 
-          key={id} 
+        <motion.div 
+          layoutId={`market-${id}`}
+          key={id}  
           style={{ 
             position: 'relative', 
             width: '80px', 
@@ -488,7 +489,7 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
               {count}
             </div>
           </div>
-        </div>
+        </motion.div>
       );
     };
 
@@ -501,6 +502,36 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
 
     return (
       <div style={{ display: 'flex', gap: '20px', padding: '20px', height: '100%', boxSizing: 'border-box' }}>
+        
+        {/* Startup Kingdom Reveal Animation */}
+        <AnimatePresence>
+          {gameState.revealedCard && (
+            <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.6)' }}>
+              <motion.div 
+                layoutId={`market-${gameState.revealedCard}`}
+                initial={{ opacity: 0, scale: 0.5, y: 100 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 1, scale: 0.5 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                style={{ 
+                   width: '240px', height: '345px', 
+                   backgroundImage: CARD_IMAGES[gameState.revealedCard] ? `url(${CARD_IMAGES[gameState.revealedCard]})` : 'none', 
+                   backgroundSize: 'cover', backgroundPosition: 'center', 
+                   borderRadius: '12px', border: '4px solid #fbbf24', 
+                   boxShadow: '0 0 40px rgba(251,191,36,0.6)', 
+                   display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '10px' 
+                }}
+              >
+                {!CARD_IMAGES[gameState.revealedCard] && (
+                  <div style={{ background: 'rgba(0,0,0,0.8)', color: 'white', padding: '10px', borderRadius: '8px', textAlign: 'center', fontSize: '24px', fontWeight: 'bold', marginTop: 'auto', marginBottom: 'auto' }}>
+                    {getCardDef(gameState.revealedCard).name}
+                  </div>
+                )}
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
         {/* Hover Popup - Renders Full Card Image */}
         {hoveredCardDef && popupPos && (
           <>

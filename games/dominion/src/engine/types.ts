@@ -63,4 +63,5 @@ export interface DominionState extends BaseGameState<PlayerState> {
   pendingActions: PendingAction[];
   history: HistorySnapshot[];
   settings?: DominionSettings;
+  revealedCard?: string;
 }

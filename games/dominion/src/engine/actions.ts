@@ -11,6 +11,8 @@ export type PlayerAction =
   | { type: 'AUTO_PLAY_TREASURES'; playerId: string }
   | { type: 'DRAW_CARDS_ASYNC'; playerId: string; amount: number; onComplete?: PlayerAction }
   | { type: 'CLEANUP_PHASE'; playerId: string }
-  | { type: 'START_TURN'; playerId: string };
+  | { type: 'START_TURN'; playerId: string }
+  | { type: 'SHOW_KINGDOM_CARD'; cardId: string; onComplete?: PlayerAction }
+  | { type: 'ADD_KINGDOM_CARD'; cardId: string; amount: number; onComplete?: PlayerAction };
 
 export type DominionAction = PlayerAction | BaseAction;

@@ -309,6 +309,24 @@ export function dominionReducer
       }
       break;
     }
+    case 'SHOW_KINGDOM_CARD': {
+      nextState.revealedCard = action.cardId;
+      if (action.onComplete) {
+        nextState.actionQueue = nextState.actionQueue || [];
+        nextState.actionQueue.push({ delayMs: 600, action: action.onComplete });
+      }
+      break;
+    }
+    case 'ADD_KINGDOM_CARD': {
+      delete nextState.revealedCard;
+      nextState.supply[action.cardId] = action.amount;
+      nextState.logs.push(`Kingdom card selected: [${getCardDef(action.cardId).name}]`);
+      if (action.onComplete) {
+        nextState.actionQueue = nextState.actionQueue || [];
+        nextState.actionQueue.push({ delayMs: 200, action: action.onComplete });
+      }
+      break;
+    }
     case 'PLAY_BOT': {
       if (nextState.status !== 'Playing') break;
       let targetPlayerId = nextState.playerOrder[nextState.currentPlayerIndex];
@@ -332,27 +350,25 @@ export function dominionReducer
       
       // Per Dominion rules: 60 copper minus 7 per player (starters), min 0
       const copperCount = Math.max(0, 60 - 7 * numPlayers);
+      
       // Build kingdom supply from settings (or defaults)
-      const kingdomCards = nextState.settings?.kingdomCards?.length
+      const allowedPool = nextState.settings?.kingdomCards?.length
         ? nextState.settings.kingdomCards
-        : ALL_KINGDOM_CARDS.slice(0, 10);
+        : ALL_KINGDOM_CARDS;
+      // Pick 10 randomly
+      const kingdomCards = shuffle([...allowedPool]).slice(0, 10);
 
-      const kingdomSupply: Record<string, number> = {};
-      kingdomCards.forEach(id => {
-         const def = getCardDef(id);
-         kingdomSupply[id] = def.types.includes('VICTORY') ? baseVictoryCount : 10;
-      });
-
+      // Add base cards to supply immediately
       nextState.supply = {
         copper: copperCount, silver: 40, gold: 30,
         estate: baseVictoryCount, duchy: baseVictoryCount, province: baseVictoryCount,
-        ...kingdomSupply
       };
 
       // Only add curse if there is a card that interacts with it (Witch)
       if (kingdomCards.includes('witch')) {
         nextState.supply.curse = numPlayers <= 2 ? 10 : (numPlayers - 1) * 10;
       }
+      
       nextState.history = [];
       
       Object.values(nextState.players).forEach(p => {
@@ -366,11 +382,30 @@ export function dominionReducer
       const firstPlayerId = nextState.playerOrder[0];
 
       let chain: PlayerAction = { type: 'START_TURN', playerId: firstPlayerId };
+      // Before drawing cards, we animate the kingdom cards one by one
       for (let i = nextState.playerOrder.length - 1; i >= 0; i--) {
          chain = { type: 'DRAW_CARDS_ASYNC', playerId: nextState.playerOrder[i], amount: 5, onComplete: chain };
       }
+      
+      // We prepend the kingdom card animations
+      for (let i = kingdomCards.length - 1; i >= 0; i--) {
+         const cardId = kingdomCards[i];
+         const def = getCardDef(cardId);
+         const amount = def.types.includes('VICTORY') ? baseVictoryCount : 10;
+         chain = { 
+           type: 'SHOW_KINGDOM_CARD', 
+           cardId, 
+           onComplete: {
+             type: 'ADD_KINGDOM_CARD',
+             cardId,
+             amount,
+             onComplete: chain
+           }
+         } as any;
+      }
+      
       nextState.actionQueue = nextState.actionQueue || [];
-      nextState.actionQueue.push({ delayMs: 250, action: chain });
+      nextState.actionQueue.push({ delayMs: 500, action: chain });
 
       nextState.status = 'Playing';
       break;
