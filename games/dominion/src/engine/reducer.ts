@@ -47,7 +47,7 @@ function processPendingActions(state: DominionState) {
       case 'DRAW_CARDS': {
         if (pending.amount > 0) {
           state.actionQueue = state.actionQueue || [];
-          state.actionQueue.push({ delayMs: 250, action: { type: 'DRAW_CARDS_ASYNC', playerId: pending.playerId, amount: pending.amount } });
+          state.actionQueue.unshift({ delayMs: 250, action: { type: 'DRAW_CARDS_ASYNC', playerId: pending.playerId, amount: pending.amount } });
         }
         break;
       }
@@ -302,29 +302,21 @@ export function dominionReducer
       
       if (action.amount > 1) {
         nextState.actionQueue = nextState.actionQueue || [];
-        nextState.actionQueue.push({ delayMs: 250, action: { type: 'DRAW_CARDS_ASYNC', playerId: action.playerId, amount: action.amount - 1, onComplete: action.onComplete } });
+        nextState.actionQueue.unshift({ delayMs: 250, action: { type: 'DRAW_CARDS_ASYNC', playerId: action.playerId, amount: action.amount - 1, onComplete: action.onComplete } });
       } else if (action.onComplete) {
         nextState.actionQueue = nextState.actionQueue || [];
-        nextState.actionQueue.push({ delayMs: 250, action: action.onComplete });
+        nextState.actionQueue.unshift({ delayMs: 250, action: action.onComplete });
       }
       break;
     }
     case 'SHOW_KINGDOM_CARD': {
-      nextState.revealedCard = action.cardId;
-      if (action.onComplete) {
-        nextState.actionQueue = nextState.actionQueue || [];
-        nextState.actionQueue.push({ delayMs: 600, action: action.onComplete });
-      }
+      nextState.revealedCard = (action as any).cardId;
       break;
     }
     case 'ADD_KINGDOM_CARD': {
       delete nextState.revealedCard;
-      nextState.supply[action.cardId] = action.amount;
-      nextState.logs.push(`Kingdom card selected: [${getCardDef(action.cardId).name}]`);
-      if (action.onComplete) {
-        nextState.actionQueue = nextState.actionQueue || [];
-        nextState.actionQueue.push({ delayMs: 200, action: action.onComplete });
-      }
+      nextState.supply[(action as any).cardId] = (action as any).amount;
+      nextState.logs.push(`Kingdom card selected: [${getCardDef((action as any).cardId).name}]`);
       break;
     }
     case 'PLAY_BOT': {
@@ -381,31 +373,25 @@ export function dominionReducer
       nextState.phase = 'CLEANUP'; // Block actions while starting hands draw
       const firstPlayerId = nextState.playerOrder[0];
 
-      let chain: PlayerAction = { type: 'START_TURN', playerId: firstPlayerId };
-      // Before drawing cards, we animate the kingdom cards one by one
-      for (let i = nextState.playerOrder.length - 1; i >= 0; i--) {
-         chain = { type: 'DRAW_CARDS_ASYNC', playerId: nextState.playerOrder[i], amount: 5, onComplete: chain };
-      }
+      nextState.actionQueue = nextState.actionQueue || [];
       
-      // We prepend the kingdom card animations
-      for (let i = kingdomCards.length - 1; i >= 0; i--) {
+      // We queue the kingdom card animations as a flat list
+      for (let i = 0; i < kingdomCards.length; i++) {
          const cardId = kingdomCards[i];
          const def = getCardDef(cardId);
          const amount = def.types.includes('VICTORY') ? baseVictoryCount : 10;
-         chain = { 
-           type: 'SHOW_KINGDOM_CARD', 
-           cardId, 
-           onComplete: {
-             type: 'ADD_KINGDOM_CARD',
-             cardId,
-             amount,
-             onComplete: chain
-           }
-         } as any;
+         nextState.actionQueue.push({ delayMs: 600, action: { type: 'SHOW_KINGDOM_CARD', cardId } });
+         nextState.actionQueue.push({ delayMs: 200, action: { type: 'ADD_KINGDOM_CARD', cardId, amount } });
       }
       
-      nextState.actionQueue = nextState.actionQueue || [];
-      nextState.actionQueue.push({ delayMs: 500, action: chain });
+      // Then players draw cards
+      for (let i = 0; i < nextState.playerOrder.length; i++) {
+         // Instead of one DRAW_CARDS_ASYNC for 5, we can push 5 individual DRAW_CARDS_ASYNC of amount 1
+         // or we can change DRAW_CARDS_ASYNC to unshift so it doesn't need onComplete
+         nextState.actionQueue.push({ delayMs: 250, action: { type: 'DRAW_CARDS_ASYNC', playerId: nextState.playerOrder[i], amount: 5 } });
+      }
+
+      nextState.actionQueue.push({ delayMs: 250, action: { type: 'START_TURN', playerId: firstPlayerId } });
 
       nextState.status = 'Playing';
       break;
