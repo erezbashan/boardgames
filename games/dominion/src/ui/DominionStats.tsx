@@ -62,8 +62,57 @@ export const DominionStats: React.FC<DominionStatsProps> = ({ gameState }) => {
     name: players[id].name,
   }));
 
+  const uniqueCards = Array.from(new Set(
+    playerOrder.flatMap(id => {
+      const p = players[id];
+      return [...p.deck, ...p.hand, ...p.discard, ...p.playArea].map(c => c.cardId);
+    })
+  )).sort((a,b) => {
+    const defA = getCardDef(a);
+    const defB = getCardDef(b);
+    const getRank = (def: any) => def.types.includes('VICTORY') ? 1 : def.types.includes('TREASURE') ? 2 : 3;
+    if (getRank(defA) !== getRank(defB)) return getRank(defA) - getRank(defB);
+    return defB.cost - defA.cost || defA.name.localeCompare(defB.name);
+  });
+
+  const [hoveredCardDef, setHoveredCardDef] = React.useState<any | null>(null);
+  const [popupPos, setPopupPos] = React.useState<{ x: number, y: number } | null>(null);
+
+  const showPopup = (e: React.MouseEvent, def: any) => {
+    setHoveredCardDef(def);
+    setPopupPos({ x: e.clientX, y: e.clientY });
+  };
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '30px', position: 'relative' }}>
+
+      {/* Popup Overlay */}
+      {hoveredCardDef && popupPos && (
+        <div 
+          onClick={() => setHoveredCardDef(null)}
+          style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 99998 }}
+        >
+          <div 
+            style={{ 
+              position: 'fixed', 
+              top: Math.min(popupPos.y + 15, window.innerHeight - 150) + 'px', 
+              left: Math.min(popupPos.x + 15, window.innerWidth - 220) + 'px', 
+              background: '#1e293b', 
+              border: '1px solid #475569', 
+              padding: '12px', 
+              borderRadius: '8px', 
+              boxShadow: '0 4px 12px rgba(0,0,0,0.5)', 
+              zIndex: 99999,
+              width: '200px',
+              pointerEvents: 'none'
+            }}
+          >
+            <div style={{ fontWeight: 'bold', color: 'white', marginBottom: '4px' }}>{hoveredCardDef.name} ({hoveredCardDef.cost}$)</div>
+            <div style={{ fontSize: '10px', color: '#94a3b8', marginBottom: '8px' }}>{hoveredCardDef.types.join(' - ')}</div>
+            <div style={{ fontSize: '12px', color: '#cbd5e1' }}>{hoveredCardDef.description}</div>
+          </div>
+        </div>
+      )}
 
       {/* Final Standings Table */}
       <div>
@@ -124,14 +173,19 @@ export const DominionStats: React.FC<DominionStatsProps> = ({ gameState }) => {
             <thead>
               <tr style={{ background: 'rgba(255,255,255,0.1)' }}>
                 <th style={{ padding: '8px', textAlign: 'left' }}>Player</th>
-                {Array.from(new Set(
-                  playerOrder.flatMap(id => {
-                    const p = players[id];
-                    return [...p.deck, ...p.hand, ...p.discard, ...p.playArea].map(c => c.cardId);
-                  })
-                )).sort((a,b) => getCardDef(b).cost - getCardDef(a).cost || a.localeCompare(b)).map(cardId => (
-                  <th key={cardId} style={{ padding: '8px' }}>{getCardDef(cardId).name}</th>
-                ))}
+                {uniqueCards.map(cardId => {
+                  const def = getCardDef(cardId);
+                  return (
+                    <th key={cardId} style={{ padding: '8px' }}>
+                      <span 
+                        onClick={(e) => showPopup(e, def)}
+                        style={{ cursor: 'pointer', color: '#60a5fa', textDecoration: 'underline' }}
+                      >
+                        {def.name}
+                      </span>
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
             <tbody>
@@ -144,12 +198,7 @@ export const DominionStats: React.FC<DominionStatsProps> = ({ gameState }) => {
                 return (
                   <tr key={row.id} style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
                     <td style={{ padding: '8px', textAlign: 'left', fontWeight: 'bold', color: row.color || 'white' }}>{row.name}</td>
-                    {Array.from(new Set(
-                      playerOrder.flatMap(pid => {
-                        const pp = players[pid];
-                        return [...pp.deck, ...pp.hand, ...pp.discard, ...pp.playArea].map(c => c.cardId);
-                      })
-                    )).sort((a,b) => getCardDef(b).cost - getCardDef(a).cost || a.localeCompare(b)).map(cardId => (
+                    {uniqueCards.map(cardId => (
                       <td key={cardId} style={{ padding: '8px', color: counts[cardId] ? 'white' : 'rgba(255,255,255,0.2)' }}>
                         {counts[cardId] || '-'}
                       </td>

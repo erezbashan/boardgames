@@ -4,6 +4,7 @@ export type Phase = 'ACTION' | 'BUY' | 'CLEANUP';
 export interface CardInstance {
   id: string;      // Unique identifier, e.g. "copper_001"
   cardId: string;  // Base card type, e.g. "copper"
+  _revealed?: boolean; // Transient flag for reveal animations
 }
 
 export interface PlayerState extends BasePlayer {
@@ -28,6 +29,7 @@ export type PendingAction =
   | { type: 'SHUFFLE_DISCARD'; playerId: string }
   | { type: 'REQUEST_INPUT'; playerId: string; inputType: string; payload?: any }
   | { type: 'LOG'; playerId: string; message: string }
+  | { type: 'REVEAL_CARD'; playerId: string; instanceId: string; message?: string }
   | { type: 'FORCE_GAIN_CARD'; playerId: string; cardId: string; destination?: 'discard' | 'hand' | 'deck' };
 
 export interface HistorySnapshot {

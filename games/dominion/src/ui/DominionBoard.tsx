@@ -201,9 +201,14 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
             <div style={{ textAlign: 'center', fontSize: '10px', color: '#94a3b8' }}>
               <div style={{ display: 'flex', gap: '1px', minHeight: '42px', alignItems: 'flex-end' }}>
                 {p.hand.length > 0 ? (
-                  Array.from({ length: Math.min(p.hand.length, 5) }).map((_, i) => (
-                    <div key={i} style={{ width: '12px', height: '18px', background: '#1e3a5f', border: '1px solid #475569', borderRadius: '2px' }} />
-                  ))
+                  p.hand.slice(0, 7).map((card, i) => {
+                    if (card._revealed) {
+                      return (
+                        <div key={i} style={{ width: '20px', height: '30px', backgroundImage: `url(${CARD_IMAGES[card.cardId]})`, backgroundSize: 'cover', border: '1px solid #fbbf24', borderRadius: '2px', zIndex: i, marginLeft: i > 0 ? '-10px' : '0' }} title="Revealed Moat" />
+                      );
+                    }
+                    return <div key={i} style={{ width: '12px', height: '18px', background: '#1e3a5f', border: '1px solid #475569', borderRadius: '2px', marginLeft: i > 0 ? '-6px' : '0' }} />;
+                  })
                 ) : (
                   <div style={{ width: '30px', height: '42px', border: '1px solid #475569', borderRadius: '3px', background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569' }}>0</div>
                 )}
@@ -252,8 +257,8 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
                         cursor: (isMyTurn || isInputPhaseForMe) ? 'pointer' : 'default',
-                        boxShadow: isSelected ? '0 0 0 4px #eab308' : isPlayableAction ? '0 0 8px rgba(52,211,153,0.6)' : '0 2px 4px rgba(0,0,0,0.5)',
-                        animation: isPlayableAction && !isSelected ? 'blinkGlow 1.5s infinite' : 'none',
+                        boxShadow: isSelected ? '0 0 0 4px #eab308' : isPlayableAction ? '0 0 8px rgba(52,211,153,0.6)' : card._revealed ? '0 0 15px 5px #fbbf24' : '0 2px 4px rgba(0,0,0,0.5)',
+                        animation: card._revealed ? 'revealedPulse 1s ease-in-out infinite' : isPlayableAction && !isSelected ? 'blinkGlow 1.5s infinite' : 'none',
                         flexShrink: 0,
                         filter: isSelected ? 'brightness(1.2)' : 'none'
                       }}
@@ -632,6 +637,27 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
     return (
       <div>
         <div style={{ marginBottom: '8px', color: '#94a3b8', fontSize: '13px' }}>
+          Rules Override:
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(0,0,0,0.2)', padding: '10px', borderRadius: '8px', marginBottom: '16px' }}>
+          <label style={{ fontSize: '13px', color: '#cbd5e1' }}>Provinces Count:</label>
+          <select 
+            disabled={!isLobby}
+            value={gameState.settings?.provincesOverride || 0}
+            onChange={(e) => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...(gameState.settings || {}), provincesOverride: Number(e.target.value) || undefined } })}
+            style={{ background: '#1e293b', color: 'white', border: '1px solid #475569', borderRadius: '4px', padding: '4px', cursor: isLobby ? 'pointer' : 'not-allowed' }}
+          >
+            <option value={0}>According to Game Rules</option>
+            <option value={2}>2 (Super Fast)</option>
+            <option value={4}>4 (Short Game)</option>
+            <option value={8}>8 (2 Players)</option>
+            <option value={12}>12 (3-4 Players)</option>
+            <option value={16}>16 (Long Game)</option>
+            <option value={20}>20 (Marathon)</option>
+          </select>
+        </div>
+
+        <div style={{ marginBottom: '8px', color: '#94a3b8', fontSize: '13px' }}>
           Select which Kingdom cards to include (chosen at game start):
         </div>
         <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
@@ -666,26 +692,6 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
             );
           })}
         </div>
-        
-        <div style={{ marginTop: '16px', marginBottom: '8px', color: '#94a3b8', fontSize: '13px' }}>
-          Rules Override:
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(0,0,0,0.2)', padding: '10px', borderRadius: '8px' }}>
-          <label style={{ fontSize: '13px', color: '#cbd5e1' }}>Provinces Count:</label>
-          <select 
-            disabled={!isLobby}
-            value={gameState.settings?.provincesOverride || 0}
-            onChange={(e) => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...(gameState.settings || {}), provincesOverride: Number(e.target.value) || undefined } })}
-            style={{ background: '#1e293b', color: 'white', border: '1px solid #475569', borderRadius: '4px', padding: '4px', cursor: isLobby ? 'pointer' : 'not-allowed' }}
-          >
-            <option value={0}>According to Game Rules</option>
-            <option value={4}>4 (Short Game)</option>
-            <option value={8}>8 (2 Players)</option>
-            <option value={12}>12 (3-4 Players)</option>
-            <option value={16}>16 (Long Game)</option>
-            <option value={20}>20 (Marathon)</option>
-          </select>
-        </div>
 
         {!isLobby && <p style={{ color: 'gray', fontSize: '12px', marginTop: '12px' }}>Settings can only be changed in the Lobby.</p>}
       </div>
@@ -701,6 +707,11 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
         .no-scrollbar {
           -ms-overflow-style: none;
           scrollbar-width: none;
+        }
+        @keyframes revealedPulse {
+          0% { transform: scale(1); box-shadow: 0 0 15px 5px #fbbf24; }
+          50% { transform: scale(1.1); box-shadow: 0 0 25px 10px #fbbf24; }
+          100% { transform: scale(1); box-shadow: 0 0 15px 5px #fbbf24; }
         }
       `}</style>
       <GameLayout

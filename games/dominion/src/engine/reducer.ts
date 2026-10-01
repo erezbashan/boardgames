@@ -79,6 +79,17 @@ function processPendingActions(state: DominionState) {
         }
         break;
       }
+      case 'REVEAL_CARD': {
+        const { instanceId, message } = pending as any;
+        const card = player.hand.find(c => c.id === instanceId);
+        if (card) {
+          card._revealed = true;
+        }
+        if (message) {
+          state.logs.push(message);
+        }
+        break;
+      }
     }
   }
 }
@@ -366,6 +377,10 @@ export function dominionReducer
     case 'CLEANUP_PHASE': {
       const player = nextState.players[action.playerId];
       const validPlayArea = player.playArea.filter(c => !(c as any)._throned);
+      // Clear any transient revealed flags
+      player.hand.forEach(c => delete c._revealed);
+      validPlayArea.forEach(c => delete c._revealed);
+      
       player.discard.push(...validPlayArea, ...player.hand);
       player.playArea = [];
       player.hand = [];
@@ -541,15 +556,28 @@ export function dominionReducer
           const discardedIds: string[] = action.payload.discardedIds || [];
           const player = nextState.players[action.playerId];
           const toDiscard = Math.min(discardedIds.length, req.payload?.amount || 0);
+          
+          const discardedNames: string[] = [];
           for (let i = 0; i < toDiscard; i++) {
              const idx = player.hand.findIndex(c => c.id === discardedIds[i]);
              if (idx >= 0) {
+               discardedNames.push(getCardDef(player.hand[idx].cardId).name);
                player.discard.push(player.hand[idx]);
                player.hand.splice(idx, 1);
              }
           }
           const cardName = req.inputType === 'DISCARD_FOR_POACHER' ? 'Poacher' : 'Militia';
-          nextState.logs.push(`${player.name} discards ${toDiscard} cards for ${cardName}.`);
+          
+          if (discardedNames.length > 0) {
+            const counts = discardedNames.reduce((acc, name) => {
+              acc[name] = (acc[name] || 0) + 1;
+              return acc;
+            }, {} as Record<string, number>);
+            const discardString = Object.entries(counts).map(([name, count]) => `${count} [${name}]`).join(', ');
+            nextState.logs.push(`${player.name} discards ${discardString} for [${cardName}].`);
+          } else {
+            nextState.logs.push(`${player.name} discards nothing for [${cardName}].`);
+          }
           nextState.pendingActions.shift();
         }
 
