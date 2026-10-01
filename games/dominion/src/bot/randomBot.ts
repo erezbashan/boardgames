@@ -21,6 +21,19 @@ export function getRandomBotAction(state: DominionState, playerId: string): Play
       return { type: 'RESOLVE_INPUT', playerId, payload: { discardedIds: toDiscard } };
     }
 
+    if (inputReq.inputType === 'DISCARD_FOR_MILITIA' || inputReq.inputType === 'DISCARD_FOR_POACHER') {
+      const hand = [...state.players[playerId].hand];
+      // Sort hand by least valuable first
+      hand.sort((a, b) => {
+        const valA = getCardDef(a.cardId).types.includes('VICTORY') || a.cardId === 'curse' ? 0 : getCardDef(a.cardId).cost;
+        const valB = getCardDef(b.cardId).types.includes('VICTORY') || b.cardId === 'curse' ? 0 : getCardDef(b.cardId).cost;
+        return valA - valB;
+      });
+      const amount = inputReq.payload?.amount || 0;
+      const toDiscard = hand.slice(0, amount).map(c => c.id);
+      return { type: 'RESOLVE_INPUT', playerId, payload: { discardedIds: toDiscard } };
+    }
+
     if (inputReq.inputType === 'TRASH_FOR_CHAPEL') {
       const chapelDef = getCardDef('chapel');
       if (chapelDef.botChoose) {

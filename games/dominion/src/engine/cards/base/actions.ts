@@ -29,10 +29,22 @@ export const Militia: CardDefinition = {
   types: ['ACTION', 'ATTACK'],
   cost: 4,
   description: '+2 Coins. Each other player discards down to 3 cards in hand.',
-  onPlay: (state, playerId) => [
-    { type: 'GAIN_COINS', playerId, amount: 2 }
-    // Note: Attack part is skipped for now until Attack mechanics are fully built
-  ]
+  onPlay: (state, playerId) => {
+    const actions: any[] = [{ type: 'GAIN_COINS', playerId, amount: 2 }];
+    
+    // Each other player discards down to 3 cards
+    for (const pId in state.players) {
+      if (pId !== playerId && state.players[pId].hand.length > 3) {
+        actions.push({
+          type: 'REQUEST_INPUT',
+          playerId: pId,
+          inputType: 'DISCARD_FOR_MILITIA',
+          payload: { amount: state.players[pId].hand.length - 3 }
+        });
+      }
+    }
+    return actions;
+  }
 };
 
 export const Cellar: CardDefinition = {

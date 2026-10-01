@@ -24,7 +24,7 @@ const CARD_IMAGES: Record<string, string> = {
   "curse": "https://wiki.dominionstrategy.com/images/thumb/9/97/Curse.jpg/200px-Curse.jpg",
   "village": "https://wiki.dominionstrategy.com/images/thumb/5/5a/Village.jpg/200px-Village.jpg",
   "smithy": "https://wiki.dominionstrategy.com/images/thumb/3/36/Smithy.jpg/200px-Smithy.jpg",
-  "militia": "https://wiki.dominionstrategy.com/images/thumb/a/a0/Militia.jpg/200px-Militia.jpg",
+  "militia": "https://raw.githubusercontent.com/tempfillernamegithq/dominion-cards/master/dominion/militia.jpg",
   "cellar": "https://wiki.dominionstrategy.com/images/thumb/1/1c/Cellar.jpg/200px-Cellar.jpg",
   "market": "https://wiki.dominionstrategy.com/images/thumb/7/7e/Market.jpg/200px-Market.jpg",
   "festival": "https://wiki.dominionstrategy.com/images/thumb/e/ec/Festival.jpg/200px-Festival.jpg",
@@ -96,7 +96,7 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
   const handleResolveInput = () => {
     const req = gameState.pendingActions[0];
     if (req?.type === 'REQUEST_INPUT') {
-      if (req.inputType === 'DISCARD_FOR_CELLAR' || req.inputType === 'DISCARD_FOR_POACHER') {
+      if (req.inputType === 'DISCARD_FOR_CELLAR' || req.inputType === 'DISCARD_FOR_POACHER' || req.inputType === 'DISCARD_FOR_MILITIA') {
         dispatch({ 
           type: 'RESOLVE_INPUT', 
           playerId: myPlayerId, 
@@ -139,7 +139,7 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
         inputType === 'TRASH_FOR_REMODEL' ? 1 :
         inputType === 'TRASH_FOR_MINE' ? 1 :
         inputType === 'TRASH_COPPER_FOR_MONEYLENDER' ? 1 :
-        inputType === 'DISCARD_FOR_POACHER' ? (req as any).payload?.amount || 0 :
+        (inputType === 'DISCARD_FOR_POACHER' || inputType === 'DISCARD_FOR_MILITIA') ? (req as any).payload?.amount || 0 :
         99;
         
       if (prev.length >= maxSelections) {
@@ -221,9 +221,10 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
             <div style={{ fontSize: '10px', color: '#94a3b8', marginBottom: '4px' }}>
               Hand ({sortedHand.length} cards){isInputPhaseForMe ? ' — click to select' : isMyTurn && gameState.phase === 'ACTION' ? ' — click action cards to play' : isMyTurn && gameState.phase === 'BUY' ? ' — treasures auto-played' : ''}
             </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px', paddingBottom: '4px' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', paddingBottom: '4px', paddingLeft: '10px' }}>
               <AnimatePresence>
                 {sortedHand.map((card, i) => {
+                  const isGrouped = i > 0 && sortedHand[i-1].cardId === card.cardId;
                   const isSelected = selectedCards.includes(card.id);
                   const def = getCardDef(card.cardId);
                   const isPlayableAction = isMyTurn && gameState.phase === 'ACTION' && me.actions > 0 && def.types.includes('ACTION') && !isInputPhase;
@@ -242,21 +243,28 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
                         else if (isMyTurn) handlePlayCard(card.id);
                       }}
                       style={{
+                        position: 'relative',
+                        marginLeft: isGrouped ? '-50px' : '6px',
+                        zIndex: i,
                         width: '70px',
                         height: '100px',
-                        border: `2px solid ${isSelected ? '#3b82f6' : isPlayableAction ? '#34d399' : 'rgba(100,116,139,0.5)'}`,
+                        border: `2px solid ${isPlayableAction && !isSelected ? '#34d399' : 'rgba(100,116,139,0.5)'}`,
                         borderRadius: '6px',
-                        background: isSelected ? '#1e3a8a' : '#1e293b',
                         backgroundImage: imageUrl ? `url(${imageUrl})` : 'none',
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
                         cursor: (isMyTurn || isInputPhaseForMe) ? 'pointer' : 'default',
-                        position: 'relative',
-                        boxShadow: isPlayableAction ? '0 0 8px rgba(52,211,153,0.6)' : '0 2px 4px rgba(0,0,0,0.5)',
-                        animation: isPlayableAction ? 'blinkGlow 1.5s infinite' : 'none',
+                        boxShadow: isSelected ? '0 0 0 4px #eab308' : isPlayableAction ? '0 0 8px rgba(52,211,153,0.6)' : '0 2px 4px rgba(0,0,0,0.5)',
+                        animation: isPlayableAction && !isSelected ? 'blinkGlow 1.5s infinite' : 'none',
                         flexShrink: 0,
+                        filter: isSelected ? 'brightness(1.2)' : 'none'
                       }}
                     >
+                      {isSelected && (
+                        <div style={{ position: 'absolute', top: '-8px', right: '-8px', background: '#eab308', color: 'black', borderRadius: '50%', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', boxShadow: '0 2px 4px rgba(0,0,0,0.5)', zIndex: 20 }}>
+                          ✓
+                        </div>
+                      )}
                       {/* Type icon */}
                       <div style={{ position: 'absolute', top: '2px', left: '2px', fontSize: '10px', zIndex: 10 }}>
                         {getIcon(def.types)}
@@ -378,9 +386,7 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
           <span 
             key={match.index}
             style={{ color: '#60a5fa', cursor: 'pointer', textDecoration: 'underline', fontWeight: 'bold' }}
-            onMouseEnter={(e) => showPopup(e, def)}
             onClick={(e) => showPopup(e, def)}
-            onMouseLeave={hidePopup}
           >
             {cardName}
           </span>
@@ -449,6 +455,11 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
           }}
           onClick={() => !disabled && handleBuyCard(id)}
         >
+          {count === 0 && (
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 20, background: 'rgba(0,0,0,0.5)', borderRadius: '4px' }}>
+              <span style={{ fontSize: '48px', color: '#ef4444', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>X</span>
+            </div>
+          )}
           {/* Top Bar: Name */}
           <div style={{ position: 'absolute', top: '2px', right: '4px', zIndex: 10 }}>
             <div 
@@ -568,13 +579,15 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
               ? `Select a Copper to trash for +3 Coins (or confirm with 0 to skip).`
               : inputType === 'DISCARD_FOR_POACHER'
               ? `Select ${req.payload?.amount} card(s) to discard for Poacher (${selectedCards.length} selected).`
+              : inputType === 'DISCARD_FOR_MILITIA'
+              ? `Select ${req.payload?.amount} card(s) to discard from Militia attack (${selectedCards.length} selected).`
               : inputType === 'TRASH_FOR_REMODEL'
               ? `Select a card to trash to gain a card costing up to $2 more.`
               : inputType === 'TRASH_FOR_MINE'
               ? `Select a Treasure to trash to gain a Treasure costing up to $3 more.`
               : 'Waiting for input...';
               
-            const needsConfirm = ['DISCARD_FOR_CELLAR', 'TRASH_FOR_CHAPEL', 'TRASH_COPPER_FOR_MONEYLENDER', 'DISCARD_FOR_POACHER', 'TRASH_FOR_REMODEL', 'TRASH_FOR_MINE'].includes(inputType || '');
+            const needsConfirm = ['DISCARD_FOR_CELLAR', 'TRASH_FOR_CHAPEL', 'TRASH_COPPER_FOR_MONEYLENDER', 'DISCARD_FOR_POACHER', 'DISCARD_FOR_MILITIA', 'TRASH_FOR_REMODEL', 'TRASH_FOR_MINE'].includes(inputType || '');
             
             return (
               <div style={{ padding: '15px', background: '#7f1d1d', border: '2px solid #ef4444', borderRadius: '8px', color: 'white', boxShadow: '0 4px 6px rgba(0,0,0,0.3)' }}>
@@ -587,7 +600,7 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
           })()}
           
           {/* Play Area */}
-          <div style={{ border: '1px solid #475569', padding: '15px', minHeight: '300px', maxHeight: '450px', overflowY: 'scroll', borderRadius: '8px', background: '#0f172a' }}>
+          <div className="no-scrollbar" style={{ border: '1px solid #475569', padding: '15px', minHeight: '300px', maxHeight: '450px', overflowY: 'auto', overflowX: 'hidden', borderRadius: '8px', background: '#0f172a' }}>
             <h3 style={{ marginTop: 0, color: '#94a3b8' }}>{activePlayer.id === myPlayerId ? 'Your' : activePlayer.name + '\'s'} Play Area</h3>
             <div style={{ display: 'flex', flexWrap: 'wrap', paddingLeft: '10px' }}>
               <AnimatePresence>
@@ -661,10 +674,20 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
   };
 
   return (
-    <GameLayout
-      gameName="Dominion"
-      helpText="Build your deck and collect Victory Points! First to buy Provinces or empty 3 piles wins."
-      helpUrl="https://en.wikipedia.org/wiki/Dominion_(card_game)"
+    <>
+      <style>{`
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
+      <GameLayout
+        gameName="Dominion"
+        helpText="Build your deck and collect Victory Points! First to buy Provinces or empty 3 piles wins."
+        helpUrl="https://en.wikipedia.org/wiki/Dominion_(card_game)"
       renderGameSpecificPlayerDetails={renderPlayerDetails}
       renderGameSpecificStats={() => <DominionStats gameState={gameState} />}
       renderLogMessage={renderLogMessage}
@@ -679,5 +702,6 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
         renderGameArea()
       )}
     </GameLayout>
+    </>
   );
 };

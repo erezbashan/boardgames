@@ -1,6 +1,6 @@
 import { baseReducer } from '@erez/boardgame-core';
 import { getBotAction } from '../bot/registry';
-import { DominionState, PendingAction, CardInstance, Phase, PlayerState } from './types';
+import { DominionState, PendingAction, CardInstance, Phase, PlayerState, ALL_KINGDOM_CARDS } from './types';
 import { PlayerAction } from './actions';
 
 import { getCardDef } from './cards';
@@ -236,11 +236,9 @@ export function dominionReducer
       // Per Dominion rules: 60 copper minus 7 per player (starters), min 0
       const copperCount = Math.max(0, 60 - 7 * numPlayers);
       // Build kingdom supply from settings (or defaults)
-      const defaultKingdom = ['village', 'smithy', 'woodcutter', 'cellar', 'market', 'festival',
-        'laboratory', 'council_room', 'moat', 'workshop', 'throne_room', 'chapel'];
       const kingdomCards = nextState.settings?.kingdomCards?.length
         ? nextState.settings.kingdomCards
-        : defaultKingdom;
+        : ALL_KINGDOM_CARDS.slice(0, 10);
 
       const kingdomSupply: Record<string, number> = {};
       kingdomCards.forEach(id => { kingdomSupply[id] = 10; });
@@ -530,7 +528,7 @@ export function dominionReducer
           nextState.pendingActions.shift();
         }
 
-        if (req.inputType === 'DISCARD_FOR_POACHER') {
+        if (req.inputType === 'DISCARD_FOR_POACHER' || req.inputType === 'DISCARD_FOR_MILITIA') {
           const discardedIds: string[] = action.payload.discardedIds || [];
           const player = nextState.players[action.playerId];
           const toDiscard = Math.min(discardedIds.length, req.payload?.amount || 0);
@@ -541,7 +539,8 @@ export function dominionReducer
                player.hand.splice(idx, 1);
              }
           }
-          nextState.logs.push(`${player.name} discards ${toDiscard} cards for Poacher.`);
+          const cardName = req.inputType === 'DISCARD_FOR_POACHER' ? 'Poacher' : 'Militia';
+          nextState.logs.push(`${player.name} discards ${toDiscard} cards for ${cardName}.`);
           nextState.pendingActions.shift();
         }
 
