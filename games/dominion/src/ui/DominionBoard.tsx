@@ -187,8 +187,6 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
                   <motion.div
                     layoutId={card.id}
                     key={card.id}
-                    initial={{ opacity: 0, scale: 3, y: -80 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
                     transition={{ type: 'spring', stiffness: 200, damping: 20 }}
                     style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundImage: `url(${CARD_IMAGES[card.cardId]})`, backgroundSize: 'cover', borderRadius: '3px', zIndex: i }}
                   />

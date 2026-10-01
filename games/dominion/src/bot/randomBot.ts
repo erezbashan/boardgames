@@ -87,6 +87,15 @@ export function getRandomBotAction(state: DominionState, playerId: string): Play
         return { type: 'PLAY_CARD', playerId, instanceId: sortedActionGivers[0].id };
       }
 
+      // Priority 1.5: If we have junk, prioritize Chapel or Cellar
+      const hasJunk = me.hand.some(c => c.cardId === 'curse' || getCardDef(c.cardId).types.includes('VICTORY'));
+      if (hasJunk) {
+        const trashDiscarder = playableActions.find(c => c.cardId === 'chapel' || c.cardId === 'cellar');
+        if (trashDiscarder) {
+          return { type: 'PLAY_CARD', playerId, instanceId: trashDiscarder.id };
+        }
+      }
+
       // Priority 2: Any action card, sorted by cost descending
       const sortedActions = [...playableActions].sort((a, b) =>
         getCardDef(b.cardId).cost - getCardDef(a.cardId).cost
