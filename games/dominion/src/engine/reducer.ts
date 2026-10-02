@@ -178,7 +178,7 @@ function processPendingActions(state: DominionState) {
           if (c) {
             revealedCards.push(c);
             p.transientDeckReveals = [c.cardId];
-            state.logs.push(`${p.name} reveals [${getCardDef(c.cardId).name}] from their deck.`);
+            p.discard.push(c);
             
             state.actionQueue = state.actionQueue || [];
             state.actionQueue.unshift(
@@ -197,25 +197,26 @@ function processPendingActions(state: DominionState) {
       }
       case 'RESOLVE_BANDIT': {
         const { revealedCards } = pending as any;
-        state.logs.push(`${player.name} reveals ${revealedCards.map((c: any) => `[${getCardDef(c.cardId).name}]`).join(' and ')}.`);
         
         // Find treasures other than copper
         const trasheableTreasures = revealedCards.filter((c: any) => getCardDef(c.cardId).types.includes('TREASURE') && c.cardId !== 'copper');
+        let toTrash: any = null;
         
         if (trasheableTreasures.length > 0) {
           trasheableTreasures.sort((a: any, b: any) => getCardDef(b.cardId).cost - getCardDef(a.cardId).cost);
-          const toTrash = trasheableTreasures[0];
+          toTrash = trasheableTreasures[0];
           state.trash.push(toTrash);
-          state.logs.push(`${player.name} trashes [${getCardDef(toTrash.cardId).name}].`);
-          
-          // Discard the rest
-          revealedCards.forEach((c: any) => {
-            if (c.id !== toTrash.id) player.discard.push(c);
-          });
-        } else {
-          // Discard all
-          player.discard.push(...revealedCards);
-          state.logs.push(`${player.name} discards them.`);
+          // Splice it out of discard since we put it there visually in REVEAL_NEXT
+          const idx = player.discard.findIndex((c: any) => c.id === toTrash.id);
+          if (idx !== -1) player.discard.splice(idx, 1);
+        }
+        
+        for (const c of revealedCards) {
+          if (toTrash && c.id === toTrash.id) {
+             state.logs.push(`${player.name} reveals [${getCardDef(c.cardId).name}] from their deck and trashes it.`);
+          } else {
+             state.logs.push(`${player.name} reveals [${getCardDef(c.cardId).name}] from their deck and discards it.`);
+          }
         }
         break;
       }
