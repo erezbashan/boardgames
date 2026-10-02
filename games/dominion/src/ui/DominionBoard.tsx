@@ -804,72 +804,82 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
                     <button onClick={() => dispatch({ type: 'RESOLVE_INPUT', playerId: myPlayerId, payload: { keep: false } })} style={{ padding: '6px 16px', background: '#94a3b8', color: 'black', fontWeight: 'bold', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Set Aside (Discard)</button>
                   </div>
                 )}
-                {inputType === 'SENTRY_CHOICE' && req.payload?.cards && (
+                {inputType === 'SENTRY_CHOICE' && req.payload?.cards && (() => {
+                  // Determine ordered cards based on sentryChoices
+                  let orderedCards = [...req.payload.cards];
+                  // If one is deck1 and other is deck2, sort them.
+                  orderedCards.sort((a, b) => {
+                     const aChoice = sentryChoices[a.id] || 'deck1';
+                     const bChoice = sentryChoices[b.id] || 'deck2'; // Default second to deck2 if not set
+                     if (aChoice === 'deck1' && bChoice === 'deck2') return -1;
+                     if (aChoice === 'deck2' && bChoice === 'deck1') return 1;
+                     return 0;
+                  });
+                  
+                  const numDeck = orderedCards.filter(c => (sentryChoices[c.id] || 'deck1').startsWith('deck')).length;
+                  let deckCounter = 0;
+
+                  return (
                   <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <div style={{ background: '#1e293b', border: '3px solid #3b82f6', borderRadius: '12px', padding: '30px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', maxWidth: '900px' }}>
                       <h2 style={{ margin: 0, color: 'white' }}>Sentry: Handle Top Cards</h2>
-                      <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                        {req.payload.cards.map((c: any) => {
-                          const choice = sentryChoices[c.id] || 'deck1';
+                      <div style={{ display: 'flex', gap: '20px', alignItems: 'center', justifyContent: 'center' }}>
+                        {orderedCards.map((c: any, index: number) => {
+                          const choice = sentryChoices[c.id] || (index === 0 ? 'deck1' : 'deck2');
+                          const isDeck = choice.startsWith('deck');
+                          
+                          let label = "";
+                          if (choice === 'trash') label = "🗑️ Trashing";
+                          else if (choice === 'discard') label = "↪️ Discarding";
+                          else {
+                            deckCounter++;
+                            label = deckCounter === 1 ? "⬆️ Top Card" : "⬇️ Second Card";
+                          }
                           
                           const handleChoice = (newChoice: 'trash'|'discard'|'deck1'|'deck2') => {
                              const newChoices: Record<string, 'trash'|'discard'|'deck1'|'deck2'> = { ...sentryChoices, [c.id]: newChoice };
-                             // Auto-swap if deck1/deck2 conflict
-                             if (newChoice === 'deck1') {
-                               for (const otherId of Object.keys(newChoices)) {
-                                 if (otherId !== c.id && newChoices[otherId] === 'deck1') newChoices[otherId] = 'deck2';
-                               }
-                             } else if (newChoice === 'deck2') {
-                               for (const otherId of Object.keys(newChoices)) {
-                                 if (otherId !== c.id && newChoices[otherId] === 'deck2') newChoices[otherId] = 'deck1';
-                               }
-                             }
                              setSentryChoices(newChoices);
                           };
                           
                           return (
                             <div key={c.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', background: 'rgba(0,0,0,0.3)', padding: '15px', borderRadius: '8px' }}>
-                              <div style={{ width: '120px', height: '180px', backgroundImage: `url(${CARD_IMAGES[c.cardId]})`, backgroundSize: '100% 100%', borderRadius: '8px', boxShadow: '0 4px 10px rgba(0,0,0,0.3)' }}></div>
-                              <div style={{ display: 'flex', gap: '5px' }}>
-                                <button onClick={() => handleChoice('trash')} style={{ padding: '6px 10px', background: choice === 'trash' ? '#ef4444' : '#334155', color: 'white', border: choice === 'trash' ? '2px solid white' : '2px solid transparent', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Trash</button>
-                                <button onClick={() => handleChoice('discard')} style={{ padding: '6px 10px', background: choice === 'discard' ? '#eab308' : '#334155', color: choice === 'discard' ? 'black' : 'white', border: choice === 'discard' ? '2px solid white' : '2px solid transparent', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Discard</button>
-                                <button onClick={() => handleChoice('deck1')} style={{ padding: '6px 10px', background: choice === 'deck1' ? '#3b82f6' : '#334155', color: 'white', border: choice === 'deck1' ? '2px solid white' : '2px solid transparent', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Deck (Top)</button>
-                                <button onClick={() => handleChoice('deck2')} style={{ padding: '6px 10px', background: choice === 'deck2' ? '#2563eb' : '#334155', color: 'white', border: choice === 'deck2' ? '2px solid white' : '2px solid transparent', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Deck (2nd)</button>
+                              <div style={{ fontWeight: 'bold', color: isDeck ? '#3b82f6' : (choice==='trash' ? '#ef4444' : '#eab308'), fontSize: '18px' }}>{label}</div>
+                              <div style={{ width: '130px', height: '195px', backgroundImage: `url(${CARD_IMAGES[c.cardId]})`, backgroundSize: '100% 100%', borderRadius: '8px', boxShadow: '0 4px 10px rgba(0,0,0,0.3)' }}></div>
+                              <div style={{ display: 'flex', gap: '8px', marginTop: '5px' }}>
+                                <button onClick={() => handleChoice(choice === 'trash' ? 'deck1' : 'trash')} style={{ padding: '8px 12px', background: choice === 'trash' ? '#ef4444' : '#334155', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Trash</button>
+                                <button onClick={() => handleChoice(choice === 'discard' ? 'deck1' : 'discard')} style={{ padding: '8px 12px', background: choice === 'discard' ? '#eab308' : '#334155', color: choice === 'discard' ? 'black' : 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Discard</button>
                               </div>
                             </div>
                           );
                         })}
                       </div>
+                      
+                      {numDeck === 2 && orderedCards.length === 2 && (
+                        <button 
+                          onClick={() => {
+                             const newChoices: Record<string, 'trash'|'discard'|'deck1'|'deck2'> = { ...sentryChoices };
+                             newChoices[orderedCards[0].id] = 'deck2';
+                             newChoices[orderedCards[1].id] = 'deck1';
+                             setSentryChoices(newChoices);
+                          }}
+                          style={{ padding: '8px 20px', background: '#8b5cf6', color: 'white', fontWeight: 'bold', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '16px' }}
+                        >
+                          🔄 Swap Deck Order
+                        </button>
+                      )}
+
                       <button 
                         onClick={() => {
                           const trashIds = req.payload.cards.filter((c:any) => sentryChoices[c.id] === 'trash').map((c:any) => c.id);
                           const discardIds = req.payload.cards.filter((c:any) => sentryChoices[c.id] === 'discard').map((c:any) => c.id);
                           
-                          // Default assignments if not set
-                          let c1 = req.payload.cards[0];
-                          let c2 = req.payload.cards[1];
+                          // Deck ids need to be ordered!
+                          const deckCards = orderedCards.filter((c:any) => (sentryChoices[c.id] || 'deck1').startsWith('deck'));
+                          // Reverse them because HAND_TO_DECK puts them on top one by one.
+                          // Actually Sentry resolver expects them in the order to put on deck.
+                          // Let's check how RESOLVE_INPUT handles deckIds for Sentry.
+                          const deckIds = deckCards.map(c => c.id);
                           
-                          let d1 = sentryChoices[c1.id] || 'deck1';
-                          let d2 = c2 ? (sentryChoices[c2.id] || (d1 === 'deck1' ? 'deck2' : 'deck1')) : null;
-                          
-                          let deckIds: string[] = [];
-                          
-                          // We process deck2 first so it's UNDER deck1 (because in the reducer, deckIds are placed bottom-up onto the deck).
-                          // Actually, wait! The reducer loops backwards: `for (let i = deckIds.length - 1; i >= 0; i--) deck.push(deckIds[i])`
-                          // If deckIds = [deck1_id, deck2_id]
-                          // i=1 (deck2_id) pushed first. i=0 (deck1_id) pushed second (ends up on top).
-                          // So deckIds[0] is the top card.
-                          // Let's build deckIds so index 0 is deck1.
-                          const deck1Card = req.payload.cards.find((c:any) => (sentryChoices[c.id] || 'deck1') === 'deck1' && sentryChoices[c.id] !== 'trash' && sentryChoices[c.id] !== 'discard');
-                          const deck2Card = req.payload.cards.find((c:any) => (sentryChoices[c.id] || 'deck2') === 'deck2' && sentryChoices[c.id] !== 'trash' && sentryChoices[c.id] !== 'discard');
-                          
-                          if (deck1Card) deckIds.push(deck1Card.id);
-                          if (deck2Card && deck2Card.id !== deck1Card?.id) deckIds.push(deck2Card.id);
-                          
-                          // Fallback if they somehow both got deck1 or both deck2 but that shouldn't happen due to our swap logic.
-                          const remainingDeck = req.payload.cards.filter((c:any) => !trashIds.includes(c.id) && !discardIds.includes(c.id) && !deckIds.includes(c.id));
-                          for (const rem of remainingDeck) deckIds.push(rem.id);
-
                           dispatch({ type: 'RESOLVE_INPUT', playerId: myPlayerId, payload: { trashIds, discardIds, deckIds } });
                           setSentryChoices({});
                         }} 
@@ -879,7 +889,8 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
                       </button>
                     </div>
                   </div>
-                )}
+                  );
+                })}
               </div>
             );
           })()}
