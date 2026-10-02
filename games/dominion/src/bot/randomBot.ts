@@ -279,34 +279,34 @@ export function getRandomBotAction(state: DominionState, playerId: string): Play
            if (i < pileDepletions.length) cardsToEmpty3Piles += pileDepletions[i];
         }
         const otherCardsRatePerRound = Math.max(0.5, otherCardsBoughtCount / 2);
-        const roundsToEmptyPiles = cardsToEmpty3Piles / otherCardsRatePerRound;
+        const roundsToEmptyPiles = (cardsToEmpty3Piles * 2) / otherCardsRatePerRound;
         
         const estimatedRoundsLeft = Math.min(roundsToDepleteProvinces, roundsToEmptyPiles);
         
         // Map rounds left to 0.0 -> 1.0 (assuming ~15 rounds is a full game)
         const gameProgress = Math.max(0, Math.min(1, 1 - (estimatedRoundsLeft / 15)));
 
+        
         const evaluate = (cardId: string) => {
            const def = getCardDef(cardId);
            let val = def.cost;
            const isVP = def.types.includes('VICTORY');
            const isTreasure = def.types.includes('TREASURE');
            
-           if (gameProgress < 0.5) {
-             // Early game: Build economy, NO VP
-             if (isVP) val -= 10;
-             if (isTreasure) val += 1;
-           } else if (gameProgress < 0.75) {
-             // Mid game: Start buying big VP, still want good actions
-             if (cardId === 'province') val += 5;
-             if (cardId === 'duchy') val += 1;
-             if (cardId === 'estate') val -= 5;
+           // Use linear formulas parameterized for tournaments
+           // Default params if none provided in settings
+           const params = state.settings?.botParams || {
+               vpIntercept: -10, vpSlope: 30, // Starts at -10, ends at +20
+               moneyIntercept: 1, moneySlope: -2, // Starts at +1, ends at -1
+               actionIntercept: 0, actionSlope: 0
+           };
+
+           if (isVP) {
+               val += params.vpIntercept + (params.vpSlope * gameProgress);
+           } else if (isTreasure) {
+               val += params.moneyIntercept + (params.moneySlope * gameProgress);
            } else {
-             // Late game: Rush VP
-             if (cardId === 'province') val += 15;
-             if (cardId === 'duchy') val += 8;
-             if (cardId === 'estate') val += 3;
-             if (isTreasure && cardId !== 'gold') val -= 2; // avoid cheap treasures late
+               val += params.actionIntercept + (params.actionSlope * gameProgress);
            }
 
            // Special cases
@@ -315,6 +315,31 @@ export function getRandomBotAction(state: DominionState, playerId: string): Play
              else val += (deckSize >= 40 ? 6 : 2);
            }
            
+           // End game logic check
+           const emptiesProvince = (cardId === 'province' && state.supply['province'] === 1);
+           const emptiesThirdPile = (state.supply[cardId] === 1 && emptyPiles === 2);
+           
+           if (emptiesProvince || emptiesThirdPile) {
+               // Calculate approximate VP if we bought this
+               const vpGain = isVP ? (cardId === 'province' ? 6 : cardId === 'duchy' ? 3 : cardId === 'estate' ? 1 : 0) : 0;
+               const newMeVP = me.victoryPoints + vpGain;
+               
+               let isAhead = true;
+               for (const pId in state.players) {
+                  if (pId === playerId) continue;
+                  if (state.players[pId].victoryPoints >= newMeVP) {
+                     isAhead = false;
+                     break;
+                  }
+               }
+               
+               if (isAhead) {
+                  val += 1000; // MUST END GAME NOW
+               } else {
+                  val -= 1000; // NEVER END GAME IF LOSING
+               }
+           }
+
            return val;
         };
 

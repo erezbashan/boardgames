@@ -75,12 +75,12 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
   const numPlayers = gameState.playerOrder.length;
   const lookback = 2 * (numPlayers || 2);
   const recent = gameState.recentBuyingPowers || [];
-  const window = recent.slice(-lookback);
-  while (window.length < lookback) window.unshift(0);
+  const historyWindow = recent.slice(-lookback);
+  while (historyWindow.length < lookback) historyWindow.unshift(0);
   
   let provincesBoughtCount = 0;
   let otherCardsBoughtCount = 0;
-  for (const bp of window) {
+  for (const bp of historyWindow) {
      if (bp >= 8) provincesBoughtCount++;
      if (bp >= 3 && bp < 8) otherCardsBoughtCount++;
   }
@@ -102,9 +102,10 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
      if (i < pileDepletions.length) cardsToEmpty3Piles += pileDepletions[i];
   }
   const otherCardsRatePerRound = Math.max(0.5, otherCardsBoughtCount / 2);
-  const roundsToEmptyPiles = cardsToEmpty3Piles / otherCardsRatePerRound;
+  const roundsToEmptyPiles = (cardsToEmpty3Piles * 2) / otherCardsRatePerRound;
   
   const estimatedRoundsLeft = Math.min(roundsToDepleteProvinces, roundsToEmptyPiles);
+  const avgBuyingPower = historyWindow.length > 0 ? historyWindow.reduce((a, b) => a + b, 0) / historyWindow.length : 0;
   const gameProgress = Math.max(0, Math.min(1, 1 - (estimatedRoundsLeft / 15)));
   
   const me = gameState.players[myPlayerId];
@@ -277,18 +278,22 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
               style={{ position: 'relative', width: '30px', height: '42px', border: '1px solid #475569', borderRadius: '3px', background: '#020617', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', cursor: gameState.settings?.openGame ? 'help' : 'default' }}
             >
               {p.deck.length}
-              {gameState.pendingActions[0]?.type === 'REQUEST_INPUT' && gameState.pendingActions[0].playerId === p.id && gameState.pendingActions[0].inputType === 'PLAY_VASSAL_ACTION' && (
+              {p.transientDeckReveals && p.transientDeckReveals.map((cardId, idx) => (
                 <motion.div
+                  key={`transient-${idx}`}
                   initial={{ scale: 0, opacity: 0, y: 0 }}
-                  animate={{ scale: 2.5, opacity: 1, y: -30, zIndex: 9999 }}
+                  animate={{ scale: 1.1, opacity: 1, y: -10 - (idx * 15), zIndex: 9999 + idx }}
                   transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+                  onMouseEnter={(e) => showPopup(e, getCardDef(cardId))}
+                  onMouseLeave={hidePopup}
                   style={{
                     position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-                    backgroundImage: `url(${CARD_IMAGES[gameState.pendingActions[0].payload?.cardId]})`,
-                    backgroundSize: '100% 100%', borderRadius: '3px', boxShadow: '0 5px 15px rgba(0,0,0,0.5)'
+                    backgroundImage: `url(${CARD_IMAGES[cardId]})`,
+                    backgroundSize: '100% 100%', borderRadius: '3px', boxShadow: '0 5px 15px rgba(0,0,0,0.5)',
+                    cursor: 'help'
                   }}
                 />
-              )}
+              ))}
             </div>
             Deck
           </div>
@@ -379,7 +384,7 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
                         backgroundPosition: 'center',
                         cursor: (isMyTurn || isInputPhaseForMe) ? 'pointer' : 'default',
                         boxShadow: isSelected ? '0 0 0 4px #eab308' : isPlayableAction ? '0 0 8px rgba(52,211,153,0.6)' : card._revealed ? '0 0 15px 5px #fbbf24' : '0 2px 4px rgba(0,0,0,0.5)',
-                        animation: card._revealed ? 'revealedPulse 1s ease-in-out infinite' : isPlayableAction && !isSelected ? 'blinkGlow 1.5s infinite' : 'none',
+                        animation: card._revealed ? 'revealedPulse 1s ease-in-out 3' : isPlayableAction && !isSelected ? 'blinkGlow 1.5s infinite' : 'none',
                         flexShrink: 0,
                         filter: isSelected ? 'brightness(1.2)' : 'none'
                       }}
@@ -1015,7 +1020,7 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
         }
       `}</style>
       <GameLayout
-        gameName={gameState.status === 'Playing' ? `Dominion [Prog: ${gameProgress.toFixed(2)} | EstRounds: ${estimatedRoundsLeft.toFixed(1)}]` : "Dominion"}
+        gameName={gameState.status === 'Playing' ? `Dominion [Prog: ${gameProgress.toFixed(2)} | EstTotalRounds: ${estimatedRoundsLeft.toFixed(1)} | AvgBuyPwr: ${avgBuyingPower.toFixed(1)} | ProvEst: ${roundsToDepleteProvinces.toFixed(1)}]` : "Dominion"}
         helpText="Build your deck and collect Victory Points! First to buy Provinces or empty 3 piles wins."
         helpUrl="https://en.wikipedia.org/wiki/Dominion_(card_game)"
       renderGameSpecificPlayerDetails={renderPlayerDetails}

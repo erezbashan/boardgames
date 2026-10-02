@@ -161,27 +161,37 @@ function processPendingActions(state: DominionState) {
         break;
       }
       case 'BANDIT_ATTACK': {
-        // Opponent reveals top 2 cards of deck (shuffling if needed), trashes highest cost treasure (non-copper), discards rest.
-        let revealedCards = [];
-        for (let i = 0; i < 2; i++) {
-          if (player.deck.length === 0 && player.discard.length > 0) {
-            player.deck = shuffle([...player.discard]);
-            player.discard = [];
-            state.logs.push(`${player.name} shuffles their discard pile.`);
+        state.actionQueue = state.actionQueue || [];
+        state.actionQueue.unshift({ delayMs: 100, action: { type: 'ENQUEUE_PENDING_ACTION', pendingAction: { type: 'BANDIT_REVEAL_NEXT', playerId: pending.playerId, cardsLeft: 2, revealedCards: [] } } });
+        break;
+      }
+      case 'BANDIT_REVEAL_NEXT': {
+        const { playerId, cardsLeft, revealedCards } = pending as any;
+        const p = state.players[playerId];
+        if (cardsLeft > 0) {
+          if (p.deck.length === 0 && p.discard.length > 0) {
+            p.deck = shuffle([...p.discard]);
+            p.discard = [];
+            state.logs.push(`${p.name} shuffles their discard pile.`);
           }
-          const c = player.deck.pop();
-          if (c) revealedCards.push(c);
-        }
-        
-        if (revealedCards.length > 0) {
+          const c = p.deck.pop();
+          if (c) {
+            revealedCards.push(c);
+            p.transientDeckReveals = [c.cardId];
+            state.logs.push(`${p.name} reveals [${getCardDef(c.cardId).name}] from their deck.`);
+            
+            state.actionQueue = state.actionQueue || [];
+            state.actionQueue.unshift(
+                { delayMs: 1500, action: { type: 'CLEAR_DECK_REVEALS', playerId } },
+                { delayMs: 100, action: { type: 'ENQUEUE_PENDING_ACTION', pendingAction: { type: 'BANDIT_REVEAL_NEXT', playerId, cardsLeft: cardsLeft - 1, revealedCards } } }
+            );
+          } else {
+            state.actionQueue = state.actionQueue || [];
+            state.actionQueue.unshift({ delayMs: 100, action: { type: 'ENQUEUE_PENDING_ACTION', pendingAction: { type: 'RESOLVE_BANDIT', playerId, revealedCards } } });
+          }
+        } else {
           state.actionQueue = state.actionQueue || [];
-          
-          for (const c of revealedCards) {
-            state.actionQueue.push({ delayMs: 200, action: { type: 'POPUP_CARD', cardId: c.cardId } });
-            state.actionQueue.push({ delayMs: 2500, action: { type: 'CLEAR_POPUP' } });
-          }
-
-          state.actionQueue.push({ delayMs: 100, action: { type: 'ENQUEUE_PENDING_ACTION', pendingAction: { type: 'RESOLVE_BANDIT', playerId: pending.playerId, revealedCards } } });
+          state.actionQueue.unshift({ delayMs: 100, action: { type: 'ENQUEUE_PENDING_ACTION', pendingAction: { type: 'RESOLVE_BANDIT', playerId, revealedCards } } });
         }
         break;
       }
@@ -225,25 +235,37 @@ function processPendingActions(state: DominionState) {
         }
         const card = player.deck.pop();
         if (card) {
-          player.discard.push(card);
-          state.logs.push(`${player.name} discards [${getCardDef(card.cardId).name}] from the top of their deck.`);
+          state.logs.push(`${player.name} reveals [${getCardDef(card.cardId).name}] from the top of their deck.`);
           state.actionQueue = state.actionQueue || [];
-          state.actionQueue.push({ delayMs: 200, action: { type: 'POPUP_CARD', cardId: card.cardId } });
+          
+          state.actionQueue.push({ delayMs: 100, action: { type: 'SHOW_DECK_REVEALS', playerId: player.id, cardIds: [card.cardId] } });
 
           if (getCardDef(card.cardId).types.includes('ACTION')) {
+            // Leave it revealed until the action resolves!
             if (player.isBot) {
-               state.actionQueue.push({ delayMs: 3000, action: { type: 'CLEAR_POPUP' } });
                state.actionQueue.push({ delayMs: 100, action: { type: 'BOT_PLAY_VASSAL', playerId: player.id, instanceId: card.id } });
             } else {
-               state.actionQueue.push({ delayMs: 3000, action: { type: 'CLEAR_POPUP' } });
+               // Must add the card to a special holding area so RESOLVE_INPUT can find it?
+               // Wait! I can just put it in discard right now and keep the visual overlay on the deck!
+               // But user specifically said "wait... move to discard".
+               player.discard.push(card);
                state.actionQueue.push({ delayMs: 100, action: { type: 'ENQUEUE_PENDING_ACTION', pendingAction: { type: 'REQUEST_INPUT', playerId: player.id, inputType: 'PLAY_VASSAL_ACTION', payload: { instanceId: card.id, cardId: card.cardId } } } });
             }
           } else {
-             state.actionQueue.push({ delayMs: 3000, action: { type: 'CLEAR_POPUP' } });
+             // Not an action card. Wait 1.5s, then discard.
+             state.actionQueue.push({ delayMs: 1500, action: { type: 'CLEAR_DECK_REVEALS', playerId: player.id } });
+             state.actionQueue.push({ delayMs: 100, action: { type: 'ENQUEUE_PENDING_ACTION', pendingAction: { type: 'DISCARD_REVEALED_VASSAL', playerId: player.id, card } } });
           }
         } else {
-          state.logs.push(`${player.name} has no cards to discard.`);
+          state.logs.push(`${player.name} has no cards to reveal.`);
         }
+        break;
+      }
+      case 'DISCARD_REVEALED_VASSAL': {
+        const { playerId, card } = pending as any;
+        const p = state.players[playerId];
+        p.discard.push(card);
+        state.logs.push(`${p.name} discards the revealed [${getCardDef(card.cardId).name}].`);
         break;
       }
       case 'LIBRARY_DRAW': {
@@ -441,6 +463,16 @@ export function dominionReducer
       delete nextState.revealedCard;
       nextState.supply[(action as any).cardId] = (action as any).amount;
       nextState.logs.push(`Kingdom card selected: [${getCardDef((action as any).cardId).name}]`);
+      break;
+    }
+    case 'SHOW_DECK_REVEALS': {
+      const p = nextState.players[(action as any).playerId];
+      if (p) p.transientDeckReveals = (action as any).cardIds;
+      break;
+    }
+    case 'CLEAR_DECK_REVEALS': {
+      const p = nextState.players[(action as any).playerId];
+      if (p) delete p.transientDeckReveals;
       break;
     }
     case 'POPUP_CARD': {
@@ -852,6 +884,7 @@ export function dominionReducer
           const instanceId: string = req.payload.instanceId;
           const player = nextState.players[action.playerId];
           nextState.pendingActions.shift();
+          delete player.transientDeckReveals;
 
           if (playCard) {
             const idx = player.discard.findIndex(c => c.id === instanceId);
@@ -1015,14 +1048,37 @@ export function dominionReducer
       } else {
         nextState.logs.push(`-- Game Over! (3 or more supply piles are empty) --`);
       }
-      // Find winner: most VP; tie-break by fewest turns taken (more remaining turns = fewer taken)
+      
       let bestVP = -Infinity;
-      let winnerId: string | null = null;
-      nextState.playerOrder.forEach(pid => {
+      let winners: string[] = [];
+
+      nextState.playerOrder.forEach((pid, index) => {
         const vp = nextState.players[pid].victoryPoints;
-        if (vp > bestVP) { bestVP = vp; winnerId = pid; }
+        // Relative turns taken: players after the current player took one fewer turn
+        const turnsTaken = index <= nextState.currentPlayerIndex ? 1 : 0; 
+        
+        if (vp > bestVP) {
+           bestVP = vp;
+           winners = [pid];
+        } else if (vp === bestVP) {
+           const currentWinnerIndex = nextState.playerOrder.indexOf(winners[0]);
+           const currentWinnerTurns = currentWinnerIndex <= nextState.currentPlayerIndex ? 1 : 0;
+           
+           if (turnsTaken < currentWinnerTurns) {
+              winners = [pid]; // Tie-breaker: fewer turns taken wins
+              nextState.logs.push(`Tie-breaker: ${nextState.players[pid].name} wins the tie with fewer turns taken.`);
+           } else if (turnsTaken === currentWinnerTurns) {
+              winners.push(pid); // True tie
+           }
+        }
       });
-      nextState.winnerId = winnerId;
+      
+      nextState.winnerId = winners[0];
+      if (winners.length > 1) {
+         nextState.logs.push(`🏆 It's a tie between ${winners.map(id => nextState.players[id].name).join(' and ')} with ${bestVP} VP!`);
+      } else {
+         nextState.logs.push(`🏆 ${nextState.players[winners[0]].name} wins with ${bestVP} VP!`);
+      }
     }
   }
 
