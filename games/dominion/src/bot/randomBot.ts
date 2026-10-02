@@ -60,6 +60,111 @@ export function getRandomBotAction(state: DominionState, playerId: string): Play
       }
       return { type: 'RESOLVE_INPUT', playerId, payload: { cardId: '' } };
     }
+
+    if (inputReq.inputType === 'HAND_TO_DECK') {
+      const p = state.players[playerId];
+      const isBureaucrat = inputReq.payload?.filterTypes?.includes('VICTORY');
+      if (isBureaucrat) {
+        // Bureaucrat: put cheapest Victory card
+        const vCards = p.hand.filter(c => getCardDef(c.cardId).types.includes('VICTORY'));
+        const cheapest = vCards.sort((a, b) => getCardDef(a.cardId).cost - getCardDef(b.cardId).cost)[0];
+        if (cheapest) return { type: 'RESOLVE_INPUT', playerId, payload: { instanceId: cheapest.id } };
+      } else {
+        // Artisan: if no actions left, put best action on top. Else cheapest card.
+        if (p.actions === 0) {
+          const actionCards = p.hand.filter(c => getCardDef(c.cardId).types.includes('ACTION'));
+          const bestAction = actionCards.sort((a, b) => getCardDef(b.cardId).cost - getCardDef(a.cardId).cost)[0];
+          if (bestAction) return { type: 'RESOLVE_INPUT', playerId, payload: { instanceId: bestAction.id } };
+        }
+        const cheapestCard = [...p.hand].sort((a, b) => getCardDef(a.cardId).cost - getCardDef(b.cardId).cost)[0];
+        if (cheapestCard) return { type: 'RESOLVE_INPUT', playerId, payload: { instanceId: cheapestCard.id } };
+      }
+      return { type: 'RESOLVE_INPUT', playerId, payload: { cardId: '' } };
+    }
+
+
+
+    if (inputReq.inputType === 'TRASH_FOR_REMODEL') {
+      const def = getCardDef('remodel');
+      if (def.botChoose) return { type: 'RESOLVE_INPUT', playerId, payload: def.botChoose(state, { playerId }) };
+      return { type: 'RESOLVE_INPUT', playerId, payload: { trashedIds: [] } };
+    }
+
+    if (inputReq.inputType === 'TRASH_FOR_MINE') {
+      const def = getCardDef('mine');
+      if (def.botChoose) return { type: 'RESOLVE_INPUT', playerId, payload: def.botChoose(state, { playerId }) };
+      return { type: 'RESOLVE_INPUT', playerId, payload: { trashedIds: [] } };
+    }
+
+    if (inputReq.inputType === 'DISCARD_TO_DECK') {
+      const p = state.players[playerId];
+      const allCards = [...p.deck, ...p.discard, ...p.hand, ...p.playArea];
+      const costs = allCards.map(c => getCardDef(c.cardId).cost).sort((a, b) => a - b);
+      const medianCost = costs[Math.floor(costs.length / 2)] || 0;
+      
+      const bestInDiscard = [...p.discard].sort((a, b) => getCardDef(b.cardId).cost - getCardDef(a.cardId).cost)[0];
+      if (bestInDiscard && getCardDef(bestInDiscard.cardId).cost > medianCost) {
+        return { type: 'RESOLVE_INPUT', playerId, payload: { instanceId: bestInDiscard.id } };
+      }
+      return { type: 'RESOLVE_INPUT', playerId, payload: { instanceId: '' } };
+    }
+
+    if (inputReq.inputType === 'PLAY_VASSAL_ACTION') {
+      return { type: 'RESOLVE_INPUT', playerId, payload: { playCard: true } };
+    }
+
+    if (inputReq.inputType === 'LIBRARY_KEEP') {
+      const me = state.players[playerId];
+      const cardId = inputReq.payload?.card?.cardId;
+      if (getCardDef(cardId).types.includes('ACTION') && me.actions === 0) {
+        return { type: 'RESOLVE_INPUT', playerId, payload: { keep: false } }; // Discard it since we have no actions
+      }
+      return { type: 'RESOLVE_INPUT', playerId, payload: { keep: true } };
+    }
+
+    if (inputReq.inputType === 'SENTRY_CHOICE') {
+      const cards = inputReq.payload?.cards || [];
+      const trashIds: string[] = [];
+      const discardIds: string[] = [];
+      const deckIds: string[] = [];
+      for (const c of cards) {
+        const def = getCardDef(c.cardId);
+        if (c.cardId === 'curse') {
+          trashIds.push(c.id);
+        } else if (def.types.includes('VICTORY')) {
+          discardIds.push(c.id);
+        } else {
+          deckIds.push(c.id);
+        }
+      }
+      return { type: 'RESOLVE_INPUT', playerId, payload: { trashIds, discardIds, deckIds } };
+    }
+    
+    if (inputReq.inputType === 'TRASH_FOR_REMODEL') {
+      const me = state.players[playerId];
+      const curse = me.hand.find(c => c.cardId === 'curse');
+      if (curse) return { type: 'RESOLVE_INPUT', playerId, payload: { trashedIds: [curse.id] } };
+      
+      // Look for a card we can exactly upgrade by 2
+      for (const c of me.hand) {
+        const def = getCardDef(c.cardId);
+        const targetCost = def.cost + 2;
+        const availableInSupply = Object.keys(state.supply).find(s => getCardDef(s).cost === targetCost && state.supply[s] > 0);
+        if (availableInSupply) {
+          return { type: 'RESOLVE_INPUT', playerId, payload: { trashedIds: [c.id] } };
+        }
+      }
+      return { type: 'RESOLVE_INPUT', playerId, payload: { trashedIds: [] } };
+    }
+    
+    if (inputReq.inputType === 'TRASH_FOR_MINE') {
+      const me = state.players[playerId];
+      const silver = me.hand.find(c => c.cardId === 'silver');
+      if (silver) return { type: 'RESOLVE_INPUT', playerId, payload: { trashedIds: [silver.id] } };
+      const copper = me.hand.find(c => c.cardId === 'copper');
+      if (copper) return { type: 'RESOLVE_INPUT', playerId, payload: { trashedIds: [copper.id] } };
+      return { type: 'RESOLVE_INPUT', playerId, payload: { trashedIds: [] } };
+    }
   }
 
   // Not input phase
@@ -68,17 +173,25 @@ export function getRandomBotAction(state: DominionState, playerId: string): Play
   const me = state.players[playerId];
 
   if (state.phase === 'ACTION') {
-    const playableActions = me.hand.filter(c => getCardDef(c.cardId).types.includes('ACTION'));
+    let playableActions = me.hand.filter(c => getCardDef(c.cardId).types.includes('ACTION'));
+    
     if (me.actions > 0 && playableActions.length > 0) {
+      // Throne Room logic
+      const throneRoom = playableActions.find(c => c.cardId === 'throne_room');
+      if (throneRoom && playableActions.length > 1) {
+        return { type: 'PLAY_CARD', playerId, instanceId: throneRoom.id };
+      }
+      
+      // Exclude Throne Room from normal choices to prefer playing it first
+      playableActions = playableActions.filter(c => c.cardId !== 'throne_room');
+      
       // Priority 1: Action cards that give more actions (village, festival, market, lab, etc.)
       const actionGivers = playableActions.filter(c => {
         const def = getCardDef(c.cardId);
-        // These cards give +Actions: check description or specific ids known to give actions
         const desc = def.description.toLowerCase();
         return desc.includes('+2 actions') || desc.includes('+1 action');
       });
 
-      // Among action-givers, prefer more expensive cards
       const sortedActionGivers = [...actionGivers].sort((a, b) => 
         getCardDef(b.cardId).cost - getCardDef(a.cardId).cost
       );
@@ -87,22 +200,21 @@ export function getRandomBotAction(state: DominionState, playerId: string): Play
         return { type: 'PLAY_CARD', playerId, instanceId: sortedActionGivers[0].id };
       }
 
-      // Priority 1.5: If we have junk, prioritize Chapel or Cellar
       const hasJunk = me.hand.some(c => c.cardId === 'curse' || getCardDef(c.cardId).types.includes('VICTORY'));
       if (hasJunk) {
-        const trashDiscarder = playableActions.find(c => c.cardId === 'chapel' || c.cardId === 'cellar');
+        const trashDiscarder = playableActions.find(c => c.cardId === 'chapel' || c.cardId === 'cellar' || c.cardId === 'sentry');
         if (trashDiscarder) {
           return { type: 'PLAY_CARD', playerId, instanceId: trashDiscarder.id };
         }
       }
 
-      // Priority 2: Any action card, sorted by cost descending
       const sortedActions = [...playableActions].sort((a, b) =>
         getCardDef(b.cardId).cost - getCardDef(a.cardId).cost
       );
-      return { type: 'PLAY_CARD', playerId, instanceId: sortedActions[0].id };
+      if (sortedActions.length > 0) {
+        return { type: 'PLAY_CARD', playerId, instanceId: sortedActions[0].id };
+      }
     }
-    // Else end phase
     return { type: 'END_PHASE', playerId };
   }
 
@@ -124,21 +236,85 @@ export function getRandomBotAction(state: DominionState, playerId: string): Play
         if (state.supply[cardId] <= 0) return false;
         const def = getCardDef(cardId);
         if (def.cost > me.coins) return false;
-        // Never buy curses (negative VP)
-        if (cardId === 'curse') return false;
+        // Never buy curses (negative VP) or coppers (junk)
+        if (cardId === 'curse' || cardId === 'copper') return false;
         return true;
       });
 
       if (affordable.length > 0) {
         // Evaluate the priority of cards based on cost, with some heuristics
         const deckSize = state.players[playerId].deck.length + state.players[playerId].discard.length + state.players[playerId].hand.length + state.players[playerId].playArea.length;
+        // Calculate game progress (0.0 to 1.0) using historical buying power
+        const numPlayers = state.playerOrder.length;
+        const lookback = 2 * numPlayers;
+        const recent = state.recentBuyingPowers || [];
+        const window = recent.slice(-lookback);
+        while (window.length < lookback) window.unshift(0); // Pad with 0 for start of game
         
+        let provincesBoughtCount = 0;
+        let otherCardsBoughtCount = 0;
+        for (const bp of window) {
+           if (bp >= 8) provincesBoughtCount++;
+           if (bp >= 3 && bp < 8) otherCardsBoughtCount++; // Rough estimate of buying other cards
+        }
+        
+        // Province depletion guess
+        const provinceRatePerRound = Math.max(0.1, provincesBoughtCount / 2);
+        const provincesLeft = state.supply['province'] ?? 8;
+        const roundsToDepleteProvinces = provincesLeft / provinceRatePerRound;
+        
+        // 3 piles depletion guess
+        let emptyPiles = 0;
+        const pileDepletions: number[] = [];
+        for (const cardId in state.supply) {
+           const count = state.supply[cardId];
+           if (count === 0) emptyPiles++;
+           else if (cardId !== 'province') pileDepletions.push(count);
+        }
+        pileDepletions.sort((a,b) => a - b);
+        
+        let cardsToEmpty3Piles = 0;
+        const pilesNeeded = Math.max(0, 3 - emptyPiles);
+        for (let i = 0; i < pilesNeeded; i++) {
+           if (i < pileDepletions.length) cardsToEmpty3Piles += pileDepletions[i];
+        }
+        const otherCardsRatePerRound = Math.max(0.5, otherCardsBoughtCount / 2);
+        const roundsToEmptyPiles = cardsToEmpty3Piles / otherCardsRatePerRound;
+        
+        const estimatedRoundsLeft = Math.min(roundsToDepleteProvinces, roundsToEmptyPiles);
+        
+        // Map rounds left to 0.0 -> 1.0 (assuming ~15 rounds is a full game)
+        const gameProgress = Math.max(0, Math.min(1, 1 - (estimatedRoundsLeft / 15)));
+
         const evaluate = (cardId: string) => {
-           let val = getCardDef(cardId).cost;
-           // Avoid Gardens early game (needs 40+ cards to be better than Duchy, 30+ to be okay)
-           if (cardId === 'gardens' && deckSize < 30) val -= 2;
-           // Value Provinces highly
-           if (cardId === 'province') val += 1;
+           const def = getCardDef(cardId);
+           let val = def.cost;
+           const isVP = def.types.includes('VICTORY');
+           const isTreasure = def.types.includes('TREASURE');
+           
+           if (gameProgress < 0.5) {
+             // Early game: Build economy, NO VP
+             if (isVP) val -= 10;
+             if (isTreasure) val += 1;
+           } else if (gameProgress < 0.75) {
+             // Mid game: Start buying big VP, still want good actions
+             if (cardId === 'province') val += 5;
+             if (cardId === 'duchy') val += 1;
+             if (cardId === 'estate') val -= 5;
+           } else {
+             // Late game: Rush VP
+             if (cardId === 'province') val += 15;
+             if (cardId === 'duchy') val += 8;
+             if (cardId === 'estate') val += 3;
+             if (isTreasure && cardId !== 'gold') val -= 2; // avoid cheap treasures late
+           }
+
+           // Special cases
+           if (cardId === 'gardens') {
+             if (deckSize < 30) val -= 5;
+             else val += (deckSize >= 40 ? 6 : 2);
+           }
+           
            return val;
         };
 

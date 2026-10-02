@@ -13,6 +13,11 @@ export type PlayerAction =
   | { type: 'CLEANUP_PHASE'; playerId: string }
   | { type: 'START_TURN'; playerId: string }
   | { type: 'SHOW_KINGDOM_CARD'; cardId: string; onComplete?: PlayerAction }
-  | { type: 'ADD_KINGDOM_CARD'; cardId: string; amount: number; onComplete?: PlayerAction };
+  | { type: 'ADD_KINGDOM_CARD'; cardId: string; amount: number; onComplete?: PlayerAction }
+  | { type: 'POPUP_CARD'; cardId: string }
+  | { type: 'CLEAR_POPUP' }
+  | { type: 'ENQUEUE_PENDING_ACTION'; pendingAction: any }
+  | { type: 'BOT_PLAY_VASSAL'; playerId: string; instanceId: string }
+  | { type: 'CLEAR_REVEALED'; playerId: string };
 
 export type DominionAction = PlayerAction | BaseAction;

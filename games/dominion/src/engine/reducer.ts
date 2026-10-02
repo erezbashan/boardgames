@@ -59,6 +59,7 @@ function processPendingActions(state: DominionState) {
         break;
       case 'GAIN_COINS':
         player.coins += pending.amount;
+        player.turnBuyingPower = Math.max(player.turnBuyingPower || 0, player.coins);
         break;
       case 'SHUFFLE_DISCARD':
         player.deck = shuffle([...player.deck, ...player.discard]);
@@ -101,6 +102,64 @@ function processPendingActions(state: DominionState) {
         }
         break;
       }
+      case 'MILITIA_ATTACK': {
+        const { playerId: targetId } = pending as any;
+        const p = state.players[targetId];
+        if (p.hand.length > 3) {
+           const hasMoat = p.hand.some(c => c.cardId === 'moat');
+           if (hasMoat) {
+             const moat = p.hand.find(c => c.cardId === 'moat');
+             state.logs.push(`🛡️ [Moat] ${p.name} reveals a Moat and is unaffected by the attack.`);
+             if (moat) moat._revealed = true;
+           } else {
+             state.pendingActions.unshift({
+               type: 'REQUEST_INPUT',
+               playerId: targetId,
+               inputType: 'DISCARD_FOR_MILITIA',
+               payload: { amount: p.hand.length - 3 }
+             });
+           }
+        }
+        break;
+      }
+      case 'WITCH_ATTACK': {
+        const { playerId: targetId } = pending as any;
+        const p = state.players[targetId];
+        const hasMoat = p.hand.some(c => c.cardId === 'moat');
+        if (hasMoat) {
+           const moat = p.hand.find(c => c.cardId === 'moat');
+           state.logs.push(`🛡️ [Moat] ${p.name} reveals a Moat and is unaffected by the attack.`);
+           if (moat) moat._revealed = true;
+        } else {
+           state.pendingActions.unshift({ type: 'FORCE_GAIN_CARD', playerId: targetId, cardId: 'curse' });
+        }
+        break;
+      }
+      case 'BUREAUCRAT_ATTACK': {
+        const { playerId: targetId } = pending as any;
+        const p = state.players[targetId];
+        const hasMoat = p.hand.some(c => c.cardId === 'moat');
+        if (hasMoat) {
+           const moat = p.hand.find(c => c.cardId === 'moat');
+           state.logs.push(`🛡️ [Moat] ${p.name} reveals a Moat and is unaffected by the attack.`);
+           if (moat) moat._revealed = true;
+        } else {
+           const vCards = p.hand.filter(c => getCardDef(c.cardId).types.includes('VICTORY'));
+           const uniqueIds = new Set(vCards.map(c => c.cardId));
+           if (vCards.length === 0) {
+             state.pendingActions.unshift({ type: 'REVEAL_HAND', playerId: targetId });
+           } else if (uniqueIds.size === 1) {
+             const card = vCards[0];
+             const idx = p.hand.findIndex(c => c.id === card.id);
+             p.hand.splice(idx, 1);
+             p.deck.push(card);
+             state.logs.push(`${p.name} puts a Victory card on their deck.`);
+           } else {
+             state.pendingActions.unshift({ type: 'REQUEST_INPUT', playerId: targetId, inputType: 'HAND_TO_DECK', payload: { filterTypes: ['VICTORY'] } });
+           }
+        }
+        break;
+      }
       case 'BANDIT_ATTACK': {
         // Opponent reveals top 2 cards of deck (shuffling if needed), trashes highest cost treasure (non-copper), discards rest.
         let revealedCards = [];
@@ -115,26 +174,38 @@ function processPendingActions(state: DominionState) {
         }
         
         if (revealedCards.length > 0) {
-          state.logs.push(`${player.name} reveals ${revealedCards.map(c => `[${getCardDef(c.cardId).name}]`).join(' and ')}.`);
+          state.actionQueue = state.actionQueue || [];
           
-          // Find treasures other than copper
-          const trasheableTreasures = revealedCards.filter(c => getCardDef(c.cardId).types.includes('TREASURE') && c.cardId !== 'copper');
-          
-          if (trasheableTreasures.length > 0) {
-            trasheableTreasures.sort((a, b) => getCardDef(b.cardId).cost - getCardDef(a.cardId).cost);
-            const toTrash = trasheableTreasures[0];
-            state.trash.push(toTrash);
-            state.logs.push(`${player.name} trashes [${getCardDef(toTrash.cardId).name}].`);
-            
-            // Discard the rest
-            revealedCards.forEach(c => {
-              if (c.id !== toTrash.id) player.discard.push(c);
-            });
-          } else {
-            // Discard all
-            player.discard.push(...revealedCards);
-            state.logs.push(`${player.name} discards them.`);
+          for (const c of revealedCards) {
+            state.actionQueue.push({ delayMs: 200, action: { type: 'POPUP_CARD', cardId: c.cardId } });
+            state.actionQueue.push({ delayMs: 2500, action: { type: 'CLEAR_POPUP' } });
           }
+
+          state.actionQueue.push({ delayMs: 100, action: { type: 'ENQUEUE_PENDING_ACTION', pendingAction: { type: 'RESOLVE_BANDIT', playerId: pending.playerId, revealedCards } } });
+        }
+        break;
+      }
+      case 'RESOLVE_BANDIT': {
+        const { revealedCards } = pending as any;
+        state.logs.push(`${player.name} reveals ${revealedCards.map((c: any) => `[${getCardDef(c.cardId).name}]`).join(' and ')}.`);
+        
+        // Find treasures other than copper
+        const trasheableTreasures = revealedCards.filter((c: any) => getCardDef(c.cardId).types.includes('TREASURE') && c.cardId !== 'copper');
+        
+        if (trasheableTreasures.length > 0) {
+          trasheableTreasures.sort((a: any, b: any) => getCardDef(b.cardId).cost - getCardDef(a.cardId).cost);
+          const toTrash = trasheableTreasures[0];
+          state.trash.push(toTrash);
+          state.logs.push(`${player.name} trashes [${getCardDef(toTrash.cardId).name}].`);
+          
+          // Discard the rest
+          revealedCards.forEach((c: any) => {
+            if (c.id !== toTrash.id) player.discard.push(c);
+          });
+        } else {
+          // Discard all
+          player.discard.push(...revealedCards);
+          state.logs.push(`${player.name} discards them.`);
         }
         break;
       }
@@ -155,23 +226,77 @@ function processPendingActions(state: DominionState) {
         const card = player.deck.pop();
         if (card) {
           player.discard.push(card);
-          state.logs.push(`${player.name} discards [${getCardDef(card.cardId).name}].`);
+          state.logs.push(`${player.name} discards [${getCardDef(card.cardId).name}] from the top of their deck.`);
+          state.actionQueue = state.actionQueue || [];
+          state.actionQueue.push({ delayMs: 200, action: { type: 'POPUP_CARD', cardId: card.cardId } });
+
           if (getCardDef(card.cardId).types.includes('ACTION')) {
             if (player.isBot) {
-               // Bot always plays it
-               const def = getCardDef(card.cardId);
-               player.playArea.push(player.discard.pop()!);
-               state.logs.push(`${player.name} plays [${def.name}] via Vassal.`);
-               if (def.onPlay) {
-                 state.pendingActions.unshift(...def.onPlay(state, player.id));
-               }
+               state.actionQueue.push({ delayMs: 3000, action: { type: 'CLEAR_POPUP' } });
+               state.actionQueue.push({ delayMs: 100, action: { type: 'BOT_PLAY_VASSAL', playerId: player.id, instanceId: card.id } });
             } else {
-               // Request user input
-               state.pendingActions.unshift({ type: 'REQUEST_INPUT', playerId: player.id, inputType: 'PLAY_VASSAL_ACTION', payload: { instanceId: card.id, cardId: card.cardId } });
+               state.actionQueue.push({ delayMs: 3000, action: { type: 'CLEAR_POPUP' } });
+               state.actionQueue.push({ delayMs: 100, action: { type: 'ENQUEUE_PENDING_ACTION', pendingAction: { type: 'REQUEST_INPUT', playerId: player.id, inputType: 'PLAY_VASSAL_ACTION', payload: { instanceId: card.id, cardId: card.cardId } } } });
             }
+          } else {
+             state.actionQueue.push({ delayMs: 3000, action: { type: 'CLEAR_POPUP' } });
           }
         } else {
           state.logs.push(`${player.name} has no cards to discard.`);
+        }
+        break;
+      }
+      case 'LIBRARY_DRAW': {
+        const { setAside } = pending as any;
+        if (player.hand.length >= 7) {
+          if (setAside && setAside.length > 0) {
+            player.discard.push(...setAside);
+            state.logs.push(`${player.name} discards ${setAside.length} set aside cards.`);
+          }
+        } else {
+          if (player.deck.length === 0 && player.discard.length > 0) {
+            player.deck = shuffle([...player.discard]);
+            player.discard = [];
+            state.logs.push(`${player.name} shuffles their discard pile.`);
+          }
+          const card = player.deck.pop();
+          if (!card) {
+            if (setAside && setAside.length > 0) {
+              player.discard.push(...setAside);
+              state.logs.push(`${player.name} discards ${setAside.length} set aside cards.`);
+            }
+          } else {
+            const def = getCardDef(card.cardId);
+            if (def.types.includes('ACTION')) {
+              state.pendingActions.unshift({ type: 'REQUEST_INPUT', playerId: player.id, inputType: 'LIBRARY_KEEP', payload: { card, setAside } });
+            } else {
+              player.hand.push(card);
+              state.pendingActions.unshift(pending); // Loop again
+            }
+          }
+        }
+        break;
+      }
+      case 'SENTRY_EFFECT': {
+        if (player.deck.length === 0 && player.discard.length > 0) {
+          player.deck = shuffle([...player.discard]);
+          player.discard = [];
+          state.logs.push(`${player.name} shuffles their discard pile.`);
+        }
+        const cards = [];
+        const c1 = player.deck.pop();
+        if (c1) cards.push(c1);
+        
+        if (player.deck.length === 0 && player.discard.length > 0) {
+          player.deck = shuffle([...player.discard]);
+          player.discard = [];
+          state.logs.push(`${player.name} shuffles their discard pile.`);
+        }
+        const c2 = player.deck.pop();
+        if (c2) cards.push(c2);
+        
+        if (cards.length > 0) {
+          state.pendingActions.unshift({ type: 'REQUEST_INPUT', playerId: player.id, inputType: 'SENTRY_CHOICE', payload: { cards } });
         }
         break;
       }
@@ -250,10 +375,9 @@ export function dominionReducer
         player.hand = player.hand.filter((c: any) => c.id !== t.id);
         player.playArea.push(t);
         const def = getCardDef(t.cardId);
-        if (def.name === 'Copper') player.coins += 1;
-        if (def.name === 'Silver') player.coins += 2;
-        if (def.name === 'Gold') player.coins += 3;
-        
+        if (def.onPlay) {
+           nextState.pendingActions.unshift(...def.onPlay(nextState, action.playerId));
+        }
         const lastLog = nextState.logs[nextState.logs.length - 1] || "";
         const match = lastLog.match(new RegExp(`^${player.name} plays (?:(\\d+) )?\\[${def.name}\\]\\.?$`));
         if (match) {
@@ -319,6 +443,40 @@ export function dominionReducer
       nextState.logs.push(`Kingdom card selected: [${getCardDef((action as any).cardId).name}]`);
       break;
     }
+    case 'POPUP_CARD': {
+      nextState.revealedCard = (action as any).cardId;
+      break;
+    }
+    case 'CLEAR_POPUP': {
+      delete nextState.revealedCard;
+      break;
+    }
+    case 'CLEAR_REVEALED': {
+      const p = nextState.players[(action as any).playerId];
+      if (p) p.hand.forEach(c => c._revealed = false);
+      break;
+    }
+    case 'ENQUEUE_PENDING_ACTION': {
+      nextState.pendingActions.unshift((action as any).pendingAction);
+      processPendingActions(nextState);
+      break;
+    }
+    case 'BOT_PLAY_VASSAL': {
+      const { playerId, instanceId } = action as any;
+      const player = nextState.players[playerId];
+      const idx = player.discard.findIndex(c => c.id === instanceId);
+      if (idx >= 0) {
+         const card = player.discard.splice(idx, 1)[0];
+         const def = getCardDef(card.cardId);
+         player.playArea.push(card);
+         nextState.logs.push(`${player.name} plays [${def.name}] via Vassal.`);
+         if (def.onPlay) {
+           nextState.pendingActions.unshift(...def.onPlay(nextState, player.id));
+         }
+      }
+      processPendingActions(nextState);
+      break;
+    }
     case 'PLAY_BOT': {
       if (nextState.status !== 'Playing') break;
       let targetPlayerId = nextState.playerOrder[nextState.currentPlayerIndex];
@@ -380,8 +538,8 @@ export function dominionReducer
          const cardId = kingdomCards[i];
          const def = getCardDef(cardId);
          const amount = def.types.includes('VICTORY') ? baseVictoryCount : 10;
-         nextState.actionQueue.push({ delayMs: 600, action: { type: 'SHOW_KINGDOM_CARD', cardId } });
-         nextState.actionQueue.push({ delayMs: 200, action: { type: 'ADD_KINGDOM_CARD', cardId, amount } });
+         nextState.actionQueue.push({ delayMs: 300, action: { type: 'SHOW_KINGDOM_CARD', cardId } });
+         nextState.actionQueue.push({ delayMs: 2400, action: { type: 'ADD_KINGDOM_CARD', cardId, amount } });
       }
       
       // Then players draw cards
@@ -494,7 +652,8 @@ export function dominionReducer
       player.buys = 0;
       player.merchantPlays = 0;
       
-      
+      nextState.recentBuyingPowers = nextState.recentBuyingPowers || [];
+      nextState.recentBuyingPowers.push(player.turnBuyingPower || 0);
 
       const nextPlayerIndex = (nextState.playerOrder.indexOf(action.playerId) + 1) % nextState.playerOrder.length;
       const nextPlayerId = nextState.playerOrder[nextPlayerIndex];
@@ -514,6 +673,8 @@ export function dominionReducer
       nextState.phase = 'ACTION';
       nextPlayer.actions = 1;
       nextPlayer.buys = 1;
+      nextPlayer.turnBuyingPower = 0;
+      nextPlayer.hand.forEach(c => c._revealed = false);
       nextState.logs.push(`-- ${nextPlayer.name}'s turn starts --`);
       
       // Push VP snapshot for stats graph (once per player turn)
@@ -565,18 +726,18 @@ export function dominionReducer
           const trashedIds: string[] = action.payload.trashedIds || [];
           const player = nextState.players[action.playerId];
           
-          let validTrashes = 0;
+          let trashedCardNames: string[] = [];
           for (const id of trashedIds.slice(0, 4)) {
             const idx = player.hand.findIndex(c => c.id === id);
             if (idx !== -1) {
               const card = player.hand.splice(idx, 1)[0];
               nextState.trash = nextState.trash || [];
               nextState.trash.push(card);
-              validTrashes++;
+              trashedCardNames.push(`[${getCardDef(card.cardId).name}]`);
             }
           }
-          if (validTrashes > 0) {
-            nextState.logs.push(`${player.name} trashes ${validTrashes} card${validTrashes > 1 ? 's' : ''} with Chapel.`);
+          if (trashedCardNames.length > 0) {
+            nextState.logs.push(`${player.name} trashes ${trashedCardNames.join(', ')} with Chapel.`);
           }
           
           // Pop the REQUEST_INPUT
@@ -659,10 +820,10 @@ export function dominionReducer
         }
 
         if (req.inputType === 'HAND_TO_DECK') {
-          const cardId: string = action.payload.cardId;
+          const instanceId: string = action.payload.instanceId || action.payload.cardId;
           const player = nextState.players[action.playerId];
-          if (cardId) {
-            const idx = player.hand.findIndex(c => c.id === cardId);
+          if (instanceId) {
+            const idx = player.hand.findIndex(c => c.id === instanceId);
             if (idx >= 0) {
               const card = player.hand.splice(idx, 1)[0];
               player.deck.push(card);
@@ -673,10 +834,10 @@ export function dominionReducer
         }
 
         if (req.inputType === 'DISCARD_TO_DECK') {
-          const cardId: string = action.payload.cardId;
+          const instanceId: string = action.payload.instanceId || action.payload.cardId;
           const player = nextState.players[action.playerId];
-          if (cardId) {
-            const idx = player.discard.findIndex(c => c.id === cardId);
+          if (instanceId) {
+            const idx = player.discard.findIndex(c => c.id === instanceId);
             if (idx >= 0) {
               const card = player.discard.splice(idx, 1)[0];
               player.deck.push(card);
@@ -698,14 +859,56 @@ export function dominionReducer
                const card = player.discard.splice(idx, 1)[0];
                const def = getCardDef(card.cardId);
                player.playArea.push(card);
-               nextState.logs.push(`${player.name} plays [${def.name}] via Vassal.`);
+               nextState.logs.push(`${player.name} plays [${def.name}] from Vassal.`);
                if (def.onPlay) {
-                 nextState.pendingActions.unshift(...def.onPlay(nextState, player.id));
+                 const newPending = def.onPlay(nextState, player.id);
+                 if (newPending && newPending.length > 0) {
+                   nextState.pendingActions.unshift(...newPending);
+                 }
                }
             }
           }
         }
-
+        
+        if (req.inputType === 'LIBRARY_KEEP') {
+          const keep: boolean = action.payload.keep;
+          const card = req.payload.card;
+          const setAside = req.payload.setAside;
+          const player = nextState.players[action.playerId];
+          nextState.pendingActions.shift();
+          
+          if (keep) {
+            player.hand.push(card);
+          } else {
+            setAside.push(card);
+          }
+          nextState.pendingActions.unshift({ type: 'LIBRARY_DRAW', playerId: player.id, setAside });
+        }
+        
+        if (req.inputType === 'SENTRY_CHOICE') {
+          const { trashIds = [], discardIds = [], deckIds = [] } = action.payload;
+          const cards = req.payload.cards;
+          const player = nextState.players[action.playerId];
+          nextState.pendingActions.shift();
+          
+          const trashCards = cards.filter((c: any) => trashIds.includes(c.id));
+          const discardCards = cards.filter((c: any) => discardIds.includes(c.id));
+          
+          if (trashCards.length > 0) {
+            nextState.trash.push(...trashCards);
+            nextState.logs.push(`${player.name} trashes ${trashCards.map((c: any) => `[${getCardDef(c.cardId).name}]`).join(' and ')}.`);
+          }
+          if (discardCards.length > 0) {
+            player.discard.push(...discardCards);
+            nextState.logs.push(`${player.name} discards ${discardCards.length} card(s).`);
+          }
+          
+          for (let i = deckIds.length - 1; i >= 0; i--) {
+            const id = deckIds[i];
+            const c = cards.find((c: any) => c.id === id);
+            if (c) player.deck.push(c);
+          }
+        }
         if (req.inputType === 'DISCARD_FOR_POACHER' || req.inputType === 'DISCARD_FOR_MILITIA') {
           const discardedIds: string[] = action.payload.discardedIds || [];
           const player = nextState.players[action.playerId];
@@ -807,7 +1010,11 @@ export function dominionReducer
     const emptyPiles = Object.values(nextState.supply).filter(count => count === 0).length;
     if (nextState.supply['province'] === 0 || emptyPiles >= 3) {
       nextState.status = 'Finished';
-      nextState.logs.push(`-- Game Over! --`);
+      if (nextState.supply['province'] === 0) {
+        nextState.logs.push(`-- Game Over! (Province pile is empty) --`);
+      } else {
+        nextState.logs.push(`-- Game Over! (3 or more supply piles are empty) --`);
+      }
       // Find winner: most VP; tie-break by fewest turns taken (more remaining turns = fewer taken)
       let bestVP = -Infinity;
       let winnerId: string | null = null;

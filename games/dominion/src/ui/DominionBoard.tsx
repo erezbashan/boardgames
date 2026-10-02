@@ -35,11 +35,19 @@ const CARD_IMAGES: Record<string, string> = {
   "throne_room": "https://raw.githubusercontent.com/tempfillernamegithq/dominion-cards/master/dominion/throne-room.jpg",
   "chapel": "https://raw.githubusercontent.com/tempfillernamegithq/dominion-cards/master/dominion/chapel.jpg",
   "gardens": "https://raw.githubusercontent.com/tempfillernamegithq/dominion-cards/master/dominion/gardens.jpg",
-  "witch": "https://wiki.dominionstrategy.com/images/thumb/b/b3/Witch.jpg/200px-Witch.jpg",
-  "moneylender": "https://wiki.dominionstrategy.com/images/thumb/7/70/Moneylender.jpg/200px-Moneylender.jpg",
-  "poacher": "https://wiki.dominionstrategy.com/images/thumb/8/87/Poacher.jpg/200px-Poacher.jpg",
-  "remodel": "https://wiki.dominionstrategy.com/images/thumb/2/2e/Remodel.jpg/200px-Remodel.jpg",
-  "mine": "https://wiki.dominionstrategy.com/images/thumb/8/8e/Mine.jpg/200px-Mine.jpg"
+  "witch": "https://raw.githubusercontent.com/tempfillernamegithq/dominion-cards/master/dominion/witch.jpg",
+  "moneylender": "https://raw.githubusercontent.com/tempfillernamegithq/dominion-cards/master/dominion/moneylender.jpg",
+  "poacher": "https://raw.githubusercontent.com/tempfillernamegithq/dominion-cards/master/dominion/poacher.jpg",
+  "remodel": "https://raw.githubusercontent.com/tempfillernamegithq/dominion-cards/master/dominion/remodel.jpg",
+  "mine": "https://raw.githubusercontent.com/tempfillernamegithq/dominion-cards/master/dominion/mine.jpg",
+  "merchant": "https://raw.githubusercontent.com/tempfillernamegithq/dominion-cards/master/dominion/merchant.jpg",
+  "vassal": "https://raw.githubusercontent.com/tempfillernamegithq/dominion-cards/master/dominion/vassal.jpg",
+  "artisan": "https://raw.githubusercontent.com/tempfillernamegithq/dominion-cards/master/dominion/artisan.jpg",
+  "bandit": "https://raw.githubusercontent.com/tempfillernamegithq/dominion-cards/master/dominion/bandit.jpg",
+  "bureaucrat": "https://raw.githubusercontent.com/tempfillernamegithq/dominion-cards/master/dominion/bureaucrat.jpg",
+  "harbinger": "https://raw.githubusercontent.com/tempfillernamegithq/dominion-cards/master/dominion/harbinger.jpg",
+  "library": "https://raw.githubusercontent.com/tempfillernamegithq/dominion-cards/master/dominion/library.jpg",
+  "sentry": "https://raw.githubusercontent.com/tempfillernamegithq/dominion-cards/master/dominion/sentry.jpg",
 };
 
 const getIcon = (types: CardType[]) => {
@@ -59,8 +67,45 @@ const getTreasureValue = (def: CardDefinition) => {
 
 export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch, onLeaveGame }) => {
   const [selectedCards, setSelectedCards] = useState<string[]>([]);
+  const [sentryChoices, setSentryChoices] = useState<Record<string, 'trash'|'discard'|'deck1'|'deck2'>>({});
   const [hoveredCardDef, setHoveredCardDef] = useState<CardDefinition | null>(null);
   const [popupPos, setPopupPos] = useState<{x: number, y: number} | null>(null);
+  
+  // Calculate debug stats for Game Progress
+  const numPlayers = gameState.playerOrder.length;
+  const lookback = 2 * (numPlayers || 2);
+  const recent = gameState.recentBuyingPowers || [];
+  const window = recent.slice(-lookback);
+  while (window.length < lookback) window.unshift(0);
+  
+  let provincesBoughtCount = 0;
+  let otherCardsBoughtCount = 0;
+  for (const bp of window) {
+     if (bp >= 8) provincesBoughtCount++;
+     if (bp >= 3 && bp < 8) otherCardsBoughtCount++;
+  }
+  const provinceRatePerRound = Math.max(0.1, provincesBoughtCount / 2);
+  const provincesLeft = gameState.supply['province'] ?? 8;
+  const roundsToDepleteProvinces = provincesLeft / provinceRatePerRound;
+  
+  let emptyPiles = 0;
+  const pileDepletions: number[] = [];
+  for (const cardId in gameState.supply) {
+     const count = gameState.supply[cardId];
+     if (count === 0) emptyPiles++;
+     else if (cardId !== 'province') pileDepletions.push(count);
+  }
+  pileDepletions.sort((a,b) => a - b);
+  let cardsToEmpty3Piles = 0;
+  const pilesNeeded = Math.max(0, 3 - emptyPiles);
+  for (let i = 0; i < pilesNeeded; i++) {
+     if (i < pileDepletions.length) cardsToEmpty3Piles += pileDepletions[i];
+  }
+  const otherCardsRatePerRound = Math.max(0.5, otherCardsBoughtCount / 2);
+  const roundsToEmptyPiles = cardsToEmpty3Piles / otherCardsRatePerRound;
+  
+  const estimatedRoundsLeft = Math.min(roundsToDepleteProvinces, roundsToEmptyPiles);
+  const gameProgress = Math.max(0, Math.min(1, 1 - (estimatedRoundsLeft / 15)));
   
   const me = gameState.players[myPlayerId];
 
@@ -97,6 +142,14 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
     const req = gameState.pendingActions[0];
     if (req?.type === 'REQUEST_INPUT') {
       if (req.inputType === 'DISCARD_FOR_CELLAR' || req.inputType === 'DISCARD_FOR_POACHER' || req.inputType === 'DISCARD_FOR_MILITIA') {
+        if (req.inputType === 'DISCARD_FOR_POACHER' || req.inputType === 'DISCARD_FOR_MILITIA') {
+           const myHandSize = gameState.players[myPlayerId]?.hand.length || 0;
+           const amountToForce = Math.min(req.payload?.amount || 0, myHandSize);
+           if (selectedCards.length < amountToForce) {
+              alert(`You must select ${amountToForce} cards.`);
+              return;
+           }
+        }
         dispatch({ 
           type: 'RESOLVE_INPUT', 
           playerId: myPlayerId, 
@@ -125,33 +178,71 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
       return;
     }
 
-    const card = me.hand.find(c => c.id === instanceId);
+    if (inputType === 'HAND_TO_DECK') {
+      const card = me.hand.find(c => c.id === instanceId);
+      if (card) {
+        if ((req as any).payload?.filterTypes) {
+           const allowed = (req as any).payload.filterTypes as string[];
+           if (!getCardDef(card.cardId).types.some(t => allowed.includes(t))) return;
+        }
+        dispatch({ type: 'RESOLVE_INPUT', playerId: myPlayerId, payload: { cardId: instanceId } });
+      }
+      return;
+    }
+
+    let card = me.hand.find(c => c.id === instanceId);
+    if (!card) card = me.discard.find(c => c.id === instanceId);
     if (!card) return;
 
     if (inputType === 'TRASH_COPPER_FOR_MONEYLENDER' && card.cardId !== 'copper') return;
     if (inputType === 'TRASH_FOR_MINE' && !getCardDef(card.cardId).types.includes('TREASURE')) return;
+    if (inputType === 'PLAY_VASSAL_ACTION') return; // Selection not used for this input type
     if ((req as any).payload?.filterTypes) {
       const allowed = (req as any).payload.filterTypes as string[];
       if (!getCardDef(card.cardId).types.some(t => allowed.includes(t))) return;
     }
 
+    const maxSelections = 
+      inputType === 'TRASH_FOR_CHAPEL' ? 4 :
+      inputType === 'TRASH_FOR_REMODEL' ? 1 :
+      inputType === 'TRASH_FOR_MINE' ? 1 :
+      inputType === 'HAND_TO_DECK' ? 1 :
+      inputType === 'DISCARD_TO_DECK' ? 1 :
+      inputType === 'PLAY_FOR_THRONE_ROOM' ? 1 :
+      inputType === 'TRASH_COPPER_FOR_MONEYLENDER' ? 1 :
+      (inputType === 'DISCARD_FOR_POACHER' || inputType === 'DISCARD_FOR_MILITIA') ? Math.min((req as any).payload?.amount || 0, me.hand.length) :
+      99;
+      
+    if (maxSelections === 1) {
+      if (inputType === 'TRASH_COPPER_FOR_MONEYLENDER') {
+        dispatch({ type: 'RESOLVE_INPUT', playerId: myPlayerId, payload: { trashedIds: [instanceId] } });
+      } else if (inputType === 'PLAY_FOR_THRONE_ROOM') {
+        dispatch({ type: 'RESOLVE_INPUT', playerId: myPlayerId, payload: { instanceId } });
+      } else if (inputType === 'TRASH_FOR_REMODEL' || inputType === 'TRASH_FOR_MINE') {
+        dispatch({ type: 'RESOLVE_INPUT', playerId: myPlayerId, payload: { trashedIds: [instanceId] } });
+      } else if (inputType === 'HAND_TO_DECK' || inputType === 'DISCARD_TO_DECK') {
+        dispatch({ type: 'RESOLVE_INPUT', playerId: myPlayerId, payload: { instanceId } });
+      } else if (inputType === 'DISCARD_FOR_POACHER' || inputType === 'DISCARD_FOR_MILITIA') {
+        dispatch({ type: 'RESOLVE_INPUT', playerId: myPlayerId, payload: { discardedIds: [instanceId] } });
+      }
+      setSelectedCards([]);
+      return;
+    }
+
     setSelectedCards(prev => {
       if (prev.includes(instanceId)) return prev.filter(id => id !== instanceId);
       
-      const maxSelections = 
-        inputType === 'TRASH_FOR_CHAPEL' ? 4 :
-        inputType === 'TRASH_FOR_REMODEL' ? 1 :
-        inputType === 'TRASH_FOR_MINE' ? 1 :
-        inputType === 'HAND_TO_DECK' ? 1 :
-        inputType === 'TRASH_COPPER_FOR_MONEYLENDER' ? 1 :
-        (inputType === 'DISCARD_FOR_POACHER' || inputType === 'DISCARD_FOR_MILITIA') ? (req as any).payload?.amount || 0 :
-        99;
-        
-      if (prev.length >= maxSelections) {
-         if (maxSelections === 1) return [instanceId];
-         return prev;
+      const nextSelection = [...prev, instanceId];
+      if (nextSelection.length === maxSelections && (inputType === 'DISCARD_FOR_POACHER' || inputType === 'DISCARD_FOR_MILITIA')) {
+        setTimeout(() => {
+          dispatch({ type: 'RESOLVE_INPUT', playerId: myPlayerId, payload: { discardedIds: nextSelection } });
+          setSelectedCards([]);
+        }, 0);
+        return nextSelection;
       }
-      return [...prev, instanceId];
+      
+      if (prev.length >= maxSelections) return prev;
+      return nextSelection;
     });
   };
 
@@ -181,19 +272,39 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', marginBottom: '8px' }}>
           {/* Deck */}
           <div style={{ textAlign: 'center', fontSize: '10px', color: '#94a3b8' }}>
-            <div style={{ width: '30px', height: '42px', border: '1px solid #475569', borderRadius: '3px', background: '#020617', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold' }}>{p.deck.length}</div>
+            <div 
+              title={gameState.settings?.openGame ? `Deck: ${[...p.deck].reverse().map(c => getCardDef(c.cardId).name).join(', ')}` : undefined}
+              style={{ position: 'relative', width: '30px', height: '42px', border: '1px solid #475569', borderRadius: '3px', background: '#020617', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', cursor: gameState.settings?.openGame ? 'help' : 'default' }}
+            >
+              {p.deck.length}
+              {gameState.pendingActions[0]?.type === 'REQUEST_INPUT' && gameState.pendingActions[0].playerId === p.id && gameState.pendingActions[0].inputType === 'PLAY_VASSAL_ACTION' && (
+                <motion.div
+                  initial={{ scale: 0, opacity: 0, y: 0 }}
+                  animate={{ scale: 2.5, opacity: 1, y: -30, zIndex: 9999 }}
+                  transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+                  style={{
+                    position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+                    backgroundImage: `url(${CARD_IMAGES[gameState.pendingActions[0].payload?.cardId]})`,
+                    backgroundSize: '100% 100%', borderRadius: '3px', boxShadow: '0 5px 15px rgba(0,0,0,0.5)'
+                  }}
+                />
+              )}
+            </div>
             Deck
           </div>
           {/* Discard (with layoutId animation so cards fly here) */}
           <div style={{ textAlign: 'center', fontSize: '10px', color: '#94a3b8' }}>
-            <div style={{ position: 'relative', width: '30px', height: '42px', border: '1px solid #475569', borderRadius: '3px', background: '#1e293b' }}>
+            <div 
+              title={gameState.settings?.openGame ? `Discard: ${[...p.discard].reverse().map(c => getCardDef(c.cardId).name).join(', ')}` : undefined}
+              style={{ position: 'relative', width: '30px', height: '42px', border: '1px solid #475569', borderRadius: '3px', background: '#1e293b', cursor: gameState.settings?.openGame ? 'help' : 'default' }}
+            >
               <AnimatePresence>
                 {p.discard.map((card, i) => (
                   <motion.div
                     layoutId={card.id}
                     key={card.id}
                     transition={{ type: 'spring', stiffness: 200, damping: 20 }}
-                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundImage: `url(${CARD_IMAGES[card.cardId]})`, backgroundSize: 'cover', borderRadius: '3px', zIndex: i }}
+                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundImage: `url(${CARD_IMAGES[card.cardId]})`, backgroundSize: '100% 100%', borderRadius: '3px', zIndex: i }}
                   />
                 ))}
               </AnimatePresence>
@@ -206,10 +317,15 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
             <div style={{ textAlign: 'center', fontSize: '10px', color: '#94a3b8' }}>
               <div style={{ display: 'flex', gap: '1px', minHeight: '42px', alignItems: 'flex-end' }}>
                 {p.hand.length > 0 ? (
-                  p.hand.slice(0, 7).map((card, i) => {
-                    if (card._revealed) {
+                  p.hand.slice(0, 15).map((card, i) => {
+                    if (card._revealed || gameState.settings?.openGame) {
                       return (
-                        <div key={i} style={{ width: '30px', height: '42px', backgroundImage: `url(${CARD_IMAGES[card.cardId]})`, backgroundSize: 'cover', border: '1px solid #fbbf24', borderRadius: '3px', zIndex: i, marginLeft: i > 0 ? '-20px' : '0', boxShadow: '0 0 5px rgba(251,191,36,0.5)' }} title="Revealed Moat" />
+                        <div 
+                          key={i} 
+                          onMouseEnter={(e) => showPopup(e, getCardDef(card.cardId))} 
+                          onMouseLeave={hidePopup}
+                          style={{ width: '30px', height: '42px', backgroundImage: `url(${CARD_IMAGES[card.cardId]})`, backgroundSize: '100% 100%', border: card._revealed ? '1px solid #fbbf24' : '1px solid #475569', borderRadius: '3px', zIndex: i, marginLeft: i > 0 ? '-20px' : '0', boxShadow: card._revealed ? '0 0 5px rgba(251,191,36,0.5)' : '-2px 0 5px rgba(0,0,0,0.3)', cursor: 'help' }} 
+                        />
                       );
                     }
                     return <div key={i} style={{ width: '30px', height: '42px', background: '#1e3a5f', border: '1px solid #475569', borderRadius: '3px', marginLeft: i > 0 ? '-20px' : '0', zIndex: i, boxShadow: '-2px 0 5px rgba(0,0,0,0.3)' }} />;
@@ -259,7 +375,7 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
                         border: `2px solid ${isPlayableAction && !isSelected ? '#34d399' : 'rgba(100,116,139,0.5)'}`,
                         borderRadius: '6px',
                         backgroundImage: imageUrl ? `url(${imageUrl})` : 'none',
-                        backgroundSize: 'cover',
+                        backgroundSize: '100% 100%',
                         backgroundPosition: 'center',
                         cursor: (isMyTurn || isInputPhaseForMe) ? 'pointer' : 'default',
                         boxShadow: isSelected ? '0 0 0 4px #eab308' : isPlayableAction ? '0 0 8px rgba(52,211,153,0.6)' : card._revealed ? '0 0 15px 5px #fbbf24' : '0 2px 4px rgba(0,0,0,0.5)',
@@ -279,7 +395,7 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
                       </div>
                       {/* Info button */}
                       <div
-                        style={{ position: 'absolute', top: '2px', right: '2px', color: 'rgba(255,255,255,0.7)', fontSize: '10px', cursor: 'pointer', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.9)', zIndex: 10 }}
+                        style={{ position: 'absolute', top: '2px', right: '2px', background: 'rgba(0,0,0,0.6)', borderRadius: '50%', width: '16px', height: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.9)', fontSize: '10px', cursor: 'pointer', fontWeight: 'bold', textShadow: '0 1px 2px rgba(0,0,0,0.9)', zIndex: 10 }}
                         onClick={(e) => { e.stopPropagation(); showPopup(e, def); }}
                       >?</div>
                       {/* Selection overlay */}
@@ -452,15 +568,11 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
             border: `2px solid ${disabled ? '#475569' : '#3b82f6'}`,
             cursor: disabled ? 'not-allowed' : 'pointer',
             backgroundImage: imageUrl ? `url(${imageUrl})` : 'none',
-            backgroundSize: 'cover',
+            backgroundSize: '100% 100%',
             backgroundPosition: 'center',
             opacity: disabled ? 0.6 : 1,
             boxShadow: disabled ? 'none' : '0 4px 10px rgba(59, 130, 246, 0.4)',
             transition: 'all 0.2s',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            padding: '4px'
           }}
           onClick={() => !disabled && handleBuyCard(id)}
         >
@@ -472,16 +584,18 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
           {/* Top Bar: Name */}
           <div style={{ position: 'absolute', top: '2px', right: '4px', zIndex: 10 }}>
             <div 
-              style={{ color: 'rgba(255,255,255,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '18px', cursor: 'pointer', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}
+              style={{ background: 'rgba(0,0,0,0.6)', borderRadius: '50%', width: '18px', height: '18px', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer', textShadow: '0 1px 2px rgba(0,0,0,0.9)' }}
               onClick={(e) => { e.stopPropagation(); showPopup(e, def); }}
             >?</div>
           </div>
-          <div style={{ background: 'rgba(0,0,0,0.7)', color: 'white', fontSize: '10px', padding: '2px 4px', borderRadius: '4px', textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            {def.name}
-          </div>
+          {!imageUrl && (
+            <div style={{ position: 'absolute', top: '4px', left: '4px', right: '4px', background: 'rgba(0,0,0,0.7)', color: 'white', fontSize: '10px', padding: '2px 4px', borderRadius: '4px', textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {def.name}
+            </div>
+          )}
           
           {/* Bottom Bar: Cost & Count */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ position: 'absolute', bottom: '4px', left: '4px', right: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ background: 'rgba(255,255,255,0.9)', color: 'black', fontWeight: 'bold', fontSize: '11px', padding: '2px 6px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               ${def.cost}
             </div>
@@ -516,7 +630,7 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
                 style={{ 
                    width: '240px', height: '345px', 
                    backgroundImage: CARD_IMAGES[gameState.revealedCard] ? `url(${CARD_IMAGES[gameState.revealedCard]})` : 'none', 
-                   backgroundSize: 'cover', backgroundPosition: 'center', 
+                   backgroundSize: '100% 100%', backgroundPosition: 'center', 
                    borderRadius: '12px', border: '4px solid #fbbf24', 
                    boxShadow: '0 0 40px rgba(251,191,36,0.6)', 
                    display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '10px' 
@@ -581,17 +695,11 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
         {/* Right Column: Game Area */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {/* Status */}
-          <div style={{ padding: '15px', background: isMyTurn ? '#064e3b' : '#1e293b', borderRadius: '8px', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 4px 6px rgba(0,0,0,0.3)' }}>
-            <div>
-              <h3 style={{ marginTop: 0, marginBottom: '10px', color: isMyTurn ? '#34d399' : 'white' }}>
-                {isMyTurn ? "Your Turn" : `${gameState.players[gameState.playerOrder[gameState.currentPlayerIndex]]?.name || 'Waiting'}'s Turn`} 
-                - Phase: {gameState.phase}
-              </h3>
-              <div style={{ display: 'flex', gap: '20px', fontSize: '18px', fontWeight: 'bold' }}>
-                <span>⚡ Available Actions: {me.actions}</span>
-                <span>🛒 Available Buys: {me.buys}</span>
-                <span>💰 Available Coins: {me.coins} <span style={{fontSize: '14px', color: '#a7f3d0'}}>(Potential: {potentialPower})</span></span>
-              </div>
+          <div style={{ padding: '15px', minHeight: '68px', background: isMyTurn ? '#064e3b' : '#1e293b', borderRadius: '8px', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 4px 6px rgba(0,0,0,0.3)' }}>
+            <div style={{ display: 'flex', gap: '20px', fontSize: '18px', fontWeight: 'bold' }}>
+              <span>⚡ Actions: {me.actions}</span>
+              <span>🛒 Buys: {me.buys}</span>
+              <span>💰 Coins: {me.coins}</span>
             </div>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'flex-end' }}>
@@ -626,11 +734,15 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
               ? `Select a Treasure to trash to gain a Treasure costing up to $3 more.`
               : inputType === 'HAND_TO_DECK'
               ? `Select a card from your hand to put on top of your deck.`
-              : inputType === 'PLAY_VASSAL_ACTION'
-              ? `Do you want to play [${getCardDef(req.payload?.cardId).name}]?`
+              : inputType === 'DISCARD_TO_DECK'
+              ? `Select a card from your discard pile to put on top of your deck.`
+              : inputType === 'LIBRARY_KEEP'
+              ? `Keep [${getCardDef(req.payload?.card?.cardId).name}] or set it aside?`
+              : inputType === 'SENTRY_CHOICE'
+              ? `Select how to handle the top cards of your deck.`
               : 'Waiting for input...';
               
-            const needsConfirm = ['DISCARD_FOR_CELLAR', 'TRASH_FOR_CHAPEL', 'TRASH_COPPER_FOR_MONEYLENDER', 'DISCARD_FOR_POACHER', 'DISCARD_FOR_MILITIA', 'TRASH_FOR_REMODEL', 'TRASH_FOR_MINE'].includes(inputType || '');
+            const needsConfirm = ['DISCARD_FOR_CELLAR', 'TRASH_FOR_CHAPEL', 'TRASH_COPPER_FOR_MONEYLENDER'].includes(inputType || '');
             
             return (
               <div style={{ padding: '15px', background: '#7f1d1d', border: '2px solid #ef4444', borderRadius: '8px', color: 'white', boxShadow: '0 4px 6px rgba(0,0,0,0.3)' }}>
@@ -638,10 +750,126 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
                 {needsConfirm && (
                   <button onClick={handleResolveInput} style={{ marginLeft: '15px', padding: '6px 16px', background: 'white', color: '#7f1d1d', fontWeight: 'bold', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Confirm Selection</button>
                 )}
+                {inputType === 'DISCARD_TO_DECK' && (() => {
+                  const uniqueDiscards: any[] = [];
+                  const seen = new Set<string>();
+                  for (const c of me.discard) {
+                    if (!seen.has(c.cardId)) {
+                      seen.add(c.cardId);
+                      uniqueDiscards.push(c);
+                    }
+                  }
+                  
+                  return (
+                    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div style={{ background: '#1e293b', border: '3px solid #3b82f6', borderRadius: '12px', padding: '30px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', maxWidth: '900px', maxHeight: '90vh', overflowY: 'auto' }}>
+                        <h2 style={{ margin: 0, color: 'white' }}>Select a card from your Discard pile</h2>
+                        {uniqueDiscards.length === 0 ? (
+                          <div style={{ color: '#94a3b8' }}>Your discard pile is empty.</div>
+                        ) : (
+                          <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                            {uniqueDiscards.map(c => (
+                              <div 
+                                key={c.id} 
+                                onClick={() => dispatch({ type: 'RESOLVE_INPUT', playerId: myPlayerId, payload: { instanceId: c.id } })}
+                                style={{ width: '120px', height: '180px', backgroundImage: `url(${CARD_IMAGES[c.cardId]})`, backgroundSize: '100% 100%', borderRadius: '8px', boxShadow: '0 4px 10px rgba(0,0,0,0.5)', cursor: 'pointer', transition: 'transform 0.1s' }}
+                                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                              />
+                            ))}
+                          </div>
+                        )}
+                        <button onClick={() => dispatch({ type: 'RESOLVE_INPUT', playerId: myPlayerId, payload: { instanceId: '' } })} style={{ padding: '10px 24px', background: '#94a3b8', color: 'black', fontWeight: 'bold', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', marginTop: '10px' }}>Skip (Do nothing)</button>
+                      </div>
+                    </div>
+                  );
+                })()}
                 {inputType === 'PLAY_VASSAL_ACTION' && (
                   <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
                     <button onClick={() => dispatch({ type: 'RESOLVE_INPUT', playerId: myPlayerId, payload: { playCard: true } })} style={{ padding: '6px 16px', background: '#34d399', color: 'black', fontWeight: 'bold', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Yes, Play It</button>
                     <button onClick={() => dispatch({ type: 'RESOLVE_INPUT', playerId: myPlayerId, payload: { playCard: false } })} style={{ padding: '6px 16px', background: '#94a3b8', color: 'black', fontWeight: 'bold', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>No, Discard It</button>
+                  </div>
+                )}
+                {inputType === 'LIBRARY_KEEP' && (
+                  <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                    <button onClick={() => dispatch({ type: 'RESOLVE_INPUT', playerId: myPlayerId, payload: { keep: true } })} style={{ padding: '6px 16px', background: '#34d399', color: 'black', fontWeight: 'bold', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Keep in Hand</button>
+                    <button onClick={() => dispatch({ type: 'RESOLVE_INPUT', playerId: myPlayerId, payload: { keep: false } })} style={{ padding: '6px 16px', background: '#94a3b8', color: 'black', fontWeight: 'bold', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Set Aside (Discard)</button>
+                  </div>
+                )}
+                {inputType === 'SENTRY_CHOICE' && req.payload?.cards && (
+                  <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ background: '#1e293b', border: '3px solid #3b82f6', borderRadius: '12px', padding: '30px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', maxWidth: '900px' }}>
+                      <h2 style={{ margin: 0, color: 'white' }}>Sentry: Handle Top Cards</h2>
+                      <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                        {req.payload.cards.map((c: any) => {
+                          const choice = sentryChoices[c.id] || 'deck1';
+                          
+                          const handleChoice = (newChoice: 'trash'|'discard'|'deck1'|'deck2') => {
+                             const newChoices: Record<string, 'trash'|'discard'|'deck1'|'deck2'> = { ...sentryChoices, [c.id]: newChoice };
+                             // Auto-swap if deck1/deck2 conflict
+                             if (newChoice === 'deck1') {
+                               for (const otherId of Object.keys(newChoices)) {
+                                 if (otherId !== c.id && newChoices[otherId] === 'deck1') newChoices[otherId] = 'deck2';
+                               }
+                             } else if (newChoice === 'deck2') {
+                               for (const otherId of Object.keys(newChoices)) {
+                                 if (otherId !== c.id && newChoices[otherId] === 'deck2') newChoices[otherId] = 'deck1';
+                               }
+                             }
+                             setSentryChoices(newChoices);
+                          };
+                          
+                          return (
+                            <div key={c.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', background: 'rgba(0,0,0,0.3)', padding: '15px', borderRadius: '8px' }}>
+                              <div style={{ width: '120px', height: '180px', backgroundImage: `url(${CARD_IMAGES[c.cardId]})`, backgroundSize: '100% 100%', borderRadius: '8px', boxShadow: '0 4px 10px rgba(0,0,0,0.3)' }}></div>
+                              <div style={{ display: 'flex', gap: '5px' }}>
+                                <button onClick={() => handleChoice('trash')} style={{ padding: '6px 10px', background: choice === 'trash' ? '#ef4444' : '#334155', color: 'white', border: choice === 'trash' ? '2px solid white' : '2px solid transparent', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Trash</button>
+                                <button onClick={() => handleChoice('discard')} style={{ padding: '6px 10px', background: choice === 'discard' ? '#eab308' : '#334155', color: choice === 'discard' ? 'black' : 'white', border: choice === 'discard' ? '2px solid white' : '2px solid transparent', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Discard</button>
+                                <button onClick={() => handleChoice('deck1')} style={{ padding: '6px 10px', background: choice === 'deck1' ? '#3b82f6' : '#334155', color: 'white', border: choice === 'deck1' ? '2px solid white' : '2px solid transparent', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Deck (Top)</button>
+                                <button onClick={() => handleChoice('deck2')} style={{ padding: '6px 10px', background: choice === 'deck2' ? '#2563eb' : '#334155', color: 'white', border: choice === 'deck2' ? '2px solid white' : '2px solid transparent', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Deck (2nd)</button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <button 
+                        onClick={() => {
+                          const trashIds = req.payload.cards.filter((c:any) => sentryChoices[c.id] === 'trash').map((c:any) => c.id);
+                          const discardIds = req.payload.cards.filter((c:any) => sentryChoices[c.id] === 'discard').map((c:any) => c.id);
+                          
+                          // Default assignments if not set
+                          let c1 = req.payload.cards[0];
+                          let c2 = req.payload.cards[1];
+                          
+                          let d1 = sentryChoices[c1.id] || 'deck1';
+                          let d2 = c2 ? (sentryChoices[c2.id] || (d1 === 'deck1' ? 'deck2' : 'deck1')) : null;
+                          
+                          let deckIds: string[] = [];
+                          
+                          // We process deck2 first so it's UNDER deck1 (because in the reducer, deckIds are placed bottom-up onto the deck).
+                          // Actually, wait! The reducer loops backwards: `for (let i = deckIds.length - 1; i >= 0; i--) deck.push(deckIds[i])`
+                          // If deckIds = [deck1_id, deck2_id]
+                          // i=1 (deck2_id) pushed first. i=0 (deck1_id) pushed second (ends up on top).
+                          // So deckIds[0] is the top card.
+                          // Let's build deckIds so index 0 is deck1.
+                          const deck1Card = req.payload.cards.find((c:any) => (sentryChoices[c.id] || 'deck1') === 'deck1' && sentryChoices[c.id] !== 'trash' && sentryChoices[c.id] !== 'discard');
+                          const deck2Card = req.payload.cards.find((c:any) => (sentryChoices[c.id] || 'deck2') === 'deck2' && sentryChoices[c.id] !== 'trash' && sentryChoices[c.id] !== 'discard');
+                          
+                          if (deck1Card) deckIds.push(deck1Card.id);
+                          if (deck2Card && deck2Card.id !== deck1Card?.id) deckIds.push(deck2Card.id);
+                          
+                          // Fallback if they somehow both got deck1 or both deck2 but that shouldn't happen due to our swap logic.
+                          const remainingDeck = req.payload.cards.filter((c:any) => !trashIds.includes(c.id) && !discardIds.includes(c.id) && !deckIds.includes(c.id));
+                          for (const rem of remainingDeck) deckIds.push(rem.id);
+
+                          dispatch({ type: 'RESOLVE_INPUT', playerId: myPlayerId, payload: { trashIds, discardIds, deckIds } });
+                          setSentryChoices({});
+                        }} 
+                        style={{ padding: '12px 30px', background: 'white', color: '#1e293b', fontWeight: 'bold', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '18px', marginTop: '10px' }}
+                      >
+                        Confirm Selections
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -650,7 +878,13 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
           
           {/* Play Area */}
           <div className="no-scrollbar" style={{ border: '1px solid #475569', padding: '15px', minHeight: '300px', maxHeight: '450px', overflowY: 'auto', overflowX: 'hidden', borderRadius: '8px', background: '#0f172a' }}>
-            <h3 style={{ marginTop: 0, color: '#94a3b8' }}>{activePlayer.id === myPlayerId ? 'Your' : activePlayer.name + '\'s'} Play Area</h3>
+            {gameState.status === 'Finished' && (
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '15px' }}>
+                <div style={{ padding: '10px 30px', background: gameState.winnerId === myPlayerId ? '#22c55e' : 'rgba(0,0,0,0.8)', color: 'white', borderRadius: '12px', textAlign: 'center', fontSize: '24px', fontWeight: 'bold', boxShadow: '0 4px 15px rgba(0,0,0,0.5)', border: '2px solid rgba(255,255,255,0.2)' }}>
+                  {gameState.winnerId === myPlayerId ? "🏆 You Won!" : `🏆 Winner: ${gameState.winnerId && gameState.players[gameState.winnerId] ? gameState.players[gameState.winnerId].name : 'Unknown'}`}
+                </div>
+              </div>
+            )}
             <div style={{ display: 'flex', flexWrap: 'wrap', paddingLeft: '10px' }}>
               <AnimatePresence>
                 {playAreaCards.map((card, i) => {
@@ -702,6 +936,20 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
             <option value={20}>20 (Marathon)</option>
           </select>
         </div>
+        
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(0,0,0,0.2)', padding: '10px', borderRadius: '8px', marginBottom: '16px' }}>
+          <input
+            type="checkbox"
+            id="openGameSetting"
+            disabled={!isLobby}
+            checked={!!gameState.settings?.openGame}
+            onChange={(e) => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...(gameState.settings || {}), openGame: e.target.checked } })}
+            style={{ cursor: isLobby ? 'pointer' : 'not-allowed' }}
+          />
+          <label htmlFor="openGameSetting" style={{ fontSize: '13px', color: '#cbd5e1', cursor: isLobby ? 'pointer' : 'not-allowed' }}>
+            Open Game (Show all players' hands & decks - for debugging)
+          </label>
+        </div>
 
         <div style={{ marginBottom: '8px', color: '#94a3b8', fontSize: '13px' }}>
           Select which Kingdom cards to include (chosen at game start):
@@ -731,8 +979,14 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
                   style={{ cursor: isLobby ? 'pointer' : 'not-allowed', opacity: isLobby ? 1 : 0.6 }}
                   onChange={() => isLobby && toggleCard(cardId)}
                 />
-                <span style={{ color: isActive ? 'white' : '#475569', cursor: isLobby ? 'pointer' : 'default' }} onClick={() => isLobby && toggleCard(cardId)}>
-                  {def.name} <span style={{ color: '#94a3b8', fontSize: '11px' }}>({def.cost}$)</span>
+                <span 
+                  style={{ color: isActive ? '#60a5fa' : '#3b82f6', cursor: 'pointer', textDecoration: 'underline' }} 
+                  onClick={(e) => { e.stopPropagation(); showPopup(e, def); }}
+                >
+                  {def.name}
+                </span>
+                <span style={{ color: '#94a3b8', fontSize: '11px', cursor: isLobby ? 'pointer' : 'default' }} onClick={() => isLobby && toggleCard(cardId)}>
+                  ({def.cost}$)
                 </span>
               </div>
             );
@@ -761,13 +1015,14 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
         }
       `}</style>
       <GameLayout
-        gameName="Dominion"
+        gameName={gameState.status === 'Playing' ? `Dominion [Prog: ${gameProgress.toFixed(2)} | EstRounds: ${estimatedRoundsLeft.toFixed(1)}]` : "Dominion"}
         helpText="Build your deck and collect Victory Points! First to buy Provinces or empty 3 piles wins."
         helpUrl="https://en.wikipedia.org/wiki/Dominion_(card_game)"
       renderGameSpecificPlayerDetails={renderPlayerDetails}
       renderGameSpecificStats={() => <DominionStats gameState={gameState} />}
       renderLogMessage={renderLogMessage}
       settings={renderSettings()}
+      hideWinnerBanner={true}
     >
       {gameState.status === 'Lobby' ? (
         <div style={{ color: 'white', padding: '40px', textAlign: 'center' }}>

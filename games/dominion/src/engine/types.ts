@@ -20,6 +20,7 @@ export interface PlayerState extends BasePlayer {
   coins: number;
   victoryPoints: number;
   merchantPlays?: number; // For Merchant card
+  turnBuyingPower?: number; // Highest coins reached this turn
 }
 
 export type PendingAction = 
@@ -34,9 +35,15 @@ export type PendingAction =
   | { type: 'FORCE_GAIN_CARD'; playerId: string; cardId: string; destination?: 'discard' | 'hand' | 'deck' }
   | { type: 'REVEAL_HAND'; playerId: string }
   | { type: 'BANDIT_ATTACK'; playerId: string }
+  | { type: 'MILITIA_ATTACK'; playerId: string }
+  | { type: 'WITCH_ATTACK'; playerId: string }
+  | { type: 'BUREAUCRAT_ATTACK'; playerId: string }
+  | { type: 'RESOLVE_BANDIT'; playerId: string; revealedCards: any[] }
   | { type: 'CLEAR_MERCHANT'; playerId: string }
   | { type: 'PLAY_MERCHANT'; playerId: string }
-  | { type: 'VASSAL_EFFECT'; playerId: string };
+  | { type: 'VASSAL_EFFECT'; playerId: string }
+  | { type: 'LIBRARY_DRAW'; playerId: string; setAside: any[] }
+  | { type: 'SENTRY_EFFECT'; playerId: string };
 
 export interface HistorySnapshot {
   turnNum: number;
@@ -47,13 +54,15 @@ export interface HistorySnapshot {
 export interface DominionSettings {
   kingdomCards: string[]; // Which kingdom cards to include (from the full pool)
   victoryCardsOverride?: number; // Override default number of victory cards
+  openGame?: boolean; // If true, all players can see each others' hands
 }
 
 export const ALL_KINGDOM_CARDS = [
   'village', 'smithy', 'militia', 'cellar', 'market', 'festival',
   'laboratory', 'council_room', 'moat', 'workshop', 'throne_room', 'chapel',
   'witch', 'moneylender', 'poacher', 'remodel', 'mine',
-  'merchant', 'vassal', 'artisan', 'bandit', 'bureaucrat'
+  'merchant', 'vassal', 'artisan', 'bandit', 'bureaucrat', 'harbinger',
+  'library', 'sentry'
 ];
 
 export interface DominionState extends BaseGameState<PlayerState> {
@@ -62,6 +71,7 @@ export interface DominionState extends BaseGameState<PlayerState> {
   trash: CardInstance[];
   pendingActions: PendingAction[];
   history: HistorySnapshot[];
+  recentBuyingPowers?: number[]; // Rolling window of max coins per turn
   settings?: DominionSettings;
   revealedCard?: string;
 }

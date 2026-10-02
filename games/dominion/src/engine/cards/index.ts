@@ -2,7 +2,7 @@ import { CardDefinition } from './types';
 import { Copper, Silver, Gold } from './base/treasures';
 import { Estate, Duchy, Province, Curse } from './base/victory';
 import { Gardens } from './base/actions';
-import { Village, Smithy, Militia, Cellar, Market, Festival, Laboratory, CouncilRoom, Moat, Workshop, ThroneRoom, Chapel, Witch, Moneylender, Poacher, Remodel, Mine, Merchant, Artisan, Bandit, Bureaucrat, Vassal } from './base/actions';
+import { Village, Smithy, Militia, Cellar, Market, Festival, Laboratory, CouncilRoom, Moat, Workshop, ThroneRoom, Chapel, Witch, Moneylender, Poacher, Remodel, Mine, Merchant, Artisan, Bandit, Bureaucrat, Vassal, Harbinger, Library, Sentry } from './base/actions';
 
 export const Cards: Record<string, CardDefinition> = {
   copper: Copper,
@@ -34,7 +34,10 @@ export const Cards: Record<string, CardDefinition> = {
   artisan: Artisan,
   bandit: Bandit,
   bureaucrat: Bureaucrat,
-  vassal: Vassal
+  vassal: Vassal,
+  harbinger: Harbinger,
+  library: Library,
+  sentry: Sentry
 };
 
 export function getCardDef(cardId: string): CardDefinition {

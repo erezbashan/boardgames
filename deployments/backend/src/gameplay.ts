@@ -65,7 +65,18 @@ export const dispatchAction = onCall(async (request) => {
       throw new HttpsError('invalid-argument', 'Unsupported game type or reducer error: ' + (err as any).message);
     }
 
-    transaction.update(gameRef, { state: newState });
+    try {
+      transaction.update(gameRef, { state: newState });
+    } catch (e) {
+      console.error("Firestore Update Error in dispatchAction!");
+      console.error(e);
+      try {
+        console.error("newState was:", JSON.stringify(newState, null, 2));
+      } catch (e2) {
+        console.error("Could not stringify newState, cycle detected:", e2);
+      }
+      throw e;
+    }
   });
 
   return { success: true };
@@ -116,6 +127,17 @@ export const onGameUpdated = onDocumentUpdated("games/{gameId}", async (event) =
       return;
     }
 
-    transaction.update(gameRef, { state: newState });
+    try {
+      transaction.update(gameRef, { state: newState });
+    } catch (e) {
+      console.error("Firestore Update Error in onGameUpdated!");
+      console.error(e);
+      try {
+        console.error("newState was:", JSON.stringify(newState, null, 2));
+      } catch (e2) {
+        console.error("Could not stringify newState, cycle detected:", e2);
+      }
+      throw e;
+    }
   });
 });

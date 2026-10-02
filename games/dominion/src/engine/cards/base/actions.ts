@@ -1,5 +1,15 @@
 import { CardDefinition } from '../types';
 import { getCardDef } from '../index';
+
+const getOtherPlayersInOrder = (state: any, playerId: string) => {
+  const currentIdx = state.playerOrder.indexOf(playerId);
+  const others: string[] = [];
+  for (let i = 1; i < state.playerOrder.length; i++) {
+    others.push(state.playerOrder[(currentIdx + i) % state.playerOrder.length]);
+  }
+  return others;
+};
+
 export const Village: CardDefinition = {
   id: 'village',
   name: 'Village',
@@ -33,22 +43,60 @@ export const Militia: CardDefinition = {
     const actions: any[] = [{ type: 'GAIN_COINS', playerId, amount: 2 }];
     
     // Each other player discards down to 3 cards
-    for (const pId in state.players) {
-      if (pId !== playerId && state.players[pId].hand.length > 3) {
-        const hasMoat = state.players[pId].hand.some(c => c.cardId === 'moat');
-        if (hasMoat) {
-          actions.push({ type: 'LOG', playerId: pId, message: `🛡️ [Moat] ${state.players[pId].name} reveals a Moat and is unaffected by the attack.` });
-        } else {
-          actions.push({
-            type: 'REQUEST_INPUT',
-            playerId: pId,
-            inputType: 'DISCARD_FOR_MILITIA',
-            payload: { amount: state.players[pId].hand.length - 3 }
-          });
-        }
+    for (const pId of getOtherPlayersInOrder(state, playerId)) {
+      if (pId !== playerId) {
+        actions.push({ type: 'MILITIA_ATTACK', playerId: pId });
       }
     }
     return actions;
+  }
+};
+
+export const Harbinger: CardDefinition = {
+  id: 'harbinger',
+  name: 'Harbinger',
+  types: ['ACTION'],
+  cost: 3,
+  description: '+1 Card, +1 Action. Look through your discard pile. You may put a card from it onto your deck.',
+  onPlay: (state, playerId) => [
+    { type: 'DRAW_CARDS', playerId, amount: 1 },
+    { type: 'GAIN_ACTIONS', playerId, amount: 1 },
+    { type: 'REQUEST_INPUT', playerId, inputType: 'DISCARD_TO_DECK' }
+  ],
+  botChoose: () => ({ instanceId: null }) // Bot skips
+};
+
+export const Library: CardDefinition = {
+  id: 'library',
+  name: 'Library',
+  types: ['ACTION'],
+  cost: 5,
+  description: 'Draw until you have 7 cards in hand, skipping any Action cards you choose to; set those aside, discarding them afterwards.',
+  onPlay: (state, playerId) => [
+    { type: 'LIBRARY_DRAW', playerId, setAside: [] }
+  ],
+  botChoose: () => ({ keep: true }) // bot always keeps actions
+};
+
+export const Sentry: CardDefinition = {
+  id: 'sentry',
+  name: 'Sentry',
+  types: ['ACTION'],
+  cost: 5,
+  description: '+1 Card, +1 Action. Look at the top 2 cards of your deck. Trash and/or discard any number of them. Put the rest back on top in any order.',
+  onPlay: (state, playerId) => [
+    { type: 'DRAW_CARDS', playerId, amount: 1 },
+    { type: 'GAIN_ACTIONS', playerId, amount: 1 },
+    { type: 'SENTRY_EFFECT', playerId }
+  ],
+  botChoose: (state, options) => {
+    // Basic bot logic: discard everything revealed to simplify
+    const req = options as any;
+    if (req.inputType === 'SENTRY_CHOICE') {
+      const cards = req.payload?.cards || [];
+      return { trashIds: [], discardIds: cards.map((c: any) => c.id), deckIds: [] };
+    }
+    return {};
   }
 };
 
@@ -125,8 +173,7 @@ export const CouncilRoom: CardDefinition = {
   onPlay: (state, playerId) => [
     { type: 'DRAW_CARDS', playerId, amount: 4 },
     { type: 'GAIN_BUYS', playerId, amount: 1 },
-    // A bit of a hack: push a draw action for every OTHER player
-    ...state.playerOrder.filter(id => id !== playerId).map(id => ({ type: 'DRAW_CARDS', playerId: id, amount: 1 } as any))
+    ...getOtherPlayersInOrder(state, playerId).map(id => ({ type: 'DRAW_CARDS', playerId: id, amount: 1 } as any))
   ]
 };
 
@@ -203,25 +250,11 @@ export const Chapel: CardDefinition = {
     }
   ],
   botChoose: (state, options) => {
-    // Bot trashes: curse cards first, then excess coppers (keep 4+), then estates early game
+    // User requested bot to not trash things with Chapel (except maybe curses)
     const pId = options.playerId;
     const hand = state.players[pId].hand;
-    const allCards = [...state.players[pId].deck, ...state.players[pId].discard, ...hand];
-    const totalCards = allCards.length;
     const curses = hand.filter(c => c.cardId === 'curse').map(c => c.id);
-    const coppers = hand.filter(c => c.cardId === 'copper').map(c => c.id);
-    const estates = hand.filter(c => c.cardId === 'estate').map(c => c.id);
-    const toTrash: string[] = [...curses];
-    // Trash coppers if we have many (keep min 4 total across deck)
-    const totalCoppers = allCards.filter(c => c.cardId === 'copper').length;
-    if (totalCoppers > 4) {
-      toTrash.push(...coppers.slice(0, Math.min(coppers.length, totalCoppers - 4)));
-    }
-    // Trash estates early game if deck is small
-    if (totalCards < 15) {
-      toTrash.push(...estates.slice(0, Math.min(estates.length, 1)));
-    }
-    return { trashedIds: toTrash.slice(0, 4) };
+    return { trashedIds: curses.slice(0, 4) };
   }
 };
 
@@ -242,14 +275,9 @@ export const Witch: CardDefinition = {
   description: '+2 Cards. Each other player gains a Curse.',
   onPlay: (state, playerId) => {
     const actions: any[] = [{ type: 'DRAW_CARDS', playerId, amount: 2 }];
-    for (const pId in state.players) {
+    for (const pId of getOtherPlayersInOrder(state, playerId)) {
       if (pId !== playerId) {
-        const hasMoat = state.players[pId].hand.some(c => c.cardId === 'moat');
-        if (hasMoat) {
-          actions.push({ type: 'LOG', playerId: pId, message: `🛡️ [Moat] ${state.players[pId].name} reveals a Moat and is unaffected by the attack.` });
-        } else {
-          actions.push({ type: 'FORCE_GAIN_CARD', playerId: pId, cardId: 'curse' });
-        }
+        actions.push({ type: 'WITCH_ATTACK', playerId: pId });
       }
     }
     return actions;
@@ -263,13 +291,15 @@ export const Moneylender: CardDefinition = {
   cost: 4,
   description: 'You may trash a Copper from your hand for +3 Coins.',
   onPlay: (state, playerId) => {
-    const hasCopper = state.players[playerId].hand.some(c => c.cardId === 'copper');
-    if (!hasCopper) return [];
-    return [{ type: 'REQUEST_INPUT', playerId, inputType: 'TRASH_COPPER_FOR_MONEYLENDER' }];
-  },
-  botChoose: (state, { playerId }) => {
-    const copper = state.players[playerId].hand.find(c => c.cardId === 'copper');
-    return { trashedIds: copper ? [copper.id] : [] };
+    const player = state.players[playerId];
+    const copperIdx = player.hand.findIndex(c => c.cardId === 'copper');
+    if (copperIdx >= 0) {
+      const copper = player.hand.splice(copperIdx, 1)[0];
+      state.trash.push(copper);
+      player.coins += 3;
+      state.logs.push(`${player.name} trashes a Copper for +3 Coins.`);
+    }
+    return [];
   }
 };
 
@@ -361,7 +391,7 @@ export const Bandit: CardDefinition = {
   description: 'Gain a Gold. Each other player reveals the top 2 cards of their deck, trashes a revealed Treasure other than Copper, and discards the rest.',
   onPlay: (state, playerId) => {
     const actions: any[] = [{ type: 'FORCE_GAIN_CARD', playerId, cardId: 'gold' }];
-    for (const pId in state.players) {
+    for (const pId of getOtherPlayersInOrder(state, playerId)) {
       if (pId !== playerId) {
         const hasMoat = state.players[pId].hand.some(c => c.cardId === 'moat');
         if (hasMoat) {
@@ -384,24 +414,9 @@ export const Bureaucrat: CardDefinition = {
   description: 'Gain a Silver onto your deck. Each other player reveals a Victory card from their hand and puts it onto their deck (or reveals a hand with no Victory cards).',
   onPlay: (state, playerId) => {
     const actions: any[] = [{ type: 'FORCE_GAIN_CARD', playerId, cardId: 'silver', destination: 'deck' }];
-    for (const pId in state.players) {
+    for (const pId of getOtherPlayersInOrder(state, playerId)) {
       if (pId !== playerId) {
-        const hasMoat = state.players[pId].hand.some(c => c.cardId === 'moat');
-        if (hasMoat) {
-          const moat = state.players[pId].hand.find(c => c.cardId === 'moat');
-          actions.push({ type: 'REVEAL_CARD', playerId: pId, instanceId: moat!.id, message: `🛡️ [Moat] ${state.players[pId].name} reveals a Moat and is unaffected by the attack.` });
-        } else {
-          const vCards = state.players[pId].hand.filter(c => getCardDef(c.cardId).types.includes('VICTORY'));
-          if (vCards.length === 0) {
-            actions.push({ type: 'REVEAL_HAND', playerId: pId });
-          } else if (vCards.length === 1) {
-            // Auto put it on deck
-            actions.push({ type: 'REQUEST_INPUT', playerId: pId, inputType: 'HAND_TO_DECK', payload: { cardId: vCards[0].id } });
-          } else {
-            // Need user input
-            actions.push({ type: 'REQUEST_INPUT', playerId: pId, inputType: 'HAND_TO_DECK', payload: { filterTypes: ['VICTORY'] } });
-          }
-        }
+        actions.push({ type: 'BUREAUCRAT_ATTACK', playerId: pId });
       }
     }
     return actions;

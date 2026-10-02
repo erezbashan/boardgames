@@ -121,26 +121,26 @@ export const DominionStats: React.FC<DominionStatsProps> = ({ gameState }) => {
           <thead>
             <tr style={{ background: 'rgba(255,255,255,0.1)' }}>
               <th style={{ padding: '10px' }}>Player</th>
-              <th style={{ padding: '10px' }}>⭐ VP</th>
-              <th style={{ padding: '10px' }}>🃏 Cards in Deck</th>
-              <th style={{ padding: '10px' }}>💰 Treasure Cards</th>
-              <th style={{ padding: '10px' }}>💵 Total Coin Value</th>
-              <th style={{ padding: '10px' }}>⚡ Action Cards</th>
-              <th style={{ padding: '10px' }}>🏆 Victory Cards</th>
+              <th style={{ padding: '10px', textAlign: 'right' }}>⭐ VP</th>
+              <th style={{ padding: '10px', textAlign: 'right' }}>🃏 Cards in Deck</th>
+              <th style={{ padding: '10px', textAlign: 'right' }}>💰 Treasure Cards</th>
+              <th style={{ padding: '10px', textAlign: 'right' }}>💵 Total Coin Value</th>
+              <th style={{ padding: '10px', textAlign: 'right' }}>⚡ Action Cards</th>
+              <th style={{ padding: '10px', textAlign: 'right' }}>🏆 Victory Cards</th>
             </tr>
           </thead>
           <tbody>
             {tableData.map((row, i) => (
               <tr key={row.id} style={{ borderTop: '1px solid rgba(255,255,255,0.1)', background: i === 0 ? 'rgba(251,191,36,0.05)' : 'transparent' }}>
-                <td style={{ padding: '10px', fontWeight: 'bold', color: row.color || 'white' }}>
-                  {i === 0 ? '🥇 ' : i === 1 ? '🥈 ' : i === 2 ? '🥉 ' : ''}{row.name}
+                <td style={{ padding: '10px', fontWeight: 'bold', color: row.color || 'white', whiteSpace: 'nowrap' }}>
+                  {i === 0 ? '🥇 ' : ''}{row.name}
                 </td>
-                <td style={{ padding: '10px', fontWeight: 'bold' }}>{row.vp}</td>
-                <td style={{ padding: '10px' }}>{row.total}</td>
-                <td style={{ padding: '10px', color: '#eab308' }}>{row.treasures}</td>
-                <td style={{ padding: '10px', color: '#fbbf24' }}>{row.totalMoney}</td>
-                <td style={{ padding: '10px', color: '#3b82f6' }}>{row.actions}</td>
-                <td style={{ padding: '10px', color: '#22c55e' }}>{row.victory}</td>
+                <td style={{ padding: '10px', fontWeight: 'bold', textAlign: 'right' }}>{row.vp}</td>
+                <td style={{ padding: '10px', textAlign: 'right' }}>{row.total}</td>
+                <td style={{ padding: '10px', color: '#eab308', textAlign: 'right' }}>{row.treasures}</td>
+                <td style={{ padding: '10px', color: '#fbbf24', textAlign: 'right' }}>{row.totalMoney}</td>
+                <td style={{ padding: '10px', color: '#3b82f6', textAlign: 'right' }}>{row.actions}</td>
+                <td style={{ padding: '10px', color: '#22c55e', textAlign: 'right' }}>{row.victory}</td>
               </tr>
             ))}
           </tbody>

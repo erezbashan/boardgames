@@ -47,6 +47,7 @@ export interface GameLayoutProps {
   renderGameSpecificStats?: () => React.ReactNode;
   renderLogMessage?: (msg: string, defaultRenderer: (m: string) => React.ReactNode) => React.ReactNode;
   bottomAreaOverlay?: React.ReactNode;
+  hideWinnerBanner?: boolean;
 }
 
 export const GameLayout: React.FC<GameLayoutProps> = ({
@@ -60,7 +61,8 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
   renderGameSpecificPlayerDetails,
   renderGameSpecificStats,
   renderLogMessage,
-  bottomAreaOverlay
+  bottomAreaOverlay,
+  hideWinnerBanner = false
 }) => {
   const [showSettings, setShowSettings] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
@@ -139,7 +141,7 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
             {status === 'Lobby' && settings}
             {status !== 'Lobby' && (
               <>
-                {status === 'Finished' && (
+                {status === 'Finished' && !hideWinnerBanner && (
                   <div style={{ position: 'absolute', top: '20px', left: '50%', transform: 'translateX(-50%)', zIndex: 500, padding: '15px 40px', background: gameState.winnerId === myPlayerId ? '#22c55e' : 'rgba(0,0,0,0.8)', color: 'white', borderRadius: '12px', textAlign: 'center', fontSize: '32px', fontWeight: 'bold', boxShadow: '0 10px 25px rgba(0,0,0,0.5)', border: '2px solid rgba(255,255,255,0.2)' }}>
                     {gameState.winnerId === myPlayerId ? "🏆 You Won!" : `🏆 Winner: ${gameState.winnerId && playersMap[gameState.winnerId] ? playersMap[gameState.winnerId].name : 'Unknown'}`}
                   </div>
