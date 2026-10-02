@@ -46,6 +46,7 @@ export type PendingAction =
   | { type: 'VASSAL_EFFECT'; playerId: string }
   | { type: 'DISCARD_REVEALED_VASSAL'; playerId: string; card: any }
   | { type: 'LIBRARY_DRAW'; playerId: string; setAside: any[] }
+  | { type: 'LIBRARY_DRAW_ONE'; playerId: string; setAside: any[] }
   | { type: 'SENTRY_EFFECT'; playerId: string };
 
 export interface HistorySnapshot {
@@ -58,7 +59,7 @@ export interface DominionSettings {
   kingdomCards: string[]; // Which kingdom cards to include (from the full pool)
   gameLength?: 'Fast' | 'Short' | 'Normal' | 'Marathon'; // Override default number of victory cards
   openGame?: boolean; // If true, all players can see each others' hands
-  botParams?: { vpIntercept: number; vpSlope: number; moneyIntercept: number; moneySlope: number; actionIntercept: number; actionSlope: number; };
+  botParams?: any;
 
 }
 

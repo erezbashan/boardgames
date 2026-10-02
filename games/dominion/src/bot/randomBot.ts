@@ -1,6 +1,28 @@
 import { DominionState } from '../engine/types';
 import { PlayerAction } from '../engine/actions';
 import { getCardDef } from '../engine/cards';
+function calculateGameProgress(state: DominionState): number {
+    const numPlayers = state.playerOrder.length;
+    const lookback = 2 * numPlayers;
+    const recent = state.recentBuyingPowers || [];
+    const window = recent.slice(-lookback);
+    while (window.length < lookback) window.unshift(0);
+    let provincesBoughtCount = 0;
+    let otherCardsBoughtCount = 0;
+    for (const bp of window) {
+       if (bp >= 8) provincesBoughtCount++;
+       if (bp >= 3 && bp < 8) otherCardsBoughtCount++;
+    }
+    const provinceRatePerRound = Math.max(0.1, provincesBoughtCount / 2);
+    const provincesLeft = state.supply['province'] ?? 8;
+    const roundsToDepleteProvinces = provincesLeft / provinceRatePerRound;
+    const cardsToEmpty3Piles = 30;
+    const otherCardsRatePerRound = Math.max(0.5, otherCardsBoughtCount / 2);
+    const roundsToEmptyPiles = (cardsToEmpty3Piles * 2) / otherCardsRatePerRound;
+    const estimatedRoundsLeft = Math.min(roundsToDepleteProvinces, roundsToEmptyPiles);
+    return Math.max(0, Math.min(1, 1 - (estimatedRoundsLeft / 15)));
+}
+
 
 export function getRandomBotAction(state: DominionState, playerId: string): PlayerAction | null {
   const isInputPhase = state.pendingActions.length > 0 && state.pendingActions[0].type === 'REQUEST_INPUT';
@@ -53,10 +75,32 @@ export function getRandomBotAction(state: DominionState, playerId: string): Play
     }
 
     if (inputReq.inputType === 'GAIN_CARD') {
-      const workshopDef = getCardDef('workshop');
-      if (workshopDef.botChoose) {
-        const result = workshopDef.botChoose(state, { playerId });
-        return { type: 'RESOLVE_INPUT', playerId, payload: result };
+      const maxCost = inputReq.payload?.maxCost || 99;
+      const affordable = Object.keys(state.supply).filter(id => state.supply[id] > 0 && getCardDef(id).cost <= maxCost);
+      if (affordable.length > 0) {
+         let bestScore = -9999;
+         let bestCard = '';
+         const prog = calculateGameProgress(state);
+         const params = state.settings?.botParams?.[playerId] || state.settings?.botParams || {
+            vpIntercept: 0, vpSlope: 20, moneyIntercept: 1, moneySlope: 1, actionIntercept: 0.5, actionSlope: 0
+         };
+         const scoreCard = (id: string) => {
+            const def = getCardDef(id);
+            if (def.types.includes('VICTORY')) {
+               const val = def.cost + params.vpIntercept + (params.vpSlope * prog);
+               if (val > bestScore) { bestScore = val; bestCard = id; }
+            } else if (def.types.includes('TREASURE')) {
+               const val = def.cost + params.moneyIntercept + (params.moneySlope * prog);
+               if (val > bestScore) { bestScore = val; bestCard = id; }
+            } else if (def.types.includes('ACTION')) {
+               const val = def.cost + params.actionIntercept + (params.actionSlope * prog);
+               if (val > bestScore) { bestScore = val; bestCard = id; }
+            }
+         };
+         affordable.forEach(scoreCard);
+         if (bestCard) {
+            return { type: 'RESOLVE_INPUT', playerId, payload: { cardId: bestCard } };
+         }
       }
       return { type: 'RESOLVE_INPUT', playerId, payload: { cardId: '' } };
     }
@@ -84,17 +128,6 @@ export function getRandomBotAction(state: DominionState, playerId: string): Play
 
 
 
-    if (inputReq.inputType === 'TRASH_FOR_REMODEL') {
-      const def = getCardDef('remodel');
-      if (def.botChoose) return { type: 'RESOLVE_INPUT', playerId, payload: def.botChoose(state, { playerId }) };
-      return { type: 'RESOLVE_INPUT', playerId, payload: { trashedIds: [] } };
-    }
-
-    if (inputReq.inputType === 'TRASH_FOR_MINE') {
-      const def = getCardDef('mine');
-      if (def.botChoose) return { type: 'RESOLVE_INPUT', playerId, payload: def.botChoose(state, { playerId }) };
-      return { type: 'RESOLVE_INPUT', playerId, payload: { trashedIds: [] } };
-    }
 
     if (inputReq.inputType === 'DISCARD_TO_DECK') {
       const p = state.players[playerId];
@@ -142,8 +175,13 @@ export function getRandomBotAction(state: DominionState, playerId: string): Play
     
     if (inputReq.inputType === 'TRASH_FOR_REMODEL') {
       const me = state.players[playerId];
+      if (me.hand.length === 0) return { type: 'RESOLVE_INPUT', playerId, payload: { trashedIds: [] } };
+      
       const curse = me.hand.find(c => c.cardId === 'curse');
       if (curse) return { type: 'RESOLVE_INPUT', playerId, payload: { trashedIds: [curse.id] } };
+      
+      const estate = me.hand.find(c => c.cardId === 'estate');
+      if (estate) return { type: 'RESOLVE_INPUT', playerId, payload: { trashedIds: [estate.id] } };
       
       // Look for a card we can exactly upgrade by 2
       for (const c of me.hand) {
@@ -154,7 +192,10 @@ export function getRandomBotAction(state: DominionState, playerId: string): Play
           return { type: 'RESOLVE_INPUT', playerId, payload: { trashedIds: [c.id] } };
         }
       }
-      return { type: 'RESOLVE_INPUT', playerId, payload: { trashedIds: [] } };
+      
+      // If we must trash, trash the cheapest card (often copper)
+      const sortedHand = [...me.hand].sort((a, b) => getCardDef(a.cardId).cost - getCardDef(b.cardId).cost);
+      return { type: 'RESOLVE_INPUT', playerId, payload: { trashedIds: [sortedHand[0].id] } };
     }
     
     if (inputReq.inputType === 'TRASH_FOR_MINE') {

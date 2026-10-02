@@ -57,10 +57,10 @@ function playMatch(botA: any, botB: any, numGames: number): any {
 
 const bots = [];
 let idCounter = 1;
-for (let vInt = -20; vInt <= 20; vInt += 10) {
-  for (let vSlp = 0; vSlp <= 40; vSlp += 10) {
-    for (let mInt = -2; mInt <= 4; mInt += 2) {
-      for (let mSlp = -4; mSlp <= 4; mSlp += 2) {
+for (let vInt = -10; vInt <= 10; vInt += 5) {
+  for (let vSlp = 10; vSlp <= 40; vSlp += 10) {
+    for (let mInt = -2; mInt <= 3; mInt += 1) {
+      for (let mSlp = -2; mSlp <= 2; mSlp += 1) {
          bots.push({ id: idCounter++, vpIntercept: vInt, vpSlope: vSlp, moneyIntercept: mInt, moneySlope: mSlp, actionIntercept: 0, actionSlope: 0 });
       }
     }

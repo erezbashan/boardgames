@@ -277,25 +277,32 @@ function processPendingActions(state: DominionState) {
             state.logs.push(`${player.name} discards ${setAside.length} set aside cards.`);
           }
         } else {
-          if (player.deck.length === 0 && player.discard.length > 0) {
-            player.deck = shuffle([...player.discard]);
-            player.discard = [];
-            state.logs.push(`${player.name} shuffles their discard pile.`);
+          state.actionQueue = state.actionQueue || [];
+          state.actionQueue.unshift({ delayMs: 400, action: { type: 'ENQUEUE_PENDING_ACTION', pendingAction: { type: 'LIBRARY_DRAW_ONE', playerId: player.id, setAside } } });
+        }
+        break;
+      }
+      case 'LIBRARY_DRAW_ONE': {
+        const { setAside } = pending as any;
+        if (player.deck.length === 0 && player.discard.length > 0) {
+          player.deck = shuffle([...player.discard]);
+          player.discard = [];
+          state.logs.push(`${player.name} shuffles their discard pile.`);
+        }
+        const card = player.deck.pop();
+        if (!card) {
+          if (setAside && setAside.length > 0) {
+            player.discard.push(...setAside);
+            state.logs.push(`${player.name} discards ${setAside.length} set aside cards.`);
           }
-          const card = player.deck.pop();
-          if (!card) {
-            if (setAside && setAside.length > 0) {
-              player.discard.push(...setAside);
-              state.logs.push(`${player.name} discards ${setAside.length} set aside cards.`);
-            }
+        } else {
+          const def = getCardDef(card.cardId);
+          if (def.types.includes('ACTION')) {
+            player.discard.push(card); // visually put on discard
+            state.pendingActions.unshift({ type: 'REQUEST_INPUT', playerId: player.id, inputType: 'LIBRARY_KEEP', payload: { card, setAside } });
           } else {
-            const def = getCardDef(card.cardId);
-            if (def.types.includes('ACTION')) {
-              state.pendingActions.unshift({ type: 'REQUEST_INPUT', playerId: player.id, inputType: 'LIBRARY_KEEP', payload: { card, setAside } });
-            } else {
-              player.hand.push(card);
-              state.pendingActions.unshift(pending); // Loop again
-            }
+            player.hand.push(card);
+            state.pendingActions.unshift({ type: 'LIBRARY_DRAW', playerId: player.id, setAside }); // loop
           }
         }
         break;
@@ -913,6 +920,11 @@ export function dominionReducer
           const setAside = req.payload.setAside;
           const player = nextState.players[action.playerId];
           nextState.pendingActions.shift();
+          
+          const idx = player.discard.findIndex((c: any) => c.id === card.id);
+          if (idx !== -1) {
+            player.discard.splice(idx, 1);
+          }
           
           if (keep) {
             player.hand.push(card);
