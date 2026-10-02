@@ -58,11 +58,16 @@ export const Harbinger: CardDefinition = {
   types: ['ACTION'],
   cost: 3,
   description: '+1 Card, +1 Action. Look through your discard pile. You may put a card from it onto your deck.',
-  onPlay: (state, playerId) => [
-    { type: 'DRAW_CARDS', playerId, amount: 1 },
-    { type: 'GAIN_ACTIONS', playerId, amount: 1 },
-    { type: 'REQUEST_INPUT', playerId, inputType: 'DISCARD_TO_DECK' }
-  ],
+  onPlay: (state, playerId) => {
+    const actions: any[] = [
+      { type: 'DRAW_CARDS', playerId, amount: 1 },
+      { type: 'GAIN_ACTIONS', playerId, amount: 1 }
+    ];
+    if (state.players[playerId].discard.length > 0) {
+      actions.push({ type: 'REQUEST_INPUT', playerId, inputType: 'DISCARD_TO_DECK' });
+    }
+    return actions;
+  },
   botChoose: () => ({ instanceId: null }) // Bot skips
 };
 

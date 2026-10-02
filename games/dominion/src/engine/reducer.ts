@@ -162,7 +162,7 @@ function processPendingActions(state: DominionState) {
       }
       case 'BANDIT_ATTACK': {
         state.actionQueue = state.actionQueue || [];
-        state.actionQueue.unshift({ delayMs: 100, action: { type: 'ENQUEUE_PENDING_ACTION', pendingAction: { type: 'BANDIT_REVEAL_NEXT', playerId: pending.playerId, cardsLeft: 2, revealedCards: [] } } });
+        state.actionQueue.push({ delayMs: 100, action: { type: 'ENQUEUE_PENDING_ACTION', pendingAction: { type: 'BANDIT_REVEAL_NEXT', playerId: pending.playerId, cardsLeft: 2, revealedCards: [] } } });
         break;
       }
       case 'BANDIT_REVEAL_NEXT': {
@@ -528,7 +528,10 @@ export function dominionReducer
     case 'START_GAME': {
       const numPlayers = nextState.playerOrder.length;
       // Per Dominion rules: 2p=8 provinces/duchies/estates, 3-4p=12
-      const baseVictoryCount = nextState.settings?.victoryCardsOverride || (numPlayers <= 2 ? 8 : 12);
+      let baseVictoryCount = numPlayers <= 2 ? 8 : 12;
+      if (nextState.settings?.gameLength === 'Fast') baseVictoryCount = Math.max(1, Math.floor(baseVictoryCount * 0.25));
+      else if (nextState.settings?.gameLength === 'Short') baseVictoryCount = Math.max(1, Math.floor(baseVictoryCount * 0.5));
+      else if (nextState.settings?.gameLength === 'Marathon') baseVictoryCount = Math.floor(baseVictoryCount * 1.5);
       
       // Per Dominion rules: 60 copper minus 7 per player (starters), min 0
       const copperCount = Math.max(0, 60 - 7 * numPlayers);

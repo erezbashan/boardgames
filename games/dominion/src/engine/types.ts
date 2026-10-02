@@ -56,7 +56,7 @@ export interface HistorySnapshot {
 
 export interface DominionSettings {
   kingdomCards: string[]; // Which kingdom cards to include (from the full pool)
-  victoryCardsOverride?: number; // Override default number of victory cards
+  gameLength?: 'Fast' | 'Short' | 'Normal' | 'Marathon'; // Override default number of victory cards
   openGame?: boolean; // If true, all players can see each others' hands
   botParams?: { vpIntercept: number; vpSlope: number; moneyIntercept: number; moneySlope: number; actionIntercept: number; actionSlope: number; };
 

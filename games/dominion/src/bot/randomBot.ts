@@ -295,7 +295,7 @@ export function getRandomBotAction(state: DominionState, playerId: string): Play
            
            // Use linear formulas parameterized for tournaments
            // Default params if none provided in settings
-           const params = state.settings?.botParams || {
+           const params = state.settings?.botParams?.[playerId] || state.settings?.botParams || {
                vpIntercept: -10, vpSlope: 30, // Starts at -10, ends at +20
                moneyIntercept: 1, moneySlope: -2, // Starts at +1, ends at -1
                actionIntercept: 0, actionSlope: 0

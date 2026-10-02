@@ -755,6 +755,9 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
                 {needsConfirm && (
                   <button onClick={handleResolveInput} style={{ marginLeft: '15px', padding: '6px 16px', background: 'white', color: '#7f1d1d', fontWeight: 'bold', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Confirm Selection</button>
                 )}
+                {inputType === 'PLAY_FOR_THRONE_ROOM' && (
+                  <button onClick={() => dispatch({ type: 'RESOLVE_INPUT', playerId: myPlayerId, payload: { instanceId: null } })} style={{ marginLeft: '15px', padding: '6px 16px', background: 'rgba(255,255,255,0.2)', color: 'white', fontWeight: 'bold', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Skip</button>
+                )}
                 {inputType === 'DISCARD_TO_DECK' && (() => {
                   const uniqueDiscards: any[] = [];
                   const seen = new Set<string>();
@@ -925,20 +928,17 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
           Rules Override:
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(0,0,0,0.2)', padding: '10px', borderRadius: '8px', marginBottom: '16px' }}>
-          <label style={{ fontSize: '13px', color: '#cbd5e1' }}>Victory Cards Count (Estates, Duchies, Provinces, Gardens):</label>
+          <label style={{ fontSize: '13px', color: '#cbd5e1' }}>Game Length:</label>
           <select 
             disabled={!isLobby}
-            value={gameState.settings?.victoryCardsOverride || 0}
-            onChange={(e) => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...(gameState.settings || {}), victoryCardsOverride: Number(e.target.value) || undefined } })}
+            value={gameState.settings?.gameLength || 'Normal'}
+            onChange={(e) => dispatch({ type: 'UPDATE_SETTINGS', payload: { ...(gameState.settings || {}), gameLength: e.target.value } })}
             style={{ background: '#1e293b', color: 'white', border: '1px solid #475569', borderRadius: '4px', padding: '4px', cursor: isLobby ? 'pointer' : 'not-allowed' }}
           >
-            <option value={0}>According to Game Rules</option>
-            <option value={2}>2 (Super Fast)</option>
-            <option value={4}>4 (Short Game)</option>
-            <option value={8}>8 (2 Players)</option>
-            <option value={12}>12 (3-4 Players)</option>
-            <option value={16}>16 (Long Game)</option>
-            <option value={20}>20 (Marathon)</option>
+            <option value="Normal">Normal</option>
+            <option value="Short">Short</option>
+            <option value="Fast">Fast</option>
+            <option value="Marathon">Marathon</option>
           </select>
         </div>
         
@@ -1020,6 +1020,7 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
         }
       `}</style>
       <GameLayout
+        bottomAreaRatio={25}
         gameName={gameState.status === 'Playing' ? `Dominion [Prog: ${gameProgress.toFixed(2)} | EstTotalRounds: ${estimatedRoundsLeft.toFixed(1)} | AvgBuyPwr: ${avgBuyingPower.toFixed(1)} | ProvEst: ${roundsToDepleteProvinces.toFixed(1)}]` : "Dominion"}
         helpText="Build your deck and collect Victory Points! First to buy Provinces or empty 3 piles wins."
         helpUrl="https://en.wikipedia.org/wiki/Dominion_(card_game)"

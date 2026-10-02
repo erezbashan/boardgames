@@ -6,7 +6,8 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "tournament": "tsx scripts/tournament.ts"
+    "tournament": "tsx scripts/tournament.ts",
+    "evolve": "tsx scripts/evolution.ts"
   },
   "dependencies": {
     "@erez/boardgame-core": "*",
@@ -15,7 +16,9 @@
   },
   "devDependencies": {
     "@types/react": "^19.3.0",
+    "ignore-styles": "^5.0.1",
     "tsx": "^4.23.15",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "vite-node": "^6.0.0"
   }
 }
