@@ -890,7 +890,7 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
                     </div>
                   </div>
                   );
-                })}
+                })()}
               </div>
             );
           })()}
