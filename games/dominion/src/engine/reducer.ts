@@ -189,7 +189,7 @@ function processPendingActions(state: DominionState) {
           const c = p.deck.pop();
           if (c) {
             revealedCards.push(c);
-            p.transientDeckReveals = revealedCards.map(rc => rc.cardId);
+            p.transientDeckReveals = revealedCards.map((rc: any) => rc.cardId);
             
             state.actionQueue = state.actionQueue || [];
             state.actionQueue.unshift(
