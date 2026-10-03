@@ -16,8 +16,8 @@ if (typeof document !== 'undefined' && !document.getElementById(styleId)) {
       50% { transform: scale(2.5); color: #ef4444; }
       100% { transform: scale(1); color: inherit; }
     }
-    .pulse-green { animation: pulse-green 1.5s ease-out; }
-    .pulse-red { animation: pulse-red 1.5s ease-out; }
+    .pulse-green { animation: pulse-green 2.25s ease-out; }
+    .pulse-red { animation: pulse-red 2.25s ease-out; }
   `;
   document.head.appendChild(style);
 }

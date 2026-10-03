@@ -702,9 +702,10 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
           {/* Status */}
           <div style={{ padding: '15px', minHeight: '68px', background: isMyTurn ? '#064e3b' : '#1e293b', borderRadius: '8px', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 4px 6px rgba(0,0,0,0.3)' }}>
             <div style={{ display: 'flex', gap: '20px', fontSize: '18px', fontWeight: 'bold', color: 'white' }}>
-              <AnimatedCounter value={me.actions} icon="⚡ Actions:" color="white" />
-              <AnimatedCounter value={me.buys} icon="🛒 Buys:" color="white" />
-              <AnimatedCounter value={me.coins} icon="💰 Coins:" color="white" />
+              <div style={{ color: '#94a3b8', marginRight: '10px' }}>{isMyTurn ? 'Your Turn' : `${gameState.players[gameState.playerOrder[gameState.currentPlayerIndex]]?.name}'s Turn`}</div>
+              <AnimatedCounter value={gameState.players[gameState.playerOrder[gameState.currentPlayerIndex]]?.actions || 0} icon="⚡ Actions:" color="white" />
+              <AnimatedCounter value={gameState.players[gameState.playerOrder[gameState.currentPlayerIndex]]?.buys || 0} icon="🛒 Buys:" color="white" />
+              <AnimatedCounter value={gameState.players[gameState.playerOrder[gameState.currentPlayerIndex]]?.coins || 0} icon="💰 Coins:" color="white" />
             </div>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'flex-end' }}>
