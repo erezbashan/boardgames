@@ -23,6 +23,35 @@ function calculateGameProgress(state: DominionState): number {
     return Math.max(0, Math.min(1, 1 - (estimatedRoundsLeft / 15)));
 }
 
+function getEndGameModifier(state: DominionState, playerId: string, cardId: string) {
+    let emptyPiles = 0;
+    for (const id in state.supply) {
+        if (state.supply[id] <= 0) emptyPiles++;
+    }
+    
+    const emptiesProvince = (cardId === 'province' && state.supply['province'] === 1);
+    const emptiesThirdPile = (state.supply[cardId] === 1 && emptyPiles === 2);
+    
+    if (emptiesProvince || emptiesThirdPile) {
+        const me = state.players[playerId];
+        const def = getCardDef(cardId);
+        const isVP = def.types.includes('VICTORY');
+        const vpGain = isVP ? (cardId === 'province' ? 6 : cardId === 'duchy' ? 3 : cardId === 'estate' ? 1 : (cardId === 'gardens' ? Math.floor((me.deck.length + me.discard.length + me.hand.length + me.playArea.length + 1) / 10) : 0)) : 0;
+        const newMeVP = me.victoryPoints + vpGain;
+        
+        let isAhead = true;
+        for (const pId in state.players) {
+            if (pId === playerId) continue;
+            if (state.players[pId].victoryPoints >= newMeVP) {
+                isAhead = false;
+                break;
+            }
+        }
+        return isAhead ? 1000 : -1000;
+    }
+    return 0;
+}
+
 
 export function getRandomBotAction(state: DominionState, playerId: string): PlayerAction | null {
   const isInputPhase = state.pendingActions.length > 0 && state.pendingActions[0].type === 'REQUEST_INPUT';
@@ -86,15 +115,19 @@ export function getRandomBotAction(state: DominionState, playerId: string): Play
          };
          const scoreCard = (id: string) => {
             const def = getCardDef(id);
+            let val = def.cost;
             if (def.types.includes('VICTORY')) {
-               const val = def.cost + params.vpIntercept + (params.vpSlope * prog);
-               if (val > bestScore) { bestScore = val; bestCard = id; }
+               val += params.vpIntercept + (params.vpSlope * prog);
             } else if (def.types.includes('TREASURE')) {
-               const val = def.cost + params.moneyIntercept + (params.moneySlope * prog);
-               if (val > bestScore) { bestScore = val; bestCard = id; }
+               val += params.moneyIntercept + (params.moneySlope * prog);
             } else if (def.types.includes('ACTION')) {
-               const val = def.cost + params.actionIntercept + (params.actionSlope * prog);
-               if (val > bestScore) { bestScore = val; bestCard = id; }
+               val += params.actionIntercept + (params.actionSlope * prog);
+            }
+            val += getEndGameModifier(state, playerId, id);
+            
+            if (val > bestScore) {
+               bestScore = val;
+               bestCard = id;
             }
          };
          affordable.forEach(scoreCard);
@@ -356,30 +389,7 @@ export function getRandomBotAction(state: DominionState, playerId: string): Play
              else val += (deckSize >= 40 ? 6 : 2);
            }
            
-           // End game logic check
-           const emptiesProvince = (cardId === 'province' && state.supply['province'] === 1);
-           const emptiesThirdPile = (state.supply[cardId] === 1 && emptyPiles === 2);
-           
-           if (emptiesProvince || emptiesThirdPile) {
-               // Calculate approximate VP if we bought this
-               const vpGain = isVP ? (cardId === 'province' ? 6 : cardId === 'duchy' ? 3 : cardId === 'estate' ? 1 : 0) : 0;
-               const newMeVP = me.victoryPoints + vpGain;
-               
-               let isAhead = true;
-               for (const pId in state.players) {
-                  if (pId === playerId) continue;
-                  if (state.players[pId].victoryPoints >= newMeVP) {
-                     isAhead = false;
-                     break;
-                  }
-               }
-               
-               if (isAhead) {
-                  val += 1000; // MUST END GAME NOW
-               } else {
-                  val -= 1000; // NEVER END GAME IF LOSING
-               }
-           }
+           val += getEndGameModifier(state, playerId, cardId);
 
            return val;
         };
