@@ -189,8 +189,7 @@ function processPendingActions(state: DominionState) {
           const c = p.deck.pop();
           if (c) {
             revealedCards.push(c);
-            p.transientDeckReveals = [c.cardId];
-            p.discard.push(c);
+            p.transientDeckReveals = revealedCards.map(rc => rc.cardId);
             
             state.actionQueue = state.actionQueue || [];
             state.actionQueue.unshift(
@@ -218,9 +217,6 @@ function processPendingActions(state: DominionState) {
           trasheableTreasures.sort((a: any, b: any) => getCardDef(b.cardId).cost - getCardDef(a.cardId).cost);
           toTrash = trasheableTreasures[0];
           state.trash.push(toTrash);
-          // Splice it out of discard since we put it there visually in REVEAL_NEXT
-          const idx = player.discard.findIndex((c: any) => c.id === toTrash.id);
-          if (idx !== -1) player.discard.splice(idx, 1);
         }
         
         for (const c of revealedCards) {
@@ -228,6 +224,7 @@ function processPendingActions(state: DominionState) {
              state.logs.push(`${player.name} reveals [${getCardDef(c.cardId).name}] from their deck and trashes it.`);
           } else {
              state.logs.push(`${player.name} reveals [${getCardDef(c.cardId).name}] from their deck and discards it.`);
+             player.discard.push(c);
           }
         }
         break;
