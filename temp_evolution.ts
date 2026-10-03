@@ -37,7 +37,7 @@ function runGame(params1: any, params2: any, firstPlayer: 'bot1' | 'bot2'): 'bot
     const curPlayer = state.playerOrder[state.currentPlayerIndex];
     state = reducer(state, { type: 'PLAY_BOT', playerId: curPlayer } as any);
   }
-  if (iterations >= 500) console.log('Hit 500 iter limit!');
+  if (iterations >= 500) { console.log('Hit 500 iter limit!'); fs.writeFileSync('stuck_state.json', JSON.stringify(state, null, 2)); process.exit(1); }
   if (!state.winnerId) return 'tie';
   return state.winnerId as 'bot1' | 'bot2';
 }

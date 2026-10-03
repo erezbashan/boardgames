@@ -36,6 +36,18 @@ function processPendingActions(state: DominionState) {
     const currentAction = state.pendingActions[0]; // Peek
     
     if (currentAction.type === 'REQUEST_INPUT') {
+      const p = state.players[currentAction.playerId];
+      
+      // Auto-resolve conditions to avoid empty UI prompts
+      if (currentAction.inputType === 'DISCARD_TO_DECK' && p.discard.length === 0) {
+        state.pendingActions.shift();
+        continue;
+      }
+      if (currentAction.inputType === 'PLAY_FOR_THRONE_ROOM' && p.hand.filter(c => c.cardId && typeof c.cardId === 'string' && getCardDef(c.cardId).types.includes('ACTION')).length === 0) {
+        state.pendingActions.shift();
+        continue;
+      }
+
       processing = false;
       break; // Pause engine for input
     }

@@ -82,7 +82,7 @@ export function getRandomBotAction(state: DominionState, playerId: string): Play
          let bestCard = '';
          const prog = calculateGameProgress(state);
          const params = state.settings?.botParams?.[playerId] || state.settings?.botParams || {
-            vpIntercept: 0, vpSlope: 20, moneyIntercept: 1, moneySlope: 1, actionIntercept: 0.5, actionSlope: 0
+            vpIntercept: 0, vpSlope: 20, moneyIntercept: -1, moneySlope: 1, actionIntercept: 0, actionSlope: 0
          };
          const scoreCard = (id: string) => {
             const def = getCardDef(id);
@@ -337,8 +337,8 @@ export function getRandomBotAction(state: DominionState, playerId: string): Play
            // Use linear formulas parameterized for tournaments
            // Default params if none provided in settings
            const params = state.settings?.botParams?.[playerId] || state.settings?.botParams || {
-               vpIntercept: -10, vpSlope: 30, // Starts at -10, ends at +20
-               moneyIntercept: 1, moneySlope: -2, // Starts at +1, ends at -1
+               vpIntercept: 0, vpSlope: 20,
+               moneyIntercept: -1, moneySlope: 1,
                actionIntercept: 0, actionSlope: 0
            };
 

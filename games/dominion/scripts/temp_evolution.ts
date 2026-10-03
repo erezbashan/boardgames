@@ -1,15 +1,19 @@
-import { dominionReducer as reducer } from '../src/engine/reducer';
-import { DominionState } from '../src/engine/types';
-import { Cards } from '../src/engine/cards';
+import fs from 'fs';
+import { reducer } from '../src/engine/reducer';
+import { DominionState, DominionSettings } from '../src/engine/types';
+import { getCardDef } from '../src/engine/cards';
+import { getRandomBotAction } from '../src/bot/randomBot';
 
-const kingdomCards = Object.keys(Cards).filter(k => Cards[k].types.includes('ACTION')).slice(0, 10);
+const kingdomCards = ['smithy', 'village', 'festival', 'market', 'laboratory', 'workshop', 'mine', 'remodel', 'militia', 'moat'];
+
+const generateInstanceId = (cardId: string) => `${cardId}_${Math.random().toString(36).substr(2, 9)}`;
 
 const createInitialState = (params1: any, params2: any, firstPlayer: 'bot1' | 'bot2'): DominionState => {
   return reducer({
     status: 'Lobby',
     players: {
-      'bot1': { id: 'bot1', name: 'Bot 1', hand: [], deck: [], discard: [], inPlay: [], setAside: [], actions: 1, buys: 1, coins: 0, victoryPoints: 0, isBot: true },
-      'bot2': { id: 'bot2', name: 'Bot 2', hand: [], deck: [], discard: [], inPlay: [], setAside: [], actions: 1, buys: 1, coins: 0, victoryPoints: 0, isBot: true }
+      'bot1': { id: 'bot1', name: 'Bot 1', deck: [], hand: [], discard: [], playArea: [], actions: 1, buys: 1, coins: 0, victoryPoints: 0, transientDeckReveals: [] },
+      'bot2': { id: 'bot2', name: 'Bot 2', deck: [], hand: [], discard: [], playArea: [], actions: 1, buys: 1, coins: 0, victoryPoints: 0, transientDeckReveals: [] }
     },
     playerOrder: firstPlayer === 'bot1' ? ['bot1', 'bot2'] : ['bot2', 'bot1'],
     currentPlayerIndex: 0,
@@ -37,7 +41,11 @@ function runGame(params1: any, params2: any, firstPlayer: 'bot1' | 'bot2'): 'bot
     const curPlayer = state.playerOrder[state.currentPlayerIndex];
     state = reducer(state, { type: 'PLAY_BOT', playerId: curPlayer } as any);
   }
-  if (iterations >= 500) console.log('Hit 500 iter limit!');
+  if (iterations >= 500) {
+    console.log('Hit 500 iter limit!');
+    fs.writeFileSync('stuck_state.json', JSON.stringify(state, null, 2));
+    process.exit(1);
+  }
   if (!state.winnerId) return 'tie';
   return state.winnerId as 'bot1' | 'bot2';
 }
@@ -45,7 +53,7 @@ function runGame(params1: any, params2: any, firstPlayer: 'bot1' | 'bot2'): 'bot
 function playMatch(botA: any, botB: any, numGames: number): any {
    let winsA = 0;
    let winsB = 0;
-   for (let i=0; i<numGames; i++) {
+   for (let i = 0; i < 4; i++) {
        const first = (i % 2 === 0) ? 'bot1' : 'bot2';
        const winner = runGame(botA, botB, first);
        if (winner === 'bot1') winsA++;
@@ -73,28 +81,23 @@ function shuffle(array: any[]) {
     [array[i], array[j]] = [array[j], array[i]];
   }
 }
-shuffle(bots);
 
-console.log(`Starting Evolution bracket with ${bots.length} bots!`);
-let currentPool = bots;
+let pool = [...bots];
 let round = 1;
 
-while (currentPool.length > 1) {
-  console.log(`--- Round ${round} --- Pool size: ${currentPool.length}`);
-  const nextPool = [];
-  const gamesPerMatch = currentPool.length <= 16 ? 50 : 6; // 6 games per match early on to go fast
-  
-  for (let i=0; i < currentPool.length; i+=2) {
-     if (i % 100 === 0 && i > 0) console.log(`  Processed ${i/2}/${Math.ceil(currentPool.length/2)} matches...`);
-     if (i + 1 >= currentPool.length) {
-        nextPool.push(currentPool[i]);
-     } else {
-        const winner = playMatch(currentPool[i], currentPool[i+1], gamesPerMatch);
-        nextPool.push(winner);
-     }
-  }
-  currentPool = nextPool;
-  round++;
+while (pool.length > 1) {
+   shuffle(pool);
+   const nextPool = [];
+   for (let i = 0; i < pool.length; i += 2) {
+       if (i + 1 >= pool.length) {
+           nextPool.push(pool[i]);
+       } else {
+           const winner = playMatch(pool[i], pool[i+1], 4);
+           nextPool.push(winner);
+       }
+   }
+   pool = nextPool;
+   round++;
 }
 
-console.log("CHAMPION BOT:", currentPool[0]);
+console.log('CHAMPION BOT:', pool[0]);

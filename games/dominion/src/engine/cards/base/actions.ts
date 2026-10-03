@@ -63,9 +63,7 @@ export const Harbinger: CardDefinition = {
       { type: 'DRAW_CARDS', playerId, amount: 1 },
       { type: 'GAIN_ACTIONS', playerId, amount: 1 }
     ];
-    if (state.players[playerId].discard.length > 0) {
-      actions.push({ type: 'REQUEST_INPUT', playerId, inputType: 'DISCARD_TO_DECK' });
-    }
+    actions.push({ type: 'REQUEST_INPUT', playerId, inputType: 'DISCARD_TO_DECK' });
     return actions;
   },
   botChoose: () => ({ instanceId: null }) // Bot skips
