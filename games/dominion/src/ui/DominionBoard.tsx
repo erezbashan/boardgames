@@ -214,6 +214,13 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
       (inputType === 'DISCARD_FOR_POACHER' || inputType === 'DISCARD_FOR_MILITIA') ? Math.min((req as any).payload?.amount || 0, me.hand.length) :
       99;
       
+    // Bypass multi-select logic for Militia/Poacher to handle them one-by-one instantly
+    if (inputType === 'DISCARD_FOR_POACHER' || inputType === 'DISCARD_FOR_MILITIA') {
+       dispatch({ type: 'RESOLVE_INPUT', playerId: myPlayerId, payload: { discardedIds: [instanceId] } });
+       setSelectedCards([]);
+       return;
+    }
+
     if (maxSelections === 1) {
       if (inputType === 'TRASH_COPPER_FOR_MONEYLENDER') {
         dispatch({ type: 'RESOLVE_INPUT', playerId: myPlayerId, payload: { trashedIds: [instanceId] } });
@@ -223,8 +230,6 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
         dispatch({ type: 'RESOLVE_INPUT', playerId: myPlayerId, payload: { trashedIds: [instanceId] } });
       } else if (inputType === 'HAND_TO_DECK' || inputType === 'DISCARD_TO_DECK') {
         dispatch({ type: 'RESOLVE_INPUT', playerId: myPlayerId, payload: { instanceId } });
-      } else if (inputType === 'DISCARD_FOR_POACHER' || inputType === 'DISCARD_FOR_MILITIA') {
-        dispatch({ type: 'RESOLVE_INPUT', playerId: myPlayerId, payload: { discardedIds: [instanceId] } });
       }
       setSelectedCards([]);
       return;
@@ -234,14 +239,6 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
       if (prev.includes(instanceId)) return prev.filter(id => id !== instanceId);
       
       const nextSelection = [...prev, instanceId];
-      if (nextSelection.length === maxSelections && (inputType === 'DISCARD_FOR_POACHER' || inputType === 'DISCARD_FOR_MILITIA')) {
-        setTimeout(() => {
-          dispatch({ type: 'RESOLVE_INPUT', playerId: myPlayerId, payload: { discardedIds: nextSelection } });
-          setSelectedCards([]);
-        }, 0);
-        return nextSelection;
-      }
-      
       if (prev.length >= maxSelections) return prev;
       return nextSelection;
     });
