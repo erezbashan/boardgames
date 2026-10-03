@@ -22,18 +22,24 @@ if (typeof document !== 'undefined' && !document.getElementById(styleId)) {
   document.head.appendChild(style);
 }
 
-export const AnimatedCounter = ({ value, icon, color, suffix, width }: { value: number, icon: React.ReactNode, color: string, suffix?: string, width?: string }) => {
+export const AnimatedCounter = ({ value, icon, color, suffix, width, resetKey }: { value: number, icon: React.ReactNode, color: string, suffix?: string, width?: string, resetKey?: number | string }) => {
   const prevValue = useRef(value);
   const [animState, setAnimState] = useState({ class: '', key: 0 });
 
+  const prevResetKey = useRef(resetKey);
   useEffect(() => {
+    if (resetKey !== prevResetKey.current) {
+      prevResetKey.current = resetKey;
+      prevValue.current = value;
+      return;
+    }
     if (value > prevValue.current) {
       setAnimState(s => ({ class: 'pulse-green', key: s.key + 1 }));
     } else if (value < prevValue.current) {
       setAnimState(s => ({ class: 'pulse-red', key: s.key + 1 }));
     }
     prevValue.current = value;
-  }, [value]);
+  }, [value, resetKey]);
 
   return (
     <div style={{ color, fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px', width, minWidth: width }}>
