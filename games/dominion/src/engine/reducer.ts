@@ -253,13 +253,11 @@ function processPendingActions(state: DominionState) {
           if (getCardDef(card.cardId).types.includes('ACTION')) {
             // Leave it revealed until the action resolves!
             if (player.isBot) {
-               state.actionQueue.push({ delayMs: 100, action: { type: 'BOT_PLAY_VASSAL', playerId: player.id, instanceId: card.id } });
+               state.actionQueue.push({ delayMs: 100, action: { type: 'BOT_PLAY_VASSAL', playerId: player.id, instanceId: card.id, card } });
             } else {
                // Must add the card to a special holding area so RESOLVE_INPUT can find it?
-               // Wait! I can just put it in discard right now and keep the visual overlay on the deck!
-               // But user specifically said "wait... move to discard".
-               player.discard.push(card);
-               state.actionQueue.push({ delayMs: 100, action: { type: 'ENQUEUE_PENDING_ACTION', pendingAction: { type: 'REQUEST_INPUT', playerId: player.id, inputType: 'PLAY_VASSAL_ACTION', payload: { instanceId: card.id, cardId: card.cardId } } } });
+               // Float it in the payload so it stays on deck visually
+               state.actionQueue.push({ delayMs: 100, action: { type: 'ENQUEUE_PENDING_ACTION', pendingAction: { type: 'REQUEST_INPUT', playerId: player.id, inputType: 'PLAY_VASSAL_ACTION', payload: { instanceId: card.id, cardId: card.cardId, card } } } });
             }
           } else {
              // Not an action card. Wait 1.5s, then discard.
@@ -906,12 +904,10 @@ export function dominionReducer
           nextState.pendingActions.shift();
           delete player.transientDeckReveals;
 
+          const cardObj = req.payload.card;
           if (playCard) {
-            const idx = player.discard.findIndex(c => c.id === instanceId);
-            if (idx >= 0) {
-               const card = player.discard.splice(idx, 1)[0];
-               const def = getCardDef(card.cardId);
-               player.playArea.push(card);
+               const def = getCardDef(cardObj.cardId);
+               player.playArea.push(cardObj);
                nextState.logs.push(`${player.name} plays [${def.name}] from Vassal.`);
                if (def.onPlay) {
                  const newPending = def.onPlay(nextState, player.id);
@@ -919,7 +915,9 @@ export function dominionReducer
                    nextState.pendingActions.unshift(...newPending);
                  }
                }
-            }
+          } else {
+             player.discard.push(cardObj);
+             nextState.logs.push(`${player.name} discards [${getCardDef(cardObj.cardId).name}] from Vassal.`);
           }
         }
         
