@@ -173,60 +173,53 @@ function processPendingActions(state: DominionState) {
         break;
       }
       case 'BANDIT_ATTACK': {
-        state.actionQueue = state.actionQueue || [];
-        state.actionQueue.push({ delayMs: 100, action: { type: 'ENQUEUE_PENDING_ACTION', pendingAction: { type: 'BANDIT_REVEAL_NEXT', playerId: pending.playerId, cardsLeft: 2, revealedCards: [] } } });
-        break;
-      }
-      case 'BANDIT_REVEAL_NEXT': {
-        const { playerId, cardsLeft, revealedCards } = pending as any;
-        const p = state.players[playerId];
-        if (cardsLeft > 0) {
+        const p = state.players[pending.playerId];
+        const drawn = [];
+        for (let i = 0; i < 2; i++) {
           if (p.deck.length === 0 && p.discard.length > 0) {
             p.deck = shuffle([...p.discard]);
             p.discard = [];
             state.logs.push(`${p.name} shuffles their discard pile.`);
           }
           const c = p.deck.pop();
-          if (c) {
-            revealedCards.push(c);
-            p.transientDeckReveals = revealedCards.map((rc: any) => rc.cardId);
-            
-            state.actionQueue = state.actionQueue || [];
-            state.actionQueue.unshift(
-                { delayMs: 1500, action: { type: 'CLEAR_DECK_REVEALS', playerId } },
-                { delayMs: 100, action: { type: 'ENQUEUE_PENDING_ACTION', pendingAction: { type: 'BANDIT_REVEAL_NEXT', playerId, cardsLeft: cardsLeft - 1, revealedCards } } }
-            );
-          } else {
-            state.actionQueue = state.actionQueue || [];
-            state.actionQueue.unshift({ delayMs: 100, action: { type: 'ENQUEUE_PENDING_ACTION', pendingAction: { type: 'RESOLVE_BANDIT', playerId, revealedCards } } });
-          }
-        } else {
-          state.actionQueue = state.actionQueue || [];
-          state.actionQueue.unshift({ delayMs: 100, action: { type: 'ENQUEUE_PENDING_ACTION', pendingAction: { type: 'RESOLVE_BANDIT', playerId, revealedCards } } });
+          if (c) drawn.push(c);
+        }
+
+        if (drawn.length === 0) {
+           state.logs.push(`${p.name} has no cards to reveal for Bandit.`);
+           break;
+        }
+
+        const trasheableTreasures = drawn.filter((c: any) => getCardDef(c.cardId).types.includes('TREASURE') && c.cardId !== 'copper');
+        let toTrashId = null;
+        if (trasheableTreasures.length > 0) {
+          trasheableTreasures.sort((a: any, b: any) => getCardDef(b.cardId).cost - getCardDef(a.cardId).cost);
+          toTrashId = trasheableTreasures[0].id;
+        }
+
+        state.actionQueue = state.actionQueue || [];
+        for (const card of drawn) {
+           state.actionQueue.push({ delayMs: 100, action: { type: 'SHOW_DECK_REVEALS', playerId: p.id, cardIds: [card.cardId] } });
+           state.actionQueue.push({ delayMs: 1500, action: { type: 'CLEAR_DECK_REVEALS', playerId: p.id } });
+           
+           if (card.id === toTrashId) {
+             state.actionQueue.push({ delayMs: 100, action: { type: 'ENQUEUE_PENDING_ACTION', pendingAction: { type: 'BANDIT_DISPOSE', playerId: p.id, card, destination: 'trash' } } });
+           } else {
+             state.actionQueue.push({ delayMs: 100, action: { type: 'ENQUEUE_PENDING_ACTION', pendingAction: { type: 'BANDIT_DISPOSE', playerId: p.id, card, destination: 'discard' } } });
+           }
         }
         break;
       }
-      case 'RESOLVE_BANDIT': {
-        const { revealedCards } = pending as any;
-        
-        // Find treasures other than copper
-        const trasheableTreasures = revealedCards.filter((c: any) => getCardDef(c.cardId).types.includes('TREASURE') && c.cardId !== 'copper');
-        let toTrash: any = null;
-        
-        if (trasheableTreasures.length > 0) {
-          trasheableTreasures.sort((a: any, b: any) => getCardDef(b.cardId).cost - getCardDef(a.cardId).cost);
-          toTrash = trasheableTreasures[0];
-          state.trash.push(toTrash);
-        }
-        
-        for (const c of revealedCards) {
-          if (toTrash && c.id === toTrash.id) {
-             state.logs.push(`${player.name} reveals [${getCardDef(c.cardId).name}] from their deck and trashes it.`);
-          } else {
-             state.logs.push(`${player.name} reveals [${getCardDef(c.cardId).name}] from their deck and discards it.`);
-             player.discard.push(c);
-          }
-        }
+      case 'BANDIT_DISPOSE': {
+         const p = state.players[pending.playerId];
+         const card = (pending as any).card;
+         if ((pending as any).destination === 'trash') {
+             state.trash.push(card);
+             state.logs.push(`${p.name} reveals [${getCardDef(card.cardId).name}] from their deck and trashes it.`);
+         } else {
+             p.discard.push(card);
+             state.logs.push(`${p.name} reveals [${getCardDef(card.cardId).name}] from their deck and discards it.`);
+         }
         break;
       }
       case 'PLAY_MERCHANT': {
