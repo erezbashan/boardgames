@@ -700,10 +700,10 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {/* Status */}
           <div style={{ padding: '15px', minHeight: '68px', background: isMyTurn ? '#064e3b' : '#1e293b', borderRadius: '8px', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 4px 6px rgba(0,0,0,0.3)' }}>
-            <div style={{ display: 'flex', gap: '20px', fontSize: '18px', fontWeight: 'bold' }}>
-              <motion.span style={{ display: 'inline-block' }} key={`actions-${me.actions}`} initial={{ scale: 1.5, color: '#fbbf24' }} animate={{ scale: 1, color: '#ffffff' }} transition={{ duration: 0.3 }}>⚡ Actions: {me.actions}</motion.span>
-              <motion.span style={{ display: 'inline-block' }} key={`buys-${me.buys}`} initial={{ scale: 1.5, color: '#fbbf24' }} animate={{ scale: 1, color: '#ffffff' }} transition={{ duration: 0.3 }}>🛒 Buys: {me.buys}</motion.span>
-              <motion.span style={{ display: 'inline-block' }} key={`coins-${me.coins}`} initial={{ scale: 1.5, color: '#fbbf24' }} animate={{ scale: 1, color: '#ffffff' }} transition={{ duration: 0.3 }}>💰 Coins: {me.coins}</motion.span>
+            <div style={{ display: 'flex', gap: '20px', fontSize: '18px', fontWeight: 'bold', color: 'white' }}>
+              <AnimatedCounter value={me.actions} icon="⚡ Actions:" color="white" />
+              <AnimatedCounter value={me.buys} icon="🛒 Buys:" color="white" />
+              <AnimatedCounter value={me.coins} icon="💰 Coins:" color="white" />
             </div>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'flex-end' }}>
