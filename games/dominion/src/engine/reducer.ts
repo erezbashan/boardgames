@@ -198,14 +198,19 @@ function processPendingActions(state: DominionState) {
         }
 
         state.actionQueue = state.actionQueue || [];
+        
+        // Show both cards at once
+        state.actionQueue.push({ delayMs: 100, action: { type: 'SHOW_DECK_REVEALS', playerId: p.id, cardIds: drawn.map(c => c.cardId) } });
+        
+        // Sleep, then clear the visual overlay
+        state.actionQueue.push({ delayMs: 1500, action: { type: 'CLEAR_DECK_REVEALS', playerId: p.id } });
+        
+        // Dispose of the cards (they will all fly to their destinations simultaneously)
         for (const card of drawn) {
-           state.actionQueue.push({ delayMs: 100, action: { type: 'SHOW_DECK_REVEALS', playerId: p.id, cardIds: [card.cardId] } });
-           state.actionQueue.push({ delayMs: 1500, action: { type: 'CLEAR_DECK_REVEALS', playerId: p.id } });
-           
            if (card.id === toTrashId) {
-             state.actionQueue.push({ delayMs: 100, action: { type: 'ENQUEUE_PENDING_ACTION', pendingAction: { type: 'BANDIT_DISPOSE', playerId: p.id, card, destination: 'trash' } } });
+             state.actionQueue.push({ delayMs: 0, action: { type: 'ENQUEUE_PENDING_ACTION', pendingAction: { type: 'BANDIT_DISPOSE', playerId: p.id, card, destination: 'trash' } } });
            } else {
-             state.actionQueue.push({ delayMs: 100, action: { type: 'ENQUEUE_PENDING_ACTION', pendingAction: { type: 'BANDIT_DISPOSE', playerId: p.id, card, destination: 'discard' } } });
+             state.actionQueue.push({ delayMs: 0, action: { type: 'ENQUEUE_PENDING_ACTION', pendingAction: { type: 'BANDIT_DISPOSE', playerId: p.id, card, destination: 'discard' } } });
            }
         }
         break;
