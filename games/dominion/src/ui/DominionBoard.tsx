@@ -280,7 +280,7 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
                 <motion.div
                   key={`transient-${idx}`}
                   initial={{ scale: 0, opacity: 0, y: 0 }}
-                  animate={{ scale: 1.1, opacity: 1, y: -10 - (idx * 15), zIndex: 9999 + idx }}
+                  animate={{ scale: 1.1, opacity: 1, y: -25, x: (idx - (p.transientDeckReveals.length - 1) / 2) * 35, zIndex: 9999 + idx }}
                   transition={{ type: 'spring', stiffness: 200, damping: 20 }}
                   onMouseEnter={(e) => showPopup(e, getCardDef(cardId))}
                   onMouseLeave={hidePopup}
