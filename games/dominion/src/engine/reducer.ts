@@ -996,7 +996,19 @@ export function dominionReducer
           } else {
             nextState.logs.push(`${player.name} discards nothing for [${cardName}].`);
           }
-          nextState.pendingActions.shift();
+          
+          if (req.inputType === 'DISCARD_FOR_MILITIA' && player.hand.length > 3) {
+            if (req.payload) req.payload.amount = player.hand.length - 3;
+          } else if (req.inputType === 'DISCARD_FOR_POACHER') {
+            if (req.payload) req.payload.amount -= toDiscard;
+            if ((req.payload?.amount || 0) > 0 && player.hand.length > 0) {
+              // Wait for more
+            } else {
+              nextState.pendingActions.shift();
+            }
+          } else {
+            nextState.pendingActions.shift();
+          }
         }
 
         if (req.inputType === 'TRASH_FOR_REMODEL') {

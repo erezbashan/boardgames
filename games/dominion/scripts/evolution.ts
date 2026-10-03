@@ -1,15 +1,15 @@
+import fs from 'fs';
 import { dominionReducer as reducer } from '../src/engine/reducer';
 import { DominionState } from '../src/engine/types';
-import { Cards } from '../src/engine/cards';
 
-const kingdomCards = Object.keys(Cards).filter(k => Cards[k].types.includes('ACTION')).slice(0, 10);
+const kingdomCards = ['smithy', 'village', 'festival', 'market', 'laboratory', 'workshop', 'mine', 'remodel', 'militia', 'moat'];
 
 const createInitialState = (params1: any, params2: any, firstPlayer: 'bot1' | 'bot2'): DominionState => {
   return reducer({
     status: 'Lobby',
     players: {
-      'bot1': { id: 'bot1', name: 'Bot 1', hand: [], deck: [], discard: [], inPlay: [], setAside: [], actions: 1, buys: 1, coins: 0, victoryPoints: 0, isBot: true },
-      'bot2': { id: 'bot2', name: 'Bot 2', hand: [], deck: [], discard: [], inPlay: [], setAside: [], actions: 1, buys: 1, coins: 0, victoryPoints: 0, isBot: true }
+      'bot1': { id: 'bot1', name: 'Bot 1', isBot: true, deck: [], hand: [], discard: [], playArea: [], actions: 1, buys: 1, coins: 0, victoryPoints: 0, transientDeckReveals: [] },
+      'bot2': { id: 'bot2', name: 'Bot 2', isBot: true, deck: [], hand: [], discard: [], playArea: [], actions: 1, buys: 1, coins: 0, victoryPoints: 0, transientDeckReveals: [] }
     },
     playerOrder: firstPlayer === 'bot1' ? ['bot1', 'bot2'] : ['bot2', 'bot1'],
     currentPlayerIndex: 0,
@@ -37,34 +37,82 @@ function runGame(params1: any, params2: any, firstPlayer: 'bot1' | 'bot2'): 'bot
     const curPlayer = state.playerOrder[state.currentPlayerIndex];
     state = reducer(state, { type: 'PLAY_BOT', playerId: curPlayer } as any);
   }
-  if (iterations >= 500) console.log('Hit 500 iter limit!');
+  
+  if (iterations >= 500) {
+    // If it stalls, we look at VP
+    const p1 = state.players.bot1.victoryPoints;
+    const p2 = state.players.bot2.victoryPoints;
+    if (p1 > p2) return 'bot1';
+    if (p2 > p1) return 'bot2';
+    return 'tie';
+  }
+  
   if (!state.winnerId) return 'tie';
   return state.winnerId as 'bot1' | 'bot2';
 }
 
-function playMatch(botA: any, botB: any, numGames: number): any {
+function playMatch(botA: any, botB: any, hardCap: number = 30): any {
    let winsA = 0;
    let winsB = 0;
-   for (let i=0; i<numGames; i++) {
-       const first = (i % 2 === 0) ? 'bot1' : 'bot2';
-       const winner = runGame(botA, botB, first);
-       if (winner === 'bot1') winsA++;
-       else if (winner === 'bot2') winsB++;
+   let games = 0;
+   
+   // We play in pairs to ensure fairness (each goes first exactly once per pair)
+   while (games < hardCap) {
+       // Game 1: botA goes first
+       const res1 = runGame(botA, botB, 'bot1');
+       if (res1 === 'bot1') winsA++;
+       else if (res1 === 'bot2') winsB++;
        else { winsA += 0.5; winsB += 0.5; }
+       
+       // Game 2: botB goes first
+       const res2 = runGame(botA, botB, 'bot2');
+       if (res2 === 'bot1') winsA++;
+       else if (res2 === 'bot2') winsB++;
+       else { winsA += 0.5; winsB += 0.5; }
+       
+       games += 2;
+       
+       // Calculate Z-Score for statistical significance (Null Hypothesis: p = 0.5)
+       // Z = (W - (N / 2)) / sqrt(N / 4)
+       if (games >= 6) { // Minimum sample size before checking
+         const expected = games / 2;
+         const stdDev = Math.sqrt(games / 4);
+         const zScore = Math.abs(winsA - expected) / stdDev;
+         
+         // Z = 1.96 corresponds to p < 0.05 (95% confidence)
+         if (zScore >= 1.96) {
+           break; // Statistically significant winner found!
+         }
+       }
    }
-   return winsA >= winsB ? botA : botB;
+   
+   if (winsA > winsB) return botA;
+   if (winsB > winsA) return botB;
+   return Math.random() > 0.5 ? botA : botB; // Pure tie at hard cap
 }
 
-const bots = [];
-let idCounter = 1;
-for (let vInt = -20; vInt <= 0; vInt += 5) {
-  for (let vSlp = 20; vSlp <= 40; vSlp += 10) {
-    for (let mInt = -1; mInt <= 3; mInt += 1) {
-      for (let mSlp = 0; mSlp <= 3; mSlp += 1) {
-         bots.push({ id: idCounter++, vpIntercept: vInt, vpSlope: vSlp, moneyIntercept: mInt, moneySlope: mSlp, actionIntercept: 0, actionSlope: 0 });
+function generateBots() {
+  const bots = [];
+  let idCounter = 1;
+  // Pruned grid: 64 combinations
+  for (let vInt of [-20, -10, -5, 0]) {
+    for (let vSlp of [15, 25, 35, 45]) {
+      for (let mInt of [0, 1]) {
+        for (let mSlp of [0, 1]) {
+          bots.push({
+            id: idCounter++,
+            vpIntercept: vInt,
+            vpSlope: vSlp,
+            moneyIntercept: mInt,
+            moneySlope: mSlp,
+            actionIntercept: 0.5,
+            actionSlope: 0
+          });
+        }
       }
     }
   }
+  return bots;
 }
 
 function shuffle(array: any[]) {
@@ -73,28 +121,34 @@ function shuffle(array: any[]) {
     [array[i], array[j]] = [array[j], array[i]];
   }
 }
-shuffle(bots);
 
-console.log(`Starting Evolution bracket with ${bots.length} bots!`);
-let currentPool = bots;
-let round = 1;
+async function runTournament() {
+  let pool = generateBots();
+  console.log(`Starting Statistically Significant 1v1 Tournament with ${pool.length} optimized bots...`);
+  let round = 1;
 
-while (currentPool.length > 1) {
-  console.log(`--- Round ${round} --- Pool size: ${currentPool.length}`);
-  const nextPool = [];
-  const gamesPerMatch = currentPool.length <= 16 ? 50 : 6; // 6 games per match early on to go fast
-  
-  for (let i=0; i < currentPool.length; i+=2) {
-     if (i % 100 === 0 && i > 0) console.log(`  Processed ${i/2}/${Math.ceil(currentPool.length/2)} matches...`);
-     if (i + 1 >= currentPool.length) {
-        nextPool.push(currentPool[i]);
-     } else {
-        const winner = playMatch(currentPool[i], currentPool[i+1], gamesPerMatch);
+  while (pool.length > 1) {
+    console.log(`\n--- Round ${round} --- Pool size: ${pool.length}`);
+    shuffle(pool);
+    const nextPool = [];
+    
+    for (let i = 0; i < pool.length; i += 2) {
+      if (i + 1 >= pool.length) {
+        nextPool.push(pool[i]);
+      } else {
+        const winner = playMatch(pool[i], pool[i+1], 40); // Hard cap of 40 games
         nextPool.push(winner);
-     }
+      }
+    }
+    
+    pool = nextPool;
+    round++;
   }
-  currentPool = nextPool;
-  round++;
+
+  console.log('\n==================================');
+  console.log('🏆 TRUE STATISTICAL CHAMPION 🏆');
+  console.log(JSON.stringify(pool[0], null, 2));
+  console.log('==================================');
 }
 
-console.log("CHAMPION BOT:", currentPool[0]);
+runTournament();
