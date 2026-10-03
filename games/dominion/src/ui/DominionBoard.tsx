@@ -782,8 +782,8 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
                   }
                   
                   return (
-                    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <div style={{ background: '#1e293b', border: '3px solid #3b82f6', borderRadius: '12px', padding: '30px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', maxWidth: '900px', maxHeight: '90vh', overflowY: 'auto' }}>
+                    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.4)', zIndex: 10000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', paddingBottom: '40px' }}>
+                      <div style={{ background: 'rgba(30, 41, 59, 0.85)', backdropFilter: 'blur(4px)', border: '3px solid #3b82f6', borderRadius: '12px', padding: '30px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', maxWidth: '900px', maxHeight: '90vh', overflowY: 'auto' }}>
                         <h2 style={{ margin: 0, color: 'white' }}>Select a card from your Discard pile</h2>
                         {uniqueDiscards.length === 0 ? (
                           <div style={{ color: '#94a3b8' }}>Your discard pile is empty.</div>
@@ -833,8 +833,8 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
                   let deckCounter = 0;
 
                   return (
-                  <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <div style={{ background: '#1e293b', border: '3px solid #3b82f6', borderRadius: '12px', padding: '30px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', maxWidth: '900px' }}>
+                  <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.4)', zIndex: 10000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', paddingBottom: '40px' }}>
+                    <div style={{ background: 'rgba(30, 41, 59, 0.85)', backdropFilter: 'blur(4px)', border: '3px solid #3b82f6', borderRadius: '12px', padding: '30px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', maxWidth: '900px' }}>
                       <h2 style={{ margin: 0, color: 'white' }}>Sentry: Handle Top Cards</h2>
                       <div style={{ display: 'flex', gap: '20px', alignItems: 'center', justifyContent: 'center' }}>
                         {orderedCards.map((c: any, index: number) => {
