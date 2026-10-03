@@ -303,8 +303,9 @@ function processPendingActions(state: DominionState) {
         } else {
           const def = getCardDef(card.cardId);
           if (def.types.includes('ACTION')) {
-            player.discard.push(card); // visually put on discard
-            state.pendingActions.unshift({ type: 'REQUEST_INPUT', playerId: player.id, inputType: 'LIBRARY_KEEP', payload: { card, setAside } });
+            state.actionQueue = state.actionQueue || [];
+            state.actionQueue.push({ delayMs: 100, action: { type: 'SHOW_DECK_REVEALS', playerId: player.id, cardIds: [card.cardId] } });
+            state.actionQueue.push({ delayMs: 100, action: { type: 'ENQUEUE_PENDING_ACTION', pendingAction: { type: 'REQUEST_INPUT', playerId: player.id, inputType: 'LIBRARY_KEEP', payload: { card, setAside } } } });
           } else {
             player.hand.push(card);
             state.pendingActions.unshift({ type: 'LIBRARY_DRAW', playerId: player.id, setAside }); // loop
@@ -926,10 +927,8 @@ export function dominionReducer
           const player = nextState.players[action.playerId];
           nextState.pendingActions.shift();
           
-          const idx = player.discard.findIndex((c: any) => c.id === card.id);
-          if (idx !== -1) {
-            player.discard.splice(idx, 1);
-          }
+          nextState.actionQueue = nextState.actionQueue || [];
+          nextState.actionQueue.unshift({ delayMs: 100, action: { type: 'CLEAR_DECK_REVEALS', playerId: player.id } });
           
           if (keep) {
             player.hand.push(card);
