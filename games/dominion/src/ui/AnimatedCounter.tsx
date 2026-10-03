@@ -28,14 +28,24 @@ export const AnimatedCounter = ({ value, icon, color, suffix, width, resetKey }:
 
   const prevResetKey = useRef(resetKey);
   useEffect(() => {
+    let effectivePrev = prevValue.current;
+    
+    // If the reset key changed (e.g. turn changed to a new player),
+    // we want to pretend the previous value was 0 so it pulses green up to their starting stats!
     if (resetKey !== prevResetKey.current) {
       prevResetKey.current = resetKey;
-      prevValue.current = value;
-      return;
+      effectivePrev = 0; // Pretend it started at 0 for the new turn
+      
+      // If the new value is ALSO 0 (e.g. Coins), we don't want it to pulse green from 0 to 0.
+      if (value === 0) {
+         prevValue.current = 0;
+         return; // Skip animation entirely
+      }
     }
-    if (value > prevValue.current) {
+    
+    if (value > effectivePrev) {
       setAnimState(s => ({ class: 'pulse-green', key: s.key + 1 }));
-    } else if (value < prevValue.current) {
+    } else if (value < effectivePrev) {
       setAnimState(s => ({ class: 'pulse-red', key: s.key + 1 }));
     }
     prevValue.current = value;
