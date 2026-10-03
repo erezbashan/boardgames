@@ -6,6 +6,7 @@ import { getCardDef, Cards } from '../engine/cards';
 import { CardDefinition, CardType } from '../engine/cards/types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DominionStats } from './DominionStats';
+import { AnimatedCounter } from './AnimatedCounter';
 
 interface Props {
   gameState: DominionState;
