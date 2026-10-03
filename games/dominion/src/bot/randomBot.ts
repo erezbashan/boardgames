@@ -213,11 +213,24 @@ export function getRandomBotAction(state: DominionState, playerId: string): Play
       const curse = me.hand.find(c => c.cardId === 'curse');
       if (curse) return { type: 'RESOLVE_INPUT', playerId, payload: { trashedIds: [curse.id] } };
       
-      const estate = me.hand.find(c => c.cardId === 'estate');
-      if (estate) return { type: 'RESOLVE_INPUT', playerId, payload: { trashedIds: [estate.id] } };
+      const emptyPiles = Object.values(state.supply).filter(c => c === 0).length;
+      const isLateGame = state.supply['province'] <= 4 || emptyPiles >= 2;
+      
+      if (!isLateGame) {
+         const estate = me.hand.find(c => c.cardId === 'estate');
+         if (estate) return { type: 'RESOLVE_INPUT', playerId, payload: { trashedIds: [estate.id] } };
+      }
+      
+      // Avoid trashing ANY victory cards if possible
+      const nonVP = me.hand.filter(c => {
+         const types = getCardDef(c.cardId).types;
+         return !types.includes('VICTORY') && c.cardId !== 'curse';
+      });
+      
+      const handToConsider = nonVP.length > 0 ? nonVP : me.hand;
       
       // Look for a card we can exactly upgrade by 2
-      for (const c of me.hand) {
+      for (const c of handToConsider) {
         const def = getCardDef(c.cardId);
         const targetCost = def.cost + 2;
         const availableInSupply = Object.keys(state.supply).find(s => getCardDef(s).cost === targetCost && state.supply[s] > 0);
@@ -227,7 +240,7 @@ export function getRandomBotAction(state: DominionState, playerId: string): Play
       }
       
       // If we must trash, trash the cheapest card (often copper)
-      const sortedHand = [...me.hand].sort((a, b) => getCardDef(a.cardId).cost - getCardDef(b.cardId).cost);
+      const sortedHand = [...handToConsider].sort((a, b) => getCardDef(a.cardId).cost - getCardDef(b.cardId).cost);
       return { type: 'RESOLVE_INPUT', playerId, payload: { trashedIds: [sortedHand[0].id] } };
     }
     
