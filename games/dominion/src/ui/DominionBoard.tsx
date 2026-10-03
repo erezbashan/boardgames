@@ -348,73 +348,86 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
             <div style={{ fontSize: '10px', color: '#94a3b8', marginBottom: '4px' }}>
               Hand ({sortedHand.length} cards){isInputPhaseForMe ? ' — click to select' : isMyTurn && gameState.phase === 'ACTION' ? ' — click action cards to play' : isMyTurn && gameState.phase === 'BUY' ? ' — treasures auto-played' : ''}
             </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', paddingBottom: '4px', paddingLeft: '10px' }}>
-              <AnimatePresence>
-                {sortedHand.map((card, i) => {
-                  const isGrouped = i > 0 && sortedHand[i-1].cardId === card.cardId;
-                  const isSelected = selectedCards.includes(card.id);
-                  const def = getCardDef(card.cardId);
-                  const isPlayableAction = isMyTurn && gameState.phase === 'ACTION' && me.actions > 0 && def.types.includes('ACTION') && !isInputPhase;
-                  const imageUrl = CARD_IMAGES[card.cardId];
-                  return (
-                    <motion.div
-                      layout
-                      layoutId={card.id}
-                      key={card.id}
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      transition={{ type: 'spring', stiffness: 350, damping: 28 }}
-                      onClick={() => {
-                        if (isInputPhase) toggleCardSelection(card.id);
-                        else if (isMyTurn) handlePlayCard(card.id);
-                      }}
-                      style={{
-                        position: 'relative',
-                        marginLeft: isGrouped ? '-50px' : '6px',
-                        zIndex: i,
-                        width: '70px',
-                        height: '100px',
-                        border: `2px solid ${isPlayableAction && !isSelected ? '#34d399' : 'rgba(100,116,139,0.5)'}`,
-                        borderRadius: '6px',
-                        backgroundImage: imageUrl ? `url(${imageUrl})` : 'none',
-                        backgroundSize: '100% 100%',
-                        backgroundPosition: 'center',
-                        cursor: (isMyTurn || isInputPhaseForMe) ? 'pointer' : 'default',
-                        boxShadow: isSelected ? '0 0 0 4px #eab308' : isPlayableAction ? '0 0 8px rgba(52,211,153,0.6)' : card._revealed ? '0 0 15px 5px #fbbf24' : '0 2px 4px rgba(0,0,0,0.5)',
-                        animation: card._revealed ? 'revealedPulse 1s ease-in-out 3' : isPlayableAction && !isSelected ? 'blinkGlow 1.5s infinite' : 'none',
-                        flexShrink: 0,
-                        filter: isSelected ? 'brightness(1.2)' : 'none'
-                      }}
-                    >
-                      {isSelected && (
-                        <div style={{ position: 'absolute', top: '-8px', right: '-8px', background: '#eab308', color: 'black', borderRadius: '50%', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', boxShadow: '0 2px 4px rgba(0,0,0,0.5)', zIndex: 20 }}>
-                          ✓
-                        </div>
-                      )}
-                      {/* Type icon */}
-                      <div style={{ position: 'absolute', top: '2px', left: '2px', fontSize: '10px', zIndex: 10 }}>
-                        {getIcon(def.types)}
-                      </div>
-                      {/* Info button */}
-                      <div
-                        style={{ position: 'absolute', top: '2px', right: '2px', background: 'rgba(0,0,0,0.6)', borderRadius: '50%', width: '16px', height: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.9)', fontSize: '10px', cursor: 'pointer', fontWeight: 'bold', textShadow: '0 1px 2px rgba(0,0,0,0.9)', zIndex: 10 }}
-                        onClick={(e) => { e.stopPropagation(); showPopup(e, def); }}
-                      >?</div>
-                      {/* Selection overlay */}
-                      {isSelected && (
-                        <div style={{ position: 'absolute', inset: 0, background: 'rgba(59,130,246,0.3)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 5 }}>
-                          <span style={{ fontSize: '18px' }}>✓</span>
-                        </div>
-                      )}
-                    </motion.div>
-                  );
-                })}
-              </AnimatePresence>
+            {(() => {
+              const groupedHand: typeof sortedHand[] = [];
+              sortedHand.forEach(c => {
+                if (groupedHand.length > 0 && groupedHand[groupedHand.length - 1][0].cardId === c.cardId) {
+                  groupedHand[groupedHand.length - 1].push(c);
+                } else {
+                  groupedHand.push([c]);
+                }
+              });
+              return (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', paddingBottom: '4px', paddingLeft: '10px' }}>
+              {groupedHand.map(group => (
+                <div key={`group-${group[0].cardId}`} style={{ display: 'flex' }}>
+                  <AnimatePresence>
+                    {group.map((card, i) => {
+                      const isGrouped = i > 0;
+                      const isSelected = selectedCards.includes(card.id);
+                      const def = getCardDef(card.cardId);
+                      const isPlayableAction = isMyTurn && gameState.phase === 'ACTION' && me.actions > 0 && def.types.includes('ACTION') && !isInputPhase;
+                      const imageUrl = CARD_IMAGES[card.cardId];
+                      return (
+                        <motion.div
+                          layout
+                          layoutId={card.id}
+                          key={card.id}
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.8 }}
+                          transition={{ type: 'spring', stiffness: 350, damping: 28 }}
+                          onClick={() => {
+                            if (isInputPhase) toggleCardSelection(card.id);
+                            else if (isMyTurn) handlePlayCard(card.id);
+                          }}
+                          style={{
+                            position: 'relative',
+                            marginLeft: isGrouped ? '-50px' : '0px',
+                            zIndex: i,
+                            width: '70px',
+                            height: '100px',
+                            border: `2px solid ${isPlayableAction && !isSelected ? '#34d399' : 'rgba(100,116,139,0.5)'}`,
+                            borderRadius: '6px',
+                            backgroundImage: imageUrl ? `url(${imageUrl})` : 'none',
+                            backgroundSize: '100% 100%',
+                            backgroundPosition: 'center',
+                            cursor: (isMyTurn || isInputPhaseForMe) ? 'pointer' : 'default',
+                            boxShadow: isSelected ? '0 0 0 4px #eab308' : isPlayableAction ? '0 0 8px rgba(52,211,153,0.6)' : card._revealed ? '0 0 15px 5px #fbbf24' : '0 2px 4px rgba(0,0,0,0.5)',
+                            animation: card._revealed ? 'revealedPulse 1s ease-in-out 3' : isPlayableAction && !isSelected ? 'blinkGlow 1.5s infinite' : 'none',
+                            flexShrink: 0,
+                            filter: isSelected ? 'brightness(1.2)' : 'none'
+                          }}
+                        >
+                          {isSelected && (
+                            <div style={{ position: 'absolute', top: '-8px', right: '-8px', background: '#eab308', color: 'black', borderRadius: '50%', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', boxShadow: '0 2px 4px rgba(0,0,0,0.5)', zIndex: 20 }}>
+                              ✓
+                            </div>
+                          )}
+                          <div style={{ position: 'absolute', top: '2px', left: '2px', fontSize: '10px', zIndex: 10 }}>
+                            {getIcon(def.types)}
+                          </div>
+                          <div
+                            style={{ position: 'absolute', top: '2px', right: '2px', background: 'rgba(0,0,0,0.6)', borderRadius: '50%', width: '16px', height: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.9)', fontSize: '10px', cursor: 'pointer', fontWeight: 'bold', textShadow: '0 1px 2px rgba(0,0,0,0.9)', zIndex: 10 }}
+                            onClick={(e) => { e.stopPropagation(); showPopup(e, def); }}
+                          >?</div>
+                          {isSelected && (
+                            <div style={{ position: 'absolute', inset: 0, background: 'rgba(59,130,246,0.3)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 5 }}>
+                              <span style={{ fontSize: '18px' }}>✓</span>
+                            </div>
+                          )}
+                        </motion.div>
+                      );
+                    })}
+                  </AnimatePresence>
+                </div>
+              ))}
               {sortedHand.length === 0 && (
                 <div style={{ color: '#475569', fontSize: '10px', padding: '8px 0' }}>Empty hand</div>
               )}
             </div>
+              );
+            })()}
           </div>
         )}
       </div>
@@ -904,18 +917,34 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
                 </div>
               </div>
             )}
-            <div style={{ display: 'flex', flexWrap: 'wrap', paddingLeft: '10px' }}>
-              <AnimatePresence>
-                {playAreaCards.map((card, i) => {
-                   const isGrouped = i > 0 && playAreaCards[i-1].cardId === card.cardId;
-                   return (
-                     <div key={card.id} style={{ marginLeft: isGrouped ? '-60px' : '10px', zIndex: i, position: 'relative' }}>
-                       {renderCard(card, i, undefined, false, isGrouped)}
-                     </div>
-                   );
-                })}
-              </AnimatePresence>
+            {(() => {
+              const groupedPlay: typeof playAreaCards[] = [];
+              playAreaCards.forEach(c => {
+                if (groupedPlay.length > 0 && groupedPlay[groupedPlay.length - 1][0].cardId === c.cardId) {
+                  groupedPlay[groupedPlay.length - 1].push(c);
+                } else {
+                  groupedPlay.push([c]);
+                }
+              });
+              return (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', paddingLeft: '10px' }}>
+              {groupedPlay.map(group => (
+                <div key={`play-${group[0].cardId}`} style={{ display: 'flex' }}>
+                  <AnimatePresence>
+                    {group.map((card, i) => {
+                       const isGrouped = i > 0;
+                       return (
+                         <div key={card.id} style={{ marginLeft: isGrouped ? '-60px' : '0px', zIndex: i, position: 'relative' }}>
+                           {renderCard(card, i, undefined, false, isGrouped)}
+                         </div>
+                       );
+                    })}
+                  </AnimatePresence>
+                </div>
+              ))}
             </div>
+              );
+            })()}
           </div>
         </div>
       </div>

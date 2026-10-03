@@ -35,7 +35,7 @@ export type PendingAction =
   | { type: 'REVEAL_CARD'; playerId: string; instanceId: string; message?: string }
   | { type: 'FORCE_GAIN_CARD'; playerId: string; cardId: string; destination?: 'discard' | 'hand' | 'deck' }
   | { type: 'REVEAL_HAND'; playerId: string }
-  | { type: 'BANDIT_ATTACK'; playerId: string }
+  | { type: 'BANDIT_ATTACK' | 'BANDIT_DISPOSE'; playerId: string }
   | { type: 'BANDIT_REVEAL_NEXT'; playerId: string; cardsLeft: number; revealedCards: any[] }
   | { type: 'MILITIA_ATTACK'; playerId: string }
   | { type: 'WITCH_ATTACK'; playerId: string }
