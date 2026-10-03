@@ -22,7 +22,7 @@ if (typeof document !== 'undefined' && !document.getElementById(styleId)) {
   document.head.appendChild(style);
 }
 
-export const AnimatedCounter = ({ value, icon, color, suffix, width, resetKey }: { value: number, icon: React.ReactNode, color: string, suffix?: string, width?: string, resetKey?: number | string }) => {
+export const AnimatedCounter = ({ value, icon, color, suffix, width, resetKey, disableAnimation }: { value: number, icon: React.ReactNode, color: string, suffix?: string, width?: string, resetKey?: number | string, disableAnimation?: boolean }) => {
   const prevValue = useRef(value);
   const [animState, setAnimState] = useState({ class: '', key: 0 });
 
@@ -43,13 +43,15 @@ export const AnimatedCounter = ({ value, icon, color, suffix, width, resetKey }:
       }
     }
     
-    if (value > effectivePrev) {
-      setAnimState(s => ({ class: 'pulse-green', key: s.key + 1 }));
-    } else if (value < effectivePrev) {
-      setAnimState(s => ({ class: 'pulse-red', key: s.key + 1 }));
+    if (!disableAnimation) {
+      if (value > effectivePrev) {
+        setAnimState(s => ({ class: 'pulse-green', key: s.key + 1 }));
+      } else if (value < effectivePrev) {
+        setAnimState(s => ({ class: 'pulse-red', key: s.key + 1 }));
+      }
     }
     prevValue.current = value;
-  }, [value, resetKey]);
+  }, [value, resetKey, disableAnimation]);
 
   return (
     <div style={{ color, fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px', width, minWidth: width }}>
