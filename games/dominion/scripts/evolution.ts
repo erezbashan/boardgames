@@ -17,9 +17,9 @@ const createInitialState = (params1: any, params2: any, firstPlayer: 'bot1' | 'b
     trash: [],
     logs: [],
     pendingActions: [],
-    turnPhase: 'ACTION',
+    phase: 'ACTION',
     settings: { kingdomCards, botParams: { bot1: params1, bot2: params2 } },
-    actionQueue: []
+    actionQueue: [], history: [], winnerId: null, chatMessages: []
   }, { type: 'START_GAME' } as any);
 };
 
