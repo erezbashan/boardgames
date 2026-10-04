@@ -273,9 +273,9 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
           <div style={{ textAlign: 'center', fontSize: '10px', color: '#94a3b8' }}>
             <div 
               title={gameState.settings?.openGame ? `Deck: ${[...p.deck].reverse().map(c => getCardDef(c.cardId).name).join(', ')}` : undefined}
-              style={{ position: 'relative', width: '30px', height: '42px', border: '1px solid #475569', borderRadius: '3px', background: '#020617', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', cursor: gameState.settings?.openGame ? 'help' : 'default' }}
+              style={{ position: 'relative', width: '30px', height: '42px', border: '1px solid #475569', borderRadius: '3px', background: '#020617', cursor: gameState.settings?.openGame ? 'help' : 'default' }}
             >
-              {p.deck.length}
+              <div style={{ position: 'absolute', top: '2px', right: '2px', background: 'rgba(0,0,0,0.8)', padding: '1px 4px', borderRadius: '8px', fontSize: '9px', color: 'white', zIndex: 9999, fontWeight: 'bold' }}>{p.deck.length}</div>
               {p.transientDeckReveals && p.transientDeckReveals.map((cardId, idx) => (
                 <motion.div
                   key={`transient-${idx}`}
