@@ -419,6 +419,13 @@ export function getRandomBotAction(state: DominionState, playerId: string): Play
         
         // Pick a random one among the best
         const bestCard = bestCards[Math.floor(Math.random() * bestCards.length)];
+
+        // IMPORTANT: If the best available card evaluates to a massive negative score,
+        // it means getEndGameModifier determined that buying ANY of these cards will cause us to lose.
+        // Since buying is optional, we should just stop buying!
+        if (bestEval < -500) {
+          return { type: 'END_PHASE', playerId };
+        }
         
         // Don't buy coppers if we can afford something more useful (cost >= 2)
         if (getCardDef(bestCard).cost === 0 && sorted.length > 1) {
