@@ -265,6 +265,36 @@ export function getRandomBotAction(state: DominionState, playerId: string): Play
 
   if (state.phase === 'ACTION') {
     let playableActions = me.hand.filter(c => getCardDef(c.cardId).types.includes('ACTION'));
+
+      // SAFETY FILTER: Don't play an action that forces a game over if we are losing!
+      playableActions = playableActions.filter(c => {
+         let emptiesPile = false;
+         if (c.cardId === 'witch') {
+             const opponents = Object.keys(state.players).length - 1;
+             if (state.supply['curse'] <= opponents) emptiesPile = true;
+         } else if (c.cardId === 'bureaucrat') {
+             if (state.supply['silver'] === 1) emptiesPile = true;
+         }
+         
+         if (emptiesPile) {
+            let emptyPiles = 0;
+            for (const id in state.supply) if (state.supply[id] <= 0) emptyPiles++;
+            // If playing this empties the 3rd pile
+            if (emptyPiles >= 2) {
+                let isAhead = true;
+                for (const pId in state.players) {
+                    if (pId === playerId) continue;
+                    // If anyone is beating or tying us, don't end the game!
+                    if (state.players[pId].victoryPoints >= me.victoryPoints) {
+                        isAhead = false;
+                        break;
+                    }
+                }
+                if (!isAhead) return false; // DON'T PLAY IT
+            }
+         }
+         return true;
+      });
     
     if (me.actions > 0 && playableActions.length > 0) {
       // Throne Room logic
