@@ -110,9 +110,13 @@ export function getRandomBotAction(state: DominionState, playerId: string): Play
          let bestScore = -9999;
          let bestCard = '';
          const prog = calculateGameProgress(state);
-         const params = state.settings?.botParams?.[playerId] || state.settings?.botParams || {
-            vpIntercept: 0, vpSlope: 20, moneyIntercept: -1, moneySlope: 1, actionIntercept: 0, actionSlope: 0
-         };
+         const playerCount = Object.keys(state.players).length;
+         let defaultParams = { vpIntercept: 0, vpSlope: 15, moneyIntercept: 1, moneySlope: 0, actionIntercept: 0.5, actionSlope: 0 }; // 1v1 Default
+         if (playerCount === 3) defaultParams = { vpIntercept: -20, vpSlope: 45, moneyIntercept: 1, moneySlope: 0, actionIntercept: 0.5, actionSlope: 0 };
+         else if (playerCount === 4) defaultParams = { vpIntercept: -30, vpSlope: 60, moneyIntercept: 1, moneySlope: 0, actionIntercept: 0.5, actionSlope: 0 };
+         else if (playerCount === 5) defaultParams = { vpIntercept: -40, vpSlope: 75, moneyIntercept: 1, moneySlope: 0, actionIntercept: 0.5, actionSlope: 0 };
+         else if (playerCount >= 6) defaultParams = { vpIntercept: -50, vpSlope: 90, moneyIntercept: 1, moneySlope: 0, actionIntercept: 0.5, actionSlope: 0 };
+         const params = state.settings?.botParams?.[playerId] || state.settings?.botParams || defaultParams;
          const scoreCard = (id: string) => {
             const def = getCardDef(id);
             let val = def.cost;
