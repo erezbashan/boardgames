@@ -59,7 +59,7 @@ export const AnimatedCounter = ({ value, icon, color, suffix, width, resetKey, d
   return (
     <div style={{ color, fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px', width, minWidth: width }}>
       <span>{icon}</span>
-      <span key={`anim-${animState.key}`} className={animState.class} style={{ display: 'inline-block', transition: 'all 0.3s', fontFamily: width ? 'monospace' : 'inherit' }}>
+      <span key={`anim-${animState.key}`} className={animState.class} style={{ display: 'inline-block', transition: 'all 0.3s', fontVariantNumeric: 'tabular-nums', fontFamily: width ? 'monospace' : 'inherit' }}>
         {value}{suffix}
       </span>
     </div>
