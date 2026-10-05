@@ -672,6 +672,10 @@ export function dominionReducer
     case 'END_PHASE': {
       if (nextState.playerOrder[nextState.currentPlayerIndex] !== action.playerId) break;
       
+      // FAILSAFE: Always clear any lingering deck reveals when a phase ends, just in case!
+      const player = nextState.players[action.playerId];
+      if (player) delete player.transientDeckReveals;
+      
       if (nextState.phase === 'ACTION') {
         nextState.phase = 'BUY';
         nextState.actionQueue = nextState.actionQueue || [];

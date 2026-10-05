@@ -836,7 +836,7 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
                   const orderedCards = [...req.payload.cards];
                   
                   // Helper to get effective choice
-                  const getChoice = (c, index) => sentryChoices[c.id] || (index === 0 ? 'deck1' : 'deck2');
+                  const getChoice = (c: any, index: number) => sentryChoices[c.id] || (index === 0 ? 'deck1' : 'deck2');
                   
                   const numDeck = orderedCards.filter((c, i) => getChoice(c, i).startsWith('deck')).length;
 
