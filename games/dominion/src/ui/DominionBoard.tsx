@@ -806,15 +806,29 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
                   );
                 })()}
                 {inputType === 'PLAY_VASSAL_ACTION' && (
-                  <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                    <button onClick={() => dispatch({ type: 'RESOLVE_INPUT', playerId: myPlayerId, payload: { playCard: true } })} style={{ padding: '6px 16px', background: '#34d399', color: 'black', fontWeight: 'bold', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Yes, Play It</button>
-                    <button onClick={() => dispatch({ type: 'RESOLVE_INPUT', playerId: myPlayerId, payload: { playCard: false } })} style={{ padding: '6px 16px', background: '#94a3b8', color: 'black', fontWeight: 'bold', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>No, Discard It</button>
+                  <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.4)', zIndex: 10000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', paddingBottom: '40px' }}>
+                    <div style={{ background: 'rgba(30, 41, 59, 0.85)', backdropFilter: 'blur(4px)', border: '3px solid #3b82f6', borderRadius: '12px', padding: '30px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', maxWidth: '900px' }}>
+                      <h2 style={{ margin: 0, color: 'white' }}>Vassal</h2>
+                      <div style={{ color: 'white', fontSize: '18px' }}>Do you want to play this card?</div>
+                      <div style={{ width: '150px', height: '225px', backgroundImage: `url(${CARD_IMAGES[req.payload?.card?.cardId]})`, backgroundSize: '100% 100%', borderRadius: '8px', boxShadow: '0 4px 10px rgba(0,0,0,0.5)' }} />
+                      <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
+                        <button onClick={() => dispatch({ type: 'RESOLVE_INPUT', playerId: myPlayerId, payload: { playCard: true } })} style={{ padding: '12px 24px', background: '#34d399', color: 'black', fontWeight: 'bold', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '18px' }}>Yes, Play It</button>
+                        <button onClick={() => dispatch({ type: 'RESOLVE_INPUT', playerId: myPlayerId, payload: { playCard: false } })} style={{ padding: '12px 24px', background: '#ef4444', color: 'white', fontWeight: 'bold', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '18px' }}>No, Discard It</button>
+                      </div>
+                    </div>
                   </div>
                 )}
                 {inputType === 'LIBRARY_KEEP' && (
-                  <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                    <button onClick={() => dispatch({ type: 'RESOLVE_INPUT', playerId: myPlayerId, payload: { keep: true } })} style={{ padding: '6px 16px', background: '#34d399', color: 'black', fontWeight: 'bold', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Keep in Hand</button>
-                    <button onClick={() => dispatch({ type: 'RESOLVE_INPUT', playerId: myPlayerId, payload: { keep: false } })} style={{ padding: '6px 16px', background: '#94a3b8', color: 'black', fontWeight: 'bold', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Set Aside (Discard)</button>
+                  <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.4)', zIndex: 10000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', paddingBottom: '40px' }}>
+                    <div style={{ background: 'rgba(30, 41, 59, 0.85)', backdropFilter: 'blur(4px)', border: '3px solid #3b82f6', borderRadius: '12px', padding: '30px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', maxWidth: '900px' }}>
+                      <h2 style={{ margin: 0, color: 'white' }}>Library</h2>
+                      <div style={{ color: 'white', fontSize: '18px' }}>Keep this Action card in your hand or set it aside?</div>
+                      <div style={{ width: '150px', height: '225px', backgroundImage: `url(${CARD_IMAGES[req.payload?.card?.cardId]})`, backgroundSize: '100% 100%', borderRadius: '8px', boxShadow: '0 4px 10px rgba(0,0,0,0.5)' }} />
+                      <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
+                        <button onClick={() => dispatch({ type: 'RESOLVE_INPUT', playerId: myPlayerId, payload: { keep: true } })} style={{ padding: '12px 24px', background: '#34d399', color: 'black', fontWeight: 'bold', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '18px' }}>Keep in Hand</button>
+                        <button onClick={() => dispatch({ type: 'RESOLVE_INPUT', playerId: myPlayerId, payload: { keep: false } })} style={{ padding: '12px 24px', background: '#ef4444', color: 'white', fontWeight: 'bold', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '18px' }}>Set Aside (Discard)</button>
+                      </div>
+                    </div>
                   </div>
                 )}
                 {inputType === 'SENTRY_CHOICE' && req.payload?.cards && (() => {

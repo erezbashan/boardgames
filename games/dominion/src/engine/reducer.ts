@@ -508,11 +508,10 @@ export function dominionReducer
       break;
     }
     case 'BOT_PLAY_VASSAL': {
-      const { playerId, instanceId } = action as any;
+      const { playerId, card } = action as any;
       const player = nextState.players[playerId];
-      const idx = player.discard.findIndex(c => c.id === instanceId);
-      if (idx >= 0) {
-         const card = player.discard.splice(idx, 1)[0];
+      delete player.transientDeckReveals;
+      if (card) {
          const def = getCardDef(card.cardId);
          player.playArea.push(card);
          nextState.logs.push(`${player.name} plays [${def.name}] via Vassal.`);
