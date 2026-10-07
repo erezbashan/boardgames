@@ -662,6 +662,28 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
           )}
         </AnimatePresence>
 
+        {gameState.kingdomOverview && (
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ background: 'rgba(30, 41, 59, 0.95)', backdropFilter: 'blur(8px)', border: '3px solid #3b82f6', borderRadius: '16px', padding: '40px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '30px', boxShadow: '0 20px 50px rgba(0,0,0,0.8)', maxWidth: '90vw', maxHeight: '90vh', overflowY: 'auto' }}>
+              <h1 style={{ margin: 0, color: 'white', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>Kingdom Cards</h1>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center', maxWidth: '1000px' }}>
+                {gameState.kingdomOverview.map(cardId => (
+                  <div key={cardId} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ width: '140px', height: '210px', backgroundImage: `url(${CARD_IMAGES[cardId]})`, backgroundSize: '100% 100%', borderRadius: '8px', boxShadow: '0 6px 15px rgba(0,0,0,0.5)' }} />
+                    <div style={{ color: 'white', fontWeight: 'bold', background: 'rgba(0,0,0,0.5)', padding: '4px 8px', borderRadius: '4px' }}>{getCardDef(cardId).name}</div>
+                  </div>
+                ))}
+              </div>
+              <button 
+                onClick={() => dispatch({ type: 'CLOSE_KINGDOM_OVERVIEW' })}
+                style={{ padding: '12px 40px', background: '#3b82f6', color: 'white', fontWeight: 'bold', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '20px', boxShadow: '0 4px 10px rgba(0,0,0,0.3)' }}
+              >
+                Start Game
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Hover Popup - Renders Full Card Image */}
         {hoveredCardDef && popupPos && (
           <>
