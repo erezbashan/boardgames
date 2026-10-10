@@ -876,8 +876,9 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
                   <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.4)', zIndex: 10000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', paddingBottom: '40px' }}>
                     <div style={{ background: 'rgba(30, 41, 59, 0.85)', backdropFilter: 'blur(4px)', border: '3px solid #3b82f6', borderRadius: '12px', padding: '30px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', maxWidth: '900px' }}>
                       <h2 style={{ margin: 0, color: 'white' }}>Sentry: Handle Top Cards</h2>
-                      <div style={{ display: 'flex', gap: '20px', alignItems: 'center', justifyContent: 'center' }}>
+                      <div style={{ display: 'flex', gap: '10px', alignItems: 'center', justifyContent: 'center' }}>
                         {orderedCards.map((c: any, index: number) => {
+
                           const choice = getChoice(c, index);
                           const isDeck = choice.startsWith('deck');
                           
@@ -906,15 +907,37 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
                               setSentryChoices(newChoices);
                           };
                           
+                          
+                          let x = 0;
+                          let y = 0;
+                          let z = 1;
+                          
+                          if (numDeck === 2) {
+                            if (choice === 'deck1') {
+                              x = index === 0 ? 15 : -15; // move towards center
+                              y = -20;
+                              z = 10;
+                            } else if (choice === 'deck2') {
+                              x = index === 0 ? 15 : -15;
+                              y = 20;
+                              z = 5;
+                            }
+                          }
+
                           return (
-                            <div key={c.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', background: 'rgba(0,0,0,0.3)', padding: '15px', borderRadius: '8px' }}>
+                            <motion.div 
+                              key={c.id} 
+                              animate={{ x, y, zIndex: z }}
+                              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', background: 'rgba(0,0,0,0.85)', padding: '15px', borderRadius: '8px', border: choice === 'deck1' ? '2px solid #3b82f6' : choice === 'deck2' ? '2px solid #64748b' : '2px solid transparent' }}
+                            >
                               <div style={{ fontWeight: 'bold', color: isDeck ? '#3b82f6' : (choice==='trash' ? '#ef4444' : '#eab308'), fontSize: '18px', height: '24px' }}>{label}</div>
                               <div style={{ width: '130px', height: '195px', backgroundImage: `url(${CARD_IMAGES[c.cardId]})`, backgroundSize: '100% 100%', borderRadius: '8px', boxShadow: '0 4px 10px rgba(0,0,0,0.3)' }}></div>
                               <div style={{ display: 'flex', gap: '8px', marginTop: '5px' }}>
                                 <button onClick={() => choice === 'trash' ? toggleToDeck() : handleChoice('trash')} style={{ padding: '8px 12px', background: choice === 'trash' ? '#ef4444' : '#334155', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Trash</button>
                                 <button onClick={() => choice === 'discard' ? toggleToDeck() : handleChoice('discard')} style={{ padding: '8px 12px', background: choice === 'discard' ? '#eab308' : '#334155', color: choice === 'discard' ? 'black' : 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Discard</button>
                               </div>
-                            </div>
+                            </motion.div>
                           );
                         })}
                       </div>
