@@ -200,10 +200,25 @@ function processPendingActions(state: DominionState) {
         state.actionQueue = state.actionQueue || [];
         
         // Show both cards at once
-        state.actionQueue.push({ delayMs: 100, action: { type: 'SHOW_DECK_REVEALS', playerId: p.id, cardIds: drawn.map(c => c.cardId) } });
+        state.actionQueue.push({ delayMs: 100, action: { type: 'SHOW_DECK_REVEALS', playerId: p.id, cardIds: drawn.map(c => c.cardId), trashCardId: toTrashId ? drawn.find(c => c.id === toTrashId)?.cardId : undefined } as any });
         
         // Sleep, then clear the visual overlay
         state.actionQueue.push({ delayMs: 1500, action: { type: 'CLEAR_DECK_REVEALS', playerId: p.id } });
+        
+        // Push consolidated log immediately
+        const revealedNames = drawn.map(c => `[${getCardDef(c.cardId).name}]`);
+        state.logs.push(`${p.name} reveals ${revealedNames.join(' and ')}.`);
+        if (toTrashId) {
+            const trashedCard = drawn.find(c => c.id === toTrashId);
+            const discardedCards = drawn.filter(c => c.id !== toTrashId);
+            if (discardedCards.length > 0) {
+               state.logs.push(`${p.name} trashes [${getCardDef(trashedCard!.cardId).name}] and discards ${discardedCards.map(c => `[${getCardDef(c.cardId).name}]`).join(' and ')}.`);
+            } else {
+               state.logs.push(`${p.name} trashes [${getCardDef(trashedCard!.cardId).name}].`);
+            }
+        } else {
+            state.logs.push(`${p.name} discards ${revealedNames.join(' and ')}.`);
+        }
         
         // Dispose of the cards (they will all fly to their destinations simultaneously)
         for (const card of drawn) {
@@ -220,10 +235,10 @@ function processPendingActions(state: DominionState) {
          const card = (pending as any).card;
          if ((pending as any).destination === 'trash') {
              state.trash.push(card);
-             state.logs.push(`${p.name} reveals [${getCardDef(card.cardId).name}] from their deck and trashes it.`);
+             // Log handled in BANDIT_ATTACK
          } else {
              p.discard.push(card);
-             state.logs.push(`${p.name} reveals [${getCardDef(card.cardId).name}] from their deck and discards it.`);
+             // Log handled in BANDIT_ATTACK
          }
         break;
       }
@@ -482,12 +497,18 @@ export function dominionReducer
     
     case 'SHOW_DECK_REVEALS': {
       const p = nextState.players[(action as any).playerId];
-      if (p) p.transientDeckReveals = (action as any).cardIds;
+      if (p) {
+         p.transientDeckReveals = (action as any).cardIds;
+         p.transientTrashReveal = (action as any).trashCardId;
+      }
       break;
     }
     case 'CLEAR_DECK_REVEALS': {
       const p = nextState.players[(action as any).playerId];
-      if (p) delete p.transientDeckReveals;
+      if (p) {
+         delete p.transientDeckReveals;
+         delete p.transientTrashReveal;
+      }
       break;
     }
     case 'POPUP_CARD': {
@@ -556,6 +577,8 @@ export function dominionReducer
         : ALL_KINGDOM_CARDS;
       // Pick 10 randomly
       const kingdomCards = shuffle([...allowedPool]).slice(0, 10);
+      nextState.settings = nextState.settings || { kingdomCards: [] };
+      nextState.settings!.kingdomCards = kingdomCards;
 
       // Add base cards to supply immediately
       nextState.supply = {

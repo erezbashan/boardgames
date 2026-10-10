@@ -15,7 +15,7 @@ export type PlayerAction =
   | { type: 'SHOW_KINGDOM_CARD'; cardId: string; onComplete?: PlayerAction }
   | { type: 'ADD_KINGDOM_CARD'; cardId: string; amount: number; onComplete?: PlayerAction }
   | { type: 'POPUP_CARD'; cardId: string }
-  | { type: 'SHOW_DECK_REVEALS'; playerId: string; cardIds: string[] }
+  | { type: 'SHOW_DECK_REVEALS'; playerId: string; cardIds: string[]; trashCardId?: string }
   | { type: 'CLEAR_DECK_REVEALS'; playerId: string }
   | { type: 'CLEAR_POPUP' }
   | { type: 'ENQUEUE_PENDING_ACTION'; pendingAction: any }

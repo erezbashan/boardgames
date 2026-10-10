@@ -21,7 +21,8 @@ export interface PlayerState extends BasePlayer {
   victoryPoints: number;
   merchantPlays?: number; // For Merchant card
   turnBuyingPower?: number; // Highest coins reached this turn
-  transientDeckReveals?: string[]; // Array of card instances being revealed on top of deck
+  transientDeckReveals?: string[];
+  transientTrashReveal?: string; // Array of card instances being revealed on top of deck
 }
 
 export type PendingAction = 

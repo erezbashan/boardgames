@@ -116,7 +116,7 @@ export function getRandomBotAction(state: DominionState, playerId: string): Play
          else if (playerCount === 4) defaultParams = { vpIntercept: -30, vpSlope: 60, moneyIntercept: 1, moneySlope: 0, actionIntercept: 0.5, actionSlope: 0 };
          else if (playerCount === 5) defaultParams = { vpIntercept: -40, vpSlope: 75, moneyIntercept: 1, moneySlope: 0, actionIntercept: 0.5, actionSlope: 0 };
          else if (playerCount >= 6) defaultParams = { vpIntercept: -50, vpSlope: 90, moneyIntercept: 1, moneySlope: 0, actionIntercept: 0.5, actionSlope: 0 };
-         const params = state.settings?.botParams?.[playerId] || state.settings?.botParams || defaultParams;
+         const params = state.settings?.botParams?.[playerId] || state.settings?.botParams || { ...defaultParams, strategy: 'V2' };
          const scoreCard = (id: string) => {
             const def = getCardDef(id);
             let val = def.cost;

@@ -277,22 +277,27 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
               style={{ position: 'relative', width: '30px', height: '42px', border: '1px solid #475569', borderRadius: '3px', background: '#020617', cursor: gameState.settings?.openGame ? 'help' : 'default' }}
             >
               <div style={{ position: 'absolute', top: '2px', right: '2px', background: 'rgba(0,0,0,0.8)', padding: '1px 4px', borderRadius: '8px', fontSize: '9px', color: 'white', zIndex: 9999, fontWeight: 'bold' }}>{p.deck.length}</div>
-              {p.transientDeckReveals && p.transientDeckReveals.map((cardId, idx) => (
+              {p.transientDeckReveals && p.transientDeckReveals.map((cardId, idx) => {
+                const isTrashed = p.transientTrashReveal === cardId;
+                return (
                 <motion.div
                   key={`transient-${idx}`}
                   initial={{ scale: 0, opacity: 0, y: 0 }}
-                  animate={{ scale: 1.1, opacity: 1, y: -25, x: (idx - (p.transientDeckReveals!.length - 1) / 2) * 35, zIndex: 9999 + idx }}
+                  animate={{ scale: isTrashed ? 1.5 : 1.1, opacity: 1, y: -25, x: (idx - (p.transientDeckReveals!.length - 1) / 2) * 35, zIndex: 9999 + idx }}
                   transition={{ type: 'spring', stiffness: 200, damping: 20 }}
                   onMouseEnter={(e) => showPopup(e, getCardDef(cardId))}
                   onMouseLeave={hidePopup}
                   style={{
                     position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
                     backgroundImage: `url(${CARD_IMAGES[cardId]})`,
-                    backgroundSize: '100% 100%', borderRadius: '3px', boxShadow: '0 5px 15px rgba(0,0,0,0.5)',
+                    backgroundSize: '100% 100%',
+                    borderRadius: '3px',
+                    border: isTrashed ? '2px solid #ef4444' : 'none',
+                    boxShadow: isTrashed ? '0 0 20px rgba(239, 68, 68, 0.9)' : '0 4px 10px rgba(0,0,0,0.5)',
                     cursor: 'help'
-                  }}
-                />
-              ))}
+                  }} />
+                )
+              })}
             </div>
             Deck
           </div>
@@ -668,12 +673,16 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
             <div style={{ background: 'rgba(30, 41, 59, 0.95)', backdropFilter: 'blur(8px)', border: '3px solid #3b82f6', borderRadius: '16px', padding: '40px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '30px', boxShadow: '0 20px 50px rgba(0,0,0,0.8)', maxWidth: '90vw', maxHeight: '90vh', overflowY: 'auto' }}>
               <h1 style={{ margin: 0, color: 'white', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>Kingdom Cards</h1>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center', maxWidth: '1000px' }}>
-                {gameState.settings?.kingdomCards?.map(cardId => (
+                {(() => {
+                  const baseCards = ['copper', 'silver', 'gold', 'estate', 'duchy', 'province', 'curse'];
+                  const kc = gameState.settings?.kingdomCards?.length ? gameState.settings.kingdomCards : Object.keys(gameState.supply).filter(k => !baseCards.includes(k) && gameState.supply[k] !== undefined);
+                  return kc.map(cardId => (
                   <div key={cardId} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
                     <div style={{ width: '140px', height: '210px', backgroundImage: `url(${CARD_IMAGES[cardId]})`, backgroundSize: '100% 100%', borderRadius: '8px', boxShadow: '0 6px 15px rgba(0,0,0,0.5)' }} />
                     <div style={{ color: 'white', fontWeight: 'bold', background: 'rgba(0,0,0,0.5)', padding: '4px 8px', borderRadius: '4px' }}>{getCardDef(cardId).name}</div>
                   </div>
-                ))}
+                ))
+                })()}
               </div>
               <button 
                 onClick={() => setShowKingdomOverview(false)}
