@@ -80,5 +80,4 @@ export interface DominionState extends BaseGameState<PlayerState> {
   recentBuyingPowers?: number[]; // Rolling window of max coins per turn
   settings?: DominionSettings;
   revealedCard?: string;
-  kingdomOverview?: string[];
 }

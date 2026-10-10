@@ -253,11 +253,17 @@ export const Chapel: CardDefinition = {
     }
   ],
   botChoose: (state, options) => {
-    // User requested bot to not trash things with Chapel (except maybe curses)
     const pId = options.playerId;
     const hand = state.players[pId].hand;
-    const curses = hand.filter(c => c.cardId === 'curse').map(c => c.id);
-    return { trashedIds: curses.slice(0, 4) };
+    const getTrashPriority = (c: any) => {
+       if (c.cardId === 'curse') return 1;
+       if (c.cardId === 'estate') return 2;
+       if (c.cardId === 'copper') return 3;
+       return 99; // never trash
+    };
+    const trashable = hand.filter(c => getTrashPriority(c) < 99);
+    trashable.sort((a, b) => getTrashPriority(a) - getTrashPriority(b));
+    return { trashedIds: trashable.slice(0, 4).map(c => c.id) };
   }
 };
 

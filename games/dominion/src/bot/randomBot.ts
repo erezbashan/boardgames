@@ -199,7 +199,7 @@ export function getRandomBotAction(state: DominionState, playerId: string): Play
       const deckIds: string[] = [];
       for (const c of cards) {
         const def = getCardDef(c.cardId);
-        if (c.cardId === 'curse') {
+        if (c.cardId === 'curse' || c.cardId === 'estate' || c.cardId === 'copper') {
           trashIds.push(c.id);
         } else if (def.types.includes('VICTORY')) {
           discardIds.push(c.id);
@@ -306,34 +306,40 @@ export function getRandomBotAction(state: DominionState, playerId: string): Play
       // Exclude Throne Room from normal choices to prefer playing it first
       playableActions = playableActions.filter(c => c.cardId !== 'throne_room');
       
-      // Priority 1: Action cards that give more actions (village, festival, market, lab, etc.)
-      const actionGivers = playableActions.filter(c => {
+      const getActionPriority = (c: any) => {
         const def = getCardDef(c.cardId);
         const desc = def.description.toLowerCase();
-        return desc.includes('+2 actions') || desc.includes('+1 action');
-      });
+        
+        // Priority 1: +2 Actions (Village, Festival, etc)
+        if (desc.includes('+2 actions')) return 1;
+        
+        // Priority 2: +1 Action AND +Card (Lab, Market, etc)
+        if (desc.includes('+1 action') && desc.includes('+') && desc.includes('card')) return 2;
+        
+        // Priority 3: +1 Action only
+        if (desc.includes('+1 action')) return 3;
+        
+        // Terminal cards (No actions given)
+        // Priority 4: Terminal Draw (Smithy, Witch, Council Room, Library)
+        if (desc.includes('+') && desc.includes('card')) return 4;
+        
+        // Priority 5: Terminal Payload / Other (Militia, Remodel, Chapel, etc)
+        return 5;
+      };
 
-      const sortedActionGivers = [...actionGivers].sort((a, b) => 
-        getCardDef(b.cardId).cost - getCardDef(a.cardId).cost
-      );
-
-      if (sortedActionGivers.length > 0) {
-        return { type: 'PLAY_CARD', playerId, instanceId: sortedActionGivers[0].id };
-      }
-
-      const hasJunk = me.hand.some(c => c.cardId === 'curse' || getCardDef(c.cardId).types.includes('VICTORY'));
+      // Always play Chapel first if we have junk to trash
+      const hasJunk = me.hand.some(c => c.cardId === 'curse' || c.cardId === 'estate');
       if (hasJunk) {
-        const trashDiscarder = playableActions.find(c => c.cardId === 'chapel' || c.cardId === 'cellar' || c.cardId === 'sentry');
-        if (trashDiscarder) {
-          return { type: 'PLAY_CARD', playerId, instanceId: trashDiscarder.id };
+        const chapel = playableActions.find(c => c.cardId === 'chapel');
+        if (chapel) {
+          return { type: 'PLAY_CARD', playerId, instanceId: chapel.id };
         }
       }
 
-      const sortedActions = [...playableActions].sort((a, b) =>
-        getCardDef(b.cardId).cost - getCardDef(a.cardId).cost
-      );
-      if (sortedActions.length > 0) {
-        return { type: 'PLAY_CARD', playerId, instanceId: sortedActions[0].id };
+      playableActions.sort((a, b) => getActionPriority(a) - getActionPriority(b));
+
+      if (playableActions.length > 0) {
+        return { type: 'PLAY_CARD', playerId, instanceId: playableActions[0].id };
       }
     }
     return { type: 'END_PHASE', playerId };
@@ -409,31 +415,62 @@ export function getRandomBotAction(state: DominionState, playerId: string): Play
 
         
         const evaluate = (cardId: string) => {
+           let defaultParams = { vpIntercept: 0, vpSlope: 15, moneyIntercept: 1, moneySlope: 0, actionIntercept: 0.5, actionSlope: 0 }; 
+           const playerCount = Object.keys(state.players).length;
+           if (playerCount === 3) defaultParams = { vpIntercept: -20, vpSlope: 45, moneyIntercept: 1, moneySlope: 0, actionIntercept: 0.5, actionSlope: 0 };
+           else if (playerCount === 4) defaultParams = { vpIntercept: -30, vpSlope: 60, moneyIntercept: 1, moneySlope: 0, actionIntercept: 0.5, actionSlope: 0 };
+           else if (playerCount >= 5) defaultParams = { vpIntercept: -40, vpSlope: 75, moneyIntercept: 1, moneySlope: 0, actionIntercept: 0.5, actionSlope: 0 };
+           const params = state.settings?.botParams?.[playerId] || state.settings?.botParams || defaultParams;
+           
            const def = getCardDef(cardId);
            let val = def.cost;
            const isVP = def.types.includes('VICTORY');
            const isTreasure = def.types.includes('TREASURE');
            
-           // Use linear formulas parameterized for tournaments
-           // Default params if none provided in settings
-           const params = state.settings?.botParams?.[playerId] || state.settings?.botParams || {
-               vpIntercept: 0, vpSlope: 20,
-               moneyIntercept: -1, moneySlope: 1,
-               actionIntercept: 0, actionSlope: 0
-           };
-
-           if (isVP) {
-               val += params.vpIntercept + (params.vpSlope * gameProgress);
+           const provincesLeft = state.supply['province'] ?? 8;
+           
+           // HARDCODED BIG MONEY & VP HEURISTICS (Bot V2)
+           if (params.strategy === 'V2') {
+               if (cardId === 'province') {
+               val += 1000; // Always buy Province if we can afford it
+           } else if (cardId === 'duchy') {
+               // Only buy Duchy if Provinces are getting low
+               if (provincesLeft <= 4) val += 500;
+               else val -= 1000; // Never buy Duchy early
+           } else if (cardId === 'estate') {
+               // Only buy Estate if Provinces are almost gone
+               if (provincesLeft <= 2) val += 100;
+               else val -= 1000; // Never buy Estate early
+           } else if (isVP) {
+               // Other VP cards (like Gardens)
+               if (provincesLeft <= 5) val += 200;
+               else val -= 1000;
            } else if (isTreasure) {
-               val += params.moneyIntercept + (params.moneySlope * gameProgress);
+                   if (cardId === 'gold') val += 200;
+                   else if (cardId === 'silver') val += 100;
+                   else val += 50;
+               } else {
+                   // Only buy an action if it's a REALLY good terminal or a draw card
+                   const desc = def.description.toLowerCase();
+                   if (desc.includes('+2 actions')) val += 80;
+                   else if (desc.includes('+') && desc.includes('card')) val += 70;
+                   else val += 40; // Otherwise prefer silver
+               }
            } else {
-               val += params.actionIntercept + (params.actionSlope * gameProgress);
+               // Bot V1 Curve Logic
+               if (isVP) {
+                   val += params.vpIntercept + (params.vpSlope * gameProgress);
+               } else if (isTreasure) {
+                   val += params.moneyIntercept + (params.moneySlope * gameProgress);
+               } else {
+                   val += params.actionIntercept + (params.actionSlope * gameProgress);
+               }
            }
 
            // Special cases
            if (cardId === 'gardens') {
-             if (deckSize < 30) val -= 5;
-             else val += (deckSize >= 40 ? 6 : 2);
+             if (deckSize < 30) val -= 1000; // Gardens is useless in small decks
+             else val += (deckSize >= 40 ? 400 : 200);
            }
            
            val += getEndGameModifier(state, playerId, cardId);

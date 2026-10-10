@@ -479,10 +479,7 @@ export function dominionReducer
       nextState.logs.push(`Kingdom card selected: [${getCardDef((action as any).cardId).name}]`);
       break;
     }
-    case 'CLOSE_KINGDOM_OVERVIEW': {
-      delete nextState.kingdomOverview;
-      break;
-    }
+    
     case 'SHOW_DECK_REVEALS': {
       const p = nextState.players[(action as any).playerId];
       if (p) p.transientDeckReveals = (action as any).cardIds;
@@ -594,8 +591,8 @@ export function dominionReducer
       }
       nextState.logs.push(`Kingdom cards initialized.`);
       
-      nextState.kingdomOverview = kingdomCards;
-      nextState.actionQueue.push({ delayMs: 6000, action: { type: 'CLOSE_KINGDOM_OVERVIEW' } as any });
+      
+      
       
       // Then players draw cards
       for (let i = 0; i < nextState.playerOrder.length; i++) {
