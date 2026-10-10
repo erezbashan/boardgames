@@ -886,11 +886,8 @@ export const DominionBoard: React.FC<Props> = ({ gameState, myPlayerId, dispatch
                           if (choice === 'trash') label = "🗑️ Trashing";
                           else if (choice === 'discard') label = "↪️ Discarding";
                           else {
-                             if (numDeck === 1) {
-                                label = "⬆️ Top Card";
-                             } else {
-                                label = choice === 'deck1' ? "⬆️ Top Card" : "⬇️ Second Card";
-                             }
+                             // Labels removed per user request (visual overlap indicates order)
+                             label = "";
                           }
                           
                           const handleChoice = (newChoice: 'trash'|'discard'|'deck1'|'deck2') => {
