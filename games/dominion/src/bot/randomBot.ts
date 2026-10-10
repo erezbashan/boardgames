@@ -417,8 +417,7 @@ export function getRandomBotAction(state: DominionState, playerId: string): Play
         const evaluate = (cardId: string) => {
            // 500-Match Genetic Algorithm Learned Parameters (2-Player Optimized)
            let defaultParams: any = { 
-               strategy: 'GA_V3', 
-               linear: { provInt: 19, provSlp: 78, duchyInt: 9, duchySlp: 21, estInt: -2, estSlp: 7, goldInt: 19, goldSlp: 10, silvInt: 8, silvSlp: -7 },
+               strategy: 'V2', // Reverted from GA_V3 to V2 to prevent degenerate Duchy Rush
                cardWeights: { sentry: 5, witch: 4, vassal: 4, cellar: 3, chapel: 3, library: 3, council_room: 2, moat: 2, throne_room: 2, poacher: 2, village: 1, merchant: 1, workshop: 0, festival: 0, gardens: -1, remodel: -1, mine: -1, bureaucrat: -3, market: -2, laboratory: 0, harbinger: -3, militia: -3, moneylender: -3, artisan: -5, bandit: -5, smithy: -5 }
            }; 
            const playerCount = Object.keys(state.players).length;
