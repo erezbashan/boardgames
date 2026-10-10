@@ -48,12 +48,49 @@ export const DominionStats: React.FC<DominionStatsProps> = ({ gameState }) => {
   });
 
   // Add final state
+  const deckSizeData: LineChartData[] = (history || []).map(snap => {
+    const entry: LineChartData = { name: `T${snap.turnNum}` };
+    playerOrder.forEach(pid => {
+      entry[players[pid].name] = snap.deckSizes?.[pid] ?? 0;
+    });
+    return entry;
+  });
+
+  const buyingPowerData: LineChartData[] = (history || []).map(snap => {
+    const entry: LineChartData = { name: `T${snap.turnNum}` };
+    playerOrder.forEach(pid => {
+      entry[players[pid].name] = snap.buyingPower?.[pid] ?? 0;
+    });
+    return entry;
+  });
+
   if (vpData.length > 0) {
     const finalEntry: LineChartData = { name: 'Final' };
     playerOrder.forEach(pid => {
       finalEntry[players[pid].name] = players[pid].victoryPoints;
     });
     vpData.push(finalEntry);
+    
+    const finalDeckEntry: LineChartData = { name: 'Final' };
+    playerOrder.forEach(pid => {
+      const p = players[pid];
+      finalDeckEntry[p.name] = p.deck.length + p.hand.length + p.discard.length + p.playArea.length;
+    });
+    deckSizeData.push(finalDeckEntry);
+    
+    const finalBPEntry: LineChartData = { name: 'Final' };
+    playerOrder.forEach(pid => {
+      const p = players[pid];
+      const allCards = [...p.deck, ...p.hand, ...p.discard, ...p.playArea];
+      let bp = 0;
+      allCards.forEach(c => {
+         if (c.cardId === 'copper') bp += 1;
+         else if (c.cardId === 'silver') bp += 2;
+         else if (c.cardId === 'gold') bp += 3;
+      });
+      finalBPEntry[p.name] = bp;
+    });
+    buyingPowerData.push(finalBPEntry);
   }
 
   const lines: LineConfig[] = playerOrder.map((id, index) => ({
@@ -149,19 +186,41 @@ export const DominionStats: React.FC<DominionStatsProps> = ({ gameState }) => {
 
       {/* VP Progression Chart */}
       {vpData.length > 1 ? (
-        <LineChartWidget
-          title="VP Progression"
-          data={vpData}
-          lines={lines}
-          height={220}
-          hideLegend
-          hideDots
-          hideXAxis
-          yAxisWidth={40}
-        />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
+          <LineChartWidget
+            title="⭐ VP Progression"
+            data={vpData}
+            lines={lines}
+            height={220}
+            hideLegend
+            hideDots
+            hideXAxis
+            yAxisWidth={40}
+          />
+          <LineChartWidget
+            title="💵 Base Buying Power Progression"
+            data={buyingPowerData}
+            lines={lines}
+            height={220}
+            hideLegend
+            hideDots
+            hideXAxis
+            yAxisWidth={40}
+          />
+          <LineChartWidget
+            title="🃏 Total Deck Size Progression"
+            data={deckSizeData}
+            lines={lines}
+            height={220}
+            hideLegend
+            hideDots
+            hideXAxis
+            yAxisWidth={40}
+          />
+        </div>
       ) : (
         <p style={{ textAlign: 'center', color: 'gray', fontStyle: 'italic' }}>
-          Play a few turns to see VP progression!
+          Play a few turns to see progression graphs!
         </p>
       )}
 

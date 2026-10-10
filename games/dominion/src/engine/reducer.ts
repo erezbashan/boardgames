@@ -761,13 +761,22 @@ export function dominionReducer
       const turnNum = nextState.history.length + 1;
       const vpSnapshot: Record<string, number> = {};
       const deckSizeSnapshot: Record<string, number> = {};
+      const buyingPowerSnapshot: Record<string, number> = {};
       nextState.playerOrder.forEach(pid => {
         const p = nextState.players[pid];
         vpSnapshot[pid] = p.victoryPoints;
         const allCards = [...p.deck, ...p.hand, ...p.playArea, ...p.discard];
         deckSizeSnapshot[pid] = allCards.length;
+        
+        let totalBuyingPower = 0;
+        allCards.forEach(c => {
+           if (c.cardId === 'copper') totalBuyingPower += 1;
+           else if (c.cardId === 'silver') totalBuyingPower += 2;
+           else if (c.cardId === 'gold') totalBuyingPower += 3;
+        });
+        buyingPowerSnapshot[pid] = totalBuyingPower;
       });
-      nextState.history.push({ turnNum, vps: vpSnapshot, deckSizes: deckSizeSnapshot });
+      nextState.history.push({ turnNum, vps: vpSnapshot, deckSizes: deckSizeSnapshot, buyingPower: buyingPowerSnapshot });
       break;
     }
     case 'RESOLVE_INPUT': {

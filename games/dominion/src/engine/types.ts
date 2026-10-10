@@ -54,6 +54,7 @@ export interface HistorySnapshot {
   turnNum: number;
   vps: Record<string, number>;
   deckSizes: Record<string, number>;
+  buyingPower: Record<string, number>;
 }
 
 export interface DominionSettings {
