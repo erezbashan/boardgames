@@ -29,7 +29,7 @@ const CARD_IMAGES: Record<string, string> = {
   "cellar": "https://wiki.dominionstrategy.com/images/thumb/1/1c/Cellar.jpg/200px-Cellar.jpg",
   "market": "https://raw.githubusercontent.com/tempfillernamegithq/dominion-cards/master/dominion/market.jpg",
   "festival": "https://wiki.dominionstrategy.com/images/thumb/e/ec/Festival.jpg/200px-Festival.jpg",
-  "laboratory": "https://wiki.dominionstrategy.com/images/thumb/0/0c/Laboratory.jpg/200px-Laboratory.jpg",
+  "laboratory": "https://raw.githubusercontent.com/tempfillernamegithq/dominion-cards/master/dominion/laboratory.jpg",
   "council_room": "https://wiki.dominionstrategy.com/images/thumb/e/e0/Council_Room.jpg/200px-Council_Room.jpg",
   "moat": "https://wiki.dominionstrategy.com/images/thumb/f/fe/Moat.jpg/200px-Moat.jpg",
   "workshop": "https://raw.githubusercontent.com/tempfillernamegithq/dominion-cards/master/dominion/workshop.jpg",

@@ -415,56 +415,62 @@ export function getRandomBotAction(state: DominionState, playerId: string): Play
 
         
         const evaluate = (cardId: string) => {
-           let defaultParams = { vpIntercept: 0, vpSlope: 15, moneyIntercept: 1, moneySlope: 0, actionIntercept: 0.5, actionSlope: 0 }; 
+           // 500-Match Genetic Algorithm Learned Parameters (2-Player Optimized)
+           let defaultParams: any = { 
+               strategy: 'GA_V3', 
+               linear: { provInt: 19, provSlp: 78, duchyInt: 9, duchySlp: 21, estInt: -2, estSlp: 7, goldInt: 19, goldSlp: 10, silvInt: 8, silvSlp: -7 },
+               cardWeights: { sentry: 5, witch: 4, vassal: 4, cellar: 3, chapel: 3, library: 3, council_room: 2, moat: 2, throne_room: 2, poacher: 2, village: 1, merchant: 1, workshop: 0, festival: 0, gardens: -1, remodel: -1, mine: -1, bureaucrat: -3, market: -2, laboratory: 0, harbinger: -3, militia: -3, moneylender: -3, artisan: -5, bandit: -5, smithy: -5 }
+           }; 
            const playerCount = Object.keys(state.players).length;
-           if (playerCount === 3) defaultParams = { vpIntercept: -20, vpSlope: 45, moneyIntercept: 1, moneySlope: 0, actionIntercept: 0.5, actionSlope: 0 };
-           else if (playerCount === 4) defaultParams = { vpIntercept: -30, vpSlope: 60, moneyIntercept: 1, moneySlope: 0, actionIntercept: 0.5, actionSlope: 0 };
-           else if (playerCount >= 5) defaultParams = { vpIntercept: -40, vpSlope: 75, moneyIntercept: 1, moneySlope: 0, actionIntercept: 0.5, actionSlope: 0 };
+           // As per request, apply this 2-player optimized profile to all player counts 
+           // until we run separate simulations for 3,4,5,6 players.
            const params = state.settings?.botParams?.[playerId] || state.settings?.botParams || defaultParams;
            
            const def = getCardDef(cardId);
            let val = def.cost;
+           
+           // Apply learned card-specific weights if provided
+           if (params.cardWeights && params.cardWeights[cardId]) {
+               val += params.cardWeights[cardId];
+           }
            const isVP = def.types.includes('VICTORY');
            const isTreasure = def.types.includes('TREASURE');
            
            const provincesLeft = state.supply['province'] ?? 8;
            
-           // HARDCODED BIG MONEY & VP HEURISTICS (Bot V2)
-           if (params.strategy === 'V2') {
+           // Genetic Algorithm (V3)
+           if (params.strategy === 'GA_V3' && params.linear) {
+               if (cardId === 'province') val += params.linear.provInt + params.linear.provSlp * gameProgress;
+               else if (cardId === 'duchy') val += params.linear.duchyInt + params.linear.duchySlp * gameProgress;
+               else if (cardId === 'estate') val += params.linear.estInt + params.linear.estSlp * gameProgress;
+               else if (cardId === 'gold') val += params.linear.goldInt + params.linear.goldSlp * gameProgress;
+               else if (cardId === 'silver') val += params.linear.silvInt + params.linear.silvSlp * gameProgress;
+           } else if (params.strategy === 'V2') {
                if (cardId === 'province') {
-               val += 1000; // Always buy Province if we can afford it
-           } else if (cardId === 'duchy') {
-               // Only buy Duchy if Provinces are getting low
-               if (provincesLeft <= 4) val += 500;
-               else val -= 1000; // Never buy Duchy early
-           } else if (cardId === 'estate') {
-               // Only buy Estate if Provinces are almost gone
-               if (provincesLeft <= 2) val += 100;
-               else val -= 1000; // Never buy Estate early
-           } else if (isVP) {
-               // Other VP cards (like Gardens)
-               if (provincesLeft <= 5) val += 200;
-               else val -= 1000;
-           } else if (isTreasure) {
+                   val += 1000;
+               } else if (cardId === 'duchy') {
+                   if (provincesLeft <= 4) val += 500;
+                   else val -= 1000;
+               } else if (cardId === 'estate') {
+                   if (provincesLeft <= 2) val += 100;
+                   else val -= 1000;
+               } else if (isVP) {
+                   if (provincesLeft <= 5) val += 200;
+                   else val -= 1000;
+               } else if (isTreasure) {
                    if (cardId === 'gold') val += 200;
                    else if (cardId === 'silver') val += 100;
                    else val += 50;
                } else {
-                   // Only buy an action if it's a REALLY good terminal or a draw card
                    const desc = def.description.toLowerCase();
                    if (desc.includes('+2 actions')) val += 80;
                    else if (desc.includes('+') && desc.includes('card')) val += 70;
-                   else val += 40; // Otherwise prefer silver
+                   else val += 40;
                }
            } else {
-               // Bot V1 Curve Logic
-               if (isVP) {
-                   val += params.vpIntercept + (params.vpSlope * gameProgress);
-               } else if (isTreasure) {
-                   val += params.moneyIntercept + (params.moneySlope * gameProgress);
-               } else {
-                   val += params.actionIntercept + (params.actionSlope * gameProgress);
-               }
+               if (isVP) val += params.vpIntercept + (params.vpSlope * gameProgress);
+               else if (isTreasure) val += params.moneyIntercept + (params.moneySlope * gameProgress);
+               else val += params.actionIntercept + (params.actionSlope * gameProgress);
            }
 
            // Special cases
